@@ -1,0 +1,8 @@
+Title: Atomix generated Ethanol level
+Puzzle: atomix
+Theme: default
+
+The ethanol molecule consists of 2 carbon atoms, 6 hydrogen atoms and
+1 oxygen atom.
+
+The player needs to create an ethanol molecule anywhere from atoms.

@@ -1,0 +1,8 @@
+Title: Lock puzzle with cleared locks
+Puzzle: lock
+Theme: ancient1
+
+In lock puzzle you need to collect keys to unlock the matching blocked
+paths leading to the finish.
+
+Also, see [unsolved screenshot](lock-puzzle-1).

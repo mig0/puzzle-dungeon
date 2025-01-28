@@ -1,0 +1,5 @@
+Title: Level 4 in original StoneAge puzzle
+Puzzle: stoneage
+Theme: stoneage3
+
+Ride the single lift to reach the finish.

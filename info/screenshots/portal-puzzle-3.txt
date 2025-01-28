@@ -1,0 +1,8 @@
+Title: Portal puzzle with 3 portals per hall
+Puzzle: portal
+Theme: stoneage2
+
+Here there are 3 portals per hall making it slightly more difficult to
+remember all portal destinations.
+
+Random enemies add some fun. They may be avoided if desired.

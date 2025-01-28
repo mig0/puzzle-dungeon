@@ -1,0 +1,8 @@
+Title: Atomix original Glycerin level
+Puzzle: atomix
+Theme: ancient2
+Main: 2
+
+This is the original level to compose Glycerin molecule from atoms.
+
+Also see the [goal screenshot](atomix-orig-glycerin-goal).

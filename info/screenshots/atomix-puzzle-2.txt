@@ -1,0 +1,7 @@
+Title: Atomix generated bonus level (solved room)
+Puzzle: atomix
+Theme: stoneage1
+
+This shows the state after the first room is solved.
+
+Also see the [unsolved screenshot](atomix-puzzle-1).

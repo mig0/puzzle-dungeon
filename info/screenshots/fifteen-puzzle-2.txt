@@ -1,0 +1,9 @@
+Title: Generated 9-room 3x3 sliding puzzle
+Puzzle: fifteen
+Theme: moss
+
+This puzzle should be solved by sliding numbers into empty space to get
+the solved 1 to 8 position.
+
+There are 9 rooms in this level, each featuring the 3x3 sliding puzzle.
+No time limit in this level.

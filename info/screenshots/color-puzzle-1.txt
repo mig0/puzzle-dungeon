@@ -1,0 +1,7 @@
+Title: Generated Color puzzle with four rooms
+Puzzle: color
+Theme: modern1
+
+This is a simple 2-color puzzle with four rooms. One room is solved
+already. In order to solve the others, just press the corresponding
+plates.

@@ -1,0 +1,9 @@
+Title: Memory puzzle 5x3 with 7 number pairs
+Puzzle: memory
+Theme: modern1 
+
+This shows memory puzzle with 7 pairs of different numbers. You have
+several seconds during which all numbers stay revealed; this is shown.
+After that (or once you start to open cells) all numbers stay hidden. You
+should open 2 cells at once and use your memory to quicker find and clear
+all matching numbers.

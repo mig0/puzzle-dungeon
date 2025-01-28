@@ -1,0 +1,11 @@
+Title: Memory puzzle with four 5x5 rooms of 12 color pairs
+Puzzle: memory
+Theme: classic
+
+This shows memory puzzle with four rooms when the first room is already
+cleared. The 24 cells in each room contain 12 pairs of different colors.
+You should open 2 cells at once and use your memory to quicker find and
+clear all matching colors.
+
+Random enemies (2 in each room here) add some fun; they must be defeated
+before the corresponding cells could be open.

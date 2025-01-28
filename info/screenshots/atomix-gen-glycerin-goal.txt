@@ -1,0 +1,7 @@
+Title: Atomix generated Glycerin level (solved)
+Puzzle: atomix
+Theme: modern1
+
+Auto generated level for the Glycerin molecule (solved state).
+
+Also see the [unsolved screenshot](atomix-gen-glycerin).

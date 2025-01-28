@@ -1,0 +1,5 @@
+Title: Solved 11x11 Color puzzle
+Puzzle: color
+Theme: modern1
+
+This shows all area cells is green.

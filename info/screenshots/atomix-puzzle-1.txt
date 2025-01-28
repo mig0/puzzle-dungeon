@@ -1,0 +1,11 @@
+Title: Atomix generated bonus level
+Puzzle: atomix
+Theme: stoneage1
+
+The atomix puzzle has a bonus mode where the goal is to push randomly
+shuffled colored numbered balls to organize them in the right order
+(rather than organizing the molecule atoms).
+
+This shows a level with 4 rooms, each featuring 4x4 atomix bonus puzzle.
+
+Also see the [partially solved screenshot](atomix-puzzle-2).

@@ -1,0 +1,9 @@
+Title: Solved rotatepic puzzle 11x11
+Puzzle: rotatepic
+Theme: default
+
+This shows the goal state of the puzzle. You may press KP Enter to
+display it, then press any button to return to the puzzle. Although this
+is considered a cheating.
+
+Also see [unsolved screenshot](rotatepic-puzzle-2).

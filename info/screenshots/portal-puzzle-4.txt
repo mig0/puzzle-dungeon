@@ -1,0 +1,9 @@
+Title: Portal puzzle with 4 portals per hall
+Puzzle: portal
+Theme: moss
+
+Here there are 4 portals per hall making it slightly more difficult to
+remember all portal destinations.
+
+Random enemies add some fun. They may be avoided if desired.
+

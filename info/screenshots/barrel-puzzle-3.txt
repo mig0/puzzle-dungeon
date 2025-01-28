@@ -1,0 +1,5 @@
+Title: Barrel puzzle with 5 barrels
+Puzzle: barrel
+Theme: default
+
+Auto-generated barrel puzzle, with 5 barrels and 5 plates.

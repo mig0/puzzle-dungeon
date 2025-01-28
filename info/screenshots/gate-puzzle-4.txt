@@ -1,0 +1,6 @@
+Title: Gate puzzle with four rooms
+Puzzle: gate
+Theme: minecraft
+
+This shows a randomly generated four-room gate puzzle with 2 or 3 gates
+and 2 or 3 plates in each room.

@@ -1,0 +1,7 @@
+Title: Rotatepic puzzle 7x7
+Puzzle: rotatepic
+Theme: default
+
+This variant has the start and the finish cells. As well as random
+enemies added for fun; they must be defeated before the corresponding
+cell could be rotated.

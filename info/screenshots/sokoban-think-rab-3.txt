@@ -1,0 +1,6 @@
+Title: Sokoban Thinking-Rabbit-Original-Plus-Extra level
+Puzzle: barrel
+Theme: stoneage3
+
+This is level 4 in Thinking-Rabbit-Original-Plus-Extra collection of Sokoban
+levels.

@@ -1,0 +1,7 @@
+Title: Memory puzzle 3x4 with 6 color pairs
+Puzzle: memory
+Theme: stoneage1
+
+This shows memory puzzle with 6 pairs of different colors. You should
+open 2 cells at once and use your memory to quicker find and clear all
+matching colors.

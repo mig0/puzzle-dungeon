@@ -1,0 +1,7 @@
+Title: Atomix original Water level
+Puzzle: atomix
+Theme: stoneage2
+
+A water molecule consists of 2 hydrogen atoms and 1 oxygen atom.
+
+The player needs to compose a water molecule anywhere from atoms.

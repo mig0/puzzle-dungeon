@@ -1,0 +1,5 @@
+Title: Level 8 in original StoneAge puzzle
+Puzzle: stoneage
+Theme: stoneage4
+
+Use correct lifts and a key to reach the finish.

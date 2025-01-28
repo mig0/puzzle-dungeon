@@ -1,0 +1,7 @@
+Title: Atomix original Glycerin level (solved)
+Puzzle: atomix
+Theme: ancient2
+
+This is the original level for the Glycerin molecule (solved state).
+
+Also see the [unsolved screenshot](atomix-orig-glycerin).

@@ -1,0 +1,7 @@
+Title: Generated Hero puzzle in four rooms
+Puzzle: hero
+Theme: moss
+
+Each of the four rooms contains a mini hero puzzle. The first room here
+is cleared. All keys in a room should be collected in order to escape
+the room.

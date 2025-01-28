@@ -1,0 +1,8 @@
+Title: Lock puzzle with 2 yellow and 1 blue locks
+Puzzle: lock
+Theme: ancient1
+
+In lock puzzle you need to collect keys to unlock the matching blocked
+paths leading to the finish.
+
+Also, see [solved screenshot](lock-puzzle-2).

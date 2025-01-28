@@ -1,0 +1,10 @@
+Title: Lock puzzle with 3 yellow and 2 blue locks
+Puzzle: lock
+Theme: ancient2
+
+This shows a lock puzzle level where the keys are dropped by enemies once
+defeated.
+
+The status bar at the bottom displays the status of all keys (and all
+other drops, like swords giving extra attack or hearts giving extra
+health). As shown, one yellow key was already collected earlier.

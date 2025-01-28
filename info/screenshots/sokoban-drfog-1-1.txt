@@ -1,0 +1,8 @@
+Puzzle: barrel
+Theme: default
+Main: 1
+Title: Abedlike - First level in DrFrog-1 collection of sokoban levels
+
+Tribute to Howard Abed who made a lot of levels with this basic design.
+This level was previously published as part of Accumulated1.
+Date of publishing: 2013-07-31.

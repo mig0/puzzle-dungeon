@@ -1,0 +1,6 @@
+Title: Level 3 in original StoneAge puzzle
+Puzzle: stoneage
+Theme: stoneage2
+
+Use correct one-directional lifts to reach the finish. Press Enter key
+(or Square button on PlayStation controller) to activate the cursor.

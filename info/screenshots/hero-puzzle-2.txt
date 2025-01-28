@@ -1,0 +1,6 @@
+Title: Generated Hero puzzle level (solved)
+Puzzle: hero
+Theme: classic
+
+The goal of hero puzzle is to clear all floors in correct order and
+survive.

@@ -1,0 +1,6 @@
+Title: Meshed Squares - Sokoban DH2 level
+Puzzle: barrel
+Theme: default
+
+This is the first level in DH2 collection of sokoban levels called
+'Meshed Squares'.

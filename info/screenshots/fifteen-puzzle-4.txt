@@ -1,0 +1,6 @@
+Title: Generated 7x7 sliding puzzle
+Puzzle: fifteen
+Theme: stoneage2
+
+This puzzle should be solved by sliding numbers into empty space to get
+the solved 1 to 48 position.

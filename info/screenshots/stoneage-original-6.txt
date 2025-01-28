@@ -1,0 +1,7 @@
+Puzzle: stoneage
+Theme: stoneage1
+Main: 3
+Title: Level 6 in original StoneAge puzzle
+
+Use correct one-directional lifts to reach the finish. Press Enter key
+(or Square button on PlayStation controller) to activate the cursor.

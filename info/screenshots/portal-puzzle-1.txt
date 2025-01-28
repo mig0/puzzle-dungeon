@@ -1,0 +1,8 @@
+Title: Portal puzzle with 2 portals per hall
+Puzzle: portal
+Theme: default
+
+This shows the initial puzzle state when the character enters the first
+hall portal at right-top.
+
+Also see [solved screenshot](portal-puzzle-2).

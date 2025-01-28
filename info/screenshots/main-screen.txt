@@ -1,0 +1,6 @@
+Title: Main Screen
+Puzzle: main
+
+This shows the main screen. Press any key to start the actual puzzle
+levels.
+

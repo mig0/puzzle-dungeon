@@ -1,0 +1,6 @@
+Title: Generated 3x2 sliding puzzle
+Puzzle: fifteen
+Theme: default
+
+This puzzle should be solved by sliding numbers into empty space to get
+the solved 1 to 5 position.

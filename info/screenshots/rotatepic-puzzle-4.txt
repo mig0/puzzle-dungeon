@@ -1,0 +1,10 @@
+Title: Solved rotatepic puzzle 8x8
+Puzzle: rotatepic
+Theme: default
+
+This variant uses the goal picture as the background of the whole level.
+However not all 13x13 cells may be rotated. 11x11 cells may be navigated
+as usual, and 8x8 cells contain the actual puzzle with rotate-able cells.
+
+The solved state is shown. You may press KP Enter to achieve this.
+Although this is considered a cheating.

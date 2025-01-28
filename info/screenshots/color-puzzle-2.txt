@@ -1,0 +1,6 @@
+Title: Generated 9x9 Color puzzle
+Puzzle: color
+Theme: modern1
+
+This is a simple puzzle with 4 colors. Press coresponding plate to rotate
+colors and make the whole 9x9 area green.

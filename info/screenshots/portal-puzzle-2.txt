@@ -1,0 +1,8 @@
+Title: Portal puzzle with 2 portals per hall (solved)
+Puzzle: portal
+Theme: default
+
+This shows the final puzzle state with the character in the target
+central hall ready to finish the puzzle.
+
+Also see [unsolved screenshot](portal-puzzle-1).

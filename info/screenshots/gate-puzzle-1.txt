@@ -1,0 +1,6 @@
+Title: Gate puzzle with 2 gates and 2 plates
+Puzzle: gate
+Theme: classic
+
+In gate puzzle your goal is to reach finish by pressing plates to trigger
+the gates from closed to open and vice versa.

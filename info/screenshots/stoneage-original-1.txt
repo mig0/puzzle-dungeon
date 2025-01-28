@@ -1,0 +1,6 @@
+Title: Level 1 in original StoneAge puzzle
+Puzzle: stoneage
+Theme: stoneage1
+
+Pretty straightforward. Just reach the finish using either lift to the
+left. You can't use the second lift or return back once crossed.

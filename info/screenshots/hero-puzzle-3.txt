@@ -1,0 +1,10 @@
+Title: Generated Hero puzzle level with strict-floors
+Puzzle: hero
+Theme: default
+
+In the strict-floors mode of Hero Puzzle, the player must complete the
+floor once entered. The only way to escape is using the portal at the
+floor end. This is achieved with one-way cells indicated by the arrow
+showing the point of no return in that direction.
+
+The goal is to kill all enemies and survive.

@@ -1,0 +1,11 @@
+Title: Partially solved 9-room 3x3 sliding puzzle
+Puzzle: fifteen
+Theme: moss
+
+This shows the state after solving the first room.
+
+The puzzle should be solved by sliding numbers into empty space to get
+the solved 1 to 8 position.
+
+There are 9 rooms in this level, each featuring the 3x3 sliding puzzle.
+No time limit in this level.
