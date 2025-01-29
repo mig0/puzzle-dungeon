@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for img_filename in html/screenshots/*.webp; do
+	name=`basename $img_filename | cut -d. -f1`
+	info_filename=info/screenshots/$name.txt
+	if ! test -f $info_filename; then
+		echo "Puzzle: `echo $name | cut -d- -f1`" >$info_filename
+		echo "Created $info_filename"
+	fi
+done

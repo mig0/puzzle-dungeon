@@ -1,0 +1,27 @@
+#!/bin/sh
+
+old_name="$1"
+new_name="$2"
+
+if test -z "$old_name" -o -z "$new_name"; then
+	echo "Usage: $0 OLD-NAME NEW-NAME"
+	exit 1
+fi
+
+image_filename=html/screenshots/$old_name.webp
+html_filename=html/screenshots/$old_name.html
+info_filename=html/screenshots/$old_name.txt
+
+if ! test -f $image_filename; then
+	echo "Can't find $image_filename, exiting"
+	exit 1
+fi
+
+for filename in $image_filename $html_filename $info_filename; do
+	if test -f "$filename"; then
+		dirname=`echo "$filename" | cut -d/ -f1-2`
+		ext=`echo "$filename" | cut -d. -f2`
+		new_filename="$dirname/$new_name.$ext"
+		mv -v -i "$filename" "$new_filename"
+	fi
+done

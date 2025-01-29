@@ -1,0 +1,33 @@
+#!/usr/bin/python
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+from filetools import RegenerateFile
+from screenshotinfo import get_all_screenshot_infos
+
+# create elements/screenshots/index.html
+# create elements/sidebars/screenshots.html
+# create elements/screenshots/<screenshot-name>.html for each <screenshot-name>
+
+file_esi = RegenerateFile("elements/screenshots/index.html")
+file_esi.print('<h1>Screenshots</h1>\n')
+file_esi.print('<div id="screenshots" class="screenshots-all">')
+
+file_ess = RegenerateFile("elements/sidebars/screenshots.html")
+file_ess.print('<a href="screenshots/index.html"><button class="page<{ current-page IF pagename screenshots/index}>">All Screenshots</button></a>')
+
+for info in get_all_screenshot_infos():
+	html = info.get_html()
+	file_es1 = RegenerateFile("elements/screenshots/%s.html" % info.name)
+	file_es1.write(html)
+	file_es1.finalize()
+
+	file_esi.print(info.get_html_for_index())
+
+	file_ess.print('<a href="%s"><button class="page<{ current-page IF pagename screenshots/%s}>">%s</button></a>' % (info.html_filename, info.name, info.name))
+
+file_esi.print('</div>')
+file_esi.finalize()
+
+file_ess.finalize()

@@ -1,0 +1,66 @@
+#!/bin/bash
+
+SCREENSHOT_WIDTH=$((CELL_WIDTH * SIZE_X))
+SCREENSHOT_HEIGHT=$((CELL_HEIGHT * SIZE_Y))
+
+# The gnome window screenshot has margin 55 61 67 61, i.e. 55 with shadow 0 6 12 6
+margin=55
+margin_l=$((margin + 6))
+margin_r=$((margin + 6))
+margin_t=$((margin + 0))
+margin_b=$((margin + 12))
+new_margin=12
+
+if test "$1" = "" -o "$1" = -h -o "$1" = "--help"; then
+	echo "Usage: $0 IMG.png"
+	echo "Example:"
+	echo "	$0 html/screenshots/hero-puzzle-1.png"
+	exit 1
+fi
+
+rc=0
+test_filename="tmp-$$.png"
+
+while test "$1" != ""; do
+	filename="$1"
+	shift
+	if test `echo "$filename" | cut -d. -f2` != png; then
+		echo "Image $filename is not png file to resize. Skipping"
+		continue
+	fi
+	final_filename="`echo "$filename" | cut -d. -f1`.webp"
+
+	magick "$filename" -crop ${margin}x$margin+0+0 -strip "$test_filename"
+	if ! test -f "$test_filename"; then
+		echo "Can't verify $filename. Skipping"
+		continue
+	fi
+	if test `stat -c %s "$test_filename"` != 242; then
+		echo "Image $filename does not look like a screenshot to be resized. Skipping"
+		continue
+	fi
+
+	geometry=`magick identify -format %G "$filename"`
+	width=`echo "$geometry" | cut -dx -f1`
+	height=`echo "$geometry" | cut -dx -f2`
+
+	if test -z "$width" -o -z "$height"; then
+		echo "Can't determine width and height of image $filename. Exiting"
+		exit 2
+	fi
+
+	new_x=$((margin_l - new_margin))
+	new_y=$((margin_t - new_margin))
+	new_width=$((width - margin_l - margin_r + new_margin * 2))
+	new_height=$((height - margin_t - margin_b + new_margin * 2))
+
+	magick "$filename" -crop ${new_width}x$new_height+$new_x+$new_y -strip -quality 100 "$final_filename" && rm "$filename"
+
+	if test "$?" != 0; then
+		rc=1
+	fi
+
+	echo "Resized $filename and created $final_filename instead"
+done
+
+exit $rc

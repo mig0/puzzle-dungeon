@@ -6,6 +6,7 @@ update-readme-md
 create-html-elements-index
 create-html-elements-authors
 create-html-elements-puzzles
+create-html-elements-screenshots
 create-html-elements-themes
 
 create-html-page index
@@ -13,13 +14,8 @@ create-html-page download
 create-html-page resources
 create-html-page authors
 
-for puzzle_element_filename in elements/puzzles/*.html; do
-	page_name=`echo $puzzle_element_filename | cut -d/ -f2- | cut -d. -f1`
-	create-html-page $page_name
-done
-
-for theme_element_filename in elements/themes/*.html; do
-	page_name=`echo $theme_element_filename | cut -d/ -f2- | cut -d. -f1`
+for element_filename in elements/puzzles/*.html elements/screenshots/*.html elements/themes/*.html; do
+	page_name=`echo $element_filename | cut -d/ -f2- | cut -d. -f1`
 	create-html-page $page_name
 done
 

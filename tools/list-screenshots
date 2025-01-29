@@ -1,0 +1,9 @@
+#!/usr/bin/python
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+from screenshotinfo import get_all_screenshot_infos
+
+for info in get_all_screenshot_infos():
+	print("%-25s %s" % (info.name, info.title))
