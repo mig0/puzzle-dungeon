@@ -99,6 +99,7 @@ a {
 	border-radius: 3px;
 	width: 220px;
 	height: 30px;
+	overflow: hidden;
 	background: transparent;
 	backdrop-filter: brightness(90%);
 	color: #111;
@@ -128,6 +129,7 @@ a {
 
 #content h1 {
 	margin: -10px;
+	margin-bottom: 0px;
 	padding: 10px;
 	backdrop-filter: brightness(90%);
 	text-align: center;
@@ -148,6 +150,34 @@ a {
 
 #content a:active {
 	color: rgb(220, 110, 110);
+}
+
+.puzzle-entry {
+	display: flex;
+	text-align: center;
+	justify-content: space-evenly;
+	align-items: center;
+	border-bottom: 1px solid rgba(16, 16, 16, 0.4);
+}
+
+.puzzle-info {
+	flex: 1;
+}
+
+.puzzle-info p:not(.goal) {
+	text-align: justify;
+	text-justify: auto;
+	padding-right: 10px;
+}
+
+.puzzle-screenshot {
+	width: 256px;
+}
+
+.puzzle-screenshot img {
+	width: 256px;
+	object-fit: scale-down;
+	padding: 6px 0px;
 }
 
 p.goal {
@@ -224,6 +254,61 @@ p.goal:before {
 
 #img-table .zoom {
 	text-align: left;
+}
+
+#screenshots {
+	width: 100%;
+	display: flex;
+	flex-wrap: nowrap;
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+}
+
+#screenshots.screenshots-all {
+	flex-wrap: wrap;
+	justify-content: space-evenly;
+	align-items: flex-start;
+	align-items: strech;
+}
+
+#screenshots .screenshot {
+	margin: 4px;
+}
+
+.screenshot img {
+	width: 100%;
+	object-fit: scale-down;
+}
+
+.screenshots-all .screenshot {
+	flex: 24%;
+	max-width: 24%;
+}
+
+.screenshot-title {
+	margin: 2px;
+	height: 20px;
+	white-space: nowrap;
+	overflow: hidden;
+	color: #ffffa0;
+}
+
+div.screenshot-image {
+	padding: 1px;
+	width: 100%;
+	text-align: center;
+}
+
+a.screenshot-img {
+	object-fit: scale-down;
+	margin: 0px auto;
+}
+
+.screenshot-property {
+	display: inline;
+	float: right;
+	padding: 0px 10px 0px 30px;
 }
 </style>
 </head>

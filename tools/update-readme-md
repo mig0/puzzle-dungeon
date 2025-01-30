@@ -4,10 +4,10 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 from filetools import RegenerateFile
-from puzzleinfo import get_all_puzzleinfo_objects
+from puzzleinfo import get_all_puzzle_infos
 
 hypertext = ""
-for info in get_all_puzzleinfo_objects():
+for info in get_all_puzzle_infos():
 	hypertext += info.get_hypertext()
 
 filename = "README.md"

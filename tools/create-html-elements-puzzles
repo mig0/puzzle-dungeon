@@ -4,7 +4,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 from filetools import RegenerateFile
-from puzzleinfo import get_all_puzzleinfo_objects
+from puzzleinfo import get_all_puzzle_infos
+from screenshotinfo import get_all_puzzle_screenshot_infos, get_front_puzzle_screenshot_info
 
 # create elements/puzzles/index.html
 # create elements/sidebars/puzzles.html
@@ -12,21 +13,36 @@ from puzzleinfo import get_all_puzzleinfo_objects
 
 file_epi = RegenerateFile("elements/puzzles/index.html")
 file_epi.print('<h1>Puzzles</h1>\n')
+file_epi.print('<div id="all-puzzles">')
 
 file_esp = RegenerateFile("elements/sidebars/puzzles.html")
 file_esp.print('<a href="puzzles/index.html"><button class="page<{ current-page IF pagename puzzles/index}>">All Puzzles</button></a>')
 
-for info in get_all_puzzleinfo_objects():
+for info in get_all_puzzle_infos():
+	all_screenshot_infos = get_all_puzzle_screenshot_infos(info.name)
+
+	all_screenshots_html = '\n'.join(info.get_html_for_index() for info in all_screenshot_infos)
+
 	html = info.get_html()
+
+	puzzle_page_html = html.replace('<!--SCREENSHOTS-->', '<div id="screenshots" class="screenshots-all">\n%s\n</div>' % all_screenshots_html)
 	file_ep1 = RegenerateFile("elements/puzzles/%s.html" % info.name)
-	file_ep1.print(html)
+	file_ep1.print(puzzle_page_html)
 	file_ep1.finalize()
 
-	file_epi.print(html.replace("h1>", "h2>"))
-	file_epi.print('')
+	index_page_html = html.replace("h1>", "h2>").replace('<!--SCREENSHOTS-->', '')
+	front_screenshot_info = get_front_puzzle_screenshot_info(info.name)
+	img_html = '<a href="puzzles/%s.html"><img src="%s"></a>' % \
+		(info.name, front_screenshot_info.img_filename if front_screenshot_info else "puzzle-dungeon-logo-alt.jpg")
+
+	file_epi.print('<!-- Start of %s entry -->' % info.title)
+	file_epi.print('<div class="puzzle-entry">\n<div class="puzzle-info">\n%s\n</div>' % index_page_html)
+	file_epi.print('<div class="puzzle-screenshot">%s</div>' % img_html)
+	file_epi.print('</div>\n<!-- End of %s entry -->\n' % info.title)
 
 	file_esp.print('<a href="puzzles/%s.html"><button class="page<{ current-page IF pagename puzzles/%s}>">%s</button></a>' % (info.name, info.name, info.name))
 
+file_epi.print('</div>')
 file_epi.finalize()
 
 file_esp.finalize()
