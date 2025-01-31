@@ -19,7 +19,7 @@ for element_filename in elements/puzzles/*.html elements/screenshots/*.html elem
 	create-html-page $page_name
 done
 
-create-html-page tutorial/index
+create-html-page tutorials/index
 
 # The optional script sync-html-pages-to-webserver if present may look like:
 # rsync -av --copy-unsafe-links html/ "$HTML_ROOT"/
