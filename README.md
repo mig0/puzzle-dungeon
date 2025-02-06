@@ -108,6 +108,8 @@ git checkout https://github.com/mig0/dungeon.git
 
 ## How to run
 
+You need python3-pygame, [python3-]pgzero and python3-bitarray.
+
 No installation is needed to quickly run the game, just checkout from github, then:
 
 ```bash
