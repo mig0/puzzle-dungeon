@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cd `dirname $0` && \
 PYGAME_HIDE_SUPPORT_PROMPT=1 PYTHONDONTWRITEBYTECODE=1 \
