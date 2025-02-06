@@ -135,6 +135,17 @@ class Puzzle:
 			self.map[self.area.x1 - 1, y] = CELL_WALL
 			self.map[self.area.x2 + 1, y] = CELL_WALL
 
+	def get_random_cell_in_area(self):
+		return (choice(self.area.x_range), choice(self.area.y_range))
+
+	def get_random_empty_cell_in_area(self, obstacles=[]):
+		while True:
+			cell = self.get_random_cell_in_area()
+			if cell in obstacles:
+				continue
+			if self.map[cell] in CELL_FLOOR_TYPES:
+				return cell
+
 	def on_set_theme(self):
 		pass
 

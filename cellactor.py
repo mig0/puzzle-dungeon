@@ -61,6 +61,22 @@ class Area:
 	def cells(self):
 		return product(self.x_range, self.y_range)
 
+	@property
+	def cell11(self):
+		return (self.x1, self.y1)
+
+	@property
+	def cell12(self):
+		return (self.x1, self.y2)
+
+	@property
+	def cell21(self):
+		return (self.x2, self.y1)
+
+	@property
+	def cell22(self):
+		return (self.x2, self.y2)
+
 class CellActor(Actor):
 	def __init__(self, image:Union[str, pygame.Surface], pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, scale=None, **kwargs):
 		self._image_name = None
