@@ -1651,6 +1651,8 @@ def enter_cell():
 		map[char.c] = CELL_FLOOR
 		drop_key2.consume()
 
+	puzzle.on_enter_cell()
+
 last_move_diff = None
 
 def continue_move_char():
