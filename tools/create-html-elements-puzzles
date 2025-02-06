@@ -16,7 +16,7 @@ file_epi.print('<h1>Puzzles</h1>\n')
 file_epi.print('<div id="all-puzzles">')
 
 file_esp = RegenerateFile("elements/sidebars/puzzles.html")
-file_esp.print('<a href="puzzles/index.html"><button class="page<{ current-page IF pagename puzzles/index}>">All Puzzles</button></a>')
+file_esp.print('<a href="puzzles/"><button class="page<{ current-page IF pagename puzzles/index}>">All Puzzles</button></a>')
 
 for info in get_all_puzzle_infos():
 	all_screenshot_infos = get_all_puzzle_screenshot_infos(info.name)

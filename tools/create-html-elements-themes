@@ -27,7 +27,7 @@ file_eti.print('<h1>Themes</h1>\n')
 start_table(file_eti)
 
 file_est = RegenerateFile("elements/sidebars/themes.html")
-file_est.print('<a href="themes/index.html"><button class="page<{ current-page IF pagename themes/index}>">All Themes</button></a>')
+file_est.print('<a href="themes/"><button class="page<{ current-page IF pagename themes/index}>">All Themes</button></a>')
 
 for theme in sorted([name for name in os.listdir("images") if os.path.isdir("images/%s" % name)]):
 	file_eti.write('<tr>')

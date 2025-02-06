@@ -15,7 +15,7 @@ file_esi.print('<h1>Screenshots</h1>\n')
 file_esi.print('<div id="screenshots" class="screenshots-all">')
 
 file_ess = RegenerateFile("elements/sidebars/screenshots.html")
-file_ess.print('<a href="screenshots/index.html"><button class="page<{ current-page IF pagename screenshots/index}>">All Screenshots</button></a>')
+file_ess.print('<a href="screenshots/"><button class="page<{ current-page IF pagename screenshots/index}>">All Screenshots</button></a>')
 
 for info in get_all_screenshot_infos():
 	html = info.get_html()
