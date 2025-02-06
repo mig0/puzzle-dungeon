@@ -25,8 +25,9 @@ def product(x_range, y_range, run_by_y=False):
 			for x in x_range:
 				yield (x, y)
 
-def apply_diff(orig, diff, subtract=False):
-	factor = -1 if subtract else 1
+def apply_diff(orig, diff, subtract=False, factor=1):
+	if subtract:
+		factor = -factor
 	return (orig[0] + diff[0] * factor, orig[1] + diff[1] * factor)
 
 def cell_diff(cell1, cell2):
@@ -186,11 +187,11 @@ class CellActor(Actor):
 	def sync_pos(self):
 		self.pos = get_pos(self)
 
-	def apply_pos_diff(self, diff, subtract=False):
-		return apply_diff(cell_to_pos(self.c), diff, subtract)
+	def apply_pos_diff(self, diff, subtract=False, factor=1):
+		return apply_diff(cell_to_pos(self.c), diff, subtract, factor)
 
-	def move_pos(self, diff, undo=False):
-		self.pos = self.apply_pos_diff(diff, undo)
+	def move_pos(self, diff, undo=False, factor=1):
+		self.pos = self.apply_pos_diff(diff, undo, factor)
 
 	def move(self, diff, undo=False):
 		self.c = apply_diff(self.c, diff, undo)
