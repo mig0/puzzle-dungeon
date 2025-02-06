@@ -1562,7 +1562,11 @@ def check_victory():
 	if mode != "game":
 		return
 
-	if "time_limit" in level and level_time > level["time_limit"] or char.health is not None and char.health <= 0 or char.power is not None and char.power <= 0:
+	if (puzzle.is_lost()
+		or "time_limit" in level and level_time > level["time_limit"]
+		or char.health is not None and char.health <= 0
+		or char.power is not None and char.power <= 0
+	):
 		loose_game()
 		return
 

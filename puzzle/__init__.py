@@ -163,6 +163,9 @@ class Puzzle:
 	def on_generate_map(self):
 		pass
 
+	def is_lost(self):
+		return False
+
 	def is_solved(self):
 		return False
 
