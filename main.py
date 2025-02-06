@@ -860,6 +860,7 @@ class Globals:
 	get_actors_in_room = get_actors_in_room
 	start_accessible_obstacles = start_accessible_obstacles
 	clear_accessible_obstacles = clear_accessible_obstacles
+	is_cell_accessible = is_cell_accessible
 	get_accessible_neighbors = get_accessible_neighbors
 	get_accessible_cells = get_accessible_cells
 	get_all_accessible_cells = get_all_accessible_cells
@@ -867,6 +868,7 @@ class Globals:
 	find_path = find_path
 	is_path_found = is_path_found
 	set_char_cell = set_char_cell
+	get_closest_accessible_cell = get_closest_accessible_cell
 	place_char_in_topleft_accessible_cell = place_char_in_topleft_accessible_cell
 	get_random_floor_cell_type = get_random_floor_cell_type
 	convert_to_floor_if_needed = convert_to_floor_if_needed
