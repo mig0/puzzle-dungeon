@@ -185,7 +185,7 @@ class BarrelPuzzle(Puzzle):
 		idx = barrels.index(barrel)
 		weighted_neighbors = []
 		# sort 4 barrel directions to place char to the "adjacent to barrel" cell for a pull (prefer empty cells)
-		for c in self.Globals.get_actor_neighbors(barrel, self.room.x_range, self.room.y_range):
+		for c in self.Globals.get_actor_neighbors(barrel, self.area.x_range, self.area.y_range):
 			if (c, char.c) in visited_cell_pairs:
 				continue
 			cx, cy = c
@@ -193,7 +193,7 @@ class BarrelPuzzle(Puzzle):
 				continue
 			new_cx = cx + cx - barrel.cx
 			new_cy = cy + cy - barrel.cy
-			if new_cx not in self.room.x_range or new_cy not in self.room.y_range:
+			if new_cx not in self.area.x_range or new_cy not in self.area.y_range:
 				continue
 			if is_cell_in_actors((new_cx, new_cy), barrels):
 				continue
@@ -266,30 +266,21 @@ class BarrelPuzzle(Puzzle):
 		return False
 
 	def generate_random_solvable_room(self):
-		num_barrels = self.config.get("num_barrels", DEFAULT_NUM_BARRELS)
-
-		def get_random_cell():
-			return (randint(self.room.x1, self.room.x2), randint(self.room.y1, self.room.y2))
-
 		# 0) initialize char position to None
 		char.c = None
 
 		# 1) initialize entire room to WALL
-		for cy in self.room.y_range:
-			for cx in self.room.x_range:
-				self.map[cx, cy] = CELL_WALL
+		for cell in self.room.cells:
+			self.map[cell] = CELL_WALL
 
 		# 2) place room plates randomly or in good positions, as the number of barrels
 		# 3) place room barrels into the place cells, one barrel per one plate
-		for n in range(num_barrels):
-			while True:
-				cell = get_random_cell()
-				if self.map[cell] != CELL_PLATE:
-					self.map[cell] = CELL_PLATE
-					break
+		for n in range(self.num_barrels):
+			cell = self.get_random_wall_cell_in_area()
+			self.map[cell] = CELL_PLATE
 			self.Globals.create_barrel(cell)
 
-		# 4) for each room barrel do:
+		# 4) for each area barrel do:
 		for barrel in barrels:
 			self.Globals.debug(2, "barrel #%d - starting (%d, %d)" % (barrels.index(barrel), barrel.cx, barrel.cy))
 			visited_cell_pairs = [(barrel.c, char.c)]
@@ -310,6 +301,9 @@ class BarrelPuzzle(Puzzle):
 		self.Globals.set_char_cell(char.c)
 
 	def generate_room(self):
+		self.num_barrels = self.config.get("num_barrels", DEFAULT_NUM_BARRELS)
+		self.set_area_from_config(default_size=DEFAULT_BARREL_PUZZLE_SIZE, align_to_center=True)
+
 		self.generate_random_solvable_room()
 
 	def is_solved(self):

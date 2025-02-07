@@ -180,12 +180,15 @@ levels = [
 	},
 	{
 		"n": 4.1,
-		"num_enemies": 3,
 		"bg_image": "bg/starry-sky.webp",
-		"theme": "modern2",
+		"theme": "classic",
 		"music": "breath",
 		"char_health": 100,
 		"goal": 'complete-barrel-puzzle',
+		"four_rooms": True,
+		"num_enemies": 0,
+		"char_health": None,
+		"allow_barrel_pull": True,
 		"barrel_puzzle": {
 			"num_barrels": 2,
 		},
@@ -198,18 +201,31 @@ levels = [
 		"char_health": 100,
 		"goal": 'complete-barrel-puzzle',
 		"barrel_puzzle": {
+			"size": (5, 5),
 			"num_barrels": 5,
 		},
 	},
 	{
 		"n": 4.3,
-		"num_enemies": 7,
 		"theme": "moss",
 		"music": "adventures",
-		"char_health": 150,
+		"num_enemies": 0,
+		"char_health": None,
 		"goal": 'complete-barrel-puzzle',
 		"barrel_puzzle": {
 			"num_barrels": 7,
+		},
+	},
+	{
+		"n": 4.4,
+		"theme": "stoneage1",
+		"music": "stoneage/03_plastic_age",
+		"num_enemies": 0,
+		"char_health": None,
+		"goal": 'complete-barrel-puzzle',
+		"barrel_puzzle": {
+			"size": (9, 9),
+			"num_barrels": 16,
 		},
 	},
 	{
