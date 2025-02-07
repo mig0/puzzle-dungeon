@@ -290,11 +290,11 @@ def is_cell_in_map(cell):
 	return is_cell_in_area(cell, MAP_X_RANGE, MAP_Y_RANGE)
 
 def is_outer_wall(cell):
-	if map[cell] not in CELL_WALLS:
+	if map[cell] not in CELL_WALL_TYPES:
 		return False
 
 	for neigh in get_all_neighbors(cell):
-		if is_cell_in_map(neigh) and map[neigh] not in CELL_WALLS:
+		if is_cell_in_map(neigh) and map[neigh] not in CELL_WALL_TYPES:
 			return False
 	return True
 
@@ -640,7 +640,7 @@ def get_random_floor_cell_type():
 	return CELL_FLOOR_TYPES_FREQUENT[randint(0, len(CELL_FLOOR_TYPES_FREQUENT) - 1)]
 
 def convert_to_floor_if_needed(cx, cy):
-	if map[cx, cy] in (*CELL_WALLS, CELL_VOID, CELL_INTERNAL1):
+	if map[cx, cy] in (*CELL_WALL_TYPES, CELL_VOID, CELL_INTERNAL1):
 		map[cx, cy] = get_random_floor_cell_type()
 
 def get_random_even_point(a1, a2):
@@ -743,7 +743,7 @@ def generate_random_free_path(target_c, deviation=0, level=0):
 
 	for neigh in neighbors:
 		old_cell_type = map[neigh]
-		if old_cell_type not in (*CELL_WALLS, CELL_VOID):
+		if old_cell_type not in (*CELL_WALL_TYPES, CELL_VOID):
 			print("BUG!")
 			return False
 		convert_to_floor_if_needed(*neigh)

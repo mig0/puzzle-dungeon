@@ -198,11 +198,11 @@ class BarrelPuzzle(Puzzle):
 			if is_cell_in_actors((new_cx, new_cy), barrels):
 				continue
 			weight = randint(0, 30)
-			if self.map[cx, cy] not in CELL_WALLS:
+			if self.map[cx, cy] not in CELL_WALL_TYPES:
 				weight += 20
 			if self.map[cx, cy] == CELL_PLATE:
 				weight += 4
-			if self.map[new_cx, new_cy] not in CELL_WALLS:
+			if self.map[new_cx, new_cy] not in CELL_WALL_TYPES:
 				weight += 10
 			if self.map[new_cx, new_cy] == CELL_PLATE:
 				weight += 2
