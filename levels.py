@@ -213,6 +213,16 @@ levels = [
 		},
 	},
 	{
+		"n": 5.01,
+		"num_enemies": 0,
+		"theme": "modern1",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"minotaur_puzzle": {
+			"size": (7, 7),
+		},
+	},
+	{
 		"n": 5.1,
 		"num_enemies": 3,
 		"theme": "ancient1",

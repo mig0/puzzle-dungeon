@@ -76,7 +76,7 @@ class MinotaurPuzzle(Puzzle):
 		self.minotaur.c = self.get_random_floor_cell_in_area([char_cell])
 
 	def generate_room(self):
-		self.set_area_from_config(default_size=DEFAULT_HERO_PUZZLE_SIZE, request_odd_size=True, align_to_center=True)
+		self.set_area_from_config(default_size=DEFAULT_MINOTAUR_PUZZLE_SIZE, align_to_center=True)
 
 		self.set_area_border_walls()
 		self.generate_random_nonsolvable_floor_cell()
