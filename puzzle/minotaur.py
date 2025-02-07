@@ -70,10 +70,10 @@ class MinotaurPuzzle(Puzzle):
 		# set finish in bottom-right cell, plus random 7 walls, char and minotaur
 		self.set_finish_cell(self.area.cell22)
 		for _ in range(7):
-			self.map[self.get_random_empty_cell_in_area()] = CELL_WALL
-		char_cell = self.get_random_empty_cell_in_area()
+			self.map[self.get_random_floor_cell_in_area()] = CELL_WALL
+		char_cell = self.get_random_floor_cell_in_area()
 		self.Globals.set_char_cell(char_cell)
-		self.minotaur.c = self.get_random_empty_cell_in_area([char_cell])
+		self.minotaur.c = self.get_random_floor_cell_in_area([char_cell])
 
 	def generate_room(self):
 		self.set_area_from_config(default_size=DEFAULT_HERO_PUZZLE_SIZE, request_odd_size=True, align_to_center=True)

@@ -138,13 +138,19 @@ class Puzzle:
 	def get_random_cell_in_area(self):
 		return (choice(self.area.x_range), choice(self.area.y_range))
 
-	def get_random_empty_cell_in_area(self, obstacles=[]):
+	def get_random_cell_of_types_in_area(self, cell_types, obstacles=[]):
 		while True:
 			cell = self.get_random_cell_in_area()
 			if cell in obstacles:
 				continue
-			if self.map[cell] in CELL_FLOOR_TYPES:
+			if self.map[cell] in cell_types:
 				return cell
+
+	def get_random_floor_cell_in_area(self, obstacles=[]):
+		return self.get_random_cell_of_types_in_area(CELL_FLOOR_TYPES, obstacles)
+
+	def get_random_wall_cell_in_area(self, obstacles=[]):
+		return self.get_random_cell_of_types_in_area(CELL_WALL_TYPES, obstacles)
 
 	def on_set_theme(self):
 		pass
