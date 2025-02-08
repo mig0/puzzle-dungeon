@@ -58,6 +58,10 @@ class Area:
 	# x1, y1, x2, y2, size_x, size_y, x_range, y_range, idx
 
 	@property
+	def num_cells(self):
+		return len(self.x_range) * len(self.y_range)
+
+	@property
 	def cells(self):
 		return product(self.x_range, self.y_range)
 
