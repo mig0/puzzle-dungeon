@@ -473,7 +473,7 @@ def enter_room(idx):
 	puzzle.on_enter_room()
 
 def get_max_room_distance():
-	return get_distance((room.x1, room.y1), (room.x2, room.y2))
+	return cell_distance((room.x1, room.y1), (room.x2, room.y2))
 
 def is_actor_in_room(actor):
 	assert_room()
@@ -603,7 +603,7 @@ def set_char_cell(cell, room_idx=None):
 
 def get_closest_accessible_cell(start_cell, target_cell):
 	accessible_cells = get_accessible_cells(start_cell)
-	return min(accessible_cells, key=lambda cell: get_distance(cell, target_cell))
+	return min(accessible_cells, key=lambda cell: cell_distance(cell, target_cell))
 
 def get_topleft_accessible_cell(start_cell):
 	return get_closest_accessible_cell(start_cell, (0, 0))
@@ -730,7 +730,7 @@ def generate_random_free_path(target_c, deviation=0, level=0):
 			continue
 		cx, cy = cell
 		weight = randint(0, max_distance)
-		weight -= get_distance(cx, cy, tx, ty)
+		weight -= cell_distance(cx, cy, tx, ty)
 		if map[cell] in CELL_FLOOR_TYPES:
 			weight -= randint(0, max_distance)
 		weighted_neighbors.append((weight, cell))
@@ -1663,7 +1663,7 @@ def continue_move_char():
 	move_char(diff_x, diff_y)
 
 def get_move_animate_duration(old_char_cell):
-	distance = get_distance(old_char_cell, char.c)
+	distance = cell_distance(old_char_cell, char.c)
 	animate_time_factor = distance - (distance - 1) / 2
 	return animate_time_factor * ARROW_KEYS_RESOLUTION
 
@@ -1773,7 +1773,7 @@ def move_char(diff_x, diff_y):
 
 	# process lift movement if available
 	if lift_target := get_lift_target(old_char_cell, diff):
-		distance = get_distance(old_char_cell, lift_target)
+		distance = cell_distance(old_char_cell, lift_target)
 		for i in range(1, distance):
 			char.move(diff)
 		lift = get_actor_on_cell(old_char_cell, lifts)

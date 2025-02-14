@@ -42,9 +42,9 @@ def cell_to_pos(cell):
 def pos_to_cell(pos):
 	return (pos[0] // CELL_W, pos[1] // CELL_H)
 
-def get_distance(cx, cy, tx=None, ty=None):
+def cell_distance(cx, cy, tx=None, ty=None):
 	if type(cx) is tuple and type(cy) is tuple:
-		return get_distance(*cx, *cy)
+		return cell_distance(*cx, *cy)
 	return abs(tx - cx) + abs(ty - cy)
 
 def sort_cells(cells):
@@ -229,7 +229,7 @@ class CellActor(Actor):
 		self.move(diff)
 		if enable_animation:
 			self.pos = old_pos
-			distance = get_distance(old_cell, target)
+			distance = cell_distance(old_cell, target)
 			animate_time_factor = distance - (distance - 1) / 2
 			self.animate(animate_time_factor * ARROW_KEYS_RESOLUTION, on_finished=on_finished)
 

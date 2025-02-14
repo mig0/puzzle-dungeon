@@ -49,7 +49,7 @@ class StoneagePuzzle(Puzzle):
 		while True:
 			start_cell = self.Globals.get_random_floor_cell()
 			finish_cell = self.Globals.get_random_floor_cell()
-			if get_distance(start_cell, finish_cell) > self.Globals.get_max_room_distance() / 2:
+			if cell_distance(start_cell, finish_cell) > self.Globals.get_max_room_distance() / 2:
 				break
 
 		self.map[start_cell] = CELL_START

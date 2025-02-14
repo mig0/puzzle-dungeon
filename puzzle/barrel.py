@@ -151,7 +151,7 @@ class BarrelPuzzle(Puzzle):
 			return False
 		self.visited_positions.append(position_id)
 
-		accessible_cells_near_barrels = [ (cell, barrel_cell) for cell in accessible_cells for barrel_cell in self.barrel_cells if get_distance(cell, barrel_cell) == 1 and self.can_push(cell, barrel_cell) ]
+		accessible_cells_near_barrels = [ (cell, barrel_cell) for cell in accessible_cells for barrel_cell in self.barrel_cells if cell_distance(cell, barrel_cell) == 1 and self.can_push(cell, barrel_cell) ]
 
 		accessible_cells_near_barrels.sort(key=lambda cell_pair: self.get_barrel_distance_weight(*cell_pair))
 
