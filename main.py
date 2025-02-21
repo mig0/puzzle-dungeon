@@ -7,7 +7,7 @@ import builtins
 from pgzero.constants import keys
 from numpy import ndarray, chararray, array, any
 from copy import deepcopy
-from random import randint, choice
+from random import randint, choice, shuffle
 from constants import *
 from leveltools import *
 from translations import *
@@ -577,7 +577,7 @@ def get_num_accessible_target_directions(start_cell, target_cells):
 
 	return num_accessible_directions
 
-def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False):
+def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, randomize=True):
 	if start_cell == target_cell:
 		return []
 	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles, allow_obstacles=allow_obstacles)
@@ -588,7 +588,10 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False):
 	current_cell = target_cell
 	while accessible_distance > 1:
 		accessible_distance -= 1
-		for neigh_cell in get_accessible_neighbors(current_cell, obstacles):
+		neigh_cells = get_accessible_neighbors(current_cell, obstacles, allow_obstacles)
+		if randomize:
+			shuffle(neigh_cells)
+		for neigh_cell in neigh_cells:
 			neigh_distance = accessible_cell_distances.get(neigh_cell)
 			if neigh_distance == accessible_distance:
 				current_cell = neigh_cell
