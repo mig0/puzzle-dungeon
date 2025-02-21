@@ -339,5 +339,10 @@ creative endeavor.
 
 The development team welcomes contributions from other developers.
 
+## Contact Us
+
+If you'd like to contribute as a developer, an artist or a mathematician
+to develop puzzle algorythms, please drop a note to migo00 at gmail.
+
 Have fun with Puzzle Dungeon!
 
