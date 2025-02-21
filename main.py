@@ -1610,7 +1610,7 @@ def check_victory():
 		set_status_message(" ".join(status_messages))
 
 def teleport_char():
-	if map[char.c] != CELL_PORTAL:
+	if map[char.c] != CELL_PORTAL and char._scale != 0:
 		die("Called teleport_char not on CELL_PORTAL")
 
 	if char._scale != 0:
