@@ -94,10 +94,10 @@ possibly other Operating Systems, but this should be tested yet.
 |m|Turn on/off music
 |s|Turn on/off sound
 |a|Enabled/disabled animation
-|Enter| Activate cursur
-|RShift-E|Set lang english
-|RShift-R|Set lang russian
-|RShift-H|Set lang hebrew
+|Enter| Activate cursor
+|RShift-E|Set language to English
+|RShift-R|Set language to Russian
+|RShift-H|Set language to Hebrew
 |RShift-L|Enabled/disabled show title and goal
 
 ## Source code
@@ -341,8 +341,8 @@ The development team welcomes contributions from other developers.
 
 ## Contact Us
 
-If you'd like to contribute as a developer, an artist or a mathematician
-to develop puzzle algorythms, please drop a note to migo00 at gmail.
+If you would like to contribute as a developer, artist or mathematician
+to develop puzzle algorithms, please drop a note to migo00 at gmail.
 
 Have fun with Puzzle Dungeon!
 
