@@ -32,3 +32,4 @@ while line := tmp_file.readline():
 		is_first = False
 
 file.finalize()
+os.remove(tmp_filename)
