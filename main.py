@@ -599,6 +599,47 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, ra
 				break
 	return path_cells
 
+def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, randomize=True, cost_func=None, set_path_cost=None):
+	if start_cell == target_cell:
+		return []
+	visited_cells = {start_cell: [None, 0]}  # cell: [parent, cost]
+	processed_cells = []
+	unprocessed_cells = [start_cell]
+	while unprocessed_cells:
+		cell = unprocessed_cells.pop(0)
+		processed_cells.append(cell)
+		if cell == target_cell:
+			break
+		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles)
+		for neigh in neigbours:
+			if neigh in processed_cells:
+				continue
+			cost = cost_func(neigh, cell, visited_cells, start_cell, target_cell, obstacles)
+			if cost is None:
+				continue
+			cost += visited_cells[cell][1]
+			if neigh not in visited_cells:
+				visited_cells[neigh] = [cell, cost]
+				unprocessed_cells.append(neigh)
+				unprocessed_cells.sort(key=lambda cell: visited_cells[neigh][1] + cell_distance(neigh, target_cell))
+			else:
+				if visited_cells[neigh][1] < cost:
+					visited_cells[neigh] = [cell, cost]
+
+	if target_cell not in visited_cells:
+		return None
+
+	best_path_cells = []
+	cell = target_cell
+	while cell != start_cell:
+		best_path_cells.insert(0, cell)
+		cell = visited_cells[cell][0]
+
+	if set_path_cost is not None:
+		set_path_cost[0] = visited_cells[target_cell][1]
+
+	return best_path_cells
+
 def is_path_found(start_cell, target_cell, obstacles=None):
 	return target_cell in get_accessible_cells(start_cell, obstacles)
 
@@ -872,6 +913,7 @@ class Globals:
 	get_all_accessible_cells = get_all_accessible_cells
 	get_num_accessible_target_directions = get_num_accessible_target_directions
 	find_path = find_path
+	find_best_path = find_best_path
 	is_path_found = is_path_found
 	set_char_cell = set_char_cell
 	get_closest_accessible_cell = get_closest_accessible_cell
