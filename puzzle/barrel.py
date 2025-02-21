@@ -6,6 +6,11 @@ MIN_SOLUTION_DEPTH = 8
 MAX_SOLUTION_DEPTH = 200
 SOLUTION_DEPTH_STEP = 4
 
+FLOOR_COST = 1
+CHAR_FLOOR_COST = -1
+WALL_COST = 100
+OBSTACLE_COST = None
+
 class BarrelPuzzle(Puzzle):
 	def init(self):
 		self.solution = None
@@ -275,7 +280,7 @@ class BarrelPuzzle(Puzzle):
 
 		# 2) place room plates randomly or in good positions, as the number of barrels
 		# 3) place room barrels into the place cells, one barrel per one plate
-		for n in range(self.num_barrels):
+		for _ in range(self.num_barrels):
 			cell = self.get_random_wall_cell_in_area()
 			self.map[cell] = CELL_PLATE
 			self.Globals.create_barrel(cell)
@@ -300,11 +305,191 @@ class BarrelPuzzle(Puzzle):
 		self.Globals.place_char_in_topleft_accessible_cell()
 		self.Globals.set_char_cell(char.c)
 
+	def cost_for_path(self, cell, parent_cell, visited_cells, start_cell, target_cell, obstacles, is_char):
+		if not self.is_in_area(cell):
+			return OBSTACLE_COST
+		if cell in obstacles:
+			return OBSTACLE_COST
+
+		if self.map[cell] in CELL_WALL_TYPES:
+			cost = WALL_COST
+		else:
+			cost = CHAR_FLOOR_COST if is_char else FLOOR_COST
+
+		if not is_char:
+			def get_cost(cell):
+				return self.cost_for_path(cell, None, visited_cells, start_cell, target_cell, obstacles, True)
+
+			# If the barrel path changed direction, then the char path should be added too.
+			# There are always 2 possibilities for the char to walk around the barrel.
+			if grand_parent_cell := (visited_cells.get(parent_cell) or [None])[0]:
+				diff1 = cell_diff(cell, parent_cell)
+				diff2 = cell_diff(parent_cell, grand_parent_cell)
+				if diff1 != diff2:
+					cell1 = apply_diff(grand_parent_cell, diff1)
+					cell2 = apply_diff(parent_cell, diff1)
+					cell3 = apply_diff(cell, diff2)
+					cell4 = apply_diff(cell, diff2, factor=-1)
+					cell5 = apply_diff(cell4, diff1)
+					cell6 = apply_diff(cell5, diff1)
+
+					cell1_cost = get_cost(cell1)
+					cell2_cost = get_cost(cell2)
+					cell3_cost = get_cost(cell3)
+					cell4_cost = get_cost(cell4)
+					cell5_cost = get_cost(cell5)
+					cell6_cost = get_cost(cell6)
+
+					if cell1_cost == OBSTACLE_COST or cell2_cost == OBSTACLE_COST:
+						cost1 = OBSTACLE_COST
+					else:
+						cost1 = cell1_cost + cell2_cost
+					if cell3_cost == OBSTACLE_COST or cell4_cost == OBSTACLE_COST or cell5_cost == OBSTACLE_COST or cell6_cost == OBSTACLE_COST or cell2_cost == OBSTACLE_COST:
+						cost2 = OBSTACLE_COST
+					else:
+						cost2 = cell3_cost + cell4_cost + cell5_cost + cell6_cost + cell2_cost
+					if cost1 == OBSTACLE_COST and cost2 == OBSTACLE_COST:
+						return OBSTACLE_COST
+					cost += cost1 if cost2 == OBSTACLE_COST or cost1 != OBSTACLE_COST and cost1 < cost2 else cost2
+
+			else:
+				prev_parent_cell = apply_diff(cell, cell_diff(cell, parent_cell), factor=2)
+				cost1 = get_cost(prev_parent_cell)
+				if cost1 == OBSTACLE_COST:
+					return OBSTACLE_COST
+				cost += cost1
+
+		return cost
+
+	def cost_for_barrel_path(self, cell, parent_cell, visited_cells, start_cell, target_cell, obstacles):
+		return self.cost_for_path(cell, parent_cell, visited_cells, start_cell, target_cell, obstacles, False)
+
+	def cost_for_char_path(self, cell, parent_cell, visited_cells, start_cell, target_cell, obstacles):
+		return self.cost_for_path(cell, parent_cell, visited_cells, start_cell, target_cell, obstacles, True)
+
+	def find_best_char_barrel_path(self, char_cell, barrel_plate_cell_pairs, placed_barrel_cells):
+		best_path_cost = None
+		best_path_values = (None, None, None, None)
+		for barrel_cell, plate_cell in barrel_plate_cell_pairs:
+			if barrel_cell == plate_cell:
+				print("BUG. Barrel %s to be moved is already on its plate" % str(barrel_cell))
+				continue
+			other_barrel_cells = [_barrel_cell for _barrel_cell, _ in barrel_plate_cell_pairs if _barrel_cell != barrel_cell] + placed_barrel_cells
+			# generate best barrel path to its plate
+			barrel_path_cells = self.Globals.find_best_path(barrel_cell, plate_cell, obstacles=other_barrel_cells, allow_obstacles=True, cost_func=self.cost_for_barrel_path)
+			if barrel_path_cells is None:
+				continue
+			new_char_cell = apply_diff(barrel_cell, cell_diff(barrel_cell, barrel_path_cells[0]), True)
+			# generate best char path to the start of the best barrel path
+			path_cost = [0]  # only remains 0 if the char should not be moved
+			barrel_cells = other_barrel_cells + [barrel_cell]
+			path_cells = self.Globals.find_best_path(char_cell, new_char_cell, obstacles=barrel_cells, allow_obstacles=True, cost_func=self.cost_for_char_path, set_path_cost=path_cost)
+			if path_cells is not None and (best_path_cost is None or path_cost[0] < best_path_cost):
+				best_path_cost = path_cost[0]
+				best_path_values = (path_cells, barrel_path_cells, barrel_cell, plate_cell)
+
+		return best_path_values
+
+	def generate_char_and_barrel_paths_to_plates(self, char_cell, barrel_cells, plate_cells):
+		unplaced_barrel_plate_cell_pairs = list(zip(barrel_cells, plate_cells))
+		placed_barrel_cells = []
+
+		self.map[char_cell] = self.Globals.get_random_floor_cell_type()
+		self.Globals.debug(2, "generate %s %s %s" % (str(char_cell), barrel_cells, plate_cells))
+		self.Globals.debug_map(2)
+
+		num_tries = 4000
+		while num_tries > 0 and unplaced_barrel_plate_cell_pairs:
+			path_cells, barrel_path_cells, barrel_cell, plate_cell = self.find_best_char_barrel_path(char_cell, unplaced_barrel_plate_cell_pairs, placed_barrel_cells)
+			if not path_cells:
+				break
+			self.Globals.debug(2, "%s %s %s %s" % (path_cells, barrel_path_cells, str(barrel_cell), str(plate_cell)))
+
+			unplaced_barrel_plate_cell_pairs.remove((barrel_cell, plate_cell))
+
+			# remove walls on the char path
+			for cell in path_cells:
+				if self.map[cell] in CELL_WALL_TYPES:
+					self.map[cell] = self.Globals.get_random_floor_cell_type()
+
+			# remove walls on the barrel path until the first direction change
+			char_cell = path_cells[-1]
+			char_dir = cell_diff(char_cell, barrel_cell)
+			for cell in barrel_path_cells:
+				if self.map[barrel_cell] in CELL_WALL_TYPES:
+					self.map[barrel_cell] = self.Globals.get_random_floor_cell_type()
+				if cell_diff(barrel_cell, cell) != char_dir:
+					break
+				char_cell = barrel_cell
+				barrel_cell = cell
+
+			if barrel_cell != plate_cell:
+				unplaced_barrel_plate_cell_pairs.append((barrel_cell, plate_cell))
+			else:
+				placed_barrel_cells.append(barrel_cell)
+
+			self.Globals.debug(2, "%s %s" % (str(char_cell), str(barrel_cell)))
+			self.Globals.debug_map(2)
+
+			num_tries -= 1
+
+		return not unplaced_barrel_plate_cell_pairs
+
+	def generate_ng_random_solvable_room(self):
+		num_tries = 2000
+
+		while num_tries > 0:
+			barrel_cells = []
+			plate_cells = []
+
+			# 1) initialize entire room to WALL
+			for cell in self.room.cells:
+				self.map[cell] = CELL_WALL
+
+			# 2) place room plates randomly or in good positions, as the number of barrels
+			for _ in range(self.num_barrels):
+				cell = self.get_random_wall_cell_in_area()
+				self.map[cell] = CELL_PLATE
+				plate_cells.append(cell)
+
+			# 3) place room barrels into the place cells, one barrel per one plate
+			for _ in range(self.num_barrels):
+				cell = self.get_random_wall_cell_in_area()
+				self.map[cell] = self.Globals.get_random_floor_cell_type()
+				barrel_cells.append(cell)
+
+			# 4) place char randomly
+			char_cell = self.get_random_wall_cell_in_area()
+
+			# 5) remove some cells from being used in generation
+			excluded_cells = set()
+			for _ in range(randint(-2, 4)):
+				excluded_cells.add(self.get_random_wall_cell_in_area(excluded_cells))
+
+			# 6) generate routes from each barrel and its plate by removing walls
+			if self.generate_char_and_barrel_paths_to_plates(char_cell, barrel_cells, plate_cells):
+				# optionally optimize level
+
+				for cell in barrel_cells:
+					self.Globals.create_barrel(cell)
+				self.Globals.set_char_cell(char_cell)
+				self.Globals.debug_map(2)
+				return
+
+			num_tries -= 1
+
+		self.Globals.debug(0, "Can't generate barrel level, making it solved")
+		for cell in self.get_room_cells(CELL_PLATE):
+			self.Globals.create_barrel(cell)
+
 	def generate_room(self):
-		self.num_barrels = self.config.get("num_barrels", DEFAULT_NUM_BARRELS)
+		self.num_barrels = self.parse_config_num("num_barrels", DEFAULT_NUM_BARRELS)
 		self.set_area_from_config(default_size=DEFAULT_BARREL_PUZZLE_SIZE, align_to_center=True)
 
-		self.generate_random_solvable_room()
+		if self.config.get("use_ng"):
+			self.generate_ng_random_solvable_room()
+		else:
+			self.generate_random_solvable_room()
 
 	def is_solved(self):
 		plate_cells = self.get_room_plate_cells()

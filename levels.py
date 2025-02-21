@@ -190,7 +190,8 @@ levels = [
 		"char_health": None,
 		"allow_barrel_pull": True,
 		"barrel_puzzle": {
-			"num_barrels": 2,
+			"num_barrels": range(3, 6),
+			"use_ng": True,
 		},
 	},
 	{
@@ -203,6 +204,7 @@ levels = [
 		"barrel_puzzle": {
 			"size": (5, 5),
 			"num_barrels": 5,
+			"use_ng": True,
 		},
 	},
 	{
@@ -214,6 +216,7 @@ levels = [
 		"goal": 'complete-barrel-puzzle',
 		"barrel_puzzle": {
 			"num_barrels": 7,
+			"use_ng": True,
 		},
 	},
 	{
@@ -226,6 +229,23 @@ levels = [
 		"barrel_puzzle": {
 			"size": (9, 9),
 			"num_barrels": 16,
+		},
+	},
+	{
+		"n": 4.5,
+		"bg_image": "bg/starry-sky.webp",
+		"theme": "stoneage5",
+		"music": "stoneage/06_no_choice_left",
+		"time_limit": 72,
+		"char_health": 100,
+		"goal": 'complete-barrel-puzzle',
+		"nine_rooms": True,
+		"num_enemies": 0,
+		"char_health": None,
+		"allow_barrel_pull": True,
+		"barrel_puzzle": {
+			"num_barrels": 2,
+			"use_ng": True,
 		},
 	},
 	{
