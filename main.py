@@ -498,8 +498,8 @@ def clear_accessible_obstacles():
 	accessible_obstacles = None
 	return accessible_obstacles0
 
-def is_cell_accessible(cell, obstacles=None, place=False, allow_enemy=False):
-	is_cell_blocked = map[cell] in (CELL_CHAR_PLACE_OBSTACLES if place else CELL_CHAR_MOVE_OBSTACLES)
+def is_cell_accessible(cell, obstacles=None, place=False, allow_obstacles=False, allow_enemy=False):
+	is_cell_blocked = map[cell] in (() if allow_obstacles else CELL_CHAR_PLACE_OBSTACLES if place else CELL_CHAR_MOVE_OBSTACLES)
 	if obstacles is not None:
 		if accessible_obstacles is not None and cell in obstacles:
 			accessible_obstacles.add(cell)
@@ -511,7 +511,7 @@ def is_cell_accessible(cell, obstacles=None, place=False, allow_enemy=False):
 			return False
 	return True
 
-def get_accessible_neighbors(cell, obstacles=None, allow_enemy=False, allow_closed_gate=False):
+def get_accessible_neighbors(cell, obstacles=None, allow_obstacles=False, allow_enemy=False, allow_closed_gate=False):
 	neighbors = []
 	if ALLOW_DIAGONAL_MOVES and False:
 		directions = ((-1, -1), (0, -1), (+1, -1), (-1, 0), (+1, 0), (-1, +1), (0, +1), (+1, +1))
@@ -519,7 +519,10 @@ def get_accessible_neighbors(cell, obstacles=None, allow_enemy=False, allow_clos
 		directions = ((-1, 0), (+1, 0), (0, -1), (0, +1))
 	for diff in directions:
 		neigh = apply_diff(cell, diff)
-		if is_cell_in_room(neigh) and (allow_closed_gate and map[neigh] == CELL_GATE0 or is_cell_accessible(neigh, obstacles, allow_enemy=allow_enemy)):
+		if is_cell_in_room(neigh) and (
+			allow_closed_gate and map[neigh] == CELL_GATE0 or
+			is_cell_accessible(neigh, obstacles, allow_obstacles=allow_obstacles, allow_enemy=allow_enemy)
+		):
 			neighbors.append(neigh)
 	debug(3, "* get_accessible_neighbors %s - %s" % (str(cell), neighbors))
 	return neighbors
@@ -536,7 +539,7 @@ def get_accessible_cells(start_cell, obstacles=None):
 				unprocessed_cells.append(n)
 	return accessible_cells
 
-def get_accessible_cell_distances(start_cell, obstacles=None):
+def get_accessible_cell_distances(start_cell, obstacles=None, allow_obstacles=False):
 	accessible_cells = []
 	accessible_cell_distances = {start_cell: 0}
 	unprocessed_cells = [start_cell]
@@ -544,7 +547,7 @@ def get_accessible_cell_distances(start_cell, obstacles=None):
 		cell = unprocessed_cells.pop(0)
 		accessible_distance = accessible_cell_distances[cell]
 		accessible_cells.append(cell)
-		neigbours = get_accessible_neighbors(cell, obstacles)
+		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles=allow_obstacles)
 		for n in neigbours:
 			if n not in accessible_cells and n not in unprocessed_cells:
 				unprocessed_cells.append(n)
@@ -574,10 +577,10 @@ def get_num_accessible_target_directions(start_cell, target_cells):
 
 	return num_accessible_directions
 
-def find_path(start_cell, target_cell, obstacles=None):
+def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False):
 	if start_cell == target_cell:
 		return []
-	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles)
+	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles, allow_obstacles=allow_obstacles)
 	accessible_distance = accessible_cell_distances.get(target_cell)
 	if accessible_distance is None:
 		return None
