@@ -611,6 +611,8 @@ def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=Fals
 		if cell == target_cell:
 			break
 		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles)
+		if randomize:
+			shuffle(neigbours)
 		for neigh in neigbours:
 			if neigh in processed_cells:
 				continue

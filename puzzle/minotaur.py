@@ -19,9 +19,11 @@ class MinotaurPuzzle(Puzzle):
 
 	def store_level(self, stored_level):
 		stored_level["minotaur_cell"] = self.minotaur.c
+		stored_level["goal_cell"] = self.goal_cell
 
 	def restore_level(self, stored_level):
 		self.minotaur.c = stored_level["minotaur_cell"]
+		self.goal_cell = stored_level["goal_cell"]
 
 	def get_minotaur_dir(self, axis_idx, minotaur_cell=None):
 		return cmp(char.c[axis_idx], (minotaur_cell or self.minotaur.c)[axis_idx])
