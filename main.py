@@ -1127,6 +1127,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 
 	flags.parse_level(level)
 
+	char.c = None
 	char_cells = [None] * flags.NUM_ROOMS
 	char.power  = level.get("char_power")
 	char.health = level.get("char_health")
