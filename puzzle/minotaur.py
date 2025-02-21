@@ -58,6 +58,10 @@ class MinotaurPuzzle(Puzzle):
 		else:
 			self.make_single_minotaur_move(dest_cells)
 
+	def on_set_room(self, room):
+		super().on_set_room(room)
+		self.set_area_from_config(default_size=DEFAULT_MINOTAUR_PUZZLE_SIZE, align_to_center=True)
+
 	def set_finish_cell(self, goal_cell):
 		self.goal_cell = goal_cell
 		if self.Globals.is_cell_accessible(self.room.cell11):
@@ -77,8 +81,6 @@ class MinotaurPuzzle(Puzzle):
 		self.minotaur.c = self.get_random_floor_cell_in_area([char_cell])
 
 	def generate_room(self):
-		self.set_area_from_config(default_size=DEFAULT_MINOTAUR_PUZZLE_SIZE, align_to_center=True)
-
 		self.set_area_border_walls()
 		self.generate_random_nonsolvable_floor_cell()
 
