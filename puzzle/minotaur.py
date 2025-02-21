@@ -35,7 +35,7 @@ class MinotaurPuzzle(Puzzle):
 				dest_cell = apply_diff(minotaur_cell, diff, factor=factor)
 				if self.Globals.is_cell_accessible(dest_cell):
 					dest_cells.append(dest_cell)
-					if char.c == dest_cell:
+					if char.c == dest_cell and char.c != self.goal_cell:
 						self._is_lost = True
 					return
 
@@ -59,6 +59,7 @@ class MinotaurPuzzle(Puzzle):
 			self.make_single_minotaur_move(dest_cells)
 
 	def set_finish_cell(self, goal_cell):
+		self.goal_cell = goal_cell
 		if self.Globals.is_cell_accessible(self.room.cell11):
 			finish_cell = self.Globals.get_closest_accessible_cell(self.room.cell11, self.room.cell22)
 			self.Globals.create_portal(goal_cell, self.room.cell11)
