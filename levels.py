@@ -5,7 +5,6 @@ from sokobanparser import parse_sokoban_levels
 levels = [
 	{
 		"n": 1.1,
-		"map_size": (11, 9),
 		"num_enemies": 5,
 		"theme": "classic",
 		"music": "a_new_path",
@@ -14,7 +13,6 @@ levels = [
 	},
 	{
 		"n": 1.2,
-		"map_size": (11, 12),
 		"num_enemies": 0,
 		"theme": "modern1",
 		"music": "inspire",
