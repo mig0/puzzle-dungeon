@@ -10,6 +10,7 @@ create-html-elements-screenshots
 create-html-elements-themes
 
 create-html-page index
+create-html-page news
 create-html-page download
 create-html-page resources
 create-html-page authors
