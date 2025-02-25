@@ -440,7 +440,7 @@ def set_room(idx):
 	room.y_range = flags.ROOM_Y_RANGE[idx]
 	room.idx = idx
 
-	puzzle.on_set_room(room)
+	puzzle.set_room(room)
 
 # only to be used by puzzle's restore_level
 def advance_room():

@@ -39,9 +39,8 @@ class RotatepicPuzzle(Puzzle):
 	def restore_level(self, stored_level):
 		self.rotatepic_map = stored_level["rotatepic_map"]
 
-	def on_set_room(self, room):
-		super().on_set_room(room)
-		super().set_area_from_config(min_size=(1, 1), align_to_center=True)
+	def on_set_room(self):
+		self.set_area_from_config(min_size=(1, 1), align_to_center=True)
 		self.max_num = self.area.size_x * self.area.size_y
 
 	def on_enter_room(self):

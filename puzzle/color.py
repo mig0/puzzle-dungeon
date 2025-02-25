@@ -21,9 +21,8 @@ class ColorPuzzle(Puzzle):
 			color_cell_image = self.Globals.colorize_cell_image(gray_tiles_image, color)
 			self.cell_images.append(color_cell_image)
 
-	def on_set_room(self, room):
-		super().on_set_room(room)
-		super().set_area_from_config(request_odd_size=True, align_to_center=True)
+	def on_set_room(self):
+		self.set_area_from_config(request_odd_size=True, align_to_center=True)
 
 	def on_create_map(self, map):
 		super().on_create_map(map)

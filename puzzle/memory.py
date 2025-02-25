@@ -31,9 +31,8 @@ class MemoryPuzzle(Puzzle):
 			cell_image = self.Globals.colorize_cell_image(gray_frame_image, color)
 			self.cell_images.append(cell_image)
 
-	def on_set_room(self, room):
-		super().on_set_room(room)
-		super().set_area_from_config()
+	def on_set_room(self):
+		self.set_area_from_config()
 		self.use_colors = self.get_num_pairs() <= len(MAIN_COLOR_RGB_VALUES)
 
 	def on_enter_room(self):

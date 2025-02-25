@@ -40,9 +40,8 @@ class FifteenPuzzle(Puzzle):
 	def restore_level(self, stored_level):
 		self.fifteen_map = stored_level["fifteen_map"]
 
-	def on_set_room(self, room):
-		super().on_set_room(room)
-		super().set_area_from_config(align_to_center=True)
+	def on_set_room(self):
+		self.set_area_from_config(align_to_center=True)
 		self.max_num = self.area.size_x * self.area.size_y
 
 	def is_empty_cell(self, cell):

@@ -166,8 +166,12 @@ class Puzzle:
 	def get_map_extra_values(self):
 		return ()
 
-	def on_set_room(self, room):
+	def on_set_room(self):
+		pass
+
+	def set_room(self, room):
 		self.room = room
+		self.on_set_room()
 
 	def on_enter_room(self):
 		pass
