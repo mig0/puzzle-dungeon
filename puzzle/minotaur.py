@@ -6,7 +6,6 @@ class MinotaurPuzzle(Puzzle):
 	def init(self):
 		self.minotaur = CellActor('minotaur')
 		self._is_lost = False
-		self.portal_demolition_time = None
 
 	def has_portal(self):
 		return True
@@ -94,12 +93,8 @@ class MinotaurPuzzle(Puzzle):
 			# skip move
 			self.make_minotaur_move()
 
-	def on_update(self, level_time):
-		if not self.portal_demolition_time and char.c == self.goal_cell and self.map[char.c] == CELL_PORTAL:
-			self.portal_demolition_time = level_time + CHAR_APPEARANCE_SCALE_DURATION * 1.5
-		if self.portal_demolition_time is not None and level_time >= self.portal_demolition_time:
-			self.map[self.goal_cell] = self.Globals.get_random_floor_cell_type()
-			self.portal_demolition_time = None
-
-	def on_enter_cell(self):
+	def on_prepare_enter_cell(self):
 		self.make_minotaur_move()
+
+		if char.c == self.goal_cell and self.map[char.c] == CELL_PORTAL:
+			self.Globals.demolish_portal(self.goal_cell, self.Globals.get_random_floor_cell_type())

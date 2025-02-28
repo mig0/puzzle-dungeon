@@ -221,7 +221,9 @@ map = None  # will be generated
 cell_images = {}  # will be generated
 revealed_map = None
 theme_prefix = None
+
 switch_cell_infos = {}  # tuple(old_cell_type, new_cell_type, end_time, duration) per cell
+portal_demolition_infos = {}  # tuple(new_cell_type, start_time) per cell
 
 def get_drop_on_cell(cell):
 	for drop in drops:
@@ -904,6 +906,9 @@ def switch_cell_type(cell, new_cell_type, duration):
 	switch_cell_infos[cell] = (map[cell], new_cell_type, level_time + duration, duration)
 	map[cell] = new_cell_type
 
+def demolish_portal(cell, new_cell_type=CELL_FLOOR):
+	portal_demolition_infos[cell] = (new_cell_type, level_time + PORTAL_DEMOLITION_DELAY)
+
 def toggle_gate(gate_cell):
 	cell_type = map[gate_cell]
 	if cell_type not in (CELL_GATE0, CELL_GATE1):
@@ -967,6 +972,7 @@ class Globals:
 	get_lift_target_at_neigh = get_lift_target_at_neigh
 	create_enemy = create_enemy
 	switch_cell_type = switch_cell_type
+	demolish_portal = demolish_portal
 	toggle_gate = toggle_gate
 
 def generate_room(idx):
@@ -1182,7 +1188,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	global puzzle
 	global bg_image
 	global revealed_map
-	global switch_cell_infos
+	global switch_cell_infos, portal_demolition_infos
 	global char_cells, enter_room_idx
 	global enemies, barrels, killed_enemies, lifts
 	global level_time
@@ -1286,6 +1292,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 		revealed_map.fill(False)
 
 	switch_cell_infos.clear()
+	portal_demolition_infos.clear()
 
 	enter_room_idx = 0
 	enter_room(enter_room_idx)
@@ -1967,6 +1974,12 @@ def update(dt):
 
 	for actor in active_inplace_animation_actors:
 		actor.update_inplace_animation(level_time)
+
+	for cell in list(portal_demolition_infos):
+		new_cell_type, start_time = portal_demolition_infos[cell]
+		if level_time >= start_time:
+			del portal_demolition_infos[cell]
+			switch_cell_type(cell, new_cell_type, PORTAL_DEMOLITION_DURATION)
 
 	puzzle.on_update(level_time)
 
