@@ -111,6 +111,15 @@ levels = [
 		},
 	},
 	{
+		"n": 2.91,
+		"map_file": "maps/switch/001.map",
+		"num_enemies": 0,
+		"theme": "modern1",
+		"music": "adventures",
+		"goal": "solve-switch-puzzle",
+		"switch_puzzle": True
+	},
+	{
 		"n": 3.1,
 		"theme": "classic",
 		"music": "stoneage/08_the_golden_valley.mp3",

@@ -1,0 +1,25 @@
+Switch Puzzle
+
+This puzzle is an extension of the Gate Puzzle and Barrel Puzzle,
+introducing a new interaction between gates, plates, and barrels.
+The maze contains plates that control the state of corresponding gates.
+Each plate has a color, and pressing any plate of that color opens all
+gates of the same color. Gates are initially closed, preventing access
+to the finish.
+
+Plates can be activated in two ways: the player stepping on them, or a
+barrel being pushed onto them.
+
+Barrels must be strategically placed on plates or pushed through open
+gates to progress. If a barrel rests on a plate that controls a gate two
+cells away (with a gap of one floor between them), the gate stays open
+when the player pushes the barrel towards it. As long as the player or a
+barrel remains on a plate or gate, the gate stays open. However, once the
+player pushes the barrel away and no one remains on the plate or gate,
+the gate closes again.
+
+This dynamic interaction requires careful planning of movements,
+positioning of barrels, and plate activations to clear the path to the
+finish.
+
+Goal: Open all gates using barrels and reach the finish.
