@@ -334,7 +334,7 @@ class GatePuzzle(Puzzle):
 		return None
 
 	def toggle_gate(self, cell):
-		self.map[cell] = CELL_GATE1 if self.map[cell] == CELL_GATE0 else CELL_GATE0
+		self.Globals.toggle_gate(cell)
 
 	def press_plate(self, cell):
 		if self.map[cell] != CELL_PLATE:

@@ -221,6 +221,7 @@ map = None  # will be generated
 cell_images = {}  # will be generated
 revealed_map = None
 theme_prefix = None
+switch_cell_infos = {}  # tuple(old_cell_type, new_cell_type, end_time, duration) per cell
 
 def get_drop_on_cell(cell):
 	for drop in drops:
@@ -899,6 +900,24 @@ def create_enemy(cell, health=None, attack=None, drop=None):
 		enemy.drop.contain(enemy)
 	enemies.append(enemy)
 
+def switch_cell_type(cell, new_cell_type, duration):
+	switch_cell_infos[cell] = (map[cell], new_cell_type, level_time + duration, duration)
+	map[cell] = new_cell_type
+
+def toggle_gate(gate_cell):
+	cell_type = map[gate_cell]
+	if cell_type not in (CELL_GATE0, CELL_GATE1):
+		die("Called toggle_gate not on CELL_GATE")
+	if cell_type == CELL_GATE1:
+		sound_name = 'close.wav'
+		new_cell_type = CELL_GATE0
+	else:
+		sound_name = 'open.wav'
+		new_cell_type = CELL_GATE1
+
+	switch_cell_type(gate_cell, new_cell_type, GATE_SWITCH_DURATION)
+	play_sound(sound_name)
+
 class Globals:
 	is_cell_in_area = is_cell_in_area
 	get_actor_neighbors = get_actor_neighbors
@@ -947,6 +966,8 @@ class Globals:
 	create_lift = create_lift
 	get_lift_target_at_neigh = get_lift_target_at_neigh
 	create_enemy = create_enemy
+	switch_cell_type = switch_cell_type
+	toggle_gate = toggle_gate
 
 def generate_room(idx):
 	set_room(idx)
@@ -1161,6 +1182,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	global puzzle
 	global bg_image
 	global revealed_map
+	global switch_cell_infos
 	global char_cells, enter_room_idx
 	global enemies, barrels, killed_enemies, lifts
 	global level_time
@@ -1263,6 +1285,8 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 		revealed_map = ndarray((MAP_SIZE_X, MAP_SIZE_Y), dtype=bool)
 		revealed_map.fill(False)
 
+	switch_cell_infos.clear()
+
 	enter_room_idx = 0
 	enter_room(enter_room_idx)
 
@@ -1317,6 +1341,7 @@ def draw_map():
 				cell_types.insert(0, CELL_FLOOR)
 			puzzle.modify_cell_types_to_draw(cell, cell_types)
 			for cell_type in cell_types:
+				cell_image = None
 				if flags.is_cloud_mode and not revealed_map[cell]:
 					if bg_image:
 						continue
@@ -1325,6 +1350,25 @@ def draw_map():
 					continue
 				elif cell_image0 := puzzle.get_cell_image_to_draw(cell, cell_type):
 					cell_image = cell_image0
+				elif cell in switch_cell_infos and switch_cell_infos[cell][1] == cell_type:
+					old_cell_type, _, end_time, duration = switch_cell_infos[cell]
+					remaining_time = end_time - level_time
+					if remaining_time < 0:
+						del switch_cell_infos[cell]
+						remaining_time = 0
+					factor = remaining_time / duration
+					if factor > 1:  # should never happen, but python is buggy
+						factor = 1
+					cell_type_opacities = [
+						(old_cell_type, factor ** 0.5),
+						(cell_type, (1 - factor) ** 0.5)
+					]
+					if cell_type == CELL_FLOOR:
+						cell_type_opacities.reverse()
+					for cell_type, opacity in cell_type_opacities:
+						cell_image = cell_images[cell_type]
+						cell_image.draw(cell, opacity if cell_type != CELL_FLOOR else 1)
+					continue
 				elif cell_type in cell_images:
 					cell_image = cell_images[cell_type]
 				else:
