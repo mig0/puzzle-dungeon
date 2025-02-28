@@ -1739,6 +1739,13 @@ def prepare_enter_cell(animate_duration):
 		if drop.has_instance(char.c):
 			drop.disappear(char.c, level_time, animate_duration)
 
+	if map[char.c] == CELL_LOCK1:
+		switch_cell_type(char.c, CELL_FLOOR, LOCK_DISAPPREAR_DURATION)
+		drop_key1.consume()
+	elif map[char.c] == CELL_LOCK2:
+		switch_cell_type(char.c, CELL_FLOOR, LOCK_DISAPPREAR_DURATION)
+		drop_key2.consume()
+
 	puzzle.on_prepare_enter_cell()
 
 def enter_cell():
@@ -1758,12 +1765,6 @@ def enter_cell():
 
 	if map[char.c] == CELL_PORTAL:
 		teleport_char()
-	elif map[char.c] == CELL_LOCK1:
-		map[char.c] = CELL_FLOOR
-		drop_key1.consume()
-	elif map[char.c] == CELL_LOCK2:
-		map[char.c] = CELL_FLOOR
-		drop_key2.consume()
 
 	puzzle.on_enter_cell()
 
