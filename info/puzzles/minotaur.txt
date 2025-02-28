@@ -1,0 +1,20 @@
+Minotaur Puzzle
+
+This puzzle is based on the classic Theseus and the Minotaur game.
+The maze consists of floor and wall cells, along with a single finish
+cell. Two actors navigate the maze: the player character and the
+Minotaur.
+
+The player moves one step per turn in any of the four cardinal directions
+(or skips a move by pressing a Space), while the Minotaur moves up to two
+steps per turn according to specific rules. The Minotaur always tries to
+reach the player by prioritizing horizontal movement first - if it is not
+aligned with the player - before making a vertical move. If a move is
+blocked by a wall, the Minotaur skips that step.
+
+Each level is designed to be challenging. A direct path to the finish
+usually results in the player being caught, forcing the player to find an
+alternative, more strategic route to outmaneuver the Minotaur and reach
+the finish safely.
+
+Goal: Reach the finish without being caught by the Minotaur.
