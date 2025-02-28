@@ -134,6 +134,9 @@ class SpanModel:
 			(self.num_plates, self.num_gates, shortstr(self.spans))
 
 class GatePuzzle(Puzzle):
+	def init(self):
+		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
+
 	def assert_config(self):
 		return flags.is_any_maze
 
@@ -431,8 +434,8 @@ class GatePuzzle(Puzzle):
 		self.gate_cells = gate_cells
 
 		self.attached_plate_gate_idxs = []
-		for plate_gate_idx_strs in extra_values:
-			plate_gate_idxs = [int(idx_str) for idx_str in plate_gate_idx_strs.split(' ')]
+		for plate_cell in sort_cells(special_cell_values.keys()):
+			plate_gate_idxs = special_cell_values[plate_cell]
 			self.attached_plate_gate_idxs.append(plate_gate_idxs)
 			if len(self.attached_plate_gate_idxs) >= self.num_plates:
 				break

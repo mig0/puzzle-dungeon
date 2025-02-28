@@ -453,8 +453,7 @@ class AtomixPuzzle(Puzzle):
 
 		self.goal_molecule = goal_molecule
 
-		for cell_value in special_cell_values:
-			cell, atom_id = cell_value
+		for cell, atom_id in special_cell_values.items():
 			# get random goal cell of all corresponding goal cells for atom_id
 			goal_cell = atom_id_goal_cells[atom_id].pop()
 			goal_cell = (goal_cell[0] + (MAP_SIZE_X - goal_size_x) // 2, goal_cell[1] + (MAP_SIZE_Y - goal_size_y) // 2)

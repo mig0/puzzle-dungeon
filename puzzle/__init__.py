@@ -28,6 +28,7 @@ class Puzzle:
 		self.area = Area()
 		self.config_name = self.__class__.config_name()
 		self.config = {} if type(level.get(self.config_name)) != dict else dict(level[self.config_name])
+		self.load_map_special_cell_types = {CELL_SPECIAL0: 'str'}
 		self.init()
 
 	def init(self):

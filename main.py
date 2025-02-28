@@ -45,7 +45,7 @@ def _(str_key):
 
 autodetect_lang()
 
-def load_map(filename_or_stringio):
+def load_map(filename_or_stringio, special_cell_types={}):
 	global map
 
 	is_stringio = type(filename_or_stringio) == io.StringIO
@@ -92,18 +92,19 @@ def load_map(filename_or_stringio):
 
 	set_char_cell(None, 0)
 
-	special_cells = []
+	line_n = 1
+	special_cell_infos = []
 	for y in range(0, size_y):
 		line = file.readline()
 		if line == '':
 			map = orig_map.copy()
-			print_error("Failed to read map line #%d" % (y + 1))
+			print_error("Failed to read map line #%d" % line_n)
 			return
 		line = line.rstrip("\n")
 		for x in range(0, size_x):
 			if len(line) <= x:
 				map = orig_map.copy()
-				print_error("Failed to read char #%d in map line #%d" % (x + 1, y + 1))
+				print_error("Failed to read char #%d in map line #%d" % (x + 1, line_n))
 				return
 			ch = line[x]
 			cell = (x, y)
@@ -125,18 +126,33 @@ def load_map(filename_or_stringio):
 					create_barrel(cell)
 				if actor_name == "char":
 					set_char_cell(cell, 0)
-			if ch.isdigit():
-				special_cells.append(cell)
+			if value_type := special_cell_types.get(ch):
+				special_cell_infos.append((cell, value_type))
 			map[x, y] = ch
+		line_n += 1
 
-	special_cell_values = []
-	for cell in special_cells:
+	special_cell_values = {}
+	for cell, value_type in special_cell_infos:
 		line = file.readline()
 		if line == '':
 			map = orig_map.copy()
 			print_error("Failed to read value for special map cell %s" % str(cell))
 			return
-		special_cell_values.append([cell, line.rstrip("\n")])
+		str = line.rstrip("\n")
+		try:
+			if value_type == 'str':
+				value = str
+			elif value_type == 'int':
+				value = int(str)
+			elif value_type == 'ints':
+				value = tuple(builtins.map(int, str.split()))
+			else:
+				raise ValueError("Unsupported value type %s" % value_type)
+		except Exception as e:
+			print_error("Error: \"%s\" in map line #%d" % (e, line_n))
+			return
+		special_cell_values[cell] = value
+		line_n += 1
 
 	extra_values = []
 	while True:
@@ -992,7 +1008,7 @@ def generate_map():
 			map[cx, cy] = cell_type
 
 	if "map_file" in level or "map_string" in level:
-		if ret := load_map(level.get("map_file") or io.StringIO(level["map_string"])):
+		if ret := load_map(level.get("map_file") or io.StringIO(level["map_string"]), puzzle.load_map_special_cell_types):
 			if flags.MULTI_ROOMS:
 				print("Ignoring multi-room level config when loading map")
 			puzzle.on_create_map(map)
