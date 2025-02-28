@@ -62,6 +62,8 @@ class Drop:
 			actor.draw()
 
 	def disappear(self, cell, start_time, animate_duration):
+		if animate_duration <= 0:
+			return
 		actor = create_actor(self.image_name, cell)
 		actor.activate_inplace_animation(start_time, animate_duration, scale=[1, 0.2], tween='linear', on_finished=lambda: self.disappeared_actors.remove(actor))
 		self.disappeared_actors.append(actor)

@@ -1731,11 +1731,15 @@ def leave_cell(old_char_cell):
 	if map[old_char_cell] == CELL_SAND:
 		map[old_char_cell] = CELL_VOID
 
+	puzzle.on_leave_cell()
+
 def prepare_enter_cell(animate_duration):
 	# prepare drop disappear if any
 	for drop in drops:
 		if drop.has_instance(char.c):
 			drop.disappear(char.c, level_time, animate_duration)
+
+	puzzle.on_prepare_enter_cell()
 
 def enter_cell():
 	# collect drop if any
@@ -1895,6 +1899,7 @@ def move_char(diff_x, diff_y):
 		char.pos = old_char_pos
 		char.animate(animate_duration, on_finished=enter_cell)
 	else:
+		prepare_enter_cell(0)
 		enter_cell()
 
 	reveal_map_near_char()

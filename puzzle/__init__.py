@@ -217,6 +217,12 @@ class Puzzle:
 	def on_update(self, level_time):
 		pass
 
+	def on_leave_cell(self):
+		pass
+
+	def on_prepare_enter_cell(self):
+		pass
+
 	def on_enter_cell(self):
 		pass
 
