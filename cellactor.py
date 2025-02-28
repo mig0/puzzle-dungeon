@@ -102,15 +102,22 @@ class CellActor(Actor):
 		self.scale = scale
 		self.apply_transform()
 
-	def draw(self):
+	def draw(self, cell=None, opacity=None):
 		if self.hidden:
 			return
-		if self.cell_to_draw:
+		if self.cell_to_draw and not cell:
+			cell = self.cell_to_draw
+		if cell:
 			real_cell = self.c
-			self.c = self.cell_to_draw
+			self.c = cell
+		if opacity is not None:
+			real_opacity = self.opacity
+			self.opacity = opacity
 		super().draw()
-		if self.cell_to_draw:
+		if cell:
 			self.c = real_cell
+		if opacity is not None:
+			self.opacity = real_opacity
 
 	def defer_transform(self):
 		self._deferred_transform = True

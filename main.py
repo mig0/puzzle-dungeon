@@ -1334,8 +1334,7 @@ def draw_map():
 					debug_map()
 					die("Bug. Got null cell image at %s cell_type=%s" % (cell, cell_type))
 				elif cell_image.__class__.__name__ == 'CellActor':
-					cell_image.c = cell
-					cell_image.draw()
+					cell_image.draw(cell)
 				else:
 					screen.blit(cell_image, (CELL_W * cx, CELL_H * cy))
 
@@ -1348,9 +1347,7 @@ def get_time_str(time):
 def draw_status():
 	cy = MAP_SIZE_Y
 	for cx in MAP_X_RANGE:
-		status_image.left = CELL_W * cx
-		status_image.top = CELL_H * cy
-		status_image.draw()
+		status_image.draw((cx, cy))
 
 	draw_status_drops(screen, drops)
 
