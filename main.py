@@ -1353,8 +1353,6 @@ def draw_map():
 					if bg_image:
 						continue
 					cell_image = cloud_image
-				elif cell_type == CELL_VOID:
-					continue
 				elif cell_image0 := puzzle.get_cell_image_to_draw(cell, cell_type):
 					cell_image = cell_image0
 				elif cell in switch_cell_infos and switch_cell_infos[cell][1] == cell_type:
@@ -1373,8 +1371,12 @@ def draw_map():
 					if cell_type == CELL_FLOOR:
 						cell_type_opacities.reverse()
 					for cell_type, opacity in cell_type_opacities:
+						if cell_type == CELL_VOID:
+							continue
 						cell_image = cell_images[cell_type]
 						cell_image.draw(cell, opacity if cell_type != CELL_FLOOR else 1)
+					continue
+				elif cell_type == CELL_VOID:
 					continue
 				elif cell_type in cell_images:
 					cell_image = cell_images[cell_type]
@@ -1736,7 +1738,7 @@ def teleport_char():
 
 def leave_cell(old_char_cell):
 	if map[old_char_cell] == CELL_SAND:
-		map[old_char_cell] = CELL_VOID
+		switch_cell_type(old_char_cell, CELL_VOID, SAND_DISAPPREAR_DURATION)
 
 	puzzle.on_leave_cell()
 
