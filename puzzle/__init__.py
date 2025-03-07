@@ -158,8 +158,12 @@ class Puzzle:
 	def on_set_theme(self):
 		pass
 
-	def on_create_map(self, map):
+	def set_map(self, map):
 		self.map = map
+		self.on_create_map()
+
+	def on_create_map(self):
+		pass
 
 	def on_load_map(self, special_cell_values, extra_values):
 		pass

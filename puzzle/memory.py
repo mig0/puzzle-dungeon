@@ -51,8 +51,7 @@ class MemoryPuzzle(Puzzle):
 	def get_num_pairs(self):
 		return (self.area.size_x * self.area.size_y) // 2
 
-	def on_create_map(self, map):
-		super().on_create_map(map)
+	def on_create_map(self):
 		self.memory_map = ndarray((MAP_SIZE_X, MAP_SIZE_X), dtype=int)
 		self.memory_map.fill(MEMORY_PUZZLE_VALUE_OUTSIDE)
 		self.room_memory_pairs.clear()

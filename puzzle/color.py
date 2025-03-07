@@ -24,8 +24,7 @@ class ColorPuzzle(Puzzle):
 	def on_set_room(self):
 		self.set_area_from_config(request_odd_size=True, align_to_center=True)
 
-	def on_create_map(self, map):
-		super().on_create_map(map)
+	def on_create_map(self):
 		self.color_map = ndarray((MAP_SIZE_X, MAP_SIZE_Y), dtype=int)
 		self.color_map.fill(COLOR_PUZZLE_VALUE_OUTSIDE)
 

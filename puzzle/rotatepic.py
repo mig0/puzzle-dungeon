@@ -15,8 +15,7 @@ class RotatepicPuzzle(Puzzle):
 	def assert_config(self):
 		return not flags.is_any_maze
 
-	def on_create_map(self, map):
-		super().on_create_map(map)
+	def on_create_map(self):
 		self.rotatepic_map = ndarray((MAP_SIZE_X, MAP_SIZE_X), dtype=int)
 		self.rotatepic_map.fill(ROTATEPIC_PUZZLE_VALUE_OUTSIDE)
 

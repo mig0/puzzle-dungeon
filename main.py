@@ -1038,12 +1038,12 @@ def generate_map():
 		if ret := load_map(level.get("map_file") or io.StringIO(level["map_string"]), puzzle.load_map_special_cell_types):
 			if flags.MULTI_ROOMS:
 				print("Ignoring multi-room level config when loading map")
-			puzzle.on_create_map(map)
+			puzzle.set_map(map)
 			set_room(0)
 			puzzle.on_load_map(*ret)
 			return
 
-	puzzle.on_create_map(map)
+	puzzle.set_map(map)
 
 	for idx in range(flags.NUM_ROOMS):
 		generate_room(idx)
@@ -1254,7 +1254,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 
 	if reload_stored:
 		map = stored_level["map"]
-		puzzle.on_create_map(map)
+		puzzle.set_map(map)
 		for enemy_info in stored_level["enemy_infos"]:
 			create_enemy(*enemy_info)
 		for barrel_cell in stored_level["barrel_cells"]:

@@ -17,8 +17,7 @@ class FifteenPuzzle(Puzzle):
 	def on_set_theme(self):
 		self.frame_image = self.Globals.load_theme_cell_image('floor_gray_frame')
 
-	def on_create_map(self, map):
-		super().on_create_map(map)
+	def on_create_map(self):
 		self.fifteen_map = ndarray((MAP_SIZE_X, MAP_SIZE_X), dtype=int)
 		self.fifteen_map.fill(FIFTEEN_PUZZLE_VALUE_OUTSIDE)
 

@@ -152,9 +152,8 @@ class GatePuzzle(Puzzle):
 	def has_gate(self):
 		return True
 
-	def on_create_map(self, map):
+	def on_create_map(self):
 		self.room_values = [[None, None, None, None, None, None] for _ in range(flags.NUM_ROOMS)]
-		super().on_create_map(map)
 
 	@property
 	def num_plates(self):
