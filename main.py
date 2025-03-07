@@ -13,6 +13,7 @@ from leveltools import *
 from translations import *
 from cellactor import *
 from objects import *
+from game import game
 from drop import draw_status_drops
 from flags import flags
 from puzzle import create_puzzle
@@ -893,7 +894,8 @@ def get_lift_target_at_neigh(lift, neigh):
 def create_enemy(cell, health=None, attack=None, drop=None):
 	global enemies
 
-	enemy = create_actor("skeleton", cell)
+	enemy = Fighter("skeleton")
+	enemy.c = cell
 	enemy.power  = health if char.power else None
 	enemy.health = None if char.power else health if health is not None else randint(MIN_ENEMY_HEALTH, MAX_ENEMY_HEALTH)
 	enemy.attack = None if char.power else attack if attack is not None else randint(MIN_ENEMY_ATTACK, MAX_ENEMY_ATTACK)
@@ -903,6 +905,7 @@ def create_enemy(cell, health=None, attack=None, drop=None):
 	enemies.append(enemy)
 
 def switch_cell_type(cell, new_cell_type, duration):
+	game.remember_map_cell(cell)
 	switch_cell_infos[cell] = (map[cell], new_cell_type, level_time + duration, duration)
 	map[cell] = new_cell_type
 
@@ -1207,6 +1210,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	if puzzle:
 		mode = "finish"
 		puzzle.finish()
+		game.stop_level()
 
 	stop_music()
 	clear_level_title_and_goal_time()
@@ -1272,6 +1276,8 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 			draw()
 			pygame.display.flip()
 		generate_map()
+
+	game.start_level(map)
 
 	for drop in drops:
 		drop.active = drop.num_total > 0
@@ -1498,7 +1504,8 @@ def draw():
 		screen.draw.text(_("Initializing level…"), center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#88AA66", owidth=1.2, ocolor="#404030", alpha=1, fontsize=80)
 
 def kill_enemy_cleanup():
-	killed_enemies.pop(0)
+	enemy = killed_enemies.pop(0)
+	enemy.reset_inplace_animation()
 
 def handle_press_key():
 	global is_main_screen
@@ -1609,6 +1616,10 @@ def handle_press_key():
 	if keyboard.n:
 		offset = get_next_level_group_offset() if keyboard.lctrl else get_next_level_offset()
 		init_new_level(offset)
+
+	if keyboard.u:
+		if not game.undo_move():
+			play_sound('error')
 
 	if keyboard.w:
 		win_room()
@@ -1761,6 +1772,7 @@ def enter_cell():
 	# collect drop if any
 	for drop in drops:
 		if (args := drop.collect(char.c)) is not None:
+			game.remember_extra_obj_state(char)
 			if drop.name == 'heart' and not char.power:
 				char.health += BONUS_HEALTH_VALUE
 			if drop.name == 'sword' and not char.power:
@@ -1795,6 +1807,7 @@ def activate_beat_animation(actor, diff, tween):
 
 def kill_enemy(enemy):
 	play_sound("kill")
+	game.remember_collection_elem(enemies, enemy)
 	enemies.remove(enemy)
 	# fallen drops upon enemy death
 	if enemy.drop:
@@ -1854,6 +1867,8 @@ def move_char(diff_x, diff_y):
 	# collision with enemies
 	enemy = get_actor_on_cell(char.c, enemies)
 	if enemy:
+		game.remember_extra_obj_state(char)
+		game.remember_extra_obj_state(enemy)
 		if char.power is None:
 			char.health -= enemy.attack
 			beat_or_kill_enemy(enemy, diff)
@@ -2071,8 +2086,10 @@ def update(dt):
 		if cursor.is_active():
 			cursor.move_animated(diff, enable_animation=is_move_animate_enabled)
 		elif cursor.is_lift_selected():
+			game.start_move()
 			move_selected_lift(diff)
 		else:
+			game.start_move()
 			move_char(diff_x, diff_y)
 
 Globals.move_char = move_char

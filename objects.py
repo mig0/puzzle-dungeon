@@ -1,7 +1,14 @@
 from cellactor import CellActor
 from drop import Drop
 
-char = CellActor('stand')
+class Fighter(CellActor):
+	def get_extra_state(self):
+		return (self.power, self.health, self.attack)
+
+	def restore_extra_state(self, state):
+		self.power, self.health, self.attack = state
+
+char = Fighter('stand')
 
 enemies = []
 barrels = []

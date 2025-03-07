@@ -5,6 +5,7 @@ from pgzero import loaders
 from typing import Union, Tuple
 from sizetools import CELL_W, CELL_H
 from config import ARROW_KEYS_RESOLUTION
+from game import game
 
 MAX_ALPHA = 255  # based on pygame
 
@@ -208,6 +209,12 @@ class CellActor(Actor):
 			print("CellActor.image: Unsupported type " + type(image))
 			pass
 
+	def get_state(self):
+		return self.c
+
+	def restore_state(self, state):
+		self.c = state
+
 	def get_pos(self):
 		return cell_to_pos(self._cell)
 
@@ -221,6 +228,7 @@ class CellActor(Actor):
 		self.pos = self.apply_pos_diff(diff, undo, factor)
 
 	def move(self, diff, undo=False):
+		game.remember_obj_state(self)
 		self.c = apply_diff(self.c, diff, undo)
 
 	def move_animated(self, diff=None, target=None, enable_animation=True, on_finished=None):

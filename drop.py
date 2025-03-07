@@ -2,6 +2,7 @@ import sys
 from constants import *
 from cellactor import *
 from sizetools import import_size_constants
+from game import game
 
 class Drop:
 	def __init__(self, name):
@@ -25,13 +26,21 @@ class Drop:
 
 		import_size_constants()
 
+	def get_state(self):
+		return (self.active, self.num_contained, self.num_collected, self.cells.copy())
+
+	def restore_state(self, state):
+		self.active, self.num_contained, self.num_collected, self.cells = state
+
 	def has_instance(self, cell):
 		return cell in self.cells
 
 	def contain(self, actor):
+		game.remember_obj_state(self)
 		self.num_contained += 1
 
 	def instantiate(self, actor, *args):
+		game.remember_obj_state(self)
 		if isinstance(actor, tuple):
 			cell = actor
 		else:
@@ -42,11 +51,13 @@ class Drop:
 	def collect(self, curr_cell):
 		for cell in self.cells:
 			if cell == curr_cell:
+				game.remember_obj_state(self)
 				self.num_collected += 1
 				return self.cells.pop(cell)
 		return None
 
 	def consume(self):
+		game.remember_obj_state(self)
 		self.num_collected -= 1
 
 	def draw_instances(self, draw_actor_hint):
