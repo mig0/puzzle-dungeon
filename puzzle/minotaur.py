@@ -29,7 +29,7 @@ class MinotaurPuzzle(Puzzle):
 
 	def calculate_single_minotaur_move(self, dest_cells):
 		minotaur_cell = dest_cells[-1] if dest_cells else self.minotaur.c
-		
+
 		# check horizontal then vertical move
 		for axis_idx, diff in ([0, (1, 0)], [1, (0, 1)]):
 			factor = cmp(char.c[axis_idx], minotaur_cell[axis_idx])
@@ -94,6 +94,9 @@ class MinotaurPuzzle(Puzzle):
 			self.make_minotaur_move()
 
 	def on_prepare_enter_cell(self):
+		if char.c == self.minotaur.c:
+			self._is_lost = True
+
 		self.make_minotaur_move()
 
 		if char.c == self.goal_cell and self.map[char.c] == CELL_PORTAL:
