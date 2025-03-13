@@ -79,12 +79,6 @@ class Drop:
 		actor.activate_inplace_animation(start_time, animate_duration, scale=[1, 0.2], tween='linear', on_finished=lambda: self.disappeared_actors.remove(actor))
 		self.disappeared_actors.append(actor)
 
-	def store(self):
-		return self.cells.copy()
-
-	def restore(self, stored):
-		self.cells = stored
-
 	@property
 	def num_instances(self):
 		return len(self.cells)

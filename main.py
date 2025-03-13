@@ -1268,7 +1268,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 		for portal_cell, dst_cell in stored_level["portal_destinations"].items():
 			create_portal(portal_cell, dst_cell)
 		for drop in drops:
-			drop.restore(stored_level["drop_infos"][drop.name])
+			drop.restore_state(stored_level["drop_states"][drop.name])
 		set_room(0)
 		puzzle.restore_level(stored_level)
 	else:
@@ -1312,7 +1312,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 		"barrel_cells": tuple(barrel.c for barrel in barrels),
 		"lift_infos": tuple((lift.c, lift.type) for lift in lifts),
 		"portal_destinations": dict(portal_destinations),
-		"drop_infos": dict([(drop.name, drop.store()) for drop in drops]),
+		"drop_states": dict([(drop.name, drop.get_state()) for drop in drops]),
 		"theme_name": theme_name,
 	}
 	puzzle.store_level(stored_level)
