@@ -74,6 +74,7 @@ class Game:
 		self.map = map
 		self.undo_frames.clear()
 		self.in_level = True
+		self.start_move()  # always have undo_frame, even before the first char move
 
 	def stop_level(self):
 		self.in_level = False
@@ -81,7 +82,14 @@ class Game:
 	def assert_in_level(self):
 		if not self.in_level:
 			import inspect
-			print("Called %s not in level. Fix the bug" % inspect.currentframe().f_back.f_code.co_qualname)
+			func_names = []
+			frame = inspect.currentframe().f_back
+			while frame:
+				code = frame.f_code
+				func_names.append("%s, line %s" % (code.co_qualname, code.co_firstlineno))
+				frame = frame.f_back
+			print("Called method outside the level. Fix the bug. Traceback:\n\t", end='')
+			print('\n\t'.join(func_names))
 			quit()
 
 	def remove_empty_undo_frames(self):
@@ -99,21 +107,23 @@ class Game:
 		self.undo_frames.append(UndoFrame())
 
 	def remember_map_cell(self, cell):
-		self.assert_in_level()
+		if not self.in_level:
+			return
 		self.undo_frame.store_map_cell(cell)
 
 	def remember_obj_state(self, obj):
-		if not self.in_level or not self.undo_frames:
+		if not self.in_level:
 			return
 		self.undo_frame.store_obj_state(obj)
 
 	def remember_extra_obj_state(self, obj):
-		if not self.in_level or not self.undo_frames:
+		if not self.in_level:
 			return
 		self.undo_frame.store_extra_obj_state(obj)
 
 	def remember_collection_elem(self, collection, elem):
-		self.assert_in_level()
+		if not self.in_level:
+			return
 		self.undo_frame.store_collection_elem(collection, elem)
 
 	def undo_move(self):

@@ -2085,11 +2085,11 @@ def update(dt):
 		diff = (diff_x, diff_y)
 		if cursor.is_active():
 			cursor.move_animated(diff, enable_animation=is_move_animate_enabled)
-		elif cursor.is_lift_selected():
-			game.start_move()
-			move_selected_lift(diff)
 		else:
 			game.start_move()
-			move_char(diff_x, diff_y)
+			if cursor.is_lift_selected():
+				move_selected_lift(diff)
+			else:
+				move_char(diff_x, diff_y)
 
 Globals.move_char = move_char
