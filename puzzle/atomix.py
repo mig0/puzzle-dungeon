@@ -322,7 +322,7 @@ class AtomixPuzzle(Puzzle):
 			lift.c = lift.orig_cell
 
 	def on_enter_room(self):
-		self.Globals.set_status_message("Press KP Enter to see the goal molecule")
+		set_status_message("Press KP Enter to see the goal molecule", self, 0, 12)
 
 	def scramble(self):
 		# move all lifts until possible without repetition

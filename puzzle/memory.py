@@ -1,4 +1,5 @@
 from . import *
+from statusmessage import get_fade_text_factor
 
 MEMORY_PUZZLE_VALUE_OUTSIDE = -1
 CELL_MEMORY_FRAME = '~f'
@@ -136,7 +137,7 @@ class MemoryPuzzle(Puzzle):
 
 	def get_reveal_fade_factor(self):
 		if self.is_time_to_reveal():
-			return self.Globals.get_fade_text_factor(self.reveal_time, MEMORY_PUZZLE_REVEAL_FADE_DURATION)
+			return get_fade_text_factor(self.level_time, self.reveal_time, MEMORY_PUZZLE_REVEAL_FADE_DURATION)
 		return None
 
 	def modify_cell_types_to_draw(self, cell, cell_types):

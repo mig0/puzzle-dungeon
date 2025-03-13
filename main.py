@@ -19,6 +19,7 @@ from flags import flags
 from puzzle import create_puzzle
 from sizetools import *
 from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_joysticks_arrow_keys
+from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
 lang = 'en'
 
@@ -242,19 +243,6 @@ level = None
 room = Area()
 enter_room_idx = None
 
-status_message = None
-status_message2 = None
-status_message2_time = 0
-
-def set_status_message(msg=None):
-	global status_message
-	status_message = msg
-
-def set_status_message2(msg=None, duration=10):
-	global status_message2, status_message2_time
-	status_message2 = msg
-	status_message2_time = level_time + (duration if duration is not None else 1000000)
-
 def get_bg_image():
 	return bg_image
 
@@ -397,15 +385,6 @@ def create_text_cell_image(text, color='#E0E0E0', gcolor="#408080", owidth=1.2, 
 	pgzero.ptext.draw(text, surf=cell_surface, center=cell_to_pos((0, 0)), color=color, gcolor=gcolor, owidth=owidth, ocolor=ocolor, alpha=alpha, fontsize=fontsize)
 	return cell_surface
 
-def get_fade_text_factor(fade_out_time, fade_duration=2, rest_duration=0):
-	if level_time > fade_out_time + rest_duration:
-		return None
-	if level_time > fade_out_time:
-		return 0
-	if level_time > fade_out_time - fade_duration:
-		return (fade_out_time - level_time) / fade_duration
-	return 1
-
 def is_portal_destination(cell):
 	return cell in {v: k for k, v in portal_destinations.items()}
 
@@ -473,8 +452,7 @@ def enter_room(idx):
 	global mode, char_cells
 
 	set_room(idx)
-	set_status_message()
-	set_status_message2()
+	reset_status_messages()
 
 	place_char_in_room()
 	char_cells[idx] = char.c  # needed for Alt-R
@@ -930,8 +908,6 @@ class Globals:
 	is_cell_in_area = is_cell_in_area
 	get_actor_neighbors = get_actor_neighbors
 	get_all_neighbors = get_all_neighbors
-	set_status_message = set_status_message
-	set_status_message2 = set_status_message2
 	get_bg_image = get_bg_image
 	debug = debug
 	debug_map = debug_map
@@ -943,7 +919,6 @@ class Globals:
 	colorize_cell_image = colorize_cell_image
 	create_cell_subimage = create_cell_subimage
 	create_text_cell_image = create_text_cell_image
-	get_fade_text_factor = get_fade_text_factor
 	is_cell_occupied = is_cell_occupied
 	advance_room = advance_room
 	get_max_room_distance = get_max_room_distance
@@ -1410,18 +1385,7 @@ def draw_status():
 
 	draw_status_drops(screen, drops)
 
-	status_message_to_draw = None
-	status_message_alpha = 1
-	if status_message2 is not None:
-		if (alpha := get_fade_text_factor(status_message2_time, STATUS_MESSAGE2_FADE_DURATION, STATUS_MESSAGE2_REST_DURATION)) is not None:
-			status_message_to_draw = status_message2
-			status_message_alpha = alpha
-		else:
-			set_status_message2()
-	elif status_message is not None:
-		status_message_to_draw = status_message
-	if status_message_to_draw is not None:
-		screen.draw.text(status_message_to_draw, midleft=(20, POS_STATUS_Y), color="#FFF0A0", gcolor="#A09060", owidth=1.2, ocolor="#303020", alpha=status_message_alpha, fontsize=26)
+	draw_status_message(screen, POS_STATUS_Y)
 
 	if mode == "game":
 		color, gcolor = ("#60C0FF", "#0080A0") if "time_limit" not in level else ("#FFC060", "#A08000") if level["time_limit"] - level_time > CRITICAL_REMAINING_LEVEL_TIME else ("#FF6060", "#A04040")
@@ -1625,7 +1589,8 @@ def handle_press_key():
 		win_room()
 
 	if keyboard.o:
-		set_status_message2("Hello, world!", 5)
+		priority = randint(0, 4)
+		set_status_message("Hello, world! [priority=%d]" % priority, None, priority, 10)
 
 	if keyboard.space and cursor.is_char_selected() and map[char.c] == CELL_PORTAL:
 		teleport_char()
@@ -1644,7 +1609,7 @@ def handle_press_key():
 			cursor.reset()
 
 	if DEBUG_LEVEL > 0 and cursor_was_active and not cursor.is_active():
-		set_status_message2()
+		set_status_message(priority=0)
 
 	if keyboard.home:
 		puzzle.press_cell(cursor.selected_actor.c, 1)
@@ -1679,6 +1644,7 @@ def loose_game():
 	stop_music()
 	mode = "end"
 	is_game_won = False
+	set_status_message("You lost. Press Alt-R to retry", priority=0)
 	start_music()
 
 def win_room():
@@ -2018,7 +1984,7 @@ def update(dt):
 	check_victory()
 
 	if DEBUG_LEVEL > 0 and cursor.is_active():
-		set_status_message2(str(cursor.c))
+		set_status_message(str(cursor.c), priority=0)
 
 	if char.is_animated():
 		return

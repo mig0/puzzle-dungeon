@@ -498,25 +498,23 @@ class BarrelPuzzle(Puzzle):
 			is_solved = len([cell for cell in barrel_cells if cell in plate_cells]) == len(barrel_cells)
 		else:
 			is_solved = len([cell for cell in plate_cells if cell in barrel_cells]) == len(plate_cells)
-		if is_solved:
-			self.Globals.set_status_message("Puzzle solved!")
 		return is_solved
 
 	def on_draw(self, mode):
 		if self.find_solution_mode:
 			solution_depth = self.solution_depth + SOLUTION_DEPTH_STEP if self.solution_depth else MIN_SOLUTION_DEPTH
 			if solution_depth > MAX_SOLUTION_DEPTH:
-				self.Globals.set_status_message("Failed to find solution")
+				set_status_message("Failed to find solution", self, 0)
 				self.find_solution_mode = 0
 				return
 			if self.find_solution_mode == 1:
-				self.Globals.set_status_message("Finding solution with depth %d…" % solution_depth)
+				set_status_message("Finding solution with depth %d…" % solution_depth, self, 0)
 			if self.find_solution_mode <= 2:
 				self.find_solution_mode += 1
 				return
 			is_found = self.find_solution(True, solution_depth)
 			if is_found:
-				self.Globals.set_status_message("Found solution with %d pushes, press again to view" % len(self.solution))
+				set_status_message("Found solution with %d pushes, press again to view" % len(self.solution), self, 0)
 				self.solution = [cell for cells in self.solution for cell in cells]
 				self.find_solution_mode = 0
 			else:
@@ -524,11 +522,12 @@ class BarrelPuzzle(Puzzle):
 
 	def on_press_key(self, keyboard):
 		if keyboard.kp_enter:
+			set_status_message(None, self)
 			if self.show_solution_mode:
-				self.Globals.set_status_message()
 				self.show_solution_mode = False
 				return
 			if self.solution is not None:
+				set_status_message(None, self, 0)
 				self.solution_time = 0
 				self.show_solution_mode = True
 				return
@@ -536,7 +535,7 @@ class BarrelPuzzle(Puzzle):
 			self.find_solution_mode = 1
 		else:
 			if self.show_solution_mode:
-				self.Globals.set_status_message()
+				set_status_message(None, self)
 				self.show_solution_mode = False
 				self.solution = None
 
@@ -548,11 +547,11 @@ class BarrelPuzzle(Puzzle):
 					dx, dy = cell_diff(char.c, new_cell)
 					self.Globals.move_char(dx, dy)
 					if char.c == new_cell:
-						self.Globals.set_status_message("Number of moves left until solved: %d" % len(self.solution))
+						set_status_message("Number of moves left until solved: %d" % len(self.solution), self)
 						self.solution.pop(0)
-						if not self.solution:
-							self.Globals.set_status_message()
-							self.show_solution_mode = False
-							self.solution = None
-							self.solution_depth = None
 					self.solution_time = level_time + BARREL_PUZZLE_SOLUTION_MOVE_DELAY
+				else:
+					set_status_message(None, self)
+					self.show_solution_mode = False
+					self.solution = None
+					self.solution_depth = None
