@@ -481,8 +481,11 @@ def enter_room(idx):
 
 	puzzle.on_enter_room()
 
+def get_max_area_distance(area):
+	return cell_distance((area.x1, area.y1), (area.x2, area.y2))
+
 def get_max_room_distance():
-	return cell_distance((room.x1, room.y1), (room.x2, room.y2))
+	return get_max_area_distance(room)
 
 def is_actor_in_room(actor):
 	assert_room()
@@ -766,32 +769,32 @@ def generate_spiral_maze():
 def generate_random_maze_room():
 	generate_random_maze_area(room.x1, room.y1, room.x2, room.y2)
 
-def generate_random_free_path(target_c, deviation=0, level=0):
+def generate_random_free_path(start_cell, target_cell, area=None, deviation=0, level=0):
 	global map
 
 	if randint(0, deviation) == 0:
-		place_char_in_closest_accessible_cell(target_c)
+		start_cell = get_closest_accessible_cell(start_cell, target_cell)
 
-	if char.c == target_c:
+	if start_cell == target_cell:
 		return True
 
-	ox, oy = char.c
-	tx, ty = target_c
+	if area == None:
+		area = room
 
-	debug(2, "* [%d] generating free path from (%d, %d) to (%d, %d)" % (level, ox, oy, tx, ty))
+	debug_path_str = "free path from %s to %s" % (str(start_cell), str(target_cell))
+	debug(2, "* [%d] generating %s" % (level, debug_path_str))
 
-	max_distance = get_max_room_distance()
+	max_distance = get_max_area_distance(area)
 
-	accessible_cells = get_all_accessible_cells()
+	accessible_cells = get_accessible_cells(start_cell)
 	weighted_neighbors = []
-	for cell in get_actor_neighbors(char, room.x_range, room.y_range):
+	for cell in get_cell_neighbors(start_cell, area.x_range, area.y_range):
 		if cell in accessible_cells:
 			continue
 		if is_cell_in_actors(cell, barrels):
 			continue
-		cx, cy = cell
 		weight = randint(0, max_distance)
-		weight -= cell_distance(cx, cy, tx, ty)
+		weight -= cell_distance(cell, target_cell)
 		if map[cell] in CELL_FLOOR_TYPES:
 			weight -= randint(0, max_distance)
 		weighted_neighbors.append((weight, cell))
@@ -799,7 +802,7 @@ def generate_random_free_path(target_c, deviation=0, level=0):
 	neighbors = [n[1] for n in sorted(weighted_neighbors, reverse=True)]
 
 	if not neighbors:
-		debug(2, "* [%d] failed to generate free path from (%d, %d) to (%d, %d)" % (level, ox, oy, tx, ty))
+		debug(2, "* [%d] failed to generate %s" % (level, debug_path_str))
 		return False
 
 	for neigh in neighbors:
@@ -807,19 +810,16 @@ def generate_random_free_path(target_c, deviation=0, level=0):
 		if old_cell_type not in (*CELL_WALL_TYPES, CELL_VOID):
 			print("BUG!")
 			return False
-		convert_to_floor_if_needed(*neigh)
-		char.c = neigh
+		convert_to_floor_if_needed(neigh)
 		debug(3, "* [%d] trying to move to %s" % (level, str(neigh)))
-		debug_map(3, full=True, clean=True, combined=True)
-		is_path_found = generate_random_free_path(target_c, deviation, level + 1)
-		if is_path_found:
-			debug(2, "* [%d] successfully generated free path from (%d, %d) to (%d, %d)" % (level, ox, oy, tx, ty))
+		debug_map(3)
+		is_generated = generate_random_free_path(neigh, target_cell, area, deviation, level + 1)
+		if is_generated:
+			debug(2, "* [%d] successfully generated %s" % (level, debug_path_str))
 			if level == 0:
-				debug_map(2, full=True, clean=True, combined=True)
+				debug_map(2)
 			return True
 		map[neigh] = old_cell_type
-
-	char.c = (ox, oy)
 
 	return False
 

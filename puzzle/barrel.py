@@ -431,7 +431,7 @@ class BarrelPuzzle(Puzzle):
 			old_char_c = char.c
 			if char.c is None:
 				char.c = (cx, cy)
-			if self.Globals.generate_random_free_path(neighbor):
+			if self.Globals.generate_random_free_path(char.c, neighbor):
 				# pull the barrel to the char
 				barrel.c = char.c
 				char.c = (new_char_cx, new_char_cy)

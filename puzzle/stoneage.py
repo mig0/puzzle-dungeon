@@ -57,8 +57,7 @@ class StoneagePuzzle(Puzzle):
 		self.Globals.set_char_cell(start_cell)
 
 		self.Globals.replace_random_floor_cell(CELL_VOID, (self.room.x2 - self.room.x1 + 1) * (self.room.y2 - self.room.y1 + 1) - 2)
-		char.c = start_cell
-		self.Globals.generate_random_free_path(finish_cell, deviation=4)
+		self.Globals.generate_random_free_path(start_cell, finish_cell, deviation=4)
 
 		path_cells = self.Globals.find_path(start_cell, finish_cell)[:-1]
 		for i in range(int(randint(0, 60) * len(path_cells) / 100), int(randint(40, 100) * len(path_cells) / 100)):
