@@ -262,7 +262,7 @@ def debug(level, str, depth=None):
 		print(" " * depth, end="")
 	print(str)
 
-def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, combined=True, dual=False, endl=False):
+def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, combined=True, dual=False, endl=False, char_cell=None, cell_chars={}):
 	if DEBUG_LEVEL < level:
 		return
 	if descr:
@@ -284,6 +284,8 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 				cell = (cx, cy)
 				cell_ch = CELL_FLOOR if clean and map[cell] in CELL_FLOOR_TYPES else map[cell]
 				actor_chars = ACTOR_ON_PLATE_CHARS if cell_ch == CELL_PLATE else ACTOR_CHARS
+				if cell in cell_chars:
+					cell_ch = cell_chars[cell]
 				if drop := get_drop_on_cell(cell):
 					cell_ch = actor_chars[drop.name]
 				if is_cell_in_actors(cell, enemies):
@@ -292,7 +294,7 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 					cell_ch = actor_chars['barrel']
 				if lift := get_actor_on_cell(cell, lifts):
 					cell_ch = LIFT_CHARS[lift.type]
-				if char.c is not None and char.c == cell:
+				if cell == char_cell or char.c is not None and char.c == cell:
 					cell_ch = actor_chars['char']
 				print(cell_ch, end="")
 		print()
