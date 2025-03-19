@@ -100,4 +100,4 @@ def get_front_puzzle_screenshot_info(puzzle):
 
 def get_css_class_for_screenshots(objs):
 	n = len(objs)
-	return "screenshots-%d-per-row" % max(5, min(2, n))
+	return "screenshots-%d-per-row" % min(5, max(1, n))
