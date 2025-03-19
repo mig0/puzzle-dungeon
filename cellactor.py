@@ -43,10 +43,8 @@ def cell_to_pos(cell):
 def pos_to_cell(pos):
 	return (pos[0] // CELL_W, pos[1] // CELL_H)
 
-def cell_distance(cx, cy, tx=None, ty=None):
-	if type(cx) is tuple and type(cy) is tuple:
-		return cell_distance(*cx, *cy)
-	return abs(tx - cx) + abs(ty - cy)
+def cell_distance(cell1, cell2):
+	return abs(cell2[0] - cell1[0]) + abs(cell2[1] - cell1[1])
 
 def sort_cells(cells):
 	return sorted(cells, key=lambda cell: (cell[1], cell[0]))
