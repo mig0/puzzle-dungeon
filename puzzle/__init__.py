@@ -156,6 +156,9 @@ class Puzzle:
 	def get_random_wall_cell_in_area(self, obstacles=[]):
 		return self.get_random_matching_cell_in_area(CELL_WALL_TYPES, obstacles)
 
+	def convert_to_floor(self, cell):
+		self.Globals.convert_to_floor_if_needed(cell)
+
 	def on_set_theme(self):
 		pass
 

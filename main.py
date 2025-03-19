@@ -697,9 +697,12 @@ def place_char_in_room():
 def get_random_floor_cell_type():
 	return CELL_FLOOR_TYPES_FREQUENT[randint(0, len(CELL_FLOOR_TYPES_FREQUENT) - 1)]
 
-def convert_to_floor_if_needed(cx, cy):
-	if map[cx, cy] in (*CELL_WALL_TYPES, CELL_VOID, CELL_INTERNAL1):
-		map[cx, cy] = get_random_floor_cell_type()
+def convert_to_floor_if_needed(cell):
+	if not cell:
+		warn("Called convert_to_floor_if_needed without cell, ignoring", True)
+		return
+	if map[cell] in (*CELL_WALL_TYPES, CELL_VOID, CELL_INTERNAL1):
+		map[cell] = get_random_floor_cell_type()
 
 def get_random_even_point(a1, a2):
 	return a1 + randint(0, int((a2 - a1) / 2)) * 2

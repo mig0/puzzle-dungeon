@@ -413,8 +413,8 @@ class BarrelPuzzle(Puzzle):
 
 			# if the cell is not empty (WALL), make it empty (FLOOR with additions)
 			was_wall1_replaced = False
-			if self.map[cx, cy] == CELL_WALL:
-				self.Globals.convert_to_floor_if_needed(cx, cy)
+			if self.map[neighbor] == CELL_WALL:
+				self.convert_to_floor(neighbor)
 				was_wall1_replaced = True
 			barrel_cx = barrel.cx
 			barrel_cy = barrel.cy
@@ -424,7 +424,7 @@ class BarrelPuzzle(Puzzle):
 			self.Globals.debug_map(2, full=True, clean=True, dual=True)
 			was_wall2_replaced = False
 			if self.map[new_char_cx, new_char_cy] == CELL_WALL:
-				self.Globals.convert_to_floor_if_needed(new_char_cx, new_char_cy)
+				self.convert_to_floor((new_char_cx, new_char_cy))
 				was_wall2_replaced = True
 
 			# if the char position is not None, first create random free path to the selected adjacent cell
@@ -582,7 +582,7 @@ class BarrelPuzzle(Puzzle):
 		unplaced_barrel_plate_cell_pairs = list(zip(barrel_cells, plate_cells))
 		placed_barrel_cells = []
 
-		self.map[char_cell] = self.Globals.get_random_floor_cell_type()
+		self.convert_to_floor(char_cell)
 		self.Globals.debug(2, "generate %s %s %s" % (str(char_cell), barrel_cells, plate_cells))
 		self.Globals.debug_map(2)
 
@@ -598,14 +598,14 @@ class BarrelPuzzle(Puzzle):
 			# remove walls on the char path
 			for cell in path_cells:
 				if self.map[cell] in CELL_WALL_TYPES:
-					self.map[cell] = self.Globals.get_random_floor_cell_type()
+					self.convert_to_floor(cell)
 
 			# remove walls on the barrel path until the first direction change
 			char_cell = path_cells[-1]
 			char_dir = cell_diff(char_cell, barrel_cell)
 			for cell in barrel_path_cells:
 				if self.map[barrel_cell] in CELL_WALL_TYPES:
-					self.map[barrel_cell] = self.Globals.get_random_floor_cell_type()
+					self.convert_to_floor(barrel_cell)
 				if cell_diff(barrel_cell, cell) != char_dir:
 					break
 				char_cell = barrel_cell
@@ -643,7 +643,7 @@ class BarrelPuzzle(Puzzle):
 			# 3) place room barrels into the place cells, one barrel per one plate
 			for _ in range(self.num_barrels):
 				cell = self.get_random_wall_cell_in_area()
-				self.map[cell] = self.Globals.get_random_floor_cell_type()
+				self.convert_to_floor(cell)
 				barrel_cells.append(cell)
 
 			# 4) place char randomly
