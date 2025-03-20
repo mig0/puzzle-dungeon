@@ -8,6 +8,7 @@ class MinotaurPuzzle(Puzzle):
 		self.minotaur_cells = [None] * flags.NUM_ROOMS
 		self.goal_cells = [None] * flags.NUM_ROOMS
 		self._is_lost = False
+		self.num_moves = self.parse_config_num("num_moves", 2)
 
 	def has_portal(self):
 		return True
@@ -68,7 +69,7 @@ class MinotaurPuzzle(Puzzle):
 		# calculate single moves
 		dest_cells = []
 		is_lost = False
-		for _ in range(2):
+		for _ in range(self.num_moves):
 			is_lost |= self.calculate_single_minotaur_move(dest_cells, char_cell or char.c, minotaur_cell or self.minotaur.c)
 		return dest_cells, is_lost
 
@@ -210,6 +211,7 @@ class MinotaurPuzzle(Puzzle):
 		self.generate_random_solvable_room()
 
 	def on_enter_room(self):
+		set_status_message("Escape minotaur making %d moves. Press Space to skip move" % self.num_moves, self, 0, 10)
 		self.minotaur.c = self.minotaur_cell
 
 	def on_draw(self, mode):
