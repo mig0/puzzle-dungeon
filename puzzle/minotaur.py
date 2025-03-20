@@ -5,6 +5,8 @@ SINGLE_MINOTAUR_MOVE_DURATION = ARROW_KEYS_RESOLUTION
 class MinotaurPuzzle(Puzzle):
 	def init(self):
 		self.minotaur = CellActor('minotaur')
+		self.minotaur_cells = [None] * flags.NUM_ROOMS
+		self.goal_cells = [None] * flags.NUM_ROOMS
 		self._is_lost = False
 
 	def has_portal(self):
@@ -13,16 +15,32 @@ class MinotaurPuzzle(Puzzle):
 	def has_finish(self):
 		return True
 
+	@property
+	def minotaur_cell(self):
+		return self.minotaur_cells[self.room.idx]
+
+	@minotaur_cell.setter
+	def minotaur_cell(self, cell):
+		self.minotaur_cells[self.room.idx] = cell
+
+	@property
+	def goal_cell(self):
+		return self.goal_cells[self.room.idx]
+
+	@goal_cell.setter
+	def goal_cell(self, cell):
+		self.goal_cells[self.room.idx] = cell
+
 	def is_lost(self):
 		return self._is_lost
 
 	def store_level(self, stored_level):
-		stored_level["minotaur_cell"] = self.minotaur.c
-		stored_level["goal_cell"] = self.goal_cell
+		stored_level["minotaur_cells"] = self.minotaur_cells
+		stored_level["goal_cells"] = self.goal_cells
 
 	def restore_level(self, stored_level):
-		self.minotaur.c = stored_level["minotaur_cell"]
-		self.goal_cell = stored_level["goal_cell"]
+		self.minotaur_cells = stored_level["minotaur_cells"]
+		self.goal_cells = stored_level["goal_cells"]
 
 	def get_minotaur_dir(self, axis_idx, minotaur_cell=None):
 		return cmp(char.c[axis_idx], (minotaur_cell or self.minotaur.c)[axis_idx])
