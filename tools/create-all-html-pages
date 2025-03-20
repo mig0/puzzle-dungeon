@@ -15,12 +15,10 @@ create-html-page download
 create-html-page resources
 create-html-page authors
 
-for element_filename in elements/puzzles/*.html elements/screenshots/*.html elements/themes/*.html; do
+for element_filename in elements/puzzles/*.html elements/screenshots/*.html elements/themes/*.html elements/tutorials/*.html; do
 	page_name=`echo $element_filename | cut -d/ -f2- | cut -d. -f1`
 	create-html-page $page_name
 done
-
-create-html-page tutorials/index
 
 # The optional script sync-html-pages-to-webserver if present may look like:
 # rsync -av --copy-unsafe-links html/ "$HTML_ROOT"/
