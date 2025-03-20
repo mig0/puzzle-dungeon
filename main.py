@@ -612,48 +612,78 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, ra
 	return path_cells
 
 def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, randomize=True,
-	cost_func=None, set_path_cost=None, allow_stay=False
+	cost_func=None, set_path_cost=None, allow_stay=False, state_func=None
 ):
 	if start_cell == target_cell:
 		return []
-	visited_cells = {start_cell: [None, 0]}  # cell: [parent, cost]
+
+	def _pack_state(cell, old_cell, old_state):
+		if state_func:
+			state = state_func(cell, old_cell, old_state)
+			return None if state is None else (cell, state)
+		else:
+			return cell
+
+	def _unpack_state(cell_state):
+		return cell_state if state_func else (cell_state, None)
+
+	if not (start_cell_state := _pack_state(start_cell, None, None)):
+		return None
+	target_cell_state = None
+
+	visited_cells = {start_cell_state: [None, 0]}  # cell_state: [parent, cost]
 	processed_cells = []
-	unprocessed_cells = [start_cell]
+	unprocessed_cells = [start_cell_state]
+
 	while unprocessed_cells:
-		cell = unprocessed_cells.pop(0)
-		processed_cells.append(cell)
+		cell_state = unprocessed_cells.pop(0)
+		cell, state = _unpack_state(cell_state)
+		processed_cells.append(cell_state)
+
 		if cell == target_cell:
+			target_cell_state = cell_state
 			break
 
 		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles, allow_stay=allow_stay)
 		if randomize:
 			shuffle(neigbours)
 		for neigh in neigbours:
-			if neigh in processed_cells:
+			if not (neigh_state := _pack_state(neigh, cell, state)):
 				continue
-			cost = cost_func(neigh, cell, visited_cells, start_cell, target_cell, obstacles)
+
+			if neigh_state in processed_cells:
+				continue
+
+			if cost_func:
+				cost = cost_func(neigh, cell, visited_cells, start_cell, target_cell, obstacles)
+			else:
+				cost = 0
 			if cost is None:
 				continue
-			cost += visited_cells[cell][1]
-			if neigh not in visited_cells:
-				visited_cells[neigh] = [cell, cost]
-				unprocessed_cells.append(neigh)
-				unprocessed_cells.sort(key=lambda cell: visited_cells[neigh][1] + cell_distance(neigh, target_cell))
-			else:
-				if visited_cells[neigh][1] < cost:
-					visited_cells[neigh] = [cell, cost]
 
-	if target_cell not in visited_cells:
+			cost += visited_cells[cell_state][1]
+			if neigh_state not in visited_cells:
+				visited_cells[neigh_state] = [cell_state, cost]
+				unprocessed_cells.append(neigh_state)
+				unprocessed_cells.sort(key=lambda cell: visited_cells[neigh_state][1] + cell_distance(neigh, target_cell))
+			else:
+				if visited_cells[neigh_state][1] < cost:
+					visited_cells[neigh_state] = [cell_state, cost]
+
+	if not target_cell_state:
 		return None
 
 	best_path_cells = []
-	cell = target_cell
-	while cell != start_cell:
+	cell_state = target_cell_state
+	while cell_state != start_cell_state:
+		cell, _ = _unpack_state(cell_state)
 		best_path_cells.insert(0, cell)
-		cell = visited_cells[cell][0]
+		if not cell_state in visited_cells:
+			print("BUG:", cell_state, visited_cells)
+		cell_state = visited_cells[cell_state][0]
 
 	if set_path_cost is not None:
-		set_path_cost[0] = visited_cells[target_cell][1]
+		set_path_cost[0] = visited_cells[target_cell_state][1]
 
 	return best_path_cells
 
