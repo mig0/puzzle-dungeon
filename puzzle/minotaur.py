@@ -27,19 +27,32 @@ class MinotaurPuzzle(Puzzle):
 	def get_minotaur_dir(self, axis_idx, minotaur_cell=None):
 		return cmp(char.c[axis_idx], (minotaur_cell or self.minotaur.c)[axis_idx])
 
-	def calculate_single_minotaur_move(self, dest_cells):
-		minotaur_cell = dest_cells[-1] if dest_cells else self.minotaur.c
+	# after 2 calls the initial dest_cells=[] become list of 0, 1 or 2 minotaur cells to move
+	def calculate_single_minotaur_move(self, dest_cells, char_cell, minotaur_cell):
+		if char_cell == minotaur_cell:
+			return True
+
+		if dest_cells:
+			minotaur_cell = dest_cells[-1]
 
 		# check horizontal then vertical move
 		for axis_idx, diff in ([0, (1, 0)], [1, (0, 1)]):
-			factor = cmp(char.c[axis_idx], minotaur_cell[axis_idx])
+			factor = cmp(char_cell[axis_idx], minotaur_cell[axis_idx])
 			if factor:
 				dest_cell = apply_diff(minotaur_cell, diff, factor=factor)
 				if self.Globals.is_cell_accessible(dest_cell):
 					dest_cells.append(dest_cell)
-					if char.c == dest_cell and char.c != self.goal_cell:
-						self._is_lost = True
-					return
+					return char_cell == dest_cell and char_cell != self.goal_cell
+
+		return False
+
+	def calculate_minotaur_move(self, char_cell=None, minotaur_cell=None):
+		# calculate single moves
+		dest_cells = []
+		is_lost = False
+		for _ in range(2):
+			is_lost |= self.calculate_single_minotaur_move(dest_cells, char_cell or char.c, minotaur_cell or self.minotaur.c)
+		return dest_cells, is_lost
 
 	def make_single_minotaur_move(self, dest_cells):
 		if not dest_cells:
@@ -48,10 +61,7 @@ class MinotaurPuzzle(Puzzle):
 		self.minotaur.move_animated(target=dest_cell, on_finished=lambda: self.make_single_minotaur_move(dest_cells))
 
 	def make_minotaur_move(self):
-		# calculate single moves
-		dest_cells = []
-		for _ in range(2):
-			self.calculate_single_minotaur_move(dest_cells)
+		dest_cells, self._is_lost = self.calculate_minotaur_move()
 
 		# animate single moves
 		if not dest_cells:
