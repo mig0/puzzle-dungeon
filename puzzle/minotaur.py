@@ -163,16 +163,24 @@ class MinotaurPuzzle(Puzzle):
 					break
 				self.convert_to_floor(cell)
 
-			# 10) find shortest path from char to goal
-			path_cells = self.Globals.find_path(char_cell, self.goal_cell)
-			if not path_cells:
-				print("Bug in generate_random_solvable_room after find_path")
+			# 10) find all shortest paths from char to goal
+			if self.config.get("allow_partially_trivial"):
+				all_shortest_paths = [self.Globals.find_path(char_cell, self.goal_cell)]
+			else:
+				all_shortest_paths = self.Globals.find_all_paths(char_cell, self.goal_cell)
+			if not all_shortest_paths:
+				print("Bug #1 in generate_random_solvable_room after find_all_paths")
 				quit()
 
-			# 11) check whether the shortest path leads to win
-			has_trivial_solution = self.check_path_victory(path_cells, minotaur_cell)
+			# 11) check whether any shortest path leads to win
+			has_trivial_solution = False
+			for path_cells in all_shortest_paths:
+				if not path_cells:
+					print("Bug #2 in generate_random_solvable_room after find_all_paths")
+					quit()
+				has_trivial_solution |= self.check_path_victory(path_cells, minotaur_cell)
 
-			# 12) check existence of winning path (only if the shortest path leads to defeat)
+			# 12) check existence of winning path (only if all shortest paths lead to defeat)
 			def get_minotaur_cell(char_cell, old_char_cell, old_minotaur_cell):
 				if char_cell == old_minotaur_cell:
 					return None

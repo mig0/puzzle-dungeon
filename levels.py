@@ -293,6 +293,7 @@ levels = [
 		"goal": "solve-minotaur-puzzle",
 		"nine_rooms": True,
 		"minotaur_puzzle": {
+			"allow_partially_trivial": True,
 		},
 	},
 	{
