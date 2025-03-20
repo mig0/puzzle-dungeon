@@ -523,13 +523,13 @@ def is_cell_accessible(cell, obstacles=None, place=False, allow_obstacles=False,
 			return False
 	return True
 
-def get_accessible_neighbors(cell, obstacles=None, allow_obstacles=False, allow_enemy=False, allow_closed_gate=False):
+def get_accessible_neighbors(cell, obstacles=None, allow_obstacles=False, allow_enemy=False, allow_closed_gate=False, allow_stay=False):
 	neighbors = []
 	if ALLOW_DIAGONAL_MOVES and False:
 		directions = ((-1, -1), (0, -1), (+1, -1), (-1, 0), (+1, 0), (-1, +1), (0, +1), (+1, +1))
 	else:
 		directions = ((-1, 0), (+1, 0), (0, -1), (0, +1))
-	for diff in directions:
+	for diff in directions + ((0, 0),) if allow_stay else directions:
 		neigh = apply_diff(cell, diff)
 		if is_cell_in_room(neigh) and (
 			allow_closed_gate and map[neigh] == CELL_GATE0 or
@@ -611,7 +611,9 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, ra
 				break
 	return path_cells
 
-def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, randomize=True, cost_func=None, set_path_cost=None):
+def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, randomize=True,
+	cost_func=None, set_path_cost=None, allow_stay=False
+):
 	if start_cell == target_cell:
 		return []
 	visited_cells = {start_cell: [None, 0]}  # cell: [parent, cost]
@@ -622,7 +624,8 @@ def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=Fals
 		processed_cells.append(cell)
 		if cell == target_cell:
 			break
-		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles)
+
+		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles, allow_stay=allow_stay)
 		if randomize:
 			shuffle(neigbours)
 		for neigh in neigbours:
