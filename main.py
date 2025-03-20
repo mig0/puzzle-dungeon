@@ -597,19 +597,36 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, ra
 	if accessible_distance is None:
 		return None
 	path_cells = [target_cell]
-	current_cell = target_cell
 	while accessible_distance > 1:
 		accessible_distance -= 1
-		neigh_cells = get_accessible_neighbors(current_cell, obstacles, allow_obstacles)
+		neigh_cells = get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles)
 		if randomize:
 			shuffle(neigh_cells)
 		for neigh_cell in neigh_cells:
 			neigh_distance = accessible_cell_distances.get(neigh_cell)
 			if neigh_distance == accessible_distance:
-				current_cell = neigh_cell
 				path_cells.insert(0, neigh_cell)
 				break
 	return path_cells
+
+def find_all_paths(start_cell, target_cell, obstacles=None, allow_obstacles=False):
+	if start_cell == target_cell:
+		return [()]
+	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles, allow_obstacles=allow_obstacles)
+	accessible_distance = accessible_cell_distances.get(target_cell)
+	if accessible_distance is None:
+		return None
+	all_path_cells = [(target_cell,)]
+	while accessible_distance > 1:
+		accessible_distance -= 1
+		new_all_path_cells = []
+		for path_cells in all_path_cells:
+			neigh_cells = [cell for cell in get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles)
+				if accessible_cell_distances.get(cell) == accessible_distance]
+			for neigh_cell in neigh_cells:
+				new_all_path_cells.append((neigh_cell, *path_cells))
+		all_path_cells = new_all_path_cells
+	return all_path_cells
 
 def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, randomize=True,
 	cost_func=None, set_path_cost=None, allow_stay=False, state_func=None
@@ -980,6 +997,7 @@ class Globals:
 	get_all_accessible_cells = get_all_accessible_cells
 	get_num_accessible_target_directions = get_num_accessible_target_directions
 	find_path = find_path
+	find_all_paths = find_all_paths
 	find_best_path = find_best_path
 	is_path_found = is_path_found
 	set_char_cell = set_char_cell
