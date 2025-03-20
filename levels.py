@@ -266,6 +266,58 @@ levels = [
 		},
 	},
 	{
+		"n": 5.02,
+		"num_enemies": 0,
+		"theme": "moss",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"minotaur_puzzle": {
+			"size": (11, 11),
+		},
+	},
+	{
+		"n": 5.03,
+		"num_enemies": 0,
+		"theme": "minecraft",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"four_rooms": True,
+		"minotaur_puzzle": {
+		},
+	},
+	{
+		"n": 5.04,
+		"num_enemies": 0,
+		"theme": "minecraft",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"nine_rooms": True,
+		"minotaur_puzzle": {
+		},
+	},
+	{
+		"n": 5.05,
+		"num_enemies": 0,
+		"theme": "classic",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"four_rooms": True,
+		"minotaur_puzzle": {
+			"num_moves": 3,
+		},
+	},
+	{
+		"n": 5.06,
+		"num_enemies": 0,
+		"theme": "default",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"nine_rooms": True,
+		"minotaur_puzzle": {
+			"num_moves": 1,
+		},
+	},
+	{
 		"n": 5.1,
 		"num_enemies": 3,
 		"theme": "ancient1",
