@@ -1768,15 +1768,24 @@ def check_victory():
 	if status_messages:
 		set_status_message(" ".join(status_messages))
 
-def teleport_char():
-	if map[char.c] != CELL_PORTAL and char._scale != 0:
-		die("Called teleport_char not on CELL_PORTAL")
+teleport_char_in_progress = False
 
-	if char._scale != 0:
+def finish_teleport_char():
+	global teleport_char_in_progress
+	teleport_char_in_progress = False
+
+def teleport_char():
+	global teleport_char_in_progress
+
+	if map[char.c] != CELL_PORTAL and not teleport_char_in_progress:
+		die("Called teleport_char not on CELL_PORTAL and not in progress")
+
+	if not teleport_char_in_progress:
+		teleport_char_in_progress = True
 		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(1, 0), angle=(0, 540), on_finished=teleport_char)
 	else:
 		char.c = portal_destinations[char.c]
-		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(0, 1), angle=(540, 0))
+		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(0, 1), angle=(540, 0), on_finished=finish_teleport_char)
 
 def leave_cell(old_char_cell):
 	if map[old_char_cell] == CELL_SAND:
