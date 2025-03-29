@@ -235,8 +235,6 @@ class BarrelPuzzle(Puzzle):
 			states[depth] = []
 			min_pushes_updated = False
 			for state in states[depth - 1]:
-				if plate_cells == [(4, 5)]:
-					print("Processing state %s on depth %d" % (str(state[0:3]), depth))
 				if time.time() - start_time > MAX_PREPARE_SOLUTION_TIME:
 					stop = True
 					break
@@ -247,12 +245,12 @@ class BarrelPuzzle(Puzzle):
 				self.barrel_cells = last_barrel_cells.copy()
 
 				if self.barrel_cells == self.stock_barrel_cells and self.Globals.find_path(last_char_cell, self.stock_char_cell, self.barrel_cells):
-					print("Found solution by pulls")
+#					print("Found solution by pulls")
 					self.solution = []
 					orig_char_cell = self.stock_char_cell
 					while True:
 						char_path = self.Globals.find_path(orig_char_cell, last_char_cell, self.barrel_cells)
-						print(char_path + [last_barrel_cell])
+#						print(char_path + [last_barrel_cell])
 						self.solution.append(char_path + [last_barrel_cell])
 						if prev_state is None:
 							break
@@ -262,45 +260,28 @@ class BarrelPuzzle(Puzzle):
 					break
 
 				for barrel_cell in last_barrel_cells:
-					if plate_cells == [(4, 5)]:
-						print("Processing barrel_cell %s %s neighbors %s" % (str(barrel_cell), str(self.barrel_cells), str(self.Globals.get_accessible_neighbors(barrel_cell, self.barrel_cells))))
 					for char_cell in self.Globals.get_accessible_neighbors(barrel_cell, self.barrel_cells):
-						if char_cell == (4, 9) or char_cell == (4, 8) or char_cell == (4, 7) or char_cell == (4, 6):
-							print("Trying to pull(%s, %s)" % (char_cell, barrel_cell))
 						if self.Globals.find_path(last_char_cell, char_cell, self.barrel_cells) is None:
-							if char_cell == (4, 9) or char_cell == (4, 8) or char_cell == (4, 7) or char_cell == (4, 6):
-								print("  no path %s -> %s %s" % (str(last_char_cell), str(char_cell), str(self.barrel_cells)))
 							continue
 						new_char_cell = self.try_pull(char_cell, barrel_cell)
 						if new_char_cell is not None:
 							new_barrel_cell = char_cell
-							if plate_cells == [(4, 5)]:
-								self.show_map("* Depth=%d after %s <- %s" % (depth, str(last_char_cell), str(last_barrel_cell)), last_char_cell)
 							self.pull(char_cell, barrel_cell)
-							if plate_cells == [(4, 5)]:
-								self.show_map("==== After pull %s <- %s ====" % (str(char_cell), str(barrel_cell)))
 							states[depth].append((new_char_cell, new_barrel_cell, self.barrel_cells, state))
-							if plate_cells == [(4, 5)]:
-								print("Added state[%d] %s %s %s" % (depth, str(new_char_cell), str(new_barrel_cell), str(self.barrel_cells)))
 							self.barrel_cells = last_barrel_cells.copy()
 							if (new_char_cell, new_barrel_cell) not in min_char_barrel_plate_pushes:
 								min_char_barrel_plate_pushes[new_char_cell, new_barrel_cell] = depth + 1
 								min_pushes_updated = True
 								if new_barrel_cell not in min_barrel_plate_pushes:
 									min_barrel_plate_pushes[new_barrel_cell] = depth + 1
-						else:
-							if char_cell == (4, 9) or char_cell == (4, 8) or char_cell == (4, 7) or char_cell == (4, 6):
-								print("  try_pull failed")
 			if not min_pushes_updated:
-				if plate_cells == [(4, 5)]:
-					print("No min-pushes updates for depth=%d" % depth)
 				stop = True
 				break
 
-		print("find_solvable_cells_for_plate_cells finished in %.1fs for %d plates %s" % (time.time() - start_time, len(plate_cells), str(plate_cells)))
-		print("  Unique barrel cells: %d, pairs: %d" % (len(min_barrel_plate_pushes), len(min_char_barrel_plate_pushes)))
-		print("  %s" % str(min_barrel_plate_pushes))
-		print("  %s" % str(min_char_barrel_plate_pushes))
+#		print("find_solvable_cells_for_plate_cells finished in %.1fs for %d plates %s" % (time.time() - start_time, len(plate_cells), str(plate_cells)))
+#		print("  Unique barrel cells: %d, pairs: %d" % (len(min_barrel_plate_pushes), len(min_char_barrel_plate_pushes)))
+#		print("  %s" % str(min_barrel_plate_pushes))
+#		print("  %s" % str(min_char_barrel_plate_pushes))
 
 		return min_char_barrel_plate_pushes, min_barrel_plate_pushes
 
