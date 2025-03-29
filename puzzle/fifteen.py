@@ -139,13 +139,7 @@ class FifteenPuzzle(Puzzle):
 		self.move(cell, empty_cell, FIFTEEN_PUZZLE_MOVE_NEIGHBOUR_ONLY)
 		return True
 
-	def press_char_cell(self):
-		self.press_cell(char.c)
-
 	def on_press_key(self, keyboard):
-		if keyboard.space:
-			self.press_char_cell()
-
 		self.draw_solved_mode = keyboard.kp_enter and not self.draw_solved_mode
 
 	def set_char_opacity_if_needed(self):

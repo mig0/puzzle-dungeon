@@ -443,11 +443,12 @@ class GatePuzzle(Puzzle):
 		return self.attached_plate_gate_idxs
 
 	def on_press_key(self, keyboard):
-		if keyboard.space:
-			self.press_plate(char.c)
 		if keyboard.kp_enter:
 			solution = self.find_map_solution(char.c)
 			if solution:
 				pressed_plate_cells = tuple(self.plate_cells[idx] for idx in solution.pressed_plates)
 				print("Press plates:", *pressed_plate_cells)
-		return False
+
+	def press_cell(self, cell, button=None):
+		self.press_plate(char.c)
+

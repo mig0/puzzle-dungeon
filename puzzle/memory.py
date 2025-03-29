@@ -168,9 +168,6 @@ class MemoryPuzzle(Puzzle):
 		return None
 
 	def on_press_key(self, keyboard):
-		if keyboard.space:
-			self.press_cell(char.c)
-
 		if keyboard.kp_enter:
 			self.reveal_time = self.level_time + 5
 

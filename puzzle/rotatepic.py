@@ -89,12 +89,7 @@ class RotatepicPuzzle(Puzzle):
 	def press_cell(self, cell, button=None):
 		return self.rotate_cell(cell, CLOCKWISE if button in (None, 3, 5) else UPSIDEDOWN if button == 2 else COUNTERCLOCKWISE)
 
-	def press_char_cell(self, clockwise=True):
-		self.rotate_cell(char.c, CLOCKWISE if clockwise else COUNTERCLOCKWISE)
-
 	def on_press_key(self, keyboard):
-		if keyboard.space:
-			self.press_char_cell()
 		if keyboard.backspace:
 			self.scramble()
 		self.draw_solved_mode = keyboard.kp_enter and not self.draw_solved_mode

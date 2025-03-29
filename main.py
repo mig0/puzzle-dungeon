@@ -1676,6 +1676,9 @@ def handle_press_key():
 	if DEBUG_LEVEL > 0 and cursor_was_active and not cursor.is_active():
 		set_status_message(priority=0)
 
+	if keyboard.space and not cursor_was_active:
+		puzzle.press_cell(char.c)
+
 	if keyboard.home:
 		puzzle.press_cell(cursor.selected_actor.c, 1)
 	if keyboard.end:

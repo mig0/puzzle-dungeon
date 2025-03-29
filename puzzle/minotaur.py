@@ -225,10 +225,9 @@ class MinotaurPuzzle(Puzzle):
 	def on_draw(self, mode):
 		self.minotaur.draw()
 
-	def on_press_key(self, keyboard):
-		if keyboard.space:
-			# skip move
-			self.make_minotaur_move()
+	def press_cell(self, cell, button=None):
+		# skip move
+		self.make_minotaur_move()
 
 	def on_prepare_enter_cell(self):
 		self.make_minotaur_move()

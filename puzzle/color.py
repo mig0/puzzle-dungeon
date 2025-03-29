@@ -95,7 +95,4 @@ class ColorPuzzle(Puzzle):
 
 		return True
 
-	def on_press_key(self, keyboard):
-		if keyboard.space and self.map[char.c] == CELL_PLATE:
-			self.press_plate(char.c)
 
