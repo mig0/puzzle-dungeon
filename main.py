@@ -551,7 +551,7 @@ def get_accessible_cells(start_cell, obstacles=None):
 				unprocessed_cells.append(n)
 	return accessible_cells
 
-def get_accessible_cell_distances(start_cell, obstacles=None, allow_obstacles=False):
+def get_accessible_cell_distances(start_cell, obstacles=None, allow_obstacles=False, allow_enemy=False):
 	accessible_cells = []
 	accessible_cell_distances = {start_cell: 0}
 	unprocessed_cells = [start_cell]
@@ -559,7 +559,7 @@ def get_accessible_cell_distances(start_cell, obstacles=None, allow_obstacles=Fa
 		cell = unprocessed_cells.pop(0)
 		accessible_distance = accessible_cell_distances[cell]
 		accessible_cells.append(cell)
-		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles=allow_obstacles)
+		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles, allow_enemy)
 		for n in neigbours:
 			if n not in accessible_cells and n not in unprocessed_cells:
 				unprocessed_cells.append(n)
@@ -589,17 +589,17 @@ def get_num_accessible_target_directions(start_cell, target_cells):
 
 	return num_accessible_directions
 
-def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, randomize=True):
+def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, allow_enemy=False, randomize=True):
 	if start_cell == target_cell:
 		return []
-	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles, allow_obstacles=allow_obstacles)
+	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles, allow_obstacles, allow_enemy)
 	accessible_distance = accessible_cell_distances.get(target_cell)
 	if accessible_distance is None:
 		return None
 	path_cells = [target_cell]
 	while accessible_distance > 1:
 		accessible_distance -= 1
-		neigh_cells = get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles)
+		neigh_cells = get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles, allow_enemy)
 		if randomize:
 			shuffle(neigh_cells)
 		for neigh_cell in neigh_cells:
@@ -612,7 +612,7 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, ra
 def find_all_paths(start_cell, target_cell, obstacles=None, allow_obstacles=False):
 	if start_cell == target_cell:
 		return [()]
-	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles, allow_obstacles=allow_obstacles)
+	accessible_cell_distances = get_accessible_cell_distances(start_cell, obstacles, allow_obstacles)
 	accessible_distance = accessible_cell_distances.get(target_cell)
 	if accessible_distance is None:
 		return None
