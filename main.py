@@ -1874,10 +1874,8 @@ def beat_or_kill_enemy(enemy, diff):
 		kill_enemy(enemy)
 	activate_beat_animation(char, diff, 'bounce_end')
 
-def move_char(diff_x, diff_y):
+def move_char(diff):
 	global last_move_diff
-
-	diff = (diff_x, diff_y)
 
 	old_char_pos = char.pos
 	old_char_cell = char.c
@@ -1985,6 +1983,16 @@ def move_selected_lift(diff):
 	if lift_target := get_lift_target(lift.c, diff):
 		for actor in [lift, char] if char.c == lift.c else [lift]:
 			actor.move_animated(target=lift_target, enable_animation=is_move_animate_enabled, on_finished=activate_cursor_after_lift_movement)
+
+def process_move(diff):
+	if cursor.is_active():
+		cursor.move_animated(diff, enable_animation=is_move_animate_enabled)
+	else:
+		game.start_move()
+		if cursor.is_lift_selected():
+			move_selected_lift(diff)
+		else:
+			move_char(diff)
 
 def can_move(diff):
 	dest_cell = apply_diff(cursor.selected_actor.c, diff)
@@ -2126,14 +2134,6 @@ def update(dt):
 		diff_y -= 1
 
 	if diff_x or diff_y:
-		diff = (diff_x, diff_y)
-		if cursor.is_active():
-			cursor.move_animated(diff, enable_animation=is_move_animate_enabled)
-		else:
-			game.start_move()
-			if cursor.is_lift_selected():
-				move_selected_lift(diff)
-			else:
-				move_char(diff_x, diff_y)
+		process_move((diff_x, diff_y),)
 
 Globals.move_char = move_char
