@@ -442,13 +442,20 @@ class GatePuzzle(Puzzle):
 	def get_map_extra_values(self):
 		return self.attached_plate_gate_idxs
 
-	def on_press_key(self, keyboard):
-		if keyboard.kp_enter:
-			solution = self.find_map_solution(char.c)
-			if solution:
-				pressed_plate_cells = tuple(self.plate_cells[idx] for idx in solution.pressed_plates)
-				print("Press plates:", *pressed_plate_cells)
-
 	def press_cell(self, cell, button=None):
 		self.press_plate(char.c)
+
+	def find_solution_func(self):
+		solution = self.find_map_solution(char.c)
+		if solution:
+			solution_items = []
+			for plate_cell in (self.plate_cells[plate_idx] for plate_idx in solution.pressed_plates):
+				solution_items.append({plate_cell})
+				solution_items.append(plate_cell)
+			solution_items.append({self.finish_cell})
+			return solution_items, None
+		return None, None
+
+	def prepare_solution(self):
+		return ("Preparing to find solution", self.find_solution_func)
 
