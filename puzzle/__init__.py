@@ -237,6 +237,9 @@ class Puzzle:
 	def finish(self):
 		pass
 
+	def prepare_solution(self):
+		return None
+
 import os, pkgutil
 for _, module, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
 	__import__(__name__ + "." + module)

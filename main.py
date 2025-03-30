@@ -18,6 +18,7 @@ from game import game
 from drop import draw_status_drops
 from flags import flags
 from puzzle import create_puzzle
+from solution import solution, set_solution_funcs
 from sizetools import *
 from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_joysticks_arrow_keys
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
@@ -1277,6 +1278,8 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	killed_enemies.clear()
 	portal_destinations.clear()
 
+	solution.reset()
+
 	puzzle = create_puzzle(level, Globals)
 
 	set_map_size(level.get("map_size", DEFAULT_MAP_SIZE), puzzle.has_border())
@@ -1451,6 +1454,8 @@ def draw_status():
 	draw_status_drops(screen, drops)
 
 	draw_status_message(screen, POS_STATUS_Y)
+
+	solution.set_status_drawn()
 
 	if mode == "game":
 		color, gcolor = ("#60C0FF", "#0080A0") if "time_limit" not in level else ("#FFC060", "#A08000") if level["time_limit"] - level_time > CRITICAL_REMAINING_LEVEL_TIME else ("#FF6060", "#A04040")
@@ -1636,6 +1641,12 @@ def handle_press_key():
 	if mode == "next" or is_main_screen:
 		return
 
+	# if any key is pressed while playing solution, stop it
+	if solution.is_play_mode():
+		solution.reset()
+		set_status_message("Playing solution stopped", "stop-auto-play", 1, 3)
+		return
+
 	if keyboard.p:
 		offset = get_prev_level_group_offset() if keyboard.lctrl else get_prev_level_offset()
 		init_new_level(offset)
@@ -1659,6 +1670,16 @@ def handle_press_key():
 
 	if keyboard.space and cursor.is_char_selected() and map[char.c] == CELL_PORTAL:
 		teleport_char()
+
+	if keyboard.kp_enter:
+		if solution.is_active():
+			solution.set_play_mode()
+		elif not solution.is_find_mode():
+			find_solution_info = puzzle.prepare_solution()
+			if find_solution_info:
+				msg, find_func = find_solution_info
+				solution.set_find_mode(msg)
+				solution.set_find_func(find_func)
 
 	cursor_was_active = cursor.is_active()
 
@@ -1770,6 +1791,12 @@ def check_victory():
 
 	if status_messages:
 		set_status_message(" ".join(status_messages))
+
+def press_cell(cell):
+	if cursor.is_active():
+		return
+	if not puzzle.press_cell(cell):
+		play_sound('error')
 
 teleport_char_in_progress = False
 
@@ -2066,6 +2093,18 @@ def update(dt):
 			char.health = level["char_health"]
 		last_autogeneration_time = idle_time
 
+	if solution.is_play_mode() and not teleport_char_in_progress:
+		solution.play_move()
+
+	if solution.is_find_mode():
+		solution_items, msg = solution.call_find_func()
+		if solution_items:
+			solution.set(solution_items)
+		elif msg:
+			solution.set_find_mode(msg)
+		else:
+			solution.set_not_found()
+
 	check_victory()
 
 	if DEBUG_LEVEL > 0 and cursor.is_active():
@@ -2136,4 +2175,4 @@ def update(dt):
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)
 
-Globals.move_char = move_char
+set_solution_funcs(find_path, move_char, press_cell)
