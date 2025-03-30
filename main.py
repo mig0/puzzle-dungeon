@@ -1395,6 +1395,8 @@ def draw_map():
 			cell_types = [cell_type]
 			if cell_type in CELL_FLOOR_EXTENSIONS and cell_type != CELL_FLOOR:
 				cell_types.insert(0, CELL_FLOOR)
+			if cell == pressed_cell:
+				cell_types.append(CELL_CURSOR)
 			puzzle.modify_cell_types_to_draw(cell, cell_types)
 			for cell_type in cell_types:
 				cell_image = None
@@ -1402,6 +1404,8 @@ def draw_map():
 					if bg_image:
 						continue
 					cell_image = cloud_image
+				elif cell_type == CELL_CURSOR:
+					cell_image = loaders.images.load('cursor')
 				elif cell_image0 := puzzle.get_cell_image_to_draw(cell, cell_type):
 					cell_image = cell_image0
 				elif cell in switch_cell_infos and switch_cell_infos[cell][1] == cell_type:
@@ -1792,9 +1796,23 @@ def check_victory():
 	if status_messages:
 		set_status_message(" ".join(status_messages))
 
+pressed_cell = None
+
+def press_cell_cleanup():
+	global pressed_cell
+	pressed_cell = None
+
+def prepare_move():
+	clock.unschedule(press_cell_cleanup)
+	press_cell_cleanup()
+
 def press_cell(cell):
+	global pressed_cell
 	if cursor.is_active():
 		return
+	if cell != char.c:
+		pressed_cell = cell
+		clock.schedule(press_cell_cleanup, SOLUTION_MOVE_DELAY)
 	if not puzzle.press_cell(cell):
 		play_sound('error')
 
@@ -2175,4 +2193,4 @@ def update(dt):
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)
 
-set_solution_funcs(find_path, move_char, press_cell)
+set_solution_funcs(find_path, move_char, press_cell, prepare_move)

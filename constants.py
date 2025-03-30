@@ -20,6 +20,7 @@ CELL_DIR_R  = '→'
 CELL_DIR_U  = '↑'
 CELL_DIR_D  = '↓'
 
+CELL_CURSOR = '▉'
 CELL_SPECIAL0 = '0'
 CELL_INTERNAL1 = '1'
 CELL_OUTER_WALL = '▒'

@@ -7,6 +7,7 @@ from statusmessage import set_status_message
 find_path    = None
 move_char    = None
 press_cell   = None
+prepare_move = None
 
 def is_cell(cell):
 	return type(cell) == tuple and len(cell) == 2 and \
@@ -137,6 +138,7 @@ class Solution:
 			return
 
 		if time() > self.next_solution_move_time:
+			prepare_move()
 			self.solution_items[0].play_move()
 			if self.solution_items[0].is_done:
 				self.solution_items.pop(0)
@@ -145,8 +147,9 @@ class Solution:
 
 solution = Solution()
 
-def set_solution_funcs(func1, func2, func3):
-	global find_path, move_char, press_cell
+def set_solution_funcs(func1, func2, func3, func4):
+	global find_path, move_char, press_cell, prepare_move
 	find_path    = func1
 	move_char    = func2
 	press_cell   = func3
+	prepare_move = func4
