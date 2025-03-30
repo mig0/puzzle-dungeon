@@ -7,6 +7,7 @@ MIN_SOLUTION_DEPTH = 8
 MAX_SOLUTION_DEPTH = 200
 SOLUTION_DEPTH_STEP = 4
 MAX_PREPARE_SOLUTION_TIME = 8
+MAX_FIND_SOLUTION_TIME = 25 * 60 * 60
 
 FLOOR_COST = 1
 CHAR_FLOOR_COST = -1
@@ -16,7 +17,6 @@ OBSTACLE_COST = None
 class BarrelPuzzle(Puzzle):
 	def init(self):
 		self.disable_prepare_solution = False
-		self.find_solution_mode = 0
 
 	def assert_config(self):
 		return not flags.is_any_maze
@@ -30,6 +30,13 @@ class BarrelPuzzle(Puzzle):
 	def is_goal_to_be_solved(self):
 		return True
 
+	def reset_solution_data(self):
+		self.min_char_barrel_plate_pushes = None
+		self.min_barrel_plate_pushes = None
+		self.solution = None
+		self.solution_depth = None
+		self.end_solution_time = 99999999999
+
 	def on_enter_room(self):
 		# prepare some invariant data
 		self.num_total_cells = self.room.size_x * self.room.size_y
@@ -41,13 +48,7 @@ class BarrelPuzzle(Puzzle):
 		self.has_extra_barrels = len(self.plate_cells) < len(barrels)
 		self.has_extra_plates  = len(self.plate_cells) > len(barrels)
 
-		# reset solution data
-		self.min_char_barrel_plate_pushes = None
-		self.min_barrel_plate_pushes = None
-		self.solution = None
-		self.solution_depth = None
-		self.show_solution_mode = False
-		self.find_solution_mode = 0
+		self.reset_solution_data()
 
 	def get_room_barrels(self):
 		return [ barrel for barrel in barrels if self.Globals.is_actor_in_room(barrel) ]
@@ -296,19 +297,22 @@ class BarrelPuzzle(Puzzle):
 
 		self.min_char_barrel_plate_pushes, self.min_barrel_plate_pushes = self.find_solvable_cells_for_plate_cells(self.plate_cells)
 
-	def find_solution(self, init=True, solution_depth=None):
+	def find_solution(self, init=True):
 		if init:
-			self.solution_depth = solution_depth or MIN_SOLUTION_DEPTH
 			self.solution = []
 			self.char_cell = self.stock_char_cell
 			self.barrel_cells = self.stock_barrel_cells.copy()
 			self.barrel_cells.sort()
 			self.visited_positions = []
+			self.end_solution_time = time.time() + MAX_FIND_SOLUTION_TIME
 
 		if self.is_solved_for_barrel_cells(self.barrel_cells):
 			return True
 
 		if len(self.solution) >= self.solution_depth:
+			return False
+
+		if time.time() > self.end_solution_time:
 			return False
 
 		accessible_cells = self.Globals.get_accessible_cells(self.char_cell, self.barrel_cells)
@@ -673,66 +677,34 @@ class BarrelPuzzle(Puzzle):
 		if cell_type in CELL_FLOOR_TYPES and self.min_barrel_plate_pushes is not None and cell not in self.min_barrel_plate_pushes:
 			return self.red_floor_image
 
-	def on_draw(self, mode):
-		if self.find_solution_mode:
-			if self.min_barrel_plate_pushes is None:
-				set_status_message("Preparing to find solution", self, 0)
-				self.prepare_to_find_solution()
-				return
-			if self.solution is None:
-				solution_depth = self.solution_depth + SOLUTION_DEPTH_STEP if self.solution_depth else self.estimate_solution_depth() or MIN_SOLUTION_DEPTH
-				if solution_depth > MAX_SOLUTION_DEPTH:
-					set_status_message("Failed to find solution", self, 0)
-					self.find_solution_mode = 0
-					return
-				if self.find_solution_mode == 1:
-					set_status_message("Finding solution with depth %d…" % solution_depth, self, 0)
-				if self.find_solution_mode <= 2:
-					self.find_solution_mode += 1
-					return
-				self.find_solution(True, solution_depth)
-			if self.solution is not None:
-				set_status_message("Found solution with %d pushes, press again to view" % len(self.solution), self, 0)
-				self.solution = [cell for cells in self.solution for cell in cells]
-				self.find_solution_mode = 0
-			else:
-				self.find_solution_mode = 1
-
 	def on_press_key(self, keyboard):
-		if keyboard.kp_enter:
-			set_status_message(None, self)
-			if self.show_solution_mode:
-				self.show_solution_mode = False
-				return
-			if self.solution is not None:
-				set_status_message(None, self, 0)
-				self.solution_time = 0
-				self.show_solution_mode = True
-				return
-			self.solution_depth = None
-			self.find_solution_mode = 1
-		else:
-			if self.show_solution_mode:
-				set_status_message(None, self)
-				self.show_solution_mode = False
-				self.solution = None
 		if keyboard.d:
 			self.disable_prepare_solution = not self.disable_prepare_solution
 			set_status_message("Prepare solution is %s" % ("disabled" if self.disable_prepare_solution else "enabled"), self, None, 4)
 
-	def on_update(self, level_time):
-		if self.show_solution_mode:
-			if level_time > self.solution_time:
-				if self.solution:
-					new_cell = self.solution[0]
-					dx, dy = cell_diff(char.c, new_cell)
-					self.Globals.move_char(dx, dy)
-					if char.c == new_cell:
-						set_status_message("Number of moves left until solved: %d" % len(self.solution), self)
-						self.solution.pop(0)
-					self.solution_time = level_time + BARREL_PUZZLE_SOLUTION_MOVE_DELAY
-				else:
-					set_status_message(None, self)
-					self.show_solution_mode = False
-					self.solution = None
-					self.solution_depth = None
+	def find_solution_func(self):
+		if self.min_barrel_plate_pushes is None:
+			# preparing to find solution
+			self.prepare_to_find_solution()
+			self.solution_depth = self.estimate_solution_depth() or MIN_SOLUTION_DEPTH
+			return None, "Finding solution with depth %d…" % self.solution_depth
+
+		if self.solution_depth > MAX_SOLUTION_DEPTH or time.time() > self.end_solution_time:
+			# solution not found
+			self.reset_solution_data()
+			return None, None
+
+		if self.find_solution(True):
+			# solution found
+			solution_items = self.solution.copy()
+			self.reset_solution_data()
+			return solution_items, None
+		else:
+			# solution in progress
+			self.solution_depth += SOLUTION_DEPTH_STEP
+			return None, "Finding solution with depth %d…" % self.solution_depth
+
+	def prepare_solution(self):
+		self.solution_depth = None
+		return ("Preparing to find solution", self.find_solution_func)
+
