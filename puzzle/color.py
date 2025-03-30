@@ -95,4 +95,14 @@ class ColorPuzzle(Puzzle):
 
 		return True
 
+	def find_solution_func(self):
+		solution_items = []
+		for plate_cell in self.get_all_plate_cells():
+			for i in range((COLOR_MAP_VALUE_SOLVED - self.color_map[plate_cell]) % self.get_num_values()):
+				solution_items.append(plate_cell)
+		shuffle(solution_items)  # optionally randomize the solution
+		return solution_items, None
+
+	def prepare_solution(self):
+		return ("Preparing to find solution", self.find_solution_func)
 
