@@ -124,6 +124,20 @@ class MinotaurPuzzle(Puzzle):
 	def generate_random_floor_path(self, start_cell, target_cell):
 		return self.Globals.generate_random_free_path(start_cell, target_cell, self.area)
 
+	def get_solution_state_func(self, minotaur_cell):
+		def get_minotaur_cell(char_cell, old_char_cell, old_minotaur_cell):
+			if char_cell == old_minotaur_cell:
+				return None
+			if old_minotaur_cell is None:
+				new_minotaur_cell = minotaur_cell
+			else:
+				dest_cells, is_lost = self.calculate_minotaur_move(char_cell, old_minotaur_cell)
+				if is_lost:
+					return None
+				new_minotaur_cell = dest_cells[-1] if dest_cells else old_minotaur_cell
+			return new_minotaur_cell
+		return get_minotaur_cell
+
 	def generate_random_solvable_room(self):
 		num_tries = 3000
 
@@ -180,22 +194,10 @@ class MinotaurPuzzle(Puzzle):
 					quit()
 				has_trivial_solution |= self.check_path_victory(path_cells, minotaur_cell)
 
-			# 12) check existence of winning path (only if all shortest paths lead to defeat)
-			def get_minotaur_cell(char_cell, old_char_cell, old_minotaur_cell):
-				if char_cell == old_minotaur_cell:
-					return None
-				if old_minotaur_cell is None:
-					new_minotaur_cell = minotaur_cell
-				else:
-					dest_cells, is_lost = self.calculate_minotaur_move(char_cell, old_minotaur_cell)
-					if is_lost:
-						return None
-					new_minotaur_cell = dest_cells[-1] if dest_cells else old_minotaur_cell
-				return new_minotaur_cell
-
 			solution_cells = None
 			if not has_trivial_solution:
-				solution_cells = self.Globals.find_best_path(char_cell, self.goal_cell, allow_stay=True, state_func=get_minotaur_cell)
+				state_func = self.get_solution_state_func(minotaur_cell)
+				solution_cells = self.Globals.find_best_path(char_cell, self.goal_cell, allow_stay=True, state_func=state_func)
 
 			if DEBUG_LEVEL:
 				title = "Non-trivial solution" if solution_cells else "Only trivial solution" if has_trivial_solution else "No solution"
@@ -219,7 +221,7 @@ class MinotaurPuzzle(Puzzle):
 		self.generate_random_solvable_room()
 
 	def on_enter_room(self):
-		set_status_message("Escape minotaur making %d moves. Press Space to skip move" % self.num_moves, self, 0, 10)
+		set_status_message("Escape minotaur making %d moves. Press Space to skip move" % self.num_moves, self, 2, 10)
 		self.minotaur.c = self.minotaur_cell
 
 	def on_draw(self, mode):
@@ -234,3 +236,17 @@ class MinotaurPuzzle(Puzzle):
 
 		if char.c == self.goal_cell and self.map[char.c] == CELL_PORTAL:
 			self.Globals.demolish_portal(self.goal_cell, self.Globals.get_random_floor_cell_type())
+
+	def find_solution_func(self):
+		state_func = self.get_solution_state_func(self.minotaur.c)
+		solution_cells = self.Globals.find_best_path(char.c, self.goal_cell, allow_stay=True, state_func=state_func)
+		solution_items = None
+		if solution_cells:
+			solution_items = [solution_cells]
+			if self.map[self.goal_cell] != CELL_FINISH:
+				solution_items.append({self.get_room_cells(CELL_FINISH)[0]})
+		return solution_items, None
+
+	def prepare_solution(self):
+		return ("Preparing to find solution", self.find_solution_func)
+
