@@ -106,8 +106,12 @@ class RotatepicPuzzle(Puzzle):
 	def find_solution_func(self):
 		solution_items = []
 		for cell in self.area.cells:
-			for i in range(self.rotatepic_map[cell]):
+			if self.rotatepic_map[cell] == 1:
 				solution_items.append(cell)
+			elif self.rotatepic_map[cell] == 2:
+				solution_items.append((cell, 2))
+			elif self.rotatepic_map[cell] == 3:
+				solution_items.append((cell, 1))	
 		shuffle(solution_items)  # optionally randomize the solution
 		return solution_items, None
 

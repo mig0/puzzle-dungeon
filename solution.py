@@ -16,9 +16,16 @@ def is_cell(cell):
 def is_cell_list(cells):
 	return type(cells) in (tuple, list) and all(is_cell(cell) for cell in cells)
 
+def is_cell_button_tuple(pair):
+	return type(pair) == tuple and len(pair) == 2 and is_cell(pair[0]) and type(pair[1]) == int
+
 class SolutionItem:
 	def __init__(self, arg):
 		self.cell_to_press = arg if is_cell(arg) else None
+		self.button_to_press = None
+		if is_cell_button_tuple(arg):
+			self.cell_to_press = arg[0]
+			self.button_to_press = arg[1]
 		self.target_cell = list(arg)[0] if type(arg) == set and is_cell(list(arg)[0]) else None
 		self.path_cells = list(arg) if is_cell_list(arg) else None
 
@@ -49,7 +56,7 @@ class SolutionItem:
 			return
 
 		if self.cell_to_press:
-			press_cell(self.cell_to_press)
+			press_cell(self.cell_to_press, self.button_to_press)
 			self.is_done = True
 		else:
 			new_cell = self.path_cells[0]

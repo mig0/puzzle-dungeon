@@ -1806,14 +1806,14 @@ def prepare_move():
 	clock.unschedule(press_cell_cleanup)
 	press_cell_cleanup()
 
-def press_cell(cell):
+def press_cell(cell, button=None):
 	global pressed_cell
 	if cursor.is_active():
 		return
 	if cell != char.c:
 		pressed_cell = cell
 		clock.schedule(press_cell_cleanup, SOLUTION_MOVE_DELAY)
-	if not puzzle.press_cell(cell):
+	if not puzzle.press_cell(cell, button):
 		play_sound('error')
 
 teleport_char_in_progress = False
