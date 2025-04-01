@@ -103,3 +103,14 @@ class RotatepicPuzzle(Puzzle):
 	def finish(self):
 		char.set_default_opacity(1)
 
+	def find_solution_func(self):
+		solution_items = []
+		for cell in self.area.cells:
+			for i in range(self.rotatepic_map[cell]):
+				solution_items.append(cell)
+		shuffle(solution_items)  # optionally randomize the solution
+		return solution_items, None
+
+	def prepare_solution(self):
+		return ("Preparing to find solution", self.find_solution_func)
+
