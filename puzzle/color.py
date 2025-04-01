@@ -104,5 +104,5 @@ class ColorPuzzle(Puzzle):
 		return solution_items, None
 
 	def prepare_solution(self):
-		return ("Preparing to find solution", self.find_solution_func)
+		return ("Finding solution", self.find_solution_func)
 
