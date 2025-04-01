@@ -1726,6 +1726,8 @@ def on_mouse_down(pos, button):
 	if mode != "game":
 		return
 
+	if solution.is_active():
+		solution.reset()
 	if cursor.is_active():
 		cursor.toggle()
 	cell = pos_to_cell(pos)
