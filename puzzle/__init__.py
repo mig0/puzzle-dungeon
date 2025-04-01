@@ -4,6 +4,7 @@ from objects import *
 from flags import flags
 from random import randint, random, shuffle, choice
 from numpy import ndarray, arange, array_equal, ix_, argwhere, copyto
+from solution import solution
 from sizetools import import_size_constants
 from puzzleinfo import PuzzleInfo
 from statusmessage import set_status_message
