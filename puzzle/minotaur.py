@@ -95,7 +95,7 @@ class MinotaurPuzzle(Puzzle):
 	def set_goal_and_finish_cell(self, goal_cell):
 		self.goal_cell = goal_cell
 		if self.Globals.is_cell_accessible(self.room.cell11):
-			finish_cell = self.Globals.get_closest_accessible_cell(self.room.cell11, self.room.cell22)
+			finish_cell = self.Globals.get_farthest_accessible_cell(self.room.cell11)
 			self.Globals.create_portal(goal_cell, self.room.cell11)
 		else:
 			finish_cell = goal_cell

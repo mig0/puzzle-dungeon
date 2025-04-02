@@ -713,6 +713,10 @@ def set_char_cell(cell, room_idx=None):
 
 	char_cells[room.idx if room_idx is None else room_idx] = cell
 
+def get_farthest_accessible_cell(start_cell):
+	accessible_cell_distances = get_accessible_cell_distances(start_cell)
+	return max(accessible_cell_distances, key=lambda cell: accessible_cell_distances[cell])
+
 def get_closest_accessible_cell(start_cell, target_cell):
 	accessible_cells = get_accessible_cells(start_cell)
 	return min(accessible_cells, key=lambda cell: cell_distance(cell, target_cell))
@@ -1002,6 +1006,7 @@ class Globals:
 	find_best_path = find_best_path
 	is_path_found = is_path_found
 	set_char_cell = set_char_cell
+	get_farthest_accessible_cell = get_farthest_accessible_cell
 	get_closest_accessible_cell = get_closest_accessible_cell
 	place_char_in_topleft_accessible_cell = place_char_in_topleft_accessible_cell
 	get_random_floor_cell_type = get_random_floor_cell_type
