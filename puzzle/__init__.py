@@ -2,6 +2,7 @@ from constants import *
 from cellactor import *
 from objects import *
 from flags import flags
+from time import time
 from random import randint, random, shuffle, choice
 from numpy import ndarray, arange, array_equal, ix_, argwhere, copyto
 from solution import solution

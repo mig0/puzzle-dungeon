@@ -1,5 +1,4 @@
 from . import *
-import time
 
 SHOW_DEADLOCK_MAPS = False
 DEBUG_FIND_SOLUTION = False
@@ -208,7 +207,7 @@ class BarrelPuzzle(Puzzle):
 #		print(self.min_char_barrel_plate_pushes)
 
 	def find_solvable_cells_for_plate_cells(self, plate_cells):
-		start_time = time.time()
+		start_time = time()
 		min_char_barrel_plate_pushes = {}
 		min_barrel_plate_pushes = {}
 		visited_positions = []
@@ -236,7 +235,7 @@ class BarrelPuzzle(Puzzle):
 			states[depth] = []
 			min_pushes_updated = False
 			for state in states[depth - 1]:
-				if time.time() - start_time > MAX_PREPARE_SOLUTION_TIME:
+				if time() - start_time > MAX_PREPARE_SOLUTION_TIME:
 					stop = True
 					break
 				last_char_cell, last_barrel_cell, last_barrel_cells, prev_state = state
@@ -279,7 +278,7 @@ class BarrelPuzzle(Puzzle):
 				stop = True
 				break
 
-#		print("find_solvable_cells_for_plate_cells finished in %.1fs for %d plates %s" % (time.time() - start_time, len(plate_cells), str(plate_cells)))
+#		print("find_solvable_cells_for_plate_cells finished in %.1fs for %d plates %s" % (time() - start_time, len(plate_cells), str(plate_cells)))
 #		print("  Unique barrel cells: %d, pairs: %d" % (len(min_barrel_plate_pushes), len(min_char_barrel_plate_pushes)))
 #		print("  %s" % str(min_barrel_plate_pushes))
 #		print("  %s" % str(min_char_barrel_plate_pushes))
@@ -304,7 +303,7 @@ class BarrelPuzzle(Puzzle):
 			self.barrel_cells = self.stock_barrel_cells.copy()
 			self.barrel_cells.sort()
 			self.visited_positions = []
-			self.end_solution_time = time.time() + MAX_FIND_SOLUTION_TIME
+			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
 
 		if self.is_solved_for_barrel_cells(self.barrel_cells):
 			return True
@@ -312,7 +311,7 @@ class BarrelPuzzle(Puzzle):
 		if len(self.solution) >= self.solution_depth:
 			return False
 
-		if time.time() > self.end_solution_time:
+		if time() > self.end_solution_time:
 			return False
 
 		accessible_cells = self.Globals.get_accessible_cells(self.char_cell, self.barrel_cells)
@@ -689,7 +688,7 @@ class BarrelPuzzle(Puzzle):
 			self.solution_depth = self.estimate_solution_depth() or MIN_SOLUTION_DEPTH
 			return None, "Finding solution with depth %d…" % self.solution_depth
 
-		if self.solution_depth > MAX_SOLUTION_DEPTH or time.time() > self.end_solution_time:
+		if self.solution_depth > MAX_SOLUTION_DEPTH or time() > self.end_solution_time:
 			# solution not found
 			self.reset_solution_data()
 			return None, None
