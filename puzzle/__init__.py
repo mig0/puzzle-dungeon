@@ -111,7 +111,7 @@ class Puzzle:
 		if size[1] > max_size[1]:
 			size[1] = max_size[1]
 
-		self.area.size = size
+		self.area.size = tuple(size)
 		self.area.size_x = size[0]
 		self.area.size_y = size[1]
 		self.area.x1 = self.room.x1 + (self.room.size_x - self.area.size_x) // 2 \
