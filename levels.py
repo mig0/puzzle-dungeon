@@ -288,7 +288,7 @@ levels = [
 	{
 		"n": 5.04,
 		"num_enemies": 0,
-		"theme": "minecraft",
+		"theme": "classic",
 		"music": "surface",
 		"goal": "solve-minotaur-puzzle",
 		"nine_rooms": True,
@@ -299,6 +299,28 @@ levels = [
 	{
 		"n": 5.05,
 		"num_enemies": 0,
+		"theme": "ancient2",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"minotaur_puzzle": {
+			"num_moves": 2,
+			"size": (7, 5),
+		},
+	},
+	{
+		"n": 5.06,
+		"num_enemies": 0,
+		"theme": "modern2",
+		"music": "surface",
+		"goal": "solve-minotaur-puzzle",
+		"minotaur_puzzle": {
+			"num_moves": 3,
+			"size": (7, 7),
+		},
+	},
+	{
+		"n": 5.07,
+		"num_enemies": 0,
 		"theme": "classic",
 		"music": "surface",
 		"goal": "solve-minotaur-puzzle",
@@ -308,7 +330,7 @@ levels = [
 		},
 	},
 	{
-		"n": 5.06,
+		"n": 5.08,
 		"num_enemies": 0,
 		"theme": "default",
 		"music": "surface",
@@ -316,6 +338,7 @@ levels = [
 		"nine_rooms": True,
 		"minotaur_puzzle": {
 			"num_moves": 1,
+			"allow_partially_trivial": True,
 		},
 	},
 	{
