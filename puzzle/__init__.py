@@ -93,8 +93,11 @@ class Puzzle:
 					cells.append((cx, cy))
 		return cells
 
+	def get_area_cells(self, *cell_types):
+		return [cell for cell in self.area.cells if self.map[cell] in cell_types]
+
 	def get_room_cells(self, *cell_types):
-		return [ cell for cell in self.get_map_cells(*cell_types) if self.is_in_room(cell) ]
+		return [cell for cell in self.room.cells if self.map[cell] in cell_types]
 
 	def set_area_from_config(self, min_size=None, default_size=None, request_odd_size=False, align_to_center=False):
 		max_size = flags.ROOM_SIZE(self.room.idx, request_odd_size)
