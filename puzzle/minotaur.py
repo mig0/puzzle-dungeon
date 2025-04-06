@@ -266,6 +266,20 @@ class MinotaurPuzzle(Puzzle):
 		if char.c == self.goal_cell and self.map[char.c] == CELL_PORTAL:
 			self.Globals.demolish_portal(self.goal_cell, self.Globals.get_random_floor_cell_type())
 
+	def on_load_map(self, special_cell_values, extra_values):
+		special_cells = list(special_cell_values.keys())
+		if len(special_cells) != 1:
+			self.die("map must have only one special cell - minotaur cell; got %d" % len(special_cells))
+		self.minotaur_cell = special_cells[0]
+
+		finish_cells = self.get_map_cells(CELL_FINISH)
+		if len(finish_cells) != 1:
+			self.die("map must have only one finish cell; got %d" % len(finish_cells))
+		portal_cells = self.get_map_cells(CELL_PORTAL)
+		if len(portal_cells) > 1:
+			self.die("map must have only one portal cell at most; got %d" % len(portal_cells))
+		self.goal_cell = portal_cells[0] if portal_cells else finish_cells[0]
+
 	def find_solution_func(self):
 		state_func = self.get_solution_state_func(self.minotaur.c)
 		solution_cells = self.Globals.find_best_path(char.c, self.goal_cell, allow_stay=True, state_func=state_func)
