@@ -79,6 +79,10 @@ class Puzzle:
 	def is_goal_to_be_solved(self):
 		return False
 
+	def die(self, msg):
+		print("%s fatal error: %s" % (self.__class__.__name__, msg))
+		quit()
+
 	def parse_config_num(self, config_key, default):
 		num = self.config.get(config_key, default)
 		if type(num) in (tuple, range):
