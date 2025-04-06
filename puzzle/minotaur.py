@@ -119,6 +119,17 @@ class MinotaurPuzzle(Puzzle):
 				minotaur_cell = dest_cells[-1]
 		return is_won
 
+	def calculate_minotaur_path(self, char_cells, minotaur_cell):
+		minotaur_cells = []
+		for char_cell in char_cells:
+			dest_cells, is_lost = self.calculate_minotaur_move(char_cell, minotaur_cell)
+			if is_lost:
+				return None
+			minotaur_cells.extend(dest_cells)
+			if dest_cells:
+				minotaur_cell = dest_cells[-1]
+		return minotaur_cells
+
 	def generate_random_nonsolvable_room(self):
 		# set finish in bottom-right cell, plus random 7 walls, char and minotaur
 		self.set_goal_and_finish_cell(self.area.cell22)
@@ -213,8 +224,10 @@ class MinotaurPuzzle(Puzzle):
 			# found non-trivial solution
 			if solution_cells:
 				num_good_positions += 1
-				if not best or len(solution_cells) > best[4]:
-					best = [self.map[ix_(self.area.x_range, self.area.y_range)].copy(), char_cell, minotaur_cell, self.goal_cell, len(solution_cells)]
+				minotaur_cells = self.calculate_minotaur_path(solution_cells, minotaur_cell)
+				weight = len(solution_cells) * 2 + len(minotaur_cells) * 1
+				if not best or weight > best[4]:
+					best = [self.map[ix_(self.area.x_range, self.area.y_range)].copy(), char_cell, minotaur_cell, self.goal_cell, weight]
 				if self.allow_partially_trivial:
 					break
 
