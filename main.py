@@ -138,6 +138,8 @@ def load_map(filename_or_stringio, special_cell_types={}):
 					create_barrel(cell)
 				if actor_name == "char":
 					set_char_cell(cell, 0)
+				if actor_name == "npc":
+					special_cell_infos.append((cell, None))
 			if value_type := special_cell_types.get(ch):
 				special_cell_infos.append((cell, value_type))
 			map[x, y] = ch
@@ -145,6 +147,9 @@ def load_map(filename_or_stringio, special_cell_types={}):
 
 	special_cell_values = {}
 	for cell, value_type in special_cell_infos:
+		if value_type is None:
+			special_cell_values[cell] = None
+			continue
 		line = file.readline()
 		if line == '':
 			map = orig_map.copy()

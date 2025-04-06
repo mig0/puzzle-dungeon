@@ -43,6 +43,7 @@ ACTOR_CHARS = {
 	'enemy':  '🕱',
 	'barrel': '■',
 	'char':   '☻',
+	'npc':    '☀',
 }
 
 ACTOR_ON_PLATE_CHARS = {
@@ -54,6 +55,7 @@ ACTOR_ON_PLATE_CHARS = {
 	'enemy':  '☠',
 	'barrel': '□',
 	'char':   '☺',
+	'npc':    '☼',
 }
 
 ACTOR_AND_PLATE_BY_CHAR = {v: (k, v != ACTOR_CHARS[k]) for k, v in {*ACTOR_CHARS.items(), *ACTOR_ON_PLATE_CHARS.items(),}}
