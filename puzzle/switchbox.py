@@ -1,6 +1,6 @@
 from . import *
 
-class SwitchPuzzle(Puzzle):
+class SwitchBoxPuzzle(Puzzle):
 	def init(self):
 		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
 

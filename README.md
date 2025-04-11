@@ -337,7 +337,7 @@ game.
 
 Goal: Reach the finish by utilizing the environment and its mechanics.
 
-### Switch Puzzle
+### SwitchBox Puzzle
 
 This puzzle is an extension of the Gate Puzzle and Barrel Puzzle,
 introducing a new interaction between gates, plates, and barrels.
