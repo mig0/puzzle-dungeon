@@ -156,13 +156,15 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			print_error("Failed to read value for special map cell %s" % str(cell))
 			return
 		str = line.rstrip("\n")
+		def parse_int(str):
+			return None if str == '-' else int(str)
 		try:
 			if value_type == 'str':
 				value = str
 			elif value_type == 'int':
-				value = int(str)
+				value = parse_int(str)
 			elif value_type == 'ints':
-				value = tuple(builtins.map(int, str.split()))
+				value = tuple(builtins.map(parse_int, str.split()))
 			else:
 				raise ValueError("Unsupported value type %s" % value_type)
 		except Exception as e:
