@@ -489,6 +489,7 @@ def enter_room(idx):
 	game.start_level(map)
 
 	puzzle.on_enter_room()
+	char.phased = puzzle.is_char_phased()
 
 def get_max_area_distance(area):
 	return cell_distance((area.x1, area.y1), (area.x2, area.y2))
@@ -1865,6 +1866,7 @@ def prepare_enter_cell(animate_duration):
 		drop_key2.consume()
 
 	puzzle.on_prepare_enter_cell()
+	char.phased = puzzle.is_char_phased()
 
 def enter_cell():
 	# collect drop if any

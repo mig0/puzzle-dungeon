@@ -467,9 +467,6 @@ class AtomixPuzzle(Puzzle):
 	def on_press_key(self, keyboard):
 		self.draw_solved_mode = keyboard.kp_enter and not self.draw_solved_mode
 
-	def set_char_opacity_if_needed(self):
-		char.set_default_opacity(MEMORY_PUZZLE_CHAR_OPACITY if get_actor_on_cell(char.c, lifts) else 1)
-
 	def on_update(self, level_time):
 		self.set_char_opacity_if_needed()
 
@@ -480,6 +477,6 @@ class AtomixPuzzle(Puzzle):
 					lift.cell_to_draw = lift.goal_cell if self.draw_solved_mode else None
 				self.last_draw_solved_mode = self.draw_solved_mode
 
-	def finish(self):
-		char.set_default_opacity(1)
+	def is_char_phased(self):
+		return is_cell_in_actors(char.c, lifts)
 

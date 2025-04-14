@@ -142,12 +142,6 @@ class FifteenPuzzle(Puzzle):
 	def on_press_key(self, keyboard):
 		self.draw_solved_mode = keyboard.kp_enter and not self.draw_solved_mode
 
-	def set_char_opacity_if_needed(self):
-		char.set_default_opacity(MEMORY_PUZZLE_CHAR_OPACITY if self.fifteen_map[char.c] != FIFTEEN_PUZZLE_VALUE_OUTSIDE else 1)
-
-	def on_update(self, level_time):
-		self.set_char_opacity_if_needed()
-
-	def finish(self):
-		char.set_default_opacity(1)
+	def is_char_phased(self):
+		return self.fifteen_map[char.c] != FIFTEEN_PUZZLE_VALUE_OUTSIDE
 

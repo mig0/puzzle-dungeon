@@ -246,6 +246,9 @@ class Puzzle:
 	def finish(self):
 		pass
 
+	def is_char_phased(self):
+		return False
+
 	def prepare_solution(self):
 		return None
 

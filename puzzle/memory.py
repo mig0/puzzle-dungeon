@@ -171,14 +171,8 @@ class MemoryPuzzle(Puzzle):
 		if keyboard.kp_enter:
 			self.reveal_time = self.level_time + 5
 
-	def set_char_opacity_if_needed(self):
-		if not self.use_colors:
-			char.set_default_opacity(MEMORY_PUZZLE_CHAR_OPACITY if self.memory_map[char.c] != MEMORY_PUZZLE_VALUE_OUTSIDE else 1)
-
 	def on_update(self, level_time):
 		self.level_time = level_time
-
-		self.set_char_opacity_if_needed()
 
 		if self.open_cell2:
 			if self.open_cell2_time:
@@ -187,6 +181,6 @@ class MemoryPuzzle(Puzzle):
 			else:
 				self.open_cell2_time = level_time + MEMORY_PUZZLE_OPEN_CELL2_TIME
 
-	def finish(self):
-		char.set_default_opacity(1)
+	def is_char_phased(self):
+		return not self.use_colors and self.memory_map[char.c] != MEMORY_PUZZLE_VALUE_OUTSIDE
 

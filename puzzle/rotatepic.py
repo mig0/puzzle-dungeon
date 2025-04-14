@@ -94,14 +94,8 @@ class RotatepicPuzzle(Puzzle):
 			self.scramble()
 		self.draw_solved_mode = keyboard.kp_enter and not self.draw_solved_mode and not solution.is_active()
 
-	def set_char_opacity_if_needed(self):
-		char.set_default_opacity(MEMORY_PUZZLE_CHAR_OPACITY if self.rotatepic_map[char.c] != ROTATEPIC_PUZZLE_VALUE_OUTSIDE else 1)
-
-	def on_update(self, level_time):
-		self.set_char_opacity_if_needed()
-
-	def finish(self):
-		char.set_default_opacity(1)
+	def is_char_phased(self):
+		return self.rotatepic_map[char.c] != ROTATEPIC_PUZZLE_VALUE_OUTSIDE
 
 	def find_solution_func(self):
 		solution_items = []
