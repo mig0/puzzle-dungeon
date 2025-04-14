@@ -486,6 +486,8 @@ def enter_room(idx):
 
 	mode = "game"
 
+	game.start_level(map)
+
 	puzzle.on_enter_room()
 
 def get_max_area_distance(area):
@@ -1327,8 +1329,6 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 			draw()
 			pygame.display.flip()
 		generate_map()
-
-	game.start_level(map)
 
 	for drop in drops:
 		drop.active = drop.num_total > 0
