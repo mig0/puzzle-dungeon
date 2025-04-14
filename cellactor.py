@@ -4,7 +4,7 @@ from pgzero.animation import *
 from pgzero import loaders
 from typing import Union, Tuple
 from sizetools import CELL_W, CELL_H
-from config import ARROW_KEYS_RESOLUTION
+from config import ARROW_KEYS_RESOLUTION, ACTOR_PHASED_OPACITY
 from game import game
 
 MAX_ALPHA = 255  # based on pygame
@@ -87,12 +87,11 @@ class CellActor(Actor):
 		self._opacity = self._default_opacity
 		self._scale = 1.0
 		self._flip = None
-		self._cell = None
-		self.hidden = False
 		self.cell_to_draw = None
 		self._deferred_transform = False
 		self._pending_transform = False
 
+		self.reset_state()
 		self.reset_inplace_animation()
 		self._unset_animation()
 
@@ -104,6 +103,8 @@ class CellActor(Actor):
 	def draw(self, cell=None, opacity=None):
 		if self.hidden:
 			return
+		if self.phased and opacity is None and not self._inplace_animation_active:
+			opacity = ACTOR_PHASED_OPACITY
 		if self.cell_to_draw and not cell:
 			cell = self.cell_to_draw
 		if cell:
@@ -207,11 +208,14 @@ class CellActor(Actor):
 			print("CellActor.image: Unsupported type " + type(image))
 			pass
 
+	def reset_state(self):
+		self._cell, self.hidden, self.phased = NONE_CELL, False, False
+
 	def get_state(self):
-		return self.c
+		return (self.c, self.hidden, self.phased)
 
 	def restore_state(self, state):
-		self.c = state
+		self.c, self.hidden, self.phased = state
 
 	def get_pos(self):
 		return cell_to_pos(self._cell)
@@ -409,12 +413,12 @@ def create_actor(image_name, cell):
 	actor.c = cell
 	return actor
 
-def get_actor_on_cell(cell, actors):
+def get_actor_on_cell(cell, actors, include_phased=False):
 	for actor in actors:
-		if cell == actor.c:
+		if not actor.hidden and (include_phased or not actor.phased) and cell == actor.c:
 			return actor
 	return None
 
-def is_cell_in_actors(cell, actors):
-	return get_actor_on_cell(cell, actors) is not None
+def is_cell_in_actors(cell, actors, include_phased=False):
+	return get_actor_on_cell(cell, actors, include_phased) is not None
 
