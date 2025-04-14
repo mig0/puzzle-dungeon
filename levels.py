@@ -120,6 +120,33 @@ levels = [
 		"switchbox_puzzle": True
 	},
 	{
+		"n": 2.92,
+		"map_file": "maps/switchbox/002.map",
+		"num_enemies": 0,
+		"theme": "ancient1",
+		"music": "adventures",
+		"goal": "solve-switchbox-puzzle",
+		"switchbox_puzzle": True
+	},
+	{
+		"n": 2.93,
+		"map_file": "maps/switchbox/003.map",
+		"num_enemies": 0,
+		"theme": "ancient2",
+		"music": "adventures",
+		"goal": "solve-switchbox-puzzle",
+		"switchbox_puzzle": True
+	},
+	{
+		"n": 2.94,
+		"map_file": "maps/switchbox/004.map",
+		"num_enemies": 0,
+		"theme": "moss",
+		"music": "adventures",
+		"goal": "solve-switchbox-puzzle",
+		"switchbox_puzzle": True
+	},
+	{
 		"n": 3.1,
 		"theme": "classic",
 		"music": "stoneage/08_the_golden_valley.mp3",
