@@ -3,6 +3,7 @@ from . import *
 class SwitchBoxPuzzle(Puzzle):
 	def init(self):
 		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
+		self.plate_barrel_cells = {}
 
 	def has_plate(self):
 		return True
@@ -17,22 +18,35 @@ class SwitchBoxPuzzle(Puzzle):
 		stored_level["plate_cells"] = self.plate_cells
 		stored_level["gate_cells"] = self.gate_cells
 		stored_level["attached_gate_plate_idxs"] = self.attached_gate_plate_idxs
+		stored_level["attached_barrel_plate_idxs"] = self.attached_barrel_plate_idxs
 
 	def restore_level(self, stored_level):
 		self.plate_cells = stored_level["plate_cells"]
 		self.gate_cells = stored_level["gate_cells"]
 		self.attached_gate_plate_idxs = stored_level["attached_gate_plate_idxs"]
+		self.attached_barrel_plate_idxs = stored_level["attached_barrel_plate_idxs"]
 
-	def update_gate_states(self):
+	def is_plate_pressed(self, plate_idx):
+		plate_cell = self.plate_cells[plate_idx]
+		return self.Globals.is_cell_occupied(plate_cell, include_phased=True)
+
+	def is_object_triggered(self, is_triggered, plate_idxs):
+		for plate_idx in plate_idxs:
+			if self.is_plate_pressed(plate_idx):
+				is_triggered = True
+		return is_triggered
+
+	def update_gate_and_barrel_states(self):
 		for gate_idx, gate_cell in enumerate(self.gate_cells):
 			is_open = self.map[gate_cell] == CELL_GATE1
-			be_open = self.Globals.is_cell_occupied(gate_cell)
-			for plate_idx in self.attached_gate_plate_idxs[gate_idx]:
-				plate_cell = self.plate_cells[plate_idx]
-				if self.Globals.is_cell_occupied(plate_cell):
-					be_open = True
+			be_open = self.is_object_triggered(self.Globals.is_cell_occupied(gate_cell, include_phased=True), self.attached_gate_plate_idxs[gate_idx])
 			if is_open != be_open:
 				self.Globals.toggle_gate(gate_cell)
+
+		for barrel_idx, barrel in enumerate(barrels):
+			be_phased = self.is_object_triggered(barrel.c == char.c, self.attached_barrel_plate_idxs[barrel_idx])
+			if be_phased != barrel.phased:
+				barrel.phased = be_phased
 
 	def on_set_room(self):
 		self.plate_gate_cells = {}
@@ -47,18 +61,29 @@ class SwitchBoxPuzzle(Puzzle):
 		self.plate_cells = plate_cells
 		self.gate_cells = gate_cells
 
-		self.attached_plate_gate_idxs = []
+		attached_plate_gate_idxs = []
+		attached_plate_barrel_idxs = []
 		for plate_cell in sort_cells(special_cell_values.keys()):
-			gate_idxs = special_cell_values[plate_cell]
-			self.attached_plate_gate_idxs.append(gate_idxs)
+			idxs = special_cell_values[plate_cell]
+			if None in idxs:
+				none_idx = idxs.index(None)
+				gate_idxs = idxs[0:none_idx]
+				barrel_idxs = idxs[none_idx + 1:]
+			else:
+				gate_idxs = idxs
+				barrel_idxs = []
+			attached_plate_gate_idxs.append(gate_idxs)
+			attached_plate_barrel_idxs.append(barrel_idxs)
 
 		self.attached_gate_plate_idxs = []
 		for gate_idx in range(len(gate_cells)):
-			plate_idxs = [ plate_idx for plate_idx, gate_idxs in enumerate(self.attached_plate_gate_idxs) if gate_idx in gate_idxs ]
+			plate_idxs = [ plate_idx for plate_idx, gate_idxs in enumerate(attached_plate_gate_idxs) if gate_idx in gate_idxs ]
 			self.attached_gate_plate_idxs.append(plate_idxs)
 
-	def on_enter_room(self):
-		self.update_gate_states()
+		self.attached_barrel_plate_idxs = []
+		for barrel_idx in range(len(barrels)):
+			plate_idxs = [ plate_idx for plate_idx, barrel_idxs in enumerate(attached_plate_barrel_idxs) if barrel_idx in barrel_idxs ]
+			self.attached_barrel_plate_idxs.append(plate_idxs)
 
 	def on_prepare_enter_cell(self):
-		self.update_gate_states()
+		self.update_gate_and_barrel_states()
