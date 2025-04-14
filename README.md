@@ -339,27 +339,31 @@ Goal: Reach the finish by utilizing the environment and its mechanics.
 
 ### SwitchBox Puzzle
 
-This puzzle is an extension of the Gate Puzzle and Barrel Puzzle,
-introducing a new interaction between gates, plates, and barrels.
-The maze contains plates that control the state of corresponding gates.
-Each plate has a color, and pressing any plate of that color opens all
-gates of the same color. Gates are initially closed, preventing access
-to the finish.
+This puzzle is an extension of the Gate Puzzle and the Barrel Puzzle,
+introducing complex interactions between gates, plates, and barrels.
+The maze contains colored plates that control the behavior of gates and
+barrels. Each plate, when pressed by the player or a barrel, activates
+all gates and/or barrels of the same color.
 
-Plates can be activated in two ways: the player stepping on them, or a
-barrel being pushed onto them.
+Gates are initially closed and block access to parts of the maze,
+including the finish. Plates open corresponding gates when pressed.
+Barrels can be pushed onto plates or through opened gates. Gates stay
+open as long as the corresponding plate is weighted by either the player
+or a barrel. If the player pushes a barrel through a gate while keeping
+the plate pressed (by standing on it), the gate remains open during the
+movement. Gates only close when no one remains on the plate or on the
+gate itself.
 
-Barrels must be strategically placed on plates or pushed through open
-gates to progress. If a barrel rests on a plate that controls a gate two
-cells away (with a gap of one floor between them), the gate stays open
-when the player pushes the barrel towards it. As long as the player or a
-barrel remains on a plate or gate, the gate stays open. However, once the
-player pushes the barrel away and no one remains on the plate or gate,
-the gate closes again.
+Additionally, plates may phase barrels - that is, they can switch all
+barrels of the same color into a semi-transparent "phased" state when
+activated. While in this state, a phased barrel becomes passable: the
+player and non-phased barrels can move through it as if it were empty
+space. Despite this, a phased barrel still counts as pressing any plate
+it rests on, which adds a new layer of strategic planning to the puzzle.
 
-This dynamic interaction requires careful planning of movements,
-positioning of barrels, and plate activations to clear the path to the
-finish.
+These dynamic mechanics require careful sequencing of movements and
+consideration of gate, plate, and barrel interactions to navigate toward
+the finish.
 
 Goal: Open all gates using barrels and reach the finish.
 
