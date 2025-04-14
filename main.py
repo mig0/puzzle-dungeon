@@ -405,17 +405,18 @@ def create_text_cell_image(text, color='#E0E0E0', gcolor="#408080", owidth=1.2, 
 def is_portal_destination(cell):
 	return cell in {v: k for k, v in portal_destinations.items()}
 
-def is_cell_occupied_except_char(cell):
-	if is_cell_in_actors(cell, enemies + barrels):
+def is_cell_occupied_except_char(cell, include_phased=False):
+	if is_cell_in_actors(cell, enemies + barrels, include_phased):
 		return True
 
 	return get_drop_on_cell(cell) is not None
 
-def is_cell_occupied(cell):
-	return is_cell_occupied_except_char(cell) or char.c == cell
+def is_cell_occupied(cell, include_phased=False):
+	return is_cell_occupied_except_char(cell, include_phased) or char.c == cell
 
+# used for positioning enemies during level generation
 def is_cell_occupied_for_enemy(cell):
-	return map[cell] in CELL_ENEMY_PLACE_OBSTACLES or is_cell_occupied(cell) or is_portal_destination(cell)
+	return map[cell] in CELL_ENEMY_PLACE_OBSTACLES or is_cell_occupied(cell, True) or is_portal_destination(cell)
 
 def create_theme_image(image_name):
 	return CellActor(get_theme_image_name(image_name))
@@ -524,10 +525,7 @@ def is_cell_accessible(cell, obstacles=None, place=False, allow_obstacles=False,
 		return False if is_cell_blocked or cell in obstacles else True
 	if is_cell_blocked:
 		return False
-	for actor in barrels if allow_enemy else barrels + enemies:
-		if actor.c == cell:
-			return False
-	return True
+	return not is_cell_in_actors(cell, barrels if allow_enemy else barrels + enemies)
 
 def get_accessible_neighbors(cell, obstacles=None, allow_obstacles=False, allow_enemy=False, allow_closed_gate=False, allow_stay=False):
 	neighbors = []
@@ -1276,7 +1274,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 
 	flags.parse_level(level)
 
-	char.c = None
+	char.reset_state()
 	char_cells = [None] * flags.NUM_ROOMS
 	char.power  = level.get("char_power")
 	char.health = level.get("char_health")
