@@ -981,6 +981,19 @@ def toggle_gate(gate_cell):
 	switch_cell_type(gate_cell, new_cell_type, GATE_SWITCH_DURATION)
 	play_sound(sound_name)
 
+def toggle_actor_phased(actor):
+	is_phased = not actor.phased
+	if is_phased:
+		sound_name = 'switch-on.wav'
+		opacity = [1, ACTOR_PHASED_OPACITY]
+	else:
+		sound_name = 'switch-off.wav'
+		opacity = [ACTOR_PHASED_OPACITY, 1]
+
+	actor.phased = is_phased
+	actor.activate_inplace_animation(level_time, ACTOR_PHASED_DURATION, opacity=opacity, tween="decelerate")
+	play_sound(sound_name)
+
 class Globals:
 	is_cell_in_area = is_cell_in_area
 	get_actor_neighbors = get_actor_neighbors
@@ -1031,6 +1044,7 @@ class Globals:
 	switch_cell_type = switch_cell_type
 	demolish_portal = demolish_portal
 	toggle_gate = toggle_gate
+	toggle_actor_phased = toggle_actor_phased
 
 def generate_room(idx):
 	set_room(idx)
