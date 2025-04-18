@@ -1148,8 +1148,6 @@ def set_theme(theme_name):
 	status_image = create_theme_image('status')
 	cloud_image = create_theme_image('cloud') if flags.is_cloud_mode and not bg_image else None
 
-	puzzle.on_set_theme()
-
 	outer_wall_image = load_theme_cell_image('wall')
 	outer_wall_image.fill((50, 50, 50), special_flags=pygame.BLEND_RGB_SUB)
 
@@ -1184,6 +1182,8 @@ def set_theme(theme_name):
 
 	for drop in drops:
 		drop.set_image(get_theme_image_name(drop.name))
+
+	puzzle.on_set_theme()
 
 def start_music():
 	global is_music_started
@@ -1319,14 +1319,16 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	if "bg_image" in level:
 		bg_image = load_image(level["bg_image"], (MAP_W, MAP_H), level.get("bg_image_crop", False))
 
+	if "goal" not in level:
+		level["goal"] = "default-level-goal"
+
 	for drop in drops:
 		# should be called after set_map_size()
 		drop.reset()
 
-	theme_name = stored_level["theme_name"] if reload_stored else level["theme"]
-	set_theme(theme_name)
-
 	if reload_stored:
+		theme_name = stored_level["theme_name"]
+		char_cells = stored_level["char_cells"]
 		map = stored_level["map"]
 		puzzle.set_map(map)
 		for enemy_info in stored_level["enemy_infos"]:
@@ -1342,24 +1344,21 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 		set_room(0)
 		puzzle.restore_level(stored_level)
 	else:
+		theme_name = level["theme"]
 		if puzzle.is_long_generation():
 			draw()
 			pygame.display.flip()
 		generate_map()
 
+	set_theme(theme_name)
+
 	for drop in drops:
 		drop.active = drop.num_total > 0
-
-	if "goal" not in level:
-		level["goal"] = "default-level-goal"
 
 	level_time = 0
 	reset_idle_time()
 	if is_level_intro_enabled:
 		reset_level_title_and_goal_time()
-
-	if reload_stored:
-		char_cells = stored_level["char_cells"]
 
 	if flags.is_cloud_mode:
 		revealed_map = ndarray((MAP_SIZE_X, MAP_SIZE_Y), dtype=bool)
