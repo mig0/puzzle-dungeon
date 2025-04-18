@@ -3,7 +3,6 @@ from . import *
 class SwitchBoxPuzzle(Puzzle):
 	def init(self):
 		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
-		self.plate_barrel_cells = {}
 
 	def has_plate(self):
 		return True
@@ -47,9 +46,6 @@ class SwitchBoxPuzzle(Puzzle):
 			be_phased = self.is_object_triggered(barrel.c == char.c, self.attached_barrel_plate_idxs[barrel_idx])
 			if be_phased != barrel.phased:
 				barrel.phased = be_phased
-
-	def on_set_room(self):
-		self.plate_gate_cells = {}
 
 	def on_load_map(self, special_cell_values, extra_values):
 		plate_cells = self.get_map_cells(CELL_PLATE)
