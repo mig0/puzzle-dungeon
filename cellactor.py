@@ -80,12 +80,22 @@ class Area:
 	def cell22(self):
 		return (self.x2, self.y2)
 
+def make_grayscale_image(image):
+	gray_image = pygame.transform.grayscale(image)
+	gray_image.fill((60, 60, 60), special_flags=pygame.BLEND_RGB_ADD)
+	return gray_image
+
+def colorize_image(image, color):
+	image.fill(color, special_flags=pygame.BLEND_RGB_MULT)
+	return image
+
 class CellActor(Actor):
-	def __init__(self, image:Union[str, pygame.Surface], pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, scale=None, **kwargs):
+	def __init__(self, image:Union[str, pygame.Surface], pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, scale=None, color=None, **kwargs):
 		self._image_name = None
 		self._default_opacity = 1.0
 		self._opacity = self._default_opacity
 		self._scale = 1.0
+		self._color = None
 		self._flip = None
 		self.cell_to_draw = None
 		self._deferred_transform = False
@@ -98,6 +108,7 @@ class CellActor(Actor):
 		self.defer_transform()
 		super().__init__(image, pos, anchor, **kwargs)
 		self.scale = scale
+		self.color = color
 		self.apply_transform()
 
 	def draw(self, cell=None, opacity=None):
@@ -173,6 +184,16 @@ class CellActor(Actor):
 	def scale(self, scale):
 		if scale is not None and scale != self._scale:
 			self._scale = scale
+			self._transform()
+
+	@property
+	def color(self):
+		return self._color
+
+	@color.setter
+	def color(self, color):
+		if color != self._color:
+			self._color = color
 			self._transform()
 
 	@property
@@ -262,6 +283,8 @@ class CellActor(Actor):
 		self._surf = self._orig_surf
 		p = self.pos
 
+		if self._color is not None:
+			self._surf = colorize_image(make_grayscale_image(self._orig_surf), self._color)
 		if self._scale != 1:
 			size = self._orig_surf.get_size()
 			self._surf = pygame.transform.scale(self._surf, (int(size[0] * self._scale), int(size[1] * self._scale)))
