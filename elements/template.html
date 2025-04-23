@@ -21,6 +21,7 @@
 	portal puzzle,
 	rotatepic puzzle,
 	stoneage puzzle,
+	switchbox puzzle,
 	puzzle dungeon">
 <title>Puzzle Dungeon - <{TITLE}></title>
 <style>
@@ -75,7 +76,12 @@ div {
 }
 
 #categories {
-	padding: 15px 15px;
+	margin: 0px 0px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-evenly;
+	align-items: center;
+	height: 100%;
 }
 
 button {
@@ -88,11 +94,11 @@ a {
 }
 
 .category {
-	margin: 20px 15px;
+	margin: auto 7px;
 	border: 1px solid black;
 	border-radius: 16px;
 	width: 160px;
-	height: 60px;
+	height: 52px;
 	background: #4e5f6d;
 	color: #e0e0e0;
 	font-size: 22px;
@@ -184,7 +190,6 @@ a {
 
 .puzzle-entry {
 	display: flex;
-	text-align: center;
 	justify-content: space-evenly;
 	align-items: center;
 	border-bottom: 1px solid rgba(16, 16, 16, 0.4);
@@ -361,7 +366,7 @@ pre.highlight  {
 <body>
 <div id="body">
 <div id="logo">
-<a href="./"><img src="puzzle-dungeon-logo.jpg" alt="Ⓟⓤⓩⓩⓛⓔ Ⓓⓤⓝⓖⓔⓞⓝ "></a>
+<a href="./"><img src="puzzle-dungeon-logo.jpg" alt="Ⓟⓤⓩⓩⓛⓔ Ⓓⓤⓝⓖⓔⓞⓝ"></a>
 </div>
 <div id="sidebar">
 <{SIDEBAR}>
