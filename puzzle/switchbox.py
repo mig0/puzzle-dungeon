@@ -1,5 +1,4 @@
 from . import *
-import pygame
 
 class SwitchBoxPuzzle(Puzzle):
 	def init(self):
@@ -46,7 +45,7 @@ class SwitchBoxPuzzle(Puzzle):
 		color_idx = self.get_object_color_idx(self.attached_barrel_plate_idxs[barrel_idx])
 		if color_idx is None:
 			return None
-		return EXTENDED_COLOR_RGB_VALUES[color_idx]
+		return EXTENDED_COLOR_RGB_VALUES[color_idx % len(EXTENDED_COLOR_RGB_VALUES)]
 
 	def assign_object_colors(self):
 		plate_gate_idxs = [[] for _ in range(len(self.plate_cells))]
@@ -76,26 +75,19 @@ class SwitchBoxPuzzle(Puzzle):
 				plate_seen_color_idxs[plate_seen_key] = color_idx
 			self.plate_color_idxs.append(color_idx)
 
-	def on_set_theme(self):
-		def make_grayscale_image(image):
-			gray_image = pygame.transform.grayscale(image)
-			gray_image.fill((60, 60, 60), special_flags=pygame.BLEND_RGB_ADD)
-			return gray_image
-		def colorize_image(image, color):
-			image.fill(color, special_flags=pygame.BLEND_RGB_MULT)
-			return image
+	def switch_barrel_colors(self):
+		for barrel in barrels:
+			barrel.color = None if self.hide_colors else self.get_barrel_color(barrel)
 
+	def on_set_theme(self):
 		self.color_floor_images = []
 		gray_floor_image = make_grayscale_image(self.Globals.load_theme_cell_image('floor'))
 		for color_idx in range(len(self.plate_color_idxs)):
 			color = EXTENDED_COLOR_RGB_VALUES[color_idx % len(EXTENDED_COLOR_RGB_VALUES)]
 			self.color_floor_images.append(colorize_image(gray_floor_image.copy(), color))
 
-		for barrel in barrels:
-			color = self.get_barrel_color(barrel)
-			if color is None:
-				continue
-			barrel.image = colorize_image(make_grayscale_image(barrel._orig_surf), color)
+		if not self.hide_colors:
+			self.switch_barrel_colors()
 
 	def store_level(self, stored_level):
 		stored_level["plate_cells"] = self.plate_cells
@@ -122,6 +114,7 @@ class SwitchBoxPuzzle(Puzzle):
 	def on_press_key(self, keyboard):
 		if keyboard.c:
 			self.hide_colors = not self.hide_colors
+			self.switch_barrel_colors()
 
 	def is_plate_pressed(self, plate_idx):
 		plate_cell = self.plate_cells[plate_idx]
