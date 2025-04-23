@@ -990,8 +990,9 @@ def toggle_actor_phased(actor):
 		sound_name = 'switch-off.wav'
 		opacity = [ACTOR_PHASED_OPACITY, 1]
 
+	game.remember_obj_state(actor)
 	actor.phased = is_phased
-	actor.activate_inplace_animation(level_time, ACTOR_PHASED_DURATION, opacity=opacity, tween="decelerate")
+	actor.activate_inplace_animation(level_time, ACTOR_PHASED_DURATION, opacity=opacity, tween="decelerate", on_finished=lambda: actor.reset_opacity())
 	play_sound(sound_name)
 
 class Globals:

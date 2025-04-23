@@ -424,12 +424,15 @@ class CellActor(Actor):
 	def is_animated(self):
 		return self.is_inplace_animation_active() or self.is_animated_external()
 
+	def reset_opacity(self):
+		self._opacity = self._default_opacity
+		self._transform()
+
 	def set_default_opacity(self, default_opacity):
 		is_default_opacity = self._opacity == self._default_opacity
 		self._default_opacity = default_opacity
 		if is_default_opacity and self._opacity != self._default_opacity:
-			self._opacity = self._default_opacity
-			self._transform()
+			self.reset_opacity()
 
 def create_actor(image_name, cell):
 	actor = CellActor(image_name)
