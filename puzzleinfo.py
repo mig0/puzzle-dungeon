@@ -43,7 +43,7 @@ class PuzzleInfo:
 			(self.title, self.description, self.goal)
 
 	def get_html(self):
-		return '<h1>%s</h1>\n\n<!--SCREENSHOTS-->\n<p>%s\n</p>\n\n<p class="goal">%s</p>' % \
+		return '<h1>%s</h1>\n\n<!--VIDEOS-->\n<!--SCREENSHOTS-->\n<p>%s\n</p>\n\n<p class="goal">%s</p>' % \
 			(self.title, "\n</p>\n\n<p>".join(self.description.split("\n\n")), self.goal)
 
 def get_all_puzzle_infos():

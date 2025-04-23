@@ -62,23 +62,24 @@ class ScreenshotInfo:
 		file.close()
 
 	def get_hypertext(self):
-		return "## %s\n\nFilename: %s\n\nPuzzle: %s\n\nTheme: %s\n\n%s\n" % (self.title, self.filename, self.puzzle, self.theme, self.description)
+		return "## %s\n\nFilename: %s\n\nPuzzle: %s\n\nTheme: %s\n\n%s\n" % (
+			self.title, self.filename, self.puzzle, self.theme, self.description)
 
 	def get_html(self):
 		extra_html = ''
 		if self.puzzle:
-			extra_html += '<p class="screenshot-property"><b>Puzzle</b>: <a href="puzzles/%s.html">%s</a></p>\n' % (self.puzzle, self.puzzle)
+			extra_html += '<p class="media-property"><b>Puzzle</b>: <a href="puzzles/%s.html">%s</a></p>\n' % (self.puzzle, self.puzzle)
 		if self.theme:
-			extra_html += '<p class="screenshot-property"><b>Theme</b>: <a href="themes/%s.html">%s</a></p>\n' % (self.theme, self.theme)
+			extra_html += '<p class="media-property"><b>Theme</b>: <a href="themes/%s.html">%s</a></p>\n' % (self.theme, self.theme)
 
 		description_html = "\n</p>\n\n<p>".join(self.description.split("\n\n"))
 		description_html = re.sub(r'\[(.*)\]\((.*)\)', r'<a href="%s/\2.html">\1</a>' % SCREENSHOTS_SUBDIR, description_html)
 
-		return '<h1>%s</h1>\n\n%s<p>\n%s\n</p>\n<div class="screenshot-image"><img class="screenshot-img" src="%s"></div>\n' % (
+		return '<h1>%s</h1>\n\n%s<p>\n%s\n</p>\n<div class="media-container"><img class="media" src="%s"></div>\n' % (
 			self.title, extra_html, description_html, self.img_filename)
 
 	def get_html_for_index(self):
-		return '<div class="screenshot"><div class="screenshot-title">%s</div><a href="%s"><img src="%s"></a></div>' % (
+		return '<div class="media"><div class="media-title">%s</div><a href="%s"><img src="%s"></a></div>' % (
 			self.title, self.html_filename, self.img_filename)
 
 def get_all_screenshot_infos():
@@ -97,7 +98,3 @@ def get_main_screenshot_infos():
 def get_front_puzzle_screenshot_info(puzzle):
 	infos = get_all_puzzle_screenshot_infos(puzzle)
 	return sorted(infos, key=lambda info: 0 if info.is_front else info.main_idx or 1000)[0] if infos else None
-
-def get_css_class_for_screenshots(objs):
-	n = len(objs)
-	return "screenshots-%d-per-row" % min(5, max(1, n))

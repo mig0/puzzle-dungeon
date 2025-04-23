@@ -1,0 +1,33 @@
+#!/usr/bin/python
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+from filetools import RegenerateFile
+from videoinfo import get_all_video_infos
+
+# create elements/videos/index.html
+# create elements/sidebars/videos.html
+# create elements/videos/<video-name>.html for each <video-name>
+
+file_evi = RegenerateFile("elements/videos/index.html")
+file_evi.print('<h1>Videos</h1>\n')
+file_evi.print('<div id="videos" class="medias-all">')
+
+file_esv = RegenerateFile("elements/sidebars/videos.html")
+file_esv.print('<a href="videos/"><button class="page<{ current-page IF pagename videos/index}>">All Videos</button></a>')
+
+for info in get_all_video_infos():
+	html = info.get_html()
+	file_ev1 = RegenerateFile("elements/videos/%s.html" % info.name)
+	file_ev1.write(html)
+	file_ev1.finalize()
+
+	file_evi.print(info.get_html_for_index())
+
+	file_esv.print('<a href="%s"><button class="page<{ current-page IF pagename videos/%s}>">%s</button></a>' % (info.html_filename, info.name, info.name))
+
+file_evi.print('</div>')
+file_evi.finalize()
+
+file_esv.finalize()

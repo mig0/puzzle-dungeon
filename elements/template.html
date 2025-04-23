@@ -291,55 +291,58 @@ p.goal:before {
 	text-align: left;
 }
 
-#screenshots {
+.home-medias {
 	width: 100%;
 	display: flex;
 	flex-wrap: nowrap;
-	text-align: center;
 	justify-content: center;
 	align-items: center;
 }
 
-#screenshots.screenshots-all {
+.all-medias {
+	width: 100%;
+	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-evenly;
 	align-items: flex-start;
 }
 
-#screenshots .screenshot {
+.home-medias .media {
 	margin: 4px;
 }
 
-.screenshot img {
-	width: 100%;
-	object-fit: scale-down;
-}
-
-.screenshots-all .screenshot {
+.all-medias .media {
+	margin: 4px;
 	flex: 24%;
 	max-width: 24%;
 }
 
-.screenshot-title {
+.media img, .media video {
+	width: 100%;
+	object-fit: scale-down;
+}
+
+.media-title {
 	margin: 2px;
 	height: 20px;
+	text-align: center;
 	white-space: nowrap;
 	overflow: hidden;
 	color: #ffffa0;
 }
 
-div.screenshot-image {
+div.media-container {
 	padding: 1px;
 	width: 100%;
 	text-align: center;
 }
 
-a.screenshot-img {
+.media {
 	object-fit: scale-down;
 	margin: 0px auto;
 }
 
-.screenshot-property {
+.media-property {
 	display: inline;
 	float: right;
 	padding: 0px 10px 0px 30px;
@@ -375,6 +378,7 @@ pre.highlight  {
 <div id="categories">
 <a href="./"><button class="category<{ current-category IF category home}>">Home</button></a>
 <a href="./puzzles/"><button class="category<{ current-category IF category puzzles}>">Puzzles</button></a>
+<a href="./videos/"><button class="category<{ current-category IF category videos}>">Videos</button></a>
 <a href="./screenshots/"><button class="category<{ current-category IF category screenshots}>">Screenshots</button></a>
 <a href="./themes/"><button class="category<{ current-category IF category themes}>">Themes</button></a>
 <a href="./tutorials/"><button class="category<{ current-category IF category tutorials}>">Tutorials</button></a>

@@ -4,7 +4,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 from filetools import RegenerateFile
-from screenshotinfo import get_main_screenshot_infos, get_css_class_for_screenshots
+from videoinfo import get_main_video_infos
+from screenshotinfo import get_main_screenshot_infos
 
 filename = "elements/index.html"
 tmp_filename = filename + ".tmp"
@@ -23,12 +24,20 @@ is_first = True
 while line := tmp_file.readline():
 	file.write(line)
 	if is_first:
-		infos = get_main_screenshot_infos()
-		file.print('<div id="screenshots" class="%s">' % get_css_class_for_screenshots(infos))
+		infos = get_main_video_infos()
+		file.print('<div id="videos" class="home-medias">')
 		for info in infos:
-			file.print('<a class="screenshot" href="%s"><img title="%s" src="%s"></a>' % \
+			file.print('<a class="media" href="%s"><img title="%s" src="%s"></a>' % \
 				(info.html_filename, info.title, info.img_filename))
 		file.print('</div>')
+
+		infos = get_main_screenshot_infos()
+		file.print('<div id="screenshots" class="home-medias">')
+		for info in infos:
+			file.print('<a class="media" href="%s"><img title="%s" src="%s"></a>' % \
+				(info.html_filename, info.title, info.img_filename))
+		file.print('</div>')
+
 		is_first = False
 
 file.finalize()
