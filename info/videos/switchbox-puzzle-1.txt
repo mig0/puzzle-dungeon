@@ -1,0 +1,8 @@
+Title: SwitchBox Puzzle levels 1-4
+Puzzles: switchbox
+Themes: classic, modern1, ancient2, default
+Main: 1
+
+The puzzle goal is to reach finish by moving barrels into plates. Each
+plate, when pressed by the player or a barrel, opens all gates and/or
+phases all barrels of the same color. Levels created by Dean Miller.
