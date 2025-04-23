@@ -1552,7 +1552,7 @@ def draw():
 
 	if mode == "game" and level_title_time > 0:
 		draw_central_flash()
-		level_line_1 = _("Main Screen") if level["n"] == 0 else _('level-label') + " " + str(level["n"])
+		level_line_1 = _("Main Screen" if level["n"] == 0 else level.get("level", _('level-label') + " " + str(level["n"])))
 		level_line_2 = _(level.get("name", 'level-' + str(level["n"]) + '-name'))
 		screen.draw.text(level_line_1, center=(POS_CENTER_X, POS_CENTER_Y - 14), color='yellow', gcolor="#AAA060", owidth=1.2, ocolor="#404030", alpha=1, fontsize=50)
 		screen.draw.text(level_line_2, center=(POS_CENTER_X, POS_CENTER_Y + 21), color='white', gcolor="#C08080", owidth=1.2, ocolor="#404030", alpha=1, fontsize=32)
