@@ -468,8 +468,6 @@ class AtomixPuzzle(Puzzle):
 		self.draw_solved_mode = keyboard.kp_enter and not self.draw_solved_mode
 
 	def on_update(self, level_time):
-		self.set_char_opacity_if_needed()
-
 		if not active_inplace_animation_actors:
 			if self.draw_solved_mode != self.last_draw_solved_mode:
 				room_lifts = self.Globals.get_actors_in_room(lifts)
