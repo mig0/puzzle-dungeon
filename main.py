@@ -218,6 +218,10 @@ is_sound_enabled = True
 is_move_animate_enabled = True
 is_level_intro_enabled = True
 
+music_orig_volume = None
+music_start_time  = None
+music_fadein_time = None
+
 mode = "start"
 is_main_screen = True
 
@@ -1186,6 +1190,21 @@ def set_theme(theme_name):
 
 	puzzle.on_set_theme()
 
+def set_music_fadein():
+	global music_orig_volume, music_start_time, music_fadein_time
+
+	music_orig_volume = music.get_volume()
+	music_start_time  = level_time
+	music_fadein_time = level_time + MUSIC_FADEIN_DURATION
+	music.set_volume(0)
+
+def reset_music_fadein():
+	global music_orig_volume, music_start_time, music_fadein_time
+
+	if music_orig_volume:
+		music.set_volume(music_orig_volume)
+	music_orig_volume = music_start_time = music_fadein_time = None
+
 def start_music():
 	global is_music_started
 
@@ -1196,6 +1215,7 @@ def start_music():
 	is_music_started = True
 
 	if is_music_enabled:
+		set_music_fadein()
 		track = level["music"] if mode == "game" else "victory" if is_game_won else "defeat"
 		music.play(track)
 
@@ -1206,6 +1226,7 @@ def stop_music():
 
 	if is_music_enabled:
 		music.stop()
+		reset_music_fadein()
 
 def enable_music():
 	global is_music_enabled
@@ -2113,6 +2134,13 @@ def update(dt):
 	game_time += dt
 	level_time += dt
 	idle_time += dt
+
+	if music_fadein_time:
+		if level_time >= music_fadein_time:
+			reset_music_fadein()
+		else:
+			factor = (level_time - music_start_time) / (music_fadein_time - music_start_time)
+			music.set_volume(music_orig_volume * (factor ** 2))
 
 	for actor in active_inplace_animation_actors:
 		actor.update_inplace_animation(level_time)
