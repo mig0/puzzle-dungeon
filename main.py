@@ -229,7 +229,7 @@ game_time = 0
 level_time = 0
 idle_time = 0
 
-last_autogeneration_time = 0
+last_regeneration_time = 0
 
 last_time_arrow_keys_processed = 0
 pressed_arrow_keys = []
@@ -1250,10 +1250,10 @@ def clear_level_title_and_goal_time():
 	level_goal_time = 0
 
 def reset_idle_time():
-	global idle_time, last_autogeneration_time
+	global idle_time, last_regeneration_time
 
 	idle_time = 0
-	last_autogeneration_time = 0
+	last_regeneration_time = 0
 
 def init_new_level(offset=1, config=None, reload_stored=False):
 	global level, level_time, mode, is_game_won
@@ -2103,7 +2103,7 @@ ARROW_KEY_CODE = {
 
 def update(dt):
 	global level_title_time, level_goal_time
-	global game_time, level_time, idle_time, last_autogeneration_time
+	global game_time, level_time, idle_time, last_regeneration_time
 	global last_time_arrow_keys_processed, last_processed_arrow_keys, last_processed_arrow_diff
 
 	if mode == "start":
@@ -2131,13 +2131,13 @@ def update(dt):
 		level_goal_time = 0
 
 	if char.health is not None and (
-		last_autogeneration_time == 0 and idle_time >= AUTOGENERATION_IDLE_TIME or
-		last_autogeneration_time != 0 and idle_time >= last_autogeneration_time + AUTOGENERATION_NEXT_TIME
+		last_regeneration_time == 0 and idle_time >= REGENERATION_IDLE_TIME or
+		last_regeneration_time != 0 and idle_time >= last_regeneration_time + REGENERATION_NEXT_TIME
 	):
-		char.health += AUTOGENERATION_HEALTH
+		char.health += REGENERATION_HEALTH
 		if char.health > level["char_health"]:
 			char.health = level["char_health"]
-		last_autogeneration_time = idle_time
+		last_regeneration_time = idle_time
 
 	if solution.is_play_mode() and not teleport_char_in_progress:
 		solution.play_move()
