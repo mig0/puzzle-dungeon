@@ -27,8 +27,8 @@ while line := tmp_file.readline():
 		infos = get_main_video_infos()
 		file.print('<div id="videos" class="home-medias">')
 		for info in infos:
-			file.print('<a class="media" href="%s"><img title="%s" src="%s"></a>' % \
-				(info.html_filename, info.title, info.img_filename))
+			file.print('<a class="media" href="%s"><video title="%s"><source src="%s"></video></a>' % \
+				(info.html_filename, info.title, info.vid_filename))
 		file.print('</div>')
 
 		infos = get_main_screenshot_infos()

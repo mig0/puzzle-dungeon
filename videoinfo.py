@@ -16,7 +16,7 @@ class VideoInfo:
 		self.name = name
 		self.filename      = "%s/%s%s" % (HTML_VIDEOS_DIR, name, FILE_EXT)
 		self.info_filename = "%s/%s%s" % (INFO_VIDEOS_DIR, name, INFO_EXT)
-		self.img_filename  = "%s/%s%s" % (VIDEOS_SUBDIR,   name, FILE_EXT)
+		self.vid_filename  = "%s/%s%s" % (VIDEOS_SUBDIR,   name, FILE_EXT)
 		self.html_filename = "%s/%s%s" % (VIDEOS_SUBDIR,   name, HTML_EXT)
 		self.puzzles = []
 		self.themes = []
@@ -78,11 +78,11 @@ class VideoInfo:
 		description_html = re.sub(r'\[(.*)\]\((.*)\)', r'<a href="%s/\2.html">\1</a>' % VIDEOS_SUBDIR, description_html)
 
 		return '<h1>%s</h1>\n\n%s<p>\n%s\n</p>\n<div class="media-container"><video class="media" controls><source src="%s"></video></div>\n' % (
-			self.title, extra_html, description_html, self.img_filename)
+			self.title, extra_html, description_html, self.vid_filename)
 
 	def get_html_for_index(self):
 		return '<div class="media"><div class="media-title">%s</div><a href="%s"><video><source src="%s"></video></a></div>' % (
-			self.title, self.html_filename, self.img_filename)
+			self.title, self.html_filename, self.vid_filename)
 
 def get_all_video_infos():
 	all_names = get_dir_names(HTML_VIDEOS_DIR, FILE_EXT)
