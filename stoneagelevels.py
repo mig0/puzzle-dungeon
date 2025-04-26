@@ -121,7 +121,8 @@ for i in range(NUM_MAPS):
 	n = i + 1
 	stoneage_levels.append({
 		"n": 15 + n / 1000,
-		"name": "Original StoneAge level %d" % n,
+		"level": "Original Stone Age",
+		"name": "Level %d" % n,
 		"map_size": (20, 11),
 		"map_file": "maps/stoneage/%03d.map" % n,
 		"theme": "stoneage%d" % stoneage_infos[i][0],
