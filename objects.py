@@ -8,7 +8,7 @@ class Fighter(CellActor):
 	def restore_extra_state(self, state):
 		self.power, self.health, self.attack = state
 
-char = Fighter('stand')
+char = Fighter('char')
 
 enemies = []
 barrels = []

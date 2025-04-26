@@ -447,6 +447,9 @@ def get_revealed_actors(actors):
 			revealed_actors.append(actor)
 	return revealed_actors
 
+def set_char_flip(is_right_dir=True):
+	char.flip = None if is_right_dir else (True, False)
+
 def assert_room():
 	if mode != "game" and mode != "init" and mode != "next":
 		die("Called room function when not inside game or init (mode=%s). Fix this bug" % mode)
@@ -486,7 +489,7 @@ def enter_room(idx):
 	char.reset_inplace()
 	char.reset_inplace_animation()
 	if map[char.c] == CELL_START:
-		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(0, 1), angle=(180, 720), flip=(True, True, 1))
+		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(0, 1), angle=(180, 720))
 
 	cursor.reset()
 
@@ -495,7 +498,9 @@ def enter_room(idx):
 	game.start_level(map)
 
 	puzzle.on_enter_room()
+
 	char.phased = puzzle.is_char_phased()
+	set_char_flip((char.cx - room.x1) * 2 < room.size_x)
 
 def get_max_area_distance(area):
 	return cell_distance((area.x1, area.y1), (area.x2, area.y2))
@@ -2112,9 +2117,6 @@ def can_move(diff):
 		or get_lift_target(char.c, diff)
 	)
 
-def get_char_image_name(is_left):
-	return "left" if is_left ^ (not flags.allow_barrel_pull or not keyboard.lshift) else "stand"
-
 ARROW_KEY_CODE = {
 	'r': pygame.K_RIGHT,
 	'l': pygame.K_LEFT,
@@ -2233,18 +2235,22 @@ def update(dt):
 	diff_x = 0
 	diff_y = 0
 
+	flip_dir = None
 	if 'r' in last_processed_arrow_keys:
 		diff_x += 1
 		if cursor.is_char_selected():
-			char.image = get_char_image_name(True)
+			flip_dir = 'r'
 	if 'l' in last_processed_arrow_keys:
 		diff_x -= 1
 		if cursor.is_char_selected():
-			char.image = get_char_image_name(False)
+			flip_dir = 'l'
 	if 'd' in last_processed_arrow_keys:
 		diff_y += 1
 	if 'u' in last_processed_arrow_keys:
 		diff_y -= 1
+
+	if flip_dir is not None:
+		set_char_flip((flip_dir == 'l') ^ (not flags.allow_barrel_pull or not keyboard.lshift))
 
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)
