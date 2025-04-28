@@ -958,7 +958,7 @@ def get_lift_target_at_neigh(lift, neigh):
 def create_enemy(cell, health=None, attack=None, drop=None):
 	global enemies
 
-	enemy = Fighter("skeleton")
+	enemy = Fighter()
 	enemy.c = cell
 	enemy.power  = health if char.power else None
 	enemy.health = None if char.power else health if health is not None else randint(MIN_ENEMY_HEALTH, MAX_ENEMY_HEALTH)
@@ -1182,6 +1182,13 @@ def set_theme(theme_name):
 		CELL_DIR_D:  image18,
 		CELL_OUTER_WALL: outer_wall_image,
 	}
+
+	char.image = get_theme_image_name("char")
+
+	cursor.image = get_theme_image_name("cursor")
+
+	for enemy in enemies:
+		enemy.image = get_theme_image_name("enemy")
 
 	for barrel in barrels:
 		barrel.image = get_theme_image_name("barrel")
@@ -1456,7 +1463,7 @@ def draw_map():
 						continue
 					cell_image = cloud_image
 				elif cell_type == CELL_CURSOR:
-					cell_image = loaders.images.load('cursor')
+					cell_image = cursor._surf
 				elif cell_image0 := puzzle.get_cell_image_to_draw(cell, cell_type):
 					cell_image = cell_image0
 				elif cell in switch_cell_infos and switch_cell_infos[cell][1] == cell_type:

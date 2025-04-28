@@ -2,7 +2,7 @@ from objects import char, lifts
 from cellactor import CellActor, apply_diff, get_actor_on_cell
 
 class Cursor(CellActor):
-	def __init__(self, image):
+	def __init__(self, image=None):
 		super().__init__(image)
 		self.reset()
 

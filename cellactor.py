@@ -91,7 +91,7 @@ def colorize_image(image, color):
 	return image
 
 class CellActor(Actor):
-	def __init__(self, image:Union[str, pygame.Surface], pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, scale=None, color=None, **kwargs):
+	def __init__(self, image:Union[str, pygame.Surface]=None, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, scale=None, color=None, **kwargs):
 		self._image_name = None
 		self._default_opacity = 1.0
 		self._opacity = self._default_opacity
