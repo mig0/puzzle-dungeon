@@ -22,9 +22,6 @@ class StoneagePuzzle(Puzzle):
 	def has_sand(self):
 		return True
 
-	def generate_room(self, room, accessible_cells, finish_cell):
-		generate_random_solvable_stoneage_room()
-
 	def generate_random_nonsolvable_room(self):
 		self.Globals.replace_random_floor_cell(CELL_VOID, 70)
 		self.Globals.replace_random_floor_cell(CELL_START, 1, self.Globals.set_char_cell)
