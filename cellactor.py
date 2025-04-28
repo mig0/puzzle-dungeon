@@ -10,6 +10,7 @@ from game import game
 MAX_ALPHA = 255  # based on pygame
 
 NONE_CELL = (-1000, -1000)
+NONE_SURFACE = pygame.Surface((0, 0))
 
 active_inplace_animation_actors = []
 
@@ -212,21 +213,22 @@ class CellActor(Actor):
 
 	@image.setter
 	def image(self, image:Union[str, pygame.Surface]):
-		if isinstance(image, pygame.Surface):
+		if image is None or isinstance(image, pygame.Surface):
 			if hasattr(self, '_orig_surf') and self._orig_surf == image:
 				return
-			self._image_name = ''
-			self._surf = self._orig_surf = image
+			self._image_name = None
+			self._surf = self._orig_surf = image or NONE_SURFACE
 			self._update_pos()
 			self._transform()
 		elif isinstance(image, str):
 			if self.image == image:
 				return
 			self._image_name = image
-			self._orig_surf = loaders.images.load(image)
+			self._surf = self._orig_surf = loaders.images.load(image)
+			self._update_pos()
 			self._transform()
 		else:
-			print("CellActor.image: Unsupported type " + type(image))
+			print("CellActor.image: Unsupported type: " + str(image))
 			pass
 
 	def reset_state(self):
@@ -279,6 +281,9 @@ class CellActor(Actor):
 			self._pending_transform = True
 			return
 		self._pending_transform = False
+
+		if self._orig_surf == NONE_SURFACE:
+			return
 
 		self._surf = self._orig_surf
 		p = self.pos
