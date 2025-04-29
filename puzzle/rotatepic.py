@@ -76,7 +76,7 @@ class RotatepicPuzzle(Puzzle):
 			if self.is_shared_bg:
 				cell_types.clear()
 			return
-		cell_types.append(CELL_ROTATEPIC_BOX)
+		cell_types.insert(-1 if cell_types[-1] == CELL_CURSOR else len(cell_types), CELL_ROTATEPIC_BOX)
 
 	def get_cell_image_to_draw(self, cell, cell_type):
 		if cell_type == CELL_ROTATEPIC_BOX:
@@ -105,7 +105,7 @@ class RotatepicPuzzle(Puzzle):
 			elif self.rotatepic_map[cell] == 2:
 				solution_items.append((cell, 2))
 			elif self.rotatepic_map[cell] == 3:
-				solution_items.append((cell, 1))	
+				solution_items.append((cell, 1))
 		shuffle(solution_items)  # optionally randomize the solution
 		return solution_items, None
 
