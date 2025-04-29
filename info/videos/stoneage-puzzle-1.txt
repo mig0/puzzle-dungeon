@@ -1,0 +1,9 @@
+Title: Stoneage Puzzle levels 1-10
+Puzzles: stoneage
+Themes: stoneage1, stoneage2, stoneage3, stoneage4
+Main: 1
+
+This video shows the original levels 1 to 10 in DOS game Stone Age
+(published by Eclipse Software Design, developed by Stonehenge Soft Art).
+The puzzle goal is to exit by navigating using directional lifts and
+using other elements, like sand, keys and locks.
