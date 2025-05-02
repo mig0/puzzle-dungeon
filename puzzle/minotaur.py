@@ -261,10 +261,11 @@ class MinotaurPuzzle(Puzzle):
 		self.make_minotaur_move()
 
 	def on_prepare_enter_cell(self):
-		self.make_minotaur_move()
-
 		if char.c == self.goal_cell and self.map[char.c] == CELL_PORTAL:
 			self.Globals.demolish_portal(self.goal_cell, self.Globals.get_random_floor_cell_type())
+
+	def on_enter_cell(self):
+		self.make_minotaur_move()
 
 	def on_load_map(self, special_cell_values, extra_values):
 		special_cells = list(special_cell_values.keys())
