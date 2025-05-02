@@ -253,6 +253,9 @@ class MinotaurPuzzle(Puzzle):
 		set_status_message("Escape minotaur making %d moves. Press Space to skip move" % self.num_moves, self, 2, 10)
 		self.minotaur.c = self.minotaur_cell
 
+	def on_set_theme(self):
+		char.image = "theseus"
+
 	def on_draw(self, mode):
 		self.minotaur.draw()
 
