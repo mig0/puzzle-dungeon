@@ -12,7 +12,7 @@ from videoinfo import get_all_video_infos
 
 file_evi = RegenerateFile("elements/videos/index.html")
 file_evi.print('<h1>Videos</h1>\n')
-file_evi.print('<div id="videos" class="medias-all">')
+file_evi.print('<div id="videos" class="all-medias">')
 
 file_esv = RegenerateFile("elements/sidebars/videos.html")
 file_esv.print('<a href="videos/"><button class="page<{ current-page IF pagename videos/index}>">All Videos</button></a>')
