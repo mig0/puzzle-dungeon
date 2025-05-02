@@ -1,7 +1,6 @@
 Title: Gate puzzle with 5 gates and 5 plates
 Puzzle: gate
 Theme: moss
-Main: 5
 
 In gate puzzle your goal is to reach finish by pressing plates to trigger
 the gates from closed to open and vice versa.

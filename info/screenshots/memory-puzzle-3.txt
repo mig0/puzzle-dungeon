@@ -1,6 +1,7 @@
 Title: Timed memory puzzle 11x11 with 60 number pairs
 Puzzle: memory
 Theme: moss
+Main: 5
 
 This shows a timed memory puzzle. The player has 5 minutes to find all 60
 number pairs in any order. The numbers stay revealed in this mode.
