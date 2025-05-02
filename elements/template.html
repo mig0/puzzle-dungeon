@@ -242,6 +242,10 @@ p.goal:before {
 	overflow: hidden;
 }
 
+#img-table tr:first-child > th:not(:first-child) {
+	font-size: 12px;
+}
+
 #img-table .zoom,
 #img-table tr > th:not(:first-child) {
 	height: 32px;
@@ -256,7 +260,7 @@ p.goal:before {
 }
 
 .img-table-half tr > th:first-child {
-	height: 32px;
+	height: 28px;
 }
 
 .img-table-full tr > th:not(:first-child) {
@@ -264,12 +268,12 @@ p.goal:before {
 }
 
 .img-table-half tr > th:not(:first-child) {
-	width: 32px;
+	width: 28px;
 }
 
 .img-table-half tr > td {
-	width: 32px;
-	height: 32px;
+	width: 28px;
+	height: 28px;
 }
 
 .img-table-full tr > td {
@@ -278,13 +282,18 @@ p.goal:before {
 }
 
 .img-table-half img {
-	width: 32px;
-	height: 32px;
+	width: 28px;
+	height: 28px;
 }
 
 .img-table-full img {
 	width: 64px;
 	height: 64px;
+}
+
+.img-table-full img[title="char"], .img-table-full img[title="enemy"] {
+	width: 50px;
+	height: 50px;
 }
 
 #img-table .zoom {
