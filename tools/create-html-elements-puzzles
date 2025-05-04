@@ -28,8 +28,7 @@ for info in get_all_puzzle_infos():
 
 	html = info.get_html()
 
-	puzzle_page_html = html.replace('<!--VIDEO-->', '<div id="videos" class="all-medias">\n%s\n</div>' % all_video_html)
-	puzzle_page_html = html.replace('<!--SCREENSHOTS-->', '<div id="screenshots" class="all-medias">\n%s\n</div>' % all_screenshots_html)
+	puzzle_page_html = html.replace('<!--VIDEOS-->', '<div id="videos" class="all-medias">\n%s\n</div>' % all_video_html).replace('<!--SCREENSHOTS-->', '<div id="screenshots" class="all-medias">\n%s\n</div>' % all_screenshots_html)
 	file_ep1 = RegenerateFile("elements/puzzles/%s.html" % info.name)
 	file_ep1.print(puzzle_page_html)
 	file_ep1.finalize()
