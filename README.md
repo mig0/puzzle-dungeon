@@ -315,7 +315,7 @@ anti-clockwise depending on the mouse button used.
 
 Goal: Rotate all mini-image cells to restore the original image.
 
-### Stoneage Puzzle
+### StoneAge Puzzle
 
 This puzzle is an accurate replication of the classic DOS game Stone Age,
 released in 1992. The puzzle area consists of various elements, including

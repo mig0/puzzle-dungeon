@@ -1,6 +1,6 @@
 from . import *
 
-class StoneagePuzzle(Puzzle):
+class StoneAgePuzzle(Puzzle):
 	def assert_config(self):
 		return not flags.is_any_maze
 

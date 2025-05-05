@@ -1,4 +1,4 @@
-Title: Stoneage Puzzle levels 1-10
+Title: StoneAge Puzzle levels 1-10
 Puzzles: stoneage
 Themes: stoneage1, stoneage2, stoneage3, stoneage4
 Main: 2
