@@ -1,4 +1,4 @@
-Title: Solved rotatepic puzzle 8x8
+Title: Solved RotatePic puzzle 8x8
 Puzzle: rotatepic
 Theme: default
 

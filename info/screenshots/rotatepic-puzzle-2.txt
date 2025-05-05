@@ -1,4 +1,4 @@
-Title: Unsolved rotatepic puzzle 11x11
+Title: Unsolved RotatePic puzzle 11x11
 Puzzle: rotatepic
 Theme: default
 

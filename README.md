@@ -299,7 +299,7 @@ central hall and ultimately to the finish.
 
 Goal: Reach the finish by navigating through the portals.
 
-### Rotatepic Puzzle
+### RotatePic Puzzle
 
 This puzzle involves restoring a large image that has been divided into
 square mini-image cells. Each cell is randomly rotated by 0, 90, 180, or

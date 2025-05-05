@@ -1,4 +1,4 @@
-Title: Rotatepic puzzle 7x7
+Title: RotatePic puzzle 7x7
 Puzzle: rotatepic
 Theme: default
 

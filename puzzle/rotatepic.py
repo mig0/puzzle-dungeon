@@ -6,7 +6,7 @@ COUNTERCLOCKWISE = +1
 UPSIDEDOWN = 2
 CELL_ROTATEPIC_BOX = '~b'
 
-class RotatepicPuzzle(Puzzle):
+class RotatePicPuzzle(Puzzle):
 	def init(self):
 		self.rotatepic_map = None
 		self.image = None
