@@ -46,7 +46,8 @@ while test "$1" != ""; do
 
 	if test -z "$width" -o -z "$height"; then
 		echo "Can't determine width and height of image $filename. Exiting"
-		exit 2
+		rc=2
+		break
 	fi
 
 	new_x=$((margin_l - new_margin))
@@ -58,9 +59,14 @@ while test "$1" != ""; do
 
 	if test "$?" != 0; then
 		rc=1
+		break
 	fi
 
 	echo "Resized $filename and created $final_filename instead"
 done
+
+if test -f "$test_filename"; then
+	rm "$test_filename"
+fi
 
 exit $rc
