@@ -1,0 +1,9 @@
+Title: SwitchBox puzzle with regular and colored barrels
+Puzzle: switchbox
+Theme: ancient2
+
+This is the 3-th level "Swap and Open" with both regular and colored
+barrels. Regular barrels can't be phased.
+
+In switchbox puzzle you need to move barrels into plates to open matching
+gates and possibly phase matching barrels.

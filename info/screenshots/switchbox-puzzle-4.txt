@@ -1,0 +1,10 @@
+Title: SwitchBox puzzle with colored barrels
+Puzzle: switchbox
+Theme: default
+
+This is the 4-th level "Think and Open" with only colored barrels.
+Colored barrels are phased when the corresponding plate of the same color
+gets pressed.
+
+In switchbox puzzle you need to move barrels into plates to open matching
+gates and possibly phase matching barrels.

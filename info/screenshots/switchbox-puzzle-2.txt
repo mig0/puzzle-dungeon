@@ -1,0 +1,10 @@
+Title: SwitchBox puzzle with regular barrels (no colors)
+Puzzle: switchbox
+Theme: modern1
+
+In switchbox puzzle your goal is to open path to the exit by moving
+barrels into plates. In this level barrels are regular and can't be
+phased in.
+
+Also see the same [screenshot with colors turned on](switchbox-puzzle-1)
+(by pressing 'c').
