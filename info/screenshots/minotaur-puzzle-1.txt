@@ -1,0 +1,7 @@
+Title: Generated Minotaur puzzle level
+Puzzle: minotaur
+Theme: ancient2
+
+This shows an auto-generated 7x5 Minotaur puzzle level.
+
+Also see the [solved screenshot](minotaur-puzzle-2).

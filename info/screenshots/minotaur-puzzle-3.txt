@@ -1,0 +1,5 @@
+Title: Pre-created Minotaur puzzle level
+Puzzle: minotaur
+Theme: moss
+
+This level requires some thinking to be solved.

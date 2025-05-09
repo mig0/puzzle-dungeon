@@ -1,0 +1,10 @@
+Title: Generated four-room Minotaur puzzle level
+Puzzle: minotaur
+Theme: minecraft
+
+This shows an auto-generated four-room mode - a collection of 4 mini
+puzzles that should be all solved in order to solve the whole level.
+
+In this level, the Minotaur makes 2 moves (if possible) after the player
+makes single move. In other levels the Minotaur may make 1 or 3 moves.
+The number of moves is specified in the status line during the start.
