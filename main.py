@@ -481,13 +481,14 @@ def enter_room(idx):
 	set_room(idx)
 	reset_status_messages()
 
+	char.reset_animation()
+	char.reset_inplace_animation()
+
 	place_char_in_room()
 	char_cells[idx] = char.c  # needed for Alt-R
 
 	reveal_map_near_char()
 
-	char.reset_inplace()
-	char.reset_inplace_animation()
 	if map[char.c] == CELL_START:
 		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(0, 1), angle=(180, 720))
 

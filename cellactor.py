@@ -103,8 +103,8 @@ class CellActor(Actor):
 		self._pending_transform = False
 
 		self.reset_state()
+		self.animation = None
 		self.reset_inplace_animation()
-		self._unset_animation()
 
 		self.defer_transform()
 		super().__init__(image, pos, anchor, **kwargs)
@@ -154,7 +154,7 @@ class CellActor(Actor):
 	@c.setter
 	def c(self, cell):
 		self._cell = NONE_CELL if cell is None else cell
-		self.x, self.y = self.get_pos()
+		self.x, self.y = self.pos = self.get_pos()
 
 	@property
 	def angle(self):
@@ -413,7 +413,13 @@ class CellActor(Actor):
 			if on_finished:
 				on_finished()
 
-	def _unset_animation(self, on_finished=None):
+	def reset_animation(self):
+		if self.animation is None:
+			return
+		self.animation.stop()
+		self.animation = None
+
+	def _finish_animation(self, on_finished=None):
 		self.animation = None
 		if on_finished:
 			on_finished()
@@ -421,7 +427,7 @@ class CellActor(Actor):
 	def animate(self, duration, tween="linear", pos=None, on_finished=None):
 		if pos is None:
 			pos = self.get_pos()
-		self.animation = animate(self, tween=tween, duration=duration, pos=pos, on_finished=lambda: self._unset_animation(on_finished))
+		self.animation = animate(self, tween=tween, duration=duration, pos=pos, on_finished=lambda: self._finish_animation(on_finished))
 
 	def is_animated_external(self):
 		return self.animation is not None
