@@ -235,10 +235,9 @@ idle_time = 0
 
 last_regeneration_time = 0
 
-last_time_arrow_keys_processed = 0
-pressed_arrow_keys = []
+last_time_arrow_keys_processed = None
 last_processed_arrow_keys = []
-last_processed_arrow_diff = (0, 0)
+pressed_arrow_keys = []
 
 map = None  # will be generated
 cell_images = {}  # will be generated
@@ -476,13 +475,15 @@ def advance_room():
 	return True
 
 def enter_room(idx):
-	global mode, char_cells
+	global mode, char_cells, last_time_arrow_keys_processed
 
 	set_room(idx)
 	reset_status_messages()
 
 	char.reset_animation()
 	char.reset_inplace_animation()
+
+	last_time_arrow_keys_processed = None
 
 	place_char_in_room()
 	char_cells[idx] = char.c  # needed for Alt-R
@@ -2133,7 +2134,7 @@ ARROW_KEY_CODE = {
 def update(dt):
 	global level_title_time, level_goal_time
 	global game_time, level_time, idle_time, last_regeneration_time
-	global last_time_arrow_keys_processed, last_processed_arrow_keys, last_processed_arrow_diff
+	global last_time_arrow_keys_processed, last_processed_arrow_keys, pressed_arrow_keys
 
 	if mode == "start":
 		init_main_screen()
@@ -2192,7 +2193,7 @@ def update(dt):
 	if DEBUG_LEVEL > 0 and cursor.is_active():
 		set_status_message(str(cursor.c), priority=0)
 
-	if char.is_animated():
+	if char.is_animated() or mode == "next":
 		return
 
 	scan_joysticks_and_state()
@@ -2203,6 +2204,12 @@ def update(dt):
 
 	keys = pygame.key.get_pressed()
 	joistick_arrow_keys = get_joysticks_arrow_keys()
+
+	if last_time_arrow_keys_processed is None:
+		last_time_arrow_keys_processed = game_time
+		last_processed_arrow_keys = []
+		pressed_arrow_keys = []
+
 	for key in ('r', 'l', 'd', 'u'):
 		is_key_pressed = keys[ARROW_KEY_CODE[key]] or key in joistick_arrow_keys
 		if is_key_pressed and key not in pressed_arrow_keys:
@@ -2219,7 +2226,8 @@ def update(dt):
 	last_processed_arrow_diff = (0, 0)
 
 	def set_arrow_key_to_process(key, diff):
-		global last_processed_arrow_keys, last_processed_arrow_diff
+		global last_processed_arrow_keys
+		nonlocal last_processed_arrow_diff
 		if not ALLOW_DIAGONAL_MOVES and last_processed_arrow_keys:
 			return
 		pressed_arrow_keys.remove(key)
