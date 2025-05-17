@@ -1676,10 +1676,8 @@ def handle_press_key():
 		set_theme("stoneage2" if not keyboard.shift else "stoneage5")
 
 	if keyboard.f11:
-		pygame.display.toggle_fullscreen()
-		# workaround for pygame bug similar to #2380; this set_mode should not be needed
-		if not pygame.display.is_fullscreen():
-			pygame.display.set_mode((WIDTH, HEIGHT))
+		# Currently toggle_fullscreen() caused warning on the first time, so use set_mode()
+		pygame.display.set_mode((WIDTH, HEIGHT), 0 if pygame.display.is_fullscreen() else pygame.FULLSCREEN)
 	if keyboard.f12:
 		pygame.mouse.set_visible(not pygame.mouse.get_visible())
 
