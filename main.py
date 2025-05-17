@@ -2053,8 +2053,9 @@ def move_char(diff):
 			# can push, animate the push
 			barrel.move_animated(diff, enable_animation=is_move_animate_enabled)
 
-	# can move, animate the move
-	new_char_pos = char.pos
+	# can move, process the character move: leave_cell, enter_cell
+	if solution.is_active() and not solution.is_play_mode:
+		solution.reset()
 
 	# process lift movement if available
 	if lift_target := get_lift_target(old_char_cell, diff):
@@ -2066,6 +2067,7 @@ def move_char(diff):
 
 	leave_cell(old_char_cell)
 
+	# animate the move if needed
 	if is_move_animate_enabled:
 		animate_duration = get_move_animate_duration(old_char_cell)
 		prepare_enter_cell(animate_duration)
