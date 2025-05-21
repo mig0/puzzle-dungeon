@@ -1605,6 +1605,25 @@ def kill_enemy_cleanup():
 	enemy = killed_enemies.pop(0)
 	enemy.reset_inplace_animation()
 
+def cancel_playing_solution():
+	if solution.is_play_mode():
+		solution.reset()
+		set_status_message("Playing solution stopped", "stop-auto-play", 1, 3)
+		return True
+	return False
+
+def unset_prepared_solution():
+	if solution.is_active() and not solution.is_play_mode():
+		solution.reset()
+		return True
+	return False
+
+def press_cell(cell, button=None):
+	was_handled = puzzle.press_cell(cell, button)
+	if was_handled:
+		unset_prepared_solution()
+	return was_handled
+
 def handle_press_key():
 	global is_main_screen
 	global lang
@@ -1704,9 +1723,7 @@ def handle_press_key():
 		return
 
 	# if any key is pressed while playing solution, stop it
-	if solution.is_play_mode():
-		solution.reset()
-		set_status_message("Playing solution stopped", "stop-auto-play", 1, 3)
+	if cancel_playing_solution():
 		return
 
 	if keyboard.p:
@@ -1749,7 +1766,7 @@ def handle_press_key():
 		if not cursor.is_active():
 			cursor.toggle()
 		else:
-			if not puzzle.press_cell(cursor.c):
+			if not press_cell(cursor.c):
 				cursor.toggle()
 
 	if keyboard.space or keyboard.escape:
@@ -1760,20 +1777,20 @@ def handle_press_key():
 		set_status_message(priority=0)
 
 	if keyboard.space and not cursor_was_active:
-		puzzle.press_cell(char.c)
+		press_cell(char.c)
 
 	if keyboard.home:
-		puzzle.press_cell(cursor.selected_actor.c, 1)
+		press_cell(cursor.selected_actor.c, 1)
 	if keyboard.end:
-		puzzle.press_cell(cursor.selected_actor.c, 3)
+		press_cell(cursor.selected_actor.c, 3)
 	if keyboard.insert:
-		puzzle.press_cell(cursor.selected_actor.c, 2)
+		press_cell(cursor.selected_actor.c, 2)
 	if keyboard.delete:
-		puzzle.press_cell(cursor.selected_actor.c, 6)
+		press_cell(cursor.selected_actor.c, 6)
 	if keyboard.pageup:
-		puzzle.press_cell(cursor.selected_actor.c, 4)
+		press_cell(cursor.selected_actor.c, 4)
 	if keyboard.pagedown:
-		puzzle.press_cell(cursor.selected_actor.c, 5)
+		press_cell(cursor.selected_actor.c, 5)
 
 	puzzle.on_press_key(keyboard)
 
@@ -1784,12 +1801,12 @@ def on_mouse_down(pos, button):
 	if mode != "game":
 		return
 
-	if solution.is_active():
-		solution.reset()
+	if cancel_playing_solution():
+		return
 	if cursor.is_active():
 		cursor.toggle()
 	cell = pos_to_cell(pos)
-	puzzle.press_cell(cell, button)
+	press_cell(cell, button)
 
 def loose_game():
 	global mode, is_game_won
@@ -1866,7 +1883,7 @@ def prepare_move():
 	clock.unschedule(press_cell_cleanup)
 	press_cell_cleanup()
 
-def press_cell(cell, button=None):
+def press_cell_in_solution(cell, button=None):
 	global pressed_cell
 	if cursor.is_active():
 		return
@@ -2054,8 +2071,7 @@ def move_char(diff):
 			barrel.move_animated(diff, enable_animation=is_move_animate_enabled)
 
 	# can move, process the character move: leave_cell, enter_cell
-	if solution.is_active() and not solution.is_play_mode:
-		solution.reset()
+	unset_prepared_solution()
 
 	# process lift movement if available
 	if lift_target := get_lift_target(old_char_cell, diff):
@@ -2271,4 +2287,4 @@ def update(dt):
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)
 
-set_solution_funcs(find_path, move_char, press_cell, prepare_move)
+set_solution_funcs(find_path, move_char, press_cell_in_solution, prepare_move)
