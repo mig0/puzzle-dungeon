@@ -121,8 +121,9 @@ for i in range(NUM_MAPS):
 	n = i + 1
 	stoneage_levels.append({
 		"n": 15 + n / 1000,
-		"level": "Original Stone Age",
-		"name": "Level %d" % n,
+		"title": "Original Stone Age",
+		"name": "{level-label} %d" % n,
+		"goal": "finish-stoneage-puzzle",
 		"map_size": (20, 11),
 		"map_file": "maps/stoneage/%03d.map" % n,
 		"theme": "stoneage%d" % stoneage_infos[i][0],
@@ -131,7 +132,6 @@ for i in range(NUM_MAPS):
 		"time_limit": stoneage_infos[i][2],
 		"char_health": None,
 		"num_enemies": 0,
-		"goal": "reach-finish",
 		"stoneage_puzzle": {
 			"code": stoneage_infos[i][1],
 		},

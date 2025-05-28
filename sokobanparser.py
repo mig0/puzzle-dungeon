@@ -110,7 +110,6 @@ def parse_sokoban_levels(major, filename):
 				"map_size": map_size,
 				"map_string": map_string,
 				"void_outer_floor": True,
-				"goal": "Complete Sokoban puzzle",
 				"num_enemies": 0,
 				"char_health": None,
 				"barrel_puzzle": {},

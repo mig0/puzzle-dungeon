@@ -31,7 +31,7 @@ for i, molecule_name in enumerate(atomix_molecule_names):
 		"theme": ("stoneage1", "stoneage2", "default", "modern1", "moss")[randint(0, 4)],
 		"music": ("playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures")[randint(0, 4)] + ".mp3",
 		"map_file": "maps/atomix/" + molecule_name.replace(" ", "-").lower() + ".map",
-		"goal": "Compose %s molecule" % molecule_name,
+		"goal": "{compose-molecule-label} %s" % molecule_name,
 		"num_enemies": 0,
 		"char_health": None,
 		"atomix_puzzle": { "molecule_name": molecule_name },
