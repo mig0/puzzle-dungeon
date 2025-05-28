@@ -279,6 +279,10 @@ last_time_arrow_keys_processed = None
 last_processed_arrow_keys = []
 pressed_arrow_keys = []
 
+level_title = None
+level_name = None
+level_goal = None
+
 map = None  # will be generated
 cell_images = {}  # will be generated
 revealed_map = None
@@ -1332,6 +1336,7 @@ def reset_idle_time():
 
 def init_new_level(offset=1, config=None, reload_stored=False):
 	global level, level_time, mode, is_game_won
+	global level_title, level_name, level_goal
 	global puzzle
 	global bg_image
 	global revealed_map
@@ -1395,8 +1400,19 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	if "bg_image" in level:
 		bg_image = load_image(level["bg_image"], (MAP_W, MAP_H), level.get("bg_image_crop", False))
 
-	if "goal" not in level:
-		level["goal"] = "default-level-goal"
+	level_title = "main-screen" if level["n"] == 0 else level.get("title", "{level-label} %s" % level["n"])
+	level_name = "level-%s-name" % level["n"]
+	level_name = level.get("name", level_name if _(level_name) != level_name else "")
+	if "goal" in level:
+		level_goal = level["goal"]
+	elif puzzle.is_goal_to_be_solved():
+		level_goal = "solve-%s-puzzle" % puzzle.canonic_name()
+	elif puzzle.is_goal_to_kill_enemies() and not flags.has_finish:
+		level_goal = "kill-enemies"
+	else:
+		level_goal = "reach-finish"
+	if "time_limit" in level:
+		level_goal = "{%s} {in-word} %d {seconds-word}" % (level_goal, level["time_limit"])
 
 	for drop in drops:
 		# should be called after set_map_size()
@@ -1628,12 +1644,11 @@ def draw():
 
 	if mode == "game" and level_title_time > 0:
 		draw_central_flash()
-		level_line_1 = _("Main Screen" if level["n"] == 0 else level.get("level", _('level-label') + " " + str(level["n"])))
-		level_line_2 = _(level.get("name", 'level-' + str(level["n"]) + '-name'))
-		screen.draw.text(level_line_1, center=(POS_CENTER_X, POS_CENTER_Y - 14), color='yellow', gcolor="#AAA060", owidth=1.2, ocolor="#404030", alpha=1, fontsize=50)
-		screen.draw.text(level_line_2, center=(POS_CENTER_X, POS_CENTER_Y + 21), color='white', gcolor="#C08080", owidth=1.2, ocolor="#404030", alpha=1, fontsize=32)
+		yd = -14 if level_name else 0
+		screen.draw.text(_(level_title), center=(POS_CENTER_X, POS_CENTER_Y + yd), color='yellow', gcolor="#AAA060", owidth=1.2, ocolor="#404030", alpha=1, fontsize=50)
+		screen.draw.text(_(level_name),  center=(POS_CENTER_X, POS_CENTER_Y + 21), color='white',  gcolor="#C08080", owidth=1.2, ocolor="#404030", alpha=1, fontsize=32)
 	elif mode == "game" and level_goal_time > 0:
-		goal_line = _(level["goal"])
+		goal_line = _(level_goal)
 		draw_central_flash()
 		screen.draw.text(goal_line, center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#66AA00", owidth=1.2, ocolor="#404030", alpha=1, fontsize=40)
 
