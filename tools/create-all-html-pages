@@ -4,6 +4,7 @@ PATH=$PATH:`dirname $0`
 
 update-readme-md
 create-html-elements-index
+create-html-elements-news
 create-html-elements-authors
 create-html-elements-puzzles
 create-html-elements-videos
