@@ -1,0 +1,103 @@
+Version 0.2.0 - 2025-05-30
+--------------------------
+
+* New Solution System
+	- Puzzles can provide a solution from any current position.
+	- Solutions are computed first and then replayed centrally.
+	- The first press of KP Enter computes; the second replays.
+	- Support in puzzles: Barrel, Gate, Color, Minotaur, RotatePic.
+
+* New Undo System
+	- Press 'u' to undo one step back to the level or room start.
+	- Full undo includes actor moves, states and cell transitions.
+
+* New Minotaur Puzzle
+	- Escape the labyrinth while being chased by the Minotaur!
+	- Auto-generated levels with configurable size and Minotaur step.
+	- Support for pre-created maps.
+	- Support for solution playback.
+
+* New SwitchBox Puzzle
+	- Push barrels onto plates to toggle related gates and barrels.
+	- Related gates and barrels are color-coded for clarity.
+	- Support for pre-created maps.
+	- Four handcrafted levels.
+
+* New actor states: phased (semi-transparent, passable), hidden.
+
+* Character flipping is now automatic, no need for duplicate images.
+
+* Themes can now customize character, enemy, and cursor images.
+
+* Improve several themes; some now include own character and enemy.
+
+* Update all translations for supported languages.
+
+* Better support for bidirectional text, like Hebrew.
+
+* Level titles, names, and goals are now smarter and better localized.
+
+* The "press cell" event is now a formalized part of the game.
+	- Space key sends "press cell" for the char cell with no info.
+	- Mouse clicks and some keys send "press cell" with button info.
+
+* Improve joystick support with multiple PlayStation controller profiles.
+
+* Implement music fadein on start.
+
+* Key and animation handling refined for smoother gameplay.
+
+* More robust input handling at level start/end and during animations.
+
+* Update web site, including new category Videos.
+
+* Added 3 new videos demonstrating both new and existing features:
+	- Minotaur Puzzle
+	- SwitchBox Puzzle
+	- StoneAge Puzzle
+
+* New tutorial pages on creating puzzles and themes.
+
+
+Version 0.1.0 - 2025-02-24
+--------------------------
+
+* 12 puzzles
+	- Atomix Puzzle
+	- Barrel Puzzle
+	- Color Puzzle
+	- Fifteen Puzzle
+	- Gate Puzzle
+	- Hero Puzzle
+	- Lock Puzzle
+	- Memory Puzzle
+	- Portal Puzzle
+	- RotatePic Puzzle
+	- StoneAge Puzzle
+	- Trivial Puzzle
+
+* 13 themes
+	- default
+	- classic
+	- ancient1, ancient2
+	- modern1, modern2
+	- minecraft
+	- moss
+	- stoneage1, stoneage2, stoneage3, stoneage4, stoneage5
+
+* Some puzzles (Hero, StoneAge) do not have Generator yet.
+
+* Initial support for Solvers (Barrel, Gate).
+
+* Support for Hints (Atomix, Fifteen, Memory, Portal, RotatePic).
+
+* Support for precreated level collections (Atomix, Barrel, StoneAge).
+
+* Support for mouse and PlayStation controlers.
+
+* Background music and sound effects.
+
+* Initial support for main screen.
+
+* Initial support for translations.
+
