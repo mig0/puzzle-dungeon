@@ -146,6 +146,12 @@ class Puzzle:
 			self.map[self.area.x1 - 1, y] = CELL_WALL
 			self.map[self.area.x2 + 1, y] = CELL_WALL
 
+	def set_area_cells(self, cell_type, add_border_walls=False):
+		for cell in self.area.cells:
+			self.map[cell] = cell_type
+		if add_border_walls:
+			self.set_area_border_walls()
+
 	def get_random_cell_in_area(self):
 		return (choice(self.area.x_range), choice(self.area.y_range))
 
