@@ -29,7 +29,7 @@ class VideoInfo:
 			print("WARNING: No required file %s found" % self.info_filename)
 			return
 
-		file = open(self.info_filename, "r")
+		file = open(self.info_filename, "r", encoding="utf-8")
 
 		is_header = True
 

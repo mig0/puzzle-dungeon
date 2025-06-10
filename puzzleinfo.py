@@ -15,7 +15,7 @@ class PuzzleInfo:
 		if not os.path.isfile(self.filename):
 			self.die("No required file %s found" % self.filename)
 
-		file = open(self.filename, "r")
+		file = open(self.filename, "r", encoding="utf-8")
 
 		self.title = file.readline().rstrip("\n")
 		if self.title == "\n" or file.readline() != "\n":

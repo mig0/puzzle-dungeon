@@ -78,7 +78,7 @@ def parse_sokoban_levels(major, filename):
 	levels = []
 
 	full_filename = SOKOBAN_MAP_PREFIX + filename
-	file = open(full_filename, "r")
+	file = open(full_filename, "r", encoding="utf-8")
 	if not file:
 		print("Can't open file %s with sokoban levels" % full_filename)
 		return levels

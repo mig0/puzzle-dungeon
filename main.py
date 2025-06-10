@@ -117,7 +117,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			print(filename_or_stringio.getvalue())
 	else:
 		try:
-			file = open(filename, "r")
+			file = open(filename, "r", encoding="utf-8")
 		except:
 			print_error("Failed to open")
 			return
