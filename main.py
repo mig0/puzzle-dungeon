@@ -6,7 +6,7 @@ import pygame
 import pgzero
 import builtins
 from pgzero.constants import keys
-from numpy import ndarray, chararray, array, any
+from numpy import ndarray, array, any
 from copy import deepcopy
 from random import randint, choice, shuffle
 from traceback import extract_stack
@@ -1148,7 +1148,7 @@ def generate_room(idx):
 def generate_map():
 	global map
 
-	map = chararray((MAP_SIZE_X, MAP_SIZE_Y), itemsize=5, unicode=True)
+	map = ndarray((MAP_SIZE_X, MAP_SIZE_Y), dtype='U5')
 	bw = 0 if flags.MULTI_ROOMS and not puzzle.has_border() else 1
 	for cy in MAP_Y_RANGE:
 		for cx in MAP_X_RANGE:
