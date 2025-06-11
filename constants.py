@@ -92,5 +92,5 @@ LIFT_TYPES = *LIFT_TYPE_DIRECTIONS,
 LIFT_TYPES_BY_CHAR = {v: k for k, v in LIFT_CHARS.items()}
 
 
-IMAGES_DIR_PREFIX = 'images/'
+IMAGES_DIR_PREFIX = DATA_DIR + '/images/'
 DEFAULT_IMAGE_PREFIX = 'default/'

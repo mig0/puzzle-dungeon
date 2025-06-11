@@ -25,6 +25,8 @@ from sizetools import *
 from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_joysticks_arrow_keys
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
+pgzero.loaders.set_root(DATA_DIR)
+
 lang = 'en'
 
 def warn(error, with_trace=False):
@@ -408,7 +410,7 @@ def get_theme_image_name(image_name):
 	die("Unable to find image %s in neither %s nor %s" % (image_name, theme_prefix, DEFAULT_IMAGE_PREFIX))
 
 def load_image(image_name, size, do_crop=False):
-	image = pygame.image.load(image_name).convert()
+	image = pygame.image.load(DATA_DIR + '/' + image_name).convert()
 	if do_crop:
 		# image=300x400 size=100x200 -> cropped=200x400
 		# image=300x400 size=200x100 -> cropped=300x150
