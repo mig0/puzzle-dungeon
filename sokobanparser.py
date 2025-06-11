@@ -34,8 +34,6 @@ def is_map_line(line):
 			is_all_floor = False
 	return not is_all_floor
 
-SOKOBAN_MAP_PREFIX = "maps/sokoban/"
-
 def create_map_string(lines):
 	min_size_x = 13
 	min_size_y = 13
@@ -77,7 +75,7 @@ def create_map_string(lines):
 def parse_sokoban_levels(major, filename):
 	levels = []
 
-	full_filename = SOKOBAN_MAP_PREFIX + filename
+	full_filename = MAPS_DIR_PREFIX + 'sokoban/' + filename
 	file = open(full_filename, "r", encoding="utf-8")
 	if not file:
 		print("Can't open file %s with sokoban levels" % full_filename)

@@ -30,7 +30,7 @@ for i, molecule_name in enumerate(atomix_molecule_names):
 		"bg_image": "bg/chemistry-%d.webp" % randint(1, 2),
 		"theme": ("stoneage1", "stoneage2", "default", "modern1", "moss")[randint(0, 4)],
 		"music": ("playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures")[randint(0, 4)] + ".mp3",
-		"map_file": "maps/atomix/" + molecule_name.replace(" ", "-").lower() + ".map",
+		"map_file": "atomix/" + molecule_name.replace(" ", "-").lower() + ".map",
 		"goal": "{compose-molecule-label} %s" % molecule_name,
 		"num_enemies": 0,
 		"char_health": None,

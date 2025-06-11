@@ -125,7 +125,7 @@ for i in range(NUM_MAPS):
 		"name": "{level-label} %d" % n,
 		"goal": "finish-stoneage-puzzle",
 		"map_size": (20, 11),
-		"map_file": "maps/stoneage/%03d.map" % n,
+		"map_file": "stoneage/%03d.map" % n,
 		"theme": "stoneage%d" % stoneage_infos[i][0],
 		"music": "stoneage/%s" % music_files[i % len(music_files)],  # random.choise(music_files)
 		"bg_image": "images/stoneage%d/bg.webp" % stoneage_infos[i][0],

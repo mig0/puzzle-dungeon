@@ -1164,7 +1164,8 @@ def generate_map():
 			map[cx, cy] = cell_type
 
 	if "map_file" in level or "map_string" in level:
-		if ret := load_map(level.get("map_file") or io.StringIO(level["map_string"]), puzzle.load_map_special_cell_types):
+		filename_or_stringio = MAPS_DIR_PREFIX + level["map_file"] if "map_file" in level else io.StringIO(level["map_string"])
+		if ret := load_map(filename_or_stringio, puzzle.load_map_special_cell_types):
 			if flags.MULTI_ROOMS:
 				print("Ignoring multi-room level config when loading map")
 			puzzle.set_map(map)

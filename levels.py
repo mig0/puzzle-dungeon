@@ -105,7 +105,7 @@ levels = [
 	},
 	{
 		"n": 3.01,
-		"map_file": "maps/switchbox/001.map",
+		"map_file": "switchbox/001.map",
 		"title": "SwitchBox - level 1",
 		"name": "Push and Open",
 		"goal": "Push barrels into plates to open path",
@@ -116,7 +116,7 @@ levels = [
 	},
 	{
 		"n": 3.02,
-		"map_file": "maps/switchbox/002.map",
+		"map_file": "switchbox/002.map",
 		"title": "SwitchBox - level 2",
 		"name": "Phase and Open",
 		"goal": "Push and phase in barrels to open path",
@@ -127,7 +127,7 @@ levels = [
 	},
 	{
 		"n": 3.03,
-		"map_file": "maps/switchbox/003.map",
+		"map_file": "switchbox/003.map",
 		"title": "SwitchBox - level 3",
 		"name": "Swap and Open",
 		"goal": "Push, phase in and swap barrels to open path",
@@ -138,7 +138,7 @@ levels = [
 	},
 	{
 		"n": 3.04,
-		"map_file": "maps/switchbox/004.map",
+		"map_file": "switchbox/004.map",
 		"title": "SwitchBox - level 4",
 		"name": "Think and Open",
 		"goal": "Think, push and phase in barrels to open path",
@@ -296,7 +296,7 @@ levels = [
 	{
 		"n": 5.021,
 		"goal": "finish-minotaur-puzzle",
-		"map_file": "maps/minotaur/001.map",
+		"map_file": "minotaur/001.map",
 		"num_enemies": 0,
 		"theme": "moss",
 		"music": "surface",
@@ -305,7 +305,7 @@ levels = [
 	{
 		"n": 5.022,
 		"goal": "finish-minotaur-puzzle",
-		"map_file": "maps/minotaur/002.map",
+		"map_file": "minotaur/002.map",
 		"num_enemies": 0,
 		"theme": "moss",
 		"music": "surface",
