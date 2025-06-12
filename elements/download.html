@@ -1,9 +1,16 @@
 <h1>Instructions to download, install and run</h1>
 
 <h2>Source code</h2>
+
+<p>Either checkout the source code from git:</p>
+
 <code>
 git clone <a href="https://github.com/mig0/puzzle-dungeon.git">https://github.com/mig0/puzzle-dungeon.git</a>
 </code>
+
+<p>Or download the latest package:
+<a href="releases/puzzle-dungeon-0.2.1.zip">puzzle-dungeon-0.2.1.zip</a>
+</p>
 
 <h2>Dependencies</h2>
 <p>You need python3, and at least <a href="https://www.pygame.org/">pygame</a>,
@@ -23,17 +30,41 @@ sudo dnf install python3-pygame pgzero python3-bitarray
 sudo apt install python3-pygame python3-pgzero python3-bitarray
 </code>
 
+<p>On Windows or any other systems, run this:</p>
+
+<code>
+pip install pgzero bitarray
+</code>
+
 <h2>How to install</h2>
-<p>No installation is currently needed to quickly run the game, just
-checkout the source code from github and run.</p>
+
+<p>No installation is needed to quickly run the game, just unzip the
+package, or git checkout the source code from github and run.</p>
+
+<p>On Unix systems, you may optionally install the game, like this:</p>
+
+<code>
+sudo make install prefix=/usr
+</code>
 
 <h2>How to run</h2>
+
 <code>
 ./dungeon
 </code>
 
-<h2>Running on non-unix systems</h2>
-<p>The developers use GNU/Linux. If you would like to help and build on
-other systems, like Windows, feel free to <a href="./#contact-us">contact
+<h2>Running on Windows</h2>
+
+<code>
+.\dungeon
+</code>
+
+<p>Or click on <i>dungeon.bat</i> in a file manager.</p>
+
+<h2>Porting to other systems</h2>
+
+<p>The developers use GNU/Linux. We also test the zip package on Windows.
+If you would like to help to port to other systems or to build binary
+packages for all systems, feel free to <a href="./#contact-us">contact
 the Puzzle Dungeon developers</a> and provide packages or instructions.
 Thanks for contributing!</p>

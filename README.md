@@ -120,14 +120,25 @@ git clone https://github.com/mig0/puzzle-dungeon.git
 
 ## How to run
 
-You need python3-pygame, [python3-]pgzero and python3-bitarray.
+See [download](download.html) page for instructions how to download the
+latest game package.
 
-No installation is needed to quickly run the game, just checkout the
-source code from github, then run:
+You need python3-pygame, [python3-]pgzero and python3-bitarray. These may be installed using:
+
+```bash
+pip install pgzero bitarray
+```
+
+No installation is needed to quickly run the game, just unzip the
+package, or checkout the source code from github, then run:
 
 ```bash
 ./dungeon
 ```
+
+On Windows, run __dungeon.bat__.
+
+On Unix systems, you may optionally install it using "make install".
 
 ## Puzzles
 
