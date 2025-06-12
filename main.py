@@ -1697,7 +1697,8 @@ def handle_press_key():
 	keyboard.alt   = keyboard.lalt   or keyboard.ralt
 
 	if mode == "game" and is_main_screen and keyboard._pressed \
-		and not (keyboard.ctrl or keyboard.escape or keyboard.right or keyboard.left or keyboard.up or keyboard.down):
+		and not ((keyboard.shift or keyboard.ctrl or keyboard.alt) and len(keyboard._pressed) == 1) \
+		and not (keyboard.escape or keyboard.right or keyboard.left or keyboard.up or keyboard.down):
 		is_main_screen = False
 		init_new_level()
 		return
