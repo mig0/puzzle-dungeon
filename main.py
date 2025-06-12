@@ -5,6 +5,7 @@ import random
 import pygame
 import pgzero
 import builtins
+from sys import stdout
 from pgzero.constants import keys
 from numpy import ndarray, array, any
 from copy import deepcopy
@@ -26,6 +27,7 @@ from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
 pgzero.loaders.set_root(DATA_DIR)
+stdout.reconfigure(encoding='utf-8')
 
 lang = 'en'
 
