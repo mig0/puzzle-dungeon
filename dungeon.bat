@@ -1,0 +1,6 @@
+@echo off
+
+set PYGAME_HIDE_SUPPORT_PROMPT=1
+set PYTHONDONTWRITEBYTECODE=1
+
+pgzrun main.py
