@@ -1,3 +1,19 @@
+Version 0.2.1 - 2025-06-13
+--------------------------
+
+* Fix Windows compatibility
+	- Fix critical startup issues related to locale encodings.
+	- Add dungeon.bat to run the game from Windows console.
+
+* New install and packaging
+	- Add Makefile with targets: install, uninstall, web, and more.
+	- Enable packaging with "make dist" (creates tar.gz and zip).
+
+* Documentation updates
+	- Update README.md and download.html with download instructions.
+	- Document new keybindings (such as 'u' for undo and KP-Enter).
+
+
 Version 0.2.0 - 2025-05-30
 --------------------------
 

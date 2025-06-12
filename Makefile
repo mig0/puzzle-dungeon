@@ -1,5 +1,5 @@
 PACKAGE = puzzle-dungeon
-VERSION = 0.2.0
+VERSION = 0.2.1
 SUFFIX = -custom
 distdir = $(PACKAGE)-$(VERSION)$(SUFFIX)
 
