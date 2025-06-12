@@ -1657,7 +1657,7 @@ def draw():
 
 	if mode == "init":
 		screen.fill("#a8b6b7")
-		screen.draw.text(_("Initializing level…"), center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#88AA66", owidth=1.2, ocolor="#404030", alpha=1, fontsize=80)
+		screen.draw.text(_("Initializing level\u2026"), center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#88AA66", owidth=1.2, ocolor="#404030", alpha=1, fontsize=80)
 
 def kill_enemy_cleanup():
 	enemy = killed_enemies.pop(0)
@@ -2003,8 +2003,8 @@ def enter_cell():
 				char.attack += BONUS_ATTACK_VALUE
 			if drop.name == 'might' and char.power:
 				op, factor = args
-				if op == '×': char.power *= factor
-				if op == '÷': char.power //= factor
+				if op == '\u00d7': char.power *= factor   # '×'
+				if op == '\u00f7': char.power //= factor  # '÷'
 				if op == '+': char.power += factor
 				if op == '-': char.power -= factor
 
