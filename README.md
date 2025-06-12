@@ -90,15 +90,27 @@ possibly other Operating Systems, but this should be tested yet.
 |Shift F1-F10|Set more themes
 |F11|Set fullscreen on/off
 |F12|Set mouse visible off/on
-|l|Shows title and goal
+|l|Show title and goal
 |m|Turn on/off music
 |s|Turn on/off sound
-|a|Enabled/disabled animation
-|Enter| Activate cursor
+|u|Undo move
+|a|Toggle move animation
+|w|Win the level (cheating)
+|Space|Press cell, force teleport and more
+|Enter|Activate cursor
+|Esc|Exit to the main screen
+|KP-Enter|Find solution, then replay it
 |RShift-E|Set language to English
 |RShift-R|Set language to Russian
 |RShift-H|Set language to Hebrew
 |RShift-L|Enabled/disabled show title and goal
+|RShift-D|Print current map
+|Home|    Simulate mouse button 1
+|End|     Simulate mouse button 3
+|Insert|  Simulate mouse button 2
+|Delete|  Simulate mouse button 6
+|PageUp|  Simulate mouse button 4
+|PageDown|Simulate mouse button 5
 
 ## Source code
 
