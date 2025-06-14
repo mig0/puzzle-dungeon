@@ -1,7 +1,10 @@
 from . import *
 
-NUM_TRIES_FOR_GENERATE = 8000
-NUM_GOOD_POSITIONS_TO_TRY = 25  # on generating, choose the best by number of moves
+# On generation, generate several good setups and choose the best one by
+# number of char and minotaur moves needed for the solution.
+
+MAX_SETUPS_TO_TRY = 8000
+MAX_GOOD_SETUPS_TO_TRY = 25
 MAX_GENERATE_TIME = 7
 SINGLE_MINOTAUR_MOVE_DURATION = ARROW_KEYS_RESOLUTION
 
@@ -156,88 +159,81 @@ class MinotaurPuzzle(Puzzle):
 			return new_minotaur_cell
 		return get_minotaur_cell
 
-	def generate_random_solvable_room(self):
-		start_time = time()
-		num_tries = 0
-		num_good_positions = 0
-		best = None
+	def generate_random_setup(self):
+		# 1) initialize entire room to WALL
+		for cell in self.area.cells:
+			self.map[cell] = CELL_WALL
 
-		while (
-			num_tries < NUM_TRIES_FOR_GENERATE and
-			num_good_positions < NUM_GOOD_POSITIONS_TO_TRY and
-			(not best or time() < start_time + MAX_GENERATE_TIME)
-		):
-			# 1) initialize entire room to WALL
-			for cell in self.area.cells:
-				self.map[cell] = CELL_WALL
+		# 2) set goal in bottom-right cell
+		self.goal_cell = self.get_random_wall_cell_in_area()
+		self.map[self.goal_cell] = CELL_FLOOR
 
-			# 2) set goal in bottom-right cell
-			self.goal_cell = self.get_random_wall_cell_in_area()
-			self.map[self.goal_cell] = CELL_FLOOR
+		# 3) place char randomly
+		char_cell = self.get_random_wall_cell_in_area()
+		self.convert_to_floor(char_cell)
 
-			# 3) place char randomly
-			char_cell = self.get_random_wall_cell_in_area()
-			self.convert_to_floor(char_cell)
+		# 4) create random path from char to goal and set it to floor
+		self.generate_random_floor_path(char_cell, self.goal_cell)
 
-			# 4) create random path from char to goal and set it to floor
-			self.generate_random_floor_path(char_cell, self.goal_cell)
+		# 5) place minotaur randomly
+		minotaur_cell = self.get_random_wall_cell_in_area()
+		self.convert_to_floor(minotaur_cell)
 
-			# 5) place minotaur randomly
-			minotaur_cell = self.get_random_wall_cell_in_area()
-			self.convert_to_floor(minotaur_cell)
+		# 6) create random path from minotaur to goal and set it to floor
+		self.generate_random_floor_path(minotaur_cell, self.goal_cell)
 
-			# 6) create random path from minotaur to goal and set it to floor
-			self.generate_random_floor_path(minotaur_cell, self.goal_cell)
+		# 7) create random floors in the area
+		wall_cells = self.get_area_cells(CELL_WALL)
+		num_walls_to_clear = randint(1, len(wall_cells) - 1)
+		for cell in choices(wall_cells, k=num_walls_to_clear):
+			self.convert_to_floor(cell)
 
-			# 7) create random floors in the area
-			wall_cells = self.get_area_cells(CELL_WALL)
-			num_walls_to_clear = randint(1, len(wall_cells) - 1)
-			for cell in choices(wall_cells, k=num_walls_to_clear):
-				self.convert_to_floor(cell)
+		# 8) find all shortest paths from char to goal
+		if self.allow_partially_trivial:
+			all_shortest_paths = [self.Globals.find_path(char_cell, self.goal_cell)]
+		else:
+			all_shortest_paths = self.Globals.find_all_paths(char_cell, self.goal_cell)
+		if not all_shortest_paths:
+			print("Bug #1 in generate_random_solvable_room after find_all_paths")
+			quit()
 
-			# 8) find all shortest paths from char to goal
-			if self.allow_partially_trivial:
-				all_shortest_paths = [self.Globals.find_path(char_cell, self.goal_cell)]
-			else:
-				all_shortest_paths = self.Globals.find_all_paths(char_cell, self.goal_cell)
-			if not all_shortest_paths:
-				print("Bug #1 in generate_random_solvable_room after find_all_paths")
+		# 9) check whether any shortest path leads to win
+		has_trivial_solution = False
+		for path_cells in all_shortest_paths:
+			if not path_cells:
+				print("Bug #2 in generate_random_solvable_room after find_all_paths")
 				quit()
+			has_trivial_solution |= self.check_path_victory(path_cells, minotaur_cell)
 
-			# 9) check whether any shortest path leads to win
-			has_trivial_solution = False
-			for path_cells in all_shortest_paths:
-				if not path_cells:
-					print("Bug #2 in generate_random_solvable_room after find_all_paths")
-					quit()
-				has_trivial_solution |= self.check_path_victory(path_cells, minotaur_cell)
+		solution_cells = None
+		if not has_trivial_solution:
+			state_func = self.get_solution_state_func(minotaur_cell)
+			solution_cells = self.Globals.find_best_path(char_cell, self.goal_cell, allow_stay=True, state_func=state_func)
 
-			solution_cells = None
-			if not has_trivial_solution:
-				state_func = self.get_solution_state_func(minotaur_cell)
-				solution_cells = self.Globals.find_best_path(char_cell, self.goal_cell, allow_stay=True, state_func=state_func)
+		if DEBUG_LEVEL:
+			title = "Non-trivial solution" if solution_cells else "Only trivial solution" if has_trivial_solution else "No solution"
+			self.Globals.debug_map(2, title, char_cell=char_cell, cell_chars={c: '⨯' for c in (solution_cells or [0])[:-1]} | {minotaur_cell: '⚚'})
 
-			if DEBUG_LEVEL:
-				title = "Non-trivial solution" if solution_cells else "Only trivial solution" if has_trivial_solution else "No solution"
-				self.Globals.debug_map(2, title, char_cell=char_cell, cell_chars={c: '⨯' for c in (solution_cells or [0])[:-1]} | {minotaur_cell: '⚚'})
+		if not solution_cells:
+			return None
 
-			# found non-trivial solution
-			if solution_cells:
-				num_good_positions += 1
-				minotaur_cells = self.calculate_minotaur_path(solution_cells, minotaur_cell)
-				weight = len(solution_cells) * 2 + len(minotaur_cells) * 1
-				if not best or weight > best[4]:
-					best = [self.map[ix_(self.area.x_range, self.area.y_range)].copy(), char_cell, minotaur_cell, self.goal_cell, weight]
-				if self.allow_partially_trivial:
-					break
+		# found non-trivial solution
+		minotaur_cells = self.calculate_minotaur_path(solution_cells, minotaur_cell)
+		weight = len(solution_cells) * 2 + len(minotaur_cells) * 1
+		real_map = self.map[ix_(self.area.x_range, self.area.y_range)].copy()
 
-			num_tries += 1
+		return weight, (real_map, char_cell, minotaur_cell, self.goal_cell)
 
-		if best:
-			self.map[ix_(self.area.x_range, self.area.y_range)] = best[0]
-			self.Globals.set_char_cell(best[1])
-			self.minotaur_cell = best[2]
-			self.set_goal_and_finish_cell(best[3])
+	def generate_random_solvable_room(self):
+		max_good_setups_to_try = 1 if self.allow_partially_trivial else MAX_GOOD_SETUPS_TO_TRY
+		setup = self.generate_best_random_setups(MAX_SETUPS_TO_TRY, max_good_setups_to_try, MAX_GENERATE_TIME, self.generate_random_setup)
+
+		if setup:
+			real_map, char_cell, minotaur_cell, goal_cell = setup
+			self.map[ix_(self.area.x_range, self.area.y_range)] = real_map
+			self.Globals.set_char_cell(char_cell)
+			self.minotaur_cell = minotaur_cell
+			self.set_goal_and_finish_cell(goal_cell)
 			return
 
 		self.Globals.debug(0, "Can't generate minotaur level, making it random unsolvable")

@@ -174,6 +174,25 @@ class Puzzle:
 	def convert_to_floor(self, cell):
 		self.Globals.convert_to_floor_if_needed(cell)
 
+	def generate_best_random_setups(self, max_setups, max_good_setups, max_time, generate_random_setup):
+		start_time = time()
+		num_setups = 0
+		num_good_setups = 0
+		best_setup = None
+		best_weight = None
+
+		while (num_setups < max_setups and num_good_setups < max_good_setups and (not best_setup or time() < start_time + max_time)):
+			result = generate_random_setup()
+			if result:
+				weight, setup = result
+				num_good_setups += 1
+				if not best_setup or weight > best_weight:
+					best_weight = weight
+					best_setup = setup
+			num_setups += 1
+
+		return best_setup
+
 	def on_set_theme(self):
 		pass
 
