@@ -13,6 +13,7 @@ from random import randint, choice, shuffle
 from traceback import extract_stack
 from unicodedata import bidirectional
 from constants import *
+from teestream import *
 from leveltools import *
 from translations import *
 from cellactor import *
@@ -24,6 +25,7 @@ from puzzle import create_puzzle
 from solution import solution, set_solution_funcs
 from sizetools import *
 from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_joysticks_arrow_keys
+from clipboard import clipboard
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
 pgzero.loaders.set_root(DATA_DIR)
@@ -1731,7 +1733,11 @@ def handle_press_key():
 			flags.is_stopless = not flags.is_stopless
 
 		if keyboard.d:
-			debug_map(full_format=not keyboard.ralt, clean=not keyboard.rctrl)
+			map_stringio = io.StringIO()
+			with stdout_redirected_to(sys.stdout, map_stringio):
+				debug_map(full_format=not keyboard.ralt, clean=not keyboard.rctrl)
+			clipboard.put(map_stringio.getvalue())
+			set_status_message("The current map copied to clipboard and stdout", priority=4, duration=5)
 
 		return
 
