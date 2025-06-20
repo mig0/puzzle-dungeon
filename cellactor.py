@@ -98,6 +98,7 @@ class CellActor(Actor):
 		self._scale = 1.0
 		self._color = None
 		self._flip = None
+		self._selected = False
 		self.cell_to_draw = None
 		self._deferred_transform = False
 		self._pending_transform = False
@@ -214,6 +215,16 @@ class CellActor(Actor):
 			self._transform()
 
 	@property
+	def selected(self):
+		return self._selected
+
+	@selected.setter
+	def selected(self, selected):
+		if selected != self._selected:
+			self._selected = selected
+			self._transform()
+
+	@property
 	def flip(self):
 		return self._flip
 
@@ -308,7 +319,9 @@ class CellActor(Actor):
 		p = self.pos
 
 		if self._color is not None:
-			self._surf = colorize_image(make_grayscale_image(self._orig_surf), self._color)
+			self._surf = colorize_image(make_grayscale_image(self._surf), self._color)
+		if self._selected:
+			self._surf = colorize_image(self._surf.copy(), (192, 192, 192))
 		if self._scale != 1:
 			size = self._orig_surf.get_size()
 			self._surf = pygame.transform.scale(self._surf, (int(size[0] * self._scale), int(size[1] * self._scale)))
