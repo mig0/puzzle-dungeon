@@ -157,6 +157,22 @@ class CellActor(Actor):
 		self.x, self.y = self.pos = self.get_pos()
 
 	@property
+	def s(self):
+		return self._size
+
+	@property
+	def sx(self):
+		return self._size[0] if self._size else 1
+
+	@property
+	def sy(self):
+		return self._size[1] if self._size else 1
+
+	@c.setter
+	def s(self, size):
+		self._size = size
+
+	@property
 	def angle(self):
 		return self._angle
 
@@ -232,13 +248,13 @@ class CellActor(Actor):
 			pass
 
 	def reset_state(self):
-		self._cell, self.hidden, self.phased = NONE_CELL, False, False
+		self._cell, self._size, self.hidden, self.phased = NONE_CELL, None, False, False
 
 	def get_state(self):
-		return (self.c, self.hidden, self.phased)
+		return (self.c, self.s, self.hidden, self.phased)
 
 	def restore_state(self, state):
-		self.c, self.hidden, self.phased = state
+		self.c, self.s, self.hidden, self.phased = state
 
 	def get_pos(self):
 		return cell_to_pos(self._cell)
