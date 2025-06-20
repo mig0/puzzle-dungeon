@@ -244,7 +244,10 @@ class CellActor(Actor):
 		return cell_to_pos(self._cell)
 
 	def sync_pos(self):
-		self.pos = get_pos(self)
+		self.pos = self.get_pos()
+
+	def sync_cell(self):
+		self.c = pos_to_cell(self.pos)
 
 	def apply_pos_diff(self, diff, subtract=False, factor=1):
 		return apply_diff(cell_to_pos(self.c), diff, subtract, factor)
