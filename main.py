@@ -10,7 +10,6 @@ from pgzero.constants import keys
 from numpy import ndarray, array, any
 from copy import deepcopy
 from random import randint, choice, shuffle
-from traceback import extract_stack
 from unicodedata import bidirectional
 from constants import *
 from teestream import *
@@ -18,6 +17,7 @@ from leveltools import *
 from translations import *
 from cellactor import *
 from objects import *
+from common import *
 from debug import *
 from room import *
 from game import game
@@ -34,18 +34,6 @@ pgzero.loaders.set_root(DATA_DIR)
 stdout.reconfigure(encoding='utf-8')
 
 lang = 'en'
-
-def warn(error, with_trace=False):
-	print(error)
-	if with_trace:
-		for fs in extract_stack():
-			if fs.name in ("warn", "die"):
-				continue
-			print("%s:%d in %s\n  %s" % (fs.filename, fs.lineno, fs.name, fs.line))
-
-def die(error, with_trace=False):
-	warn(error, with_trace)
-	quit()
 
 def autodetect_lang():
 	global lang

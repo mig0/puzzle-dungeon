@@ -1,6 +1,7 @@
 from constants import *
 from cellactor import *
 from objects import *
+from common import *
 from debug import *
 from room import *
 from flags import flags
@@ -81,8 +82,7 @@ class Puzzle:
 		return False
 
 	def die(self, msg):
-		print("%s fatal error: %s" % (self.__class__.__name__, msg))
-		quit()
+		die("%s fatal error: %s" % (self.__class__.__name__, msg))
 
 	def parse_config_num(self, config_key, default):
 		num = self.config.get(config_key, default)
