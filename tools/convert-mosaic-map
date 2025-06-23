@@ -46,13 +46,13 @@ mosaic_to_dungeon_chars = {
 	',': CELL_CRACK,
 	':': CELL_BONES,
 	';': CELL_ROCKS,
-	'a': LIFT_CHARS[LIFT_A],
-	'h': LIFT_CHARS[LIFT_H],
-	'v': LIFT_CHARS[LIFT_V],
-	'l': LIFT_CHARS[LIFT_L],
-	'r': LIFT_CHARS[LIFT_R],
-	'u': LIFT_CHARS[LIFT_U],
-	'd': LIFT_CHARS[LIFT_D],
+	'a': LIFT_CHARS[MOVE_A],
+	'h': LIFT_CHARS[MOVE_H],
+	'v': LIFT_CHARS[MOVE_V],
+	'l': LIFT_CHARS[MOVE_L],
+	'r': LIFT_CHARS[MOVE_R],
+	'u': LIFT_CHARS[MOVE_U],
+	'd': LIFT_CHARS[MOVE_D],
 }
 
 dungeon_to_mosaic_chars = {v: k for k, v in mosaic_to_dungeon_chars.items()}

@@ -60,36 +60,39 @@ ACTOR_ON_PLATE_CHARS = {
 
 ACTOR_AND_PLATE_BY_CHAR = {v: (k, v != ACTOR_CHARS[k]) for k, v in {*ACTOR_CHARS.items(), *ACTOR_ON_PLATE_CHARS.items(),}}
 
-LIFT_A = 'a'
-LIFT_H = 'h'
-LIFT_V = 'v'
-LIFT_L = 'l'
-LIFT_R = 'r'
-LIFT_U = 'u'
-LIFT_D = 'd'
+MOVE_A = 'a'
+MOVE_H = 'h'
+MOVE_V = 'v'
+MOVE_L = 'l'
+MOVE_R = 'r'
+MOVE_U = 'u'
+MOVE_D = 'd'
+MOVE_N = 'n'
+
+MOVE_TYPE_DIRECTIONS = {
+	MOVE_A: [(-1, 0), (+1, 0), (0, -1), (0, +1)],
+	MOVE_H: [(-1, 0), (+1, 0)],
+	MOVE_V: [(0, -1), (0, +1)],
+	MOVE_L: [(-1, 0)],
+	MOVE_R: [(+1, 0)],
+	MOVE_U: [(0, -1)],
+	MOVE_D: [(0, +1)],
+	MOVE_N: [],
+}
+MOVE_TYPES = *MOVE_TYPE_DIRECTIONS,
 
 LIFT_CHARS = {
-	LIFT_A: '✥',
-	LIFT_H: '↔',
-	LIFT_V: '↕',
-	LIFT_L: '←',
-	LIFT_R: '→',
-	LIFT_U: '↑',
-	LIFT_D: '↓',
+	MOVE_A: '✥',
+	MOVE_H: '↔',
+	MOVE_V: '↕',
+	MOVE_L: '←',
+	MOVE_R: '→',
+	MOVE_U: '↑',
+	MOVE_D: '↓',
+	MOVE_N: '◉',
 }
 
-LIFT_TYPE_DIRECTIONS = {
-	LIFT_A:  [(-1, 0), (+1, 0), (0, -1), (0, +1)],
-	LIFT_H: [(-1, 0), (+1, 0)],
-	LIFT_V: [(0, -1), (0, +1)],
-	LIFT_L: [(-1, 0)],
-	LIFT_R: [(+1, 0)],
-	LIFT_U: [(0, -1)],
-	LIFT_D: [(0, +1)],
-}
-LIFT_TYPES = *LIFT_TYPE_DIRECTIONS,
-
-LIFT_TYPES_BY_CHAR = {v: k for k, v in LIFT_CHARS.items()}
+LIFT_MOVE_TYPES_BY_CHAR = {v: k for k, v in LIFT_CHARS.items()}
 
 IMAGES_DIR_PREFIX = DATA_DIR + '/images/'
 DEFAULT_IMAGE_PREFIX = 'default/'

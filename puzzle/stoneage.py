@@ -34,13 +34,13 @@ class StoneAgePuzzle(Puzzle):
 		drop_key1.instantiate(self.Globals.get_random_floor_cell())
 		drop_key2.instantiate(self.Globals.get_random_floor_cell())
 
-		self.Globals.replace_random_floor_cell(CELL_VOID, 5, self.Globals.create_lift, LIFT_A)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 2, self.Globals.create_lift, LIFT_H)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 2, self.Globals.create_lift, LIFT_V)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, LIFT_L)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, LIFT_R)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, LIFT_U)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, LIFT_D)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 5, self.Globals.create_lift, MOVE_A)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 2, self.Globals.create_lift, MOVE_H)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 2, self.Globals.create_lift, MOVE_V)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_L)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_R)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_U)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_D)
 
 	def generate_random_solvable_room(self):
 		while True:

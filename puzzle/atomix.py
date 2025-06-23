@@ -371,7 +371,7 @@ class AtomixPuzzle(Puzzle):
 		text_surface = self.Globals.create_text_cell_image(self.get_atom_str(atom_id), color='#FFFFC0', gcolor="#808040", owidth=1, ocolor="#404030")
 		lift_image.blit(text_surface, (0, 0))
 
-		self.Globals.create_lift(cell, LIFT_A, lift_image)
+		self.Globals.create_lift(cell, MOVE_A, lift_image)
 		lift = lifts[-1]
 		lift.atom_id = atom_id
 		lift.goal_cell = goal_cell

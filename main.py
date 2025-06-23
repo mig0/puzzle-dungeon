@@ -168,8 +168,8 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			cell = (x, y)
 			if ch == CELL_START:
 				set_char_cell(cell, 0)
-			if ch in LIFT_TYPES_BY_CHAR:
-				create_lift(cell, LIFT_TYPES_BY_CHAR[ch])
+			if ch in LIFT_MOVE_TYPES_BY_CHAR:
+				create_lift(cell, LIFT_MOVE_TYPES_BY_CHAR[ch])
 				ch = CELL_VOID
 			if ch in ACTOR_AND_PLATE_BY_CHAR:
 				actor_name, is_plate = ACTOR_AND_PLATE_BY_CHAR[ch]
@@ -996,7 +996,7 @@ def create_lift(cell, type, surface=None):
 
 def get_lift_target(cell, diff):
 	lift = get_actor_on_cell(cell, lifts)
-	if not lift or diff not in LIFT_TYPE_DIRECTIONS[lift.type]:
+	if not lift or diff not in MOVE_TYPE_DIRECTIONS[lift.type]:
 		return None
 	while True:
 		next_cell = apply_diff(cell, diff)
@@ -2166,7 +2166,7 @@ def activate_cursor_after_lift_movement():
 	if not cursor.is_lift_selected():
 		return
 	lift = cursor.selected_actor
-	if lift.type in (LIFT_L, LIFT_R, LIFT_U, LIFT_D):
+	if lift.type in (MOVE_L, MOVE_R, MOVE_U, MOVE_D):
 		cursor.toggle()
 
 def move_selected_lift(diff):
