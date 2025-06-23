@@ -364,10 +364,10 @@ class AtomixPuzzle(Puzzle):
 		num_uniq_atom_ids = len(set(self.get_goal_molecule_atom_ids()))
 
 		if non_bonus_mode or num_uniq_atom_ids <= len(EXTENDED_COLOR_RGB_VALUES):
-			lift_image = self.Globals.load_theme_cell_image('sphere-gray')
+			lift_image = load_theme_cell_image('sphere-gray')
 			lift_image.fill(atom_colors.get(atom_base) or EXTENDED_COLOR_RGB_VALUES[atom_id - 1], special_flags=pygame.BLEND_RGB_MULT)
 		else:
-			lift_image = self.Globals.load_theme_cell_image('lift-empty')
+			lift_image = load_theme_cell_image('lift-empty')
 		text_surface = self.Globals.create_text_cell_image(self.get_atom_str(atom_id), color='#FFFFC0', gcolor="#808040", owidth=1, ocolor="#404030")
 		lift_image.blit(text_surface, (0, 0))
 

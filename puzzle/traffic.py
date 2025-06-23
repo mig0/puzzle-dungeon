@@ -175,7 +175,7 @@ class TrafficPuzzle(Puzzle):
 
 	def on_set_theme(self):
 		self.color_void_images = []
-		gray_void_image = make_grayscale_image(self.Globals.load_theme_cell_image('floor'))
+		gray_void_image = make_grayscale_image(load_theme_cell_image('floor'))
 		for color_idx in range(len(self.exit_color_idxs)):
 			color = EXTENDED_COLOR_RGB_VALUES[color_idx % len(EXTENDED_COLOR_RGB_VALUES)]
 			self.color_void_images.append(colorize_image(gray_void_image.copy(), color))

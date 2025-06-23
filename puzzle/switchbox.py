@@ -81,7 +81,7 @@ class SwitchBoxPuzzle(Puzzle):
 
 	def on_set_theme(self):
 		self.color_floor_images = []
-		gray_floor_image = make_grayscale_image(self.Globals.load_theme_cell_image('floor'))
+		gray_floor_image = make_grayscale_image(load_theme_cell_image('floor'))
 		for color_idx in range(len(self.plate_color_idxs)):
 			color = EXTENDED_COLOR_RGB_VALUES[color_idx % len(EXTENDED_COLOR_RGB_VALUES)]
 			self.color_floor_images.append(colorize_image(gray_floor_image.copy(), color))

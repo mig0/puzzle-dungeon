@@ -26,7 +26,7 @@ class MemoryPuzzle(Puzzle):
 		self.open_cell2_time = None
 
 	def on_set_theme(self):
-		gray_frame_image = self.Globals.load_theme_cell_image('floor_gray_frame')
+		gray_frame_image = load_theme_cell_image('floor_gray_frame')
 		self.cell_images = [gray_frame_image]
 		for color in MAIN_COLOR_RGB_VALUES:
 			cell_image = self.Globals.colorize_cell_image(gray_frame_image, color)

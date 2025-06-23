@@ -347,7 +347,7 @@ class BarrelPuzzle(Puzzle):
 		return False
 
 	def on_set_theme(self):
-		self.red_floor_image = self.Globals.load_theme_cell_image('floor')
+		self.red_floor_image = load_theme_cell_image('floor')
 		self.red_floor_image.fill(MAIN_COLOR_RGB_VALUES[0], special_flags=pygame.BLEND_RGB_MULT)
 
 	def on_load_map(self, special_cell_values, extra_values):

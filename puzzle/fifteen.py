@@ -15,7 +15,7 @@ class FifteenPuzzle(Puzzle):
 		return not flags.is_any_maze
 
 	def on_set_theme(self):
-		self.frame_image = self.Globals.load_theme_cell_image('floor_gray_frame')
+		self.frame_image = load_theme_cell_image('floor_gray_frame')
 
 	def on_create_map(self):
 		self.fifteen_map = ndarray((MAP_SIZE_X, MAP_SIZE_X), dtype=int)

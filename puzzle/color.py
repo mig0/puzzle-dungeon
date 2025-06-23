@@ -18,7 +18,7 @@ class ColorPuzzle(Puzzle):
 		return True
 
 	def on_set_theme(self):
-		gray_tiles_image = self.Globals.load_theme_cell_image('floor_gray_tiles')
+		gray_tiles_image = load_theme_cell_image('floor_gray_tiles')
 		self.cell_images = []
 		for color in MAIN_COLOR_RGB_VALUES:
 			color_cell_image = self.Globals.colorize_cell_image(gray_tiles_image, color)

@@ -19,6 +19,7 @@ from cellactor import *
 from objects import *
 from common import *
 from debug import *
+from theme import *
 from room import *
 from game import game
 from drop import draw_status_drops
@@ -279,7 +280,6 @@ level_goal = None
 map = None  # will be generated
 cell_images = {}  # will be generated
 revealed_map = None
-theme_prefix = None
 
 switch_cell_infos = {}  # tuple(old_cell_type, new_cell_type, end_time, duration) per cell
 portal_demolition_infos = {}  # tuple(new_cell_type, start_time) per cell
@@ -384,14 +384,6 @@ def convert_outer_floors(cell_type=None):
 	if cell_type is not None:
 		replace_outer_walls(cell_type)
 
-def get_theme_image_name(image_name):
-	for full_image_name in (theme_prefix + image_name, DEFAULT_IMAGE_PREFIX + image_name):
-		if os.path.isfile(IMAGES_DIR_PREFIX + full_image_name + '.png'):
-			debug(2, "Found image %s" % full_image_name)
-			return full_image_name
-
-	die("Unable to find image %s in neither %s nor %s" % (image_name, theme_prefix, DEFAULT_IMAGE_PREFIX))
-
 def load_image(image_name, size, do_crop=False):
 	image = pygame.image.load(DATA_DIR + '/' + image_name).convert()
 	if do_crop:
@@ -413,9 +405,6 @@ def load_image(image_name, size, do_crop=False):
 		cropped_image.blit(image, (-crop_x, -crop_y))
 		image = cropped_image
 	return pygame.transform.scale(image, size)
-
-def load_theme_cell_image(image_name):
-	return pygame.image.load(IMAGES_DIR_PREFIX + get_theme_image_name(image_name) + '.png').convert_alpha()
 
 def colorize_cell_image(image, color, alpha=1):
 	cell_surface = pygame.Surface((CELL_W, CELL_H), pygame.SRCALPHA, 32)
@@ -451,12 +440,6 @@ def is_cell_occupied(cell, include_phased=False):
 # used for positioning enemies during level generation
 def is_cell_occupied_for_enemy(cell):
 	return map[cell] in CELL_ENEMY_PLACE_OBSTACLES or is_cell_occupied(cell, True) or is_portal_destination(cell)
-
-def create_theme_image(image_name):
-	return CellActor(get_theme_image_name(image_name))
-
-def create_theme_actor(image_name, cell):
-	return create_actor(get_theme_image_name(image_name), cell)
 
 def reveal_map_near_char():
 	if not flags.is_cloud_mode:
@@ -1014,7 +997,6 @@ class Globals:
 	convert_outer_walls = convert_outer_walls
 	convert_outer_floors = convert_outer_floors
 	load_image = load_image
-	load_theme_cell_image = load_theme_cell_image
 	colorize_cell_image = colorize_cell_image
 	create_cell_subimage = create_cell_subimage
 	create_text_cell_image = create_text_cell_image
@@ -1130,9 +1112,8 @@ def generate_map():
 def set_theme(theme_name):
 	global cell_images, status_image, cloud_image
 	global barrels
-	global theme_prefix
 
-	theme_prefix = theme_name + '/'
+	set_theme_name(theme_name)
 	image1 = create_theme_image('wall')
 	image2 = create_theme_image('floor')
 	image3 = create_theme_image('crack')
@@ -1179,19 +1160,18 @@ def set_theme(theme_name):
 		CELL_OUTER_WALL: outer_wall_image,
 	}
 
-	char.image = get_theme_image_name("char")
+	load_actor_theme_image(char, 'char')
 
-	cursor.image = get_theme_image_name("cursor")
+	load_actor_theme_image(cursor, 'cursor')
 
 	for enemy in enemies:
-		enemy.image = get_theme_image_name("enemy")
+		load_actor_theme_image(enemy, 'enemy')
 
 	for barrel in barrels:
-		barrel.image = get_theme_image_name("barrel")
+		reload_actor_theme_image(barrel)
 
 	for lift in lifts:
-		if lift.image:
-			lift.image = get_theme_image_name("lift" + lift.type)
+		reload_actor_theme_image(lift)
 
 	for drop in drops:
 		drop.set_image(get_theme_image_name(drop.name))
