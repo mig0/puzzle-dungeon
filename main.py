@@ -1,11 +1,11 @@
 import os
 import io
 import re
+import sys
 import random
 import pygame
 import pgzero
 import builtins
-from sys import stdout
 from pgzero.constants import keys
 from numpy import ndarray, array, any
 from copy import deepcopy
@@ -31,8 +31,9 @@ from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_
 from clipboard import clipboard
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
+# set data dir and default encoding for the whole program
 pgzero.loaders.set_root(DATA_DIR)
-stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding='utf-8')
 
 lang = 'en'
 
@@ -610,6 +611,7 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, al
 				break
 	return path_cells
 
+# like find_path, but return all paths with the shortest distance from start to target
 def find_all_paths(start_cell, target_cell, obstacles=None, allow_obstacles=False):
 	if start_cell == target_cell:
 		return [()]
