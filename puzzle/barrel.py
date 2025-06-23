@@ -38,8 +38,8 @@ class BarrelPuzzle(Puzzle):
 
 	def on_enter_room(self):
 		# prepare some invariant data
-		self.num_total_cells = self.room.size_x * self.room.size_y
-		self.plate_cells = [ tuple(cell) for cell in argwhere(self.map == CELL_PLATE) if self.Globals.is_cell_in_room(cell) ]
+		self.num_total_cells = room.size_x * room.size_y
+		self.plate_cells = [ tuple(cell) for cell in argwhere(self.map == CELL_PLATE) if is_cell_in_room(cell) ]
 		self.plate_cells.sort()
 		self.stock_barrel_cells = [ barrel.c for barrel in self.get_room_barrels() ]
 		self.stock_barrel_cells.sort()
@@ -49,7 +49,7 @@ class BarrelPuzzle(Puzzle):
 		self.reset_solution_data()
 
 	def get_room_barrels(self):
-		return [ barrel for barrel in barrels if self.Globals.is_actor_in_room(barrel) ]
+		return [ barrel for barrel in barrels if is_actor_in_room(barrel) ]
 
 	def show_map(self, descr=None, char_cell=None, barrel_cells=None):
 		orig_barrels = barrels.copy()
@@ -446,7 +446,7 @@ class BarrelPuzzle(Puzzle):
 		char.c = None
 
 		# 1) initialize entire room to WALL
-		for cell in self.room.cells:
+		for cell in room.cells:
 			self.map[cell] = CELL_WALL
 
 		# 2) place room plates randomly or in good positions, as the number of barrels
@@ -614,7 +614,7 @@ class BarrelPuzzle(Puzzle):
 			plate_cells = []
 
 			# 1) initialize entire room to WALL
-			for cell in self.room.cells:
+			for cell in room.cells:
 				self.map[cell] = CELL_WALL
 
 			# 2) place room plates randomly or in good positions, as the number of barrels

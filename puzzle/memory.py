@@ -61,7 +61,7 @@ class MemoryPuzzle(Puzzle):
 		return True
 
 	def is_solved(self):
-		return not self.room_memory_pairs[self.room.idx]
+		return not self.room_memory_pairs[room.idx]
 
 	def is_time_to_reveal(self):
 		return self.reveal_time > self.level_time
@@ -79,7 +79,7 @@ class MemoryPuzzle(Puzzle):
 		if self.memory_map[self.open_cell2] == pair_idx:
 			self.memory_map[self.open_cell1] = MEMORY_PUZZLE_VALUE_OUTSIDE
 			self.memory_map[self.open_cell2] = MEMORY_PUZZLE_VALUE_OUTSIDE
-			del self.room_memory_pairs[self.room.idx][pair_idx]
+			del self.room_memory_pairs[room.idx][pair_idx]
 		self.unset_open_cells()
 
 	def press_cell(self, cell, button=None):
@@ -131,7 +131,7 @@ class MemoryPuzzle(Puzzle):
 				debug(3, "	%s" % str(cell2))
 				self.memory_map[cell2] = pair_idx
 				memory_pairs[pair_idx] = (cell1, cell2)  # or True
-		self.room_memory_pairs[self.room.idx] = memory_pairs
+		self.room_memory_pairs[room.idx] = memory_pairs
 
 		self.Globals.set_char_cell(self.get_empty_central_cell())
 

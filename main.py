@@ -19,6 +19,7 @@ from translations import *
 from cellactor import *
 from objects import *
 from debug import *
+from room import *
 from game import game
 from drop import draw_status_drops
 from flags import flags
@@ -231,9 +232,6 @@ def load_map(filename_or_stringio, special_cell_types={}):
 
 	return (special_cell_values, extra_values)
 
-def is_cell_in_area(cell, x_range, y_range):
-	return cell[0] in x_range and cell[1] in y_range
-
 # get 4 neughbour cells for cell
 def get_cell_neighbors(cell, x_range=None, y_range=None):
 	neighbors = []
@@ -311,7 +309,6 @@ level_goal_time = 0
 
 level = None
 
-room = Area()
 enter_room_idx = None
 
 def get_bg_image():
@@ -493,35 +490,21 @@ def get_revealed_actors(actors):
 def set_char_flip(is_right_dir=True):
 	char.flip = None if is_right_dir else (True, False)
 
-def assert_room():
-	if mode != "game" and mode != "init" and mode != "next":
-		die("Called room function when not inside game or init (mode=%s). Fix this bug" % mode)
-
-def set_room(idx):
-	room.size = flags.ROOM_SIZE(idx)
-	room.size_x = flags.ROOM_SIZE_X[idx]
-	room.size_y = flags.ROOM_SIZE_Y[idx]
-	room.x1 = flags.ROOM_X1[idx]
-	room.x2 = flags.ROOM_X2[idx]
-	room.y1 = flags.ROOM_Y1[idx]
-	room.y2 = flags.ROOM_Y2[idx]
-	room.x_range = flags.ROOM_X_RANGE[idx]
-	room.y_range = flags.ROOM_Y_RANGE[idx]
-	room.idx = idx
-
-	puzzle.set_room(room)
+def set_room_and_notify_puzzle(idx):
+	set_room(idx)
+	puzzle.on_set_room()
 
 # only to be used by puzzle's restore_level
 def advance_room():
 	if room.idx + 1 >= flags.NUM_ROOMS:
 		return False
-	set_room(room.idx + 1)
+	set_room_and_notify_puzzle(room.idx + 1)
 	return True
 
 def enter_room(idx):
 	global mode, char_cells, last_time_arrow_keys_processed
 
-	set_room(idx)
+	set_room_and_notify_puzzle(idx)
 	reset_status_messages()
 
 	char.reset_animation()
@@ -547,23 +530,6 @@ def enter_room(idx):
 
 	char.phased = puzzle.is_char_phased()
 	set_char_flip((char.cx - room.x1) * 2 < room.size_x)
-
-def get_max_area_distance(area):
-	return cell_distance((area.x1, area.y1), (area.x2, area.y2))
-
-def get_max_room_distance():
-	return get_max_area_distance(room)
-
-def is_actor_in_room(actor):
-	assert_room()
-
-	return actor.cx >= room.x1 and actor.cx <= room.x2 and actor.cy >= room.y1 and actor.cy <= room.y2
-
-def get_actors_in_room(actors):
-	return [actor for actor in actors if is_actor_in_room(actor)]
-
-def is_cell_in_room(cell):
-	return is_cell_in_area(cell, room.x_range, room.y_range)
 
 accessible_obstacles = None
 
@@ -1066,10 +1032,6 @@ class Globals:
 	create_text_cell_image = create_text_cell_image
 	is_cell_occupied = is_cell_occupied
 	advance_room = advance_room
-	get_max_room_distance = get_max_room_distance
-	is_actor_in_room = is_actor_in_room
-	is_cell_in_room = is_cell_in_room
-	get_actors_in_room = get_actors_in_room
 	start_accessible_obstacles = start_accessible_obstacles
 	clear_accessible_obstacles = clear_accessible_obstacles
 	is_cell_accessible = is_cell_accessible
@@ -1102,7 +1064,7 @@ class Globals:
 	toggle_actor_phased = toggle_actor_phased
 
 def generate_room(idx):
-	set_room(idx)
+	set_room_and_notify_puzzle(idx)
 
 	if flags.is_random_maze:
 		generate_random_maze_room()
@@ -1166,7 +1128,7 @@ def generate_map():
 			if flags.MULTI_ROOMS:
 				print("Ignoring multi-room level config when loading map")
 			puzzle.set_map(map)
-			set_room(0)
+			set_room_and_notify_puzzle(0)
 			puzzle.on_load_map(*ret)
 			return
 
@@ -1433,7 +1395,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 			create_portal(portal_cell, dst_cell)
 		for drop in drops:
 			drop.restore_state(stored_level["drop_states"][drop.name])
-		set_room(0)
+		set_room_and_notify_puzzle(0)
 		puzzle.restore_level(stored_level)
 	else:
 		theme_name = level["theme"]

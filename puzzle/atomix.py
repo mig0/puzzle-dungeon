@@ -234,11 +234,11 @@ class AtomixPuzzle(Puzzle):
 
 	@property
 	def goal_molecule(self):
-		return self.goal_molecules[self.room.idx]
+		return self.goal_molecules[room.idx]
 
 	@goal_molecule.setter
 	def goal_molecule(self, molecule):
-		self.goal_molecules[self.room.idx] = molecule
+		self.goal_molecules[room.idx] = molecule
 
 		atom_ids = self.get_goal_molecule_atom_ids()
 		uniq_atom_ids = []
@@ -257,15 +257,15 @@ class AtomixPuzzle(Puzzle):
 			atom_base = self.get_atom_base(atom_id)
 			atom_base_counters[atom_base] += 1
 			atom_indexes[atom_id] = None if len(atom_base_ids[atom_base]) == 1 else atom_base_counters[atom_base]
-		self.atom_indexes_per_room[self.room.idx] = atom_indexes
+		self.atom_indexes_per_room[room.idx] = atom_indexes
 
 	@property
 	def atom_indexes(self):
-		return self.atom_indexes_per_room[self.room.idx]
+		return self.atom_indexes_per_room[room.idx]
 
 	@atom_indexes.setter
 	def atom_indexes(self, indexes):
-		self.atom_indexes_per_room[self.room.idx] = indexes
+		self.atom_indexes_per_room[room.idx] = indexes
 
 	def get_goal_molecule_atom_ids(self):
 		return [atom_id for row in self.goal_molecule for atom_id in row if atom_id != '']
@@ -279,7 +279,7 @@ class AtomixPuzzle(Puzzle):
 		return self.get_atom_base(atom_id) + index_str
 	
 	def get_current_lift_molecule(self):
-		room_lifts = self.Globals.get_actors_in_room(lifts)
+		room_lifts = get_actors_in_room(lifts)
 
 		x_min = y_min = 1000
 		x_max = y_max = -1
@@ -326,7 +326,7 @@ class AtomixPuzzle(Puzzle):
 
 	def scramble(self):
 		# move all lifts until possible without repetition
-		room_lifts = self.Globals.get_actors_in_room(lifts)
+		room_lifts = get_actors_in_room(lifts)
 		was_scrambled = False
 
 		visited_lift_molecules = [self.goal_molecule]
@@ -336,7 +336,7 @@ class AtomixPuzzle(Puzzle):
 					neigh_presense = 0
 					for dir in 'lrdu':
 						neigh = apply_diff(lift.c, dir_diffs[dir])
-						if not self.Globals.is_cell_in_room(neigh) or self.map[neigh] != CELL_VOID or is_cell_in_actors(neigh, lifts):
+						if not is_cell_in_room(neigh) or self.map[neigh] != CELL_VOID or is_cell_in_actors(neigh, lifts):
 							neigh_presense += diff_factors[dir]
 					scramble_dirs = [dir for dir in scramble_presense_dirs[neigh_presense] if dir != ' ']
 					for scramble_dir in scramble_dirs:
@@ -406,7 +406,7 @@ class AtomixPuzzle(Puzzle):
 		self.set_area_from_config(align_to_center=True)
 
 		# replace floor with void and fill unused space with walls
-		for cell in self.room.cells:
+		for cell in room.cells:
 			self.map[cell] = CELL_VOID if self.is_in_area(cell) else CELL_FLOOR if flags.MULTI_ROOMS else CELL_WALL
 
 		if not flags.MULTI_ROOMS:
@@ -470,7 +470,7 @@ class AtomixPuzzle(Puzzle):
 	def on_update(self, level_time):
 		if not active_inplace_animation_actors:
 			if self.draw_solved_mode != self.last_draw_solved_mode:
-				room_lifts = self.Globals.get_actors_in_room(lifts)
+				room_lifts = get_actors_in_room(lifts)
 				for lift in room_lifts:
 					lift.cell_to_draw = lift.goal_cell if self.draw_solved_mode else None
 				self.last_draw_solved_mode = self.draw_solved_mode

@@ -157,51 +157,51 @@ class GatePuzzle(Puzzle):
 
 	@property
 	def num_plates(self):
-		return self.room_values[self.room.idx][0]
+		return self.room_values[room.idx][0]
 
 	@num_plates.setter
 	def num_plates(self, num_plates):
-		self.room_values[self.room.idx][0] = num_plates
+		self.room_values[room.idx][0] = num_plates
 
 	@property
 	def num_gates(self):
-		return self.room_values[self.room.idx][1]
+		return self.room_values[room.idx][1]
 
 	@num_gates.setter
 	def num_gates(self, num_gates):
-		self.room_values[self.room.idx][1] = num_gates
+		self.room_values[room.idx][1] = num_gates
 
 	@property
 	def finish_cell(self):
-		return self.room_values[self.room.idx][2]
+		return self.room_values[room.idx][2]
 
 	@finish_cell.setter
 	def finish_cell(self, finish_cell):
-		self.room_values[self.room.idx][2] = finish_cell
+		self.room_values[room.idx][2] = finish_cell
 
 	@property
 	def plate_cells(self):
-		return self.room_values[self.room.idx][3]
+		return self.room_values[room.idx][3]
 
 	@plate_cells.setter
 	def plate_cells(self, plate_cells):
-		self.room_values[self.room.idx][3] = plate_cells
+		self.room_values[room.idx][3] = plate_cells
 
 	@property
 	def gate_cells(self):
-		return self.room_values[self.room.idx][4]
+		return self.room_values[room.idx][4]
 
 	@gate_cells.setter
 	def gate_cells(self, gate_cells):
-		self.room_values[self.room.idx][4] = gate_cells
+		self.room_values[room.idx][4] = gate_cells
 
 	@property
 	def attached_plate_gate_idxs(self):
-		return self.room_values[self.room.idx][5]
+		return self.room_values[room.idx][5]
 
 	@attached_plate_gate_idxs.setter
 	def attached_plate_gate_idxs(self, attached_plate_gate_idxs):
-		self.room_values[self.room.idx][5] = attached_plate_gate_idxs
+		self.room_values[room.idx][5] = attached_plate_gate_idxs
 
 	def store_level(self, stored_level):
 		stored_level["room_values"] = self.room_values

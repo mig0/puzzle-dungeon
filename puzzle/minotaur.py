@@ -28,19 +28,19 @@ class MinotaurPuzzle(Puzzle):
 
 	@property
 	def minotaur_cell(self):
-		return self.minotaur_cells[self.room.idx]
+		return self.minotaur_cells[room.idx]
 
 	@minotaur_cell.setter
 	def minotaur_cell(self, cell):
-		self.minotaur_cells[self.room.idx] = cell
+		self.minotaur_cells[room.idx] = cell
 
 	@property
 	def goal_cell(self):
-		return self.goal_cells[self.room.idx]
+		return self.goal_cells[room.idx]
 
 	@goal_cell.setter
 	def goal_cell(self, cell):
-		self.goal_cells[self.room.idx] = cell
+		self.goal_cells[room.idx] = cell
 
 	def is_lost(self):
 		return self._is_lost
@@ -104,9 +104,9 @@ class MinotaurPuzzle(Puzzle):
 
 	def set_goal_and_finish_cell(self, goal_cell):
 		self.goal_cell = goal_cell
-		if self.area.size != self.room.size and self.Globals.is_cell_accessible(self.room.cell11):
-			finish_cell = self.Globals.get_farthest_accessible_cell(self.room.cell11)
-			self.Globals.create_portal(goal_cell, self.room.cell11)
+		if self.area.size != room.size and self.Globals.is_cell_accessible(room.cell11):
+			finish_cell = self.Globals.get_farthest_accessible_cell(room.cell11)
+			self.Globals.create_portal(goal_cell, room.cell11)
 		else:
 			finish_cell = goal_cell
 		self.map[finish_cell] = CELL_FINISH

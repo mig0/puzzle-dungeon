@@ -2,6 +2,7 @@ from constants import *
 from cellactor import *
 from objects import *
 from debug import *
+from room import *
 from flags import flags
 from time import time
 from random import randint, random, shuffle, choice, choices
@@ -26,7 +27,6 @@ class Puzzle:
 
 	def __init__(self, level, Globals):
 		self.map = None
-		self.room = None
 		self.level = level
 		self.Globals = Globals
 		self.area = Area()
@@ -102,10 +102,10 @@ class Puzzle:
 		return [cell for cell in self.area.cells if self.map[cell] in cell_types]
 
 	def get_room_cells(self, *cell_types):
-		return [cell for cell in self.room.cells if self.map[cell] in cell_types]
+		return [cell for cell in room.cells if self.map[cell] in cell_types]
 
 	def set_area_from_config(self, min_size=None, default_size=None, request_odd_size=False, align_to_center=False):
-		max_size = flags.ROOM_SIZE(self.room.idx, request_odd_size)
+		max_size = flags.ROOM_SIZE(room.idx, request_odd_size)
 		if min_size is None:
 			min_size = (3, 3) if request_odd_size else (2, 2)
 
@@ -122,13 +122,13 @@ class Puzzle:
 		self.area.size = tuple(size)
 		self.area.size_x = size[0]
 		self.area.size_y = size[1]
-		self.area.x1 = self.room.x1 + (self.room.size_x - self.area.size_x) // 2 \
-			+ ((self.room.size_x - self.area.size_x) % 2 * ((self.room.idx + 1 if self.room.idx is not None else 0) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
-			+ ((self.room.size_x - self.area.size_x) % 2 * ((self.room.idx + 1 if self.room.idx is not None else 0) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
+		self.area.x1 = room.x1 + (room.size_x - self.area.size_x) // 2 \
+			+ ((room.size_x - self.area.size_x) % 2 * ((room.idx + 1 if room.idx is not None else 0) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
+			+ ((room.size_x - self.area.size_x) % 2 * ((room.idx + 1 if room.idx is not None else 0) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
 		self.area.x2 = self.area.x1 + self.area.size_x - 1
-		self.area.y1 = self.room.y1 + (self.room.size_y - self.area.size_y) // 2 \
-			+ ((self.room.size_y - self.area.size_y) % 2 * (1 - ((self.room.idx if self.room.idx is not None else 2) // 2) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
-			+ ((self.room.size_y - self.area.size_y) % 2 * int(1.5 - ((self.room.idx if self.room.idx is not None else 3) // 3) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
+		self.area.y1 = room.y1 + (room.size_y - self.area.size_y) // 2 \
+			+ ((room.size_y - self.area.size_y) % 2 * (1 - ((room.idx if room.idx is not None else 2) // 2) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
+			+ ((room.size_y - self.area.size_y) % 2 * int(1.5 - ((room.idx if room.idx is not None else 3) // 3) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
 		self.area.y2 = self.area.y1 + self.area.size_y - 1
 		self.area.x_range = range(self.area.x1, self.area.x2 + 1)
 		self.area.y_range = range(self.area.y1, self.area.y2 + 1)
@@ -137,7 +137,7 @@ class Puzzle:
 		return self.Globals.is_cell_in_area(cell, self.area.x_range, self.area.y_range)
 
 	def is_in_room(self, cell):
-		return self.Globals.is_cell_in_area(cell, self.room.x_range, self.room.y_range)
+		return self.Globals.is_cell_in_area(cell, room.x_range, room.y_range)
 
 	def set_area_border_walls(self):
 		for x in self.area.x_range:
@@ -212,10 +212,6 @@ class Puzzle:
 
 	def on_set_room(self):
 		pass
-
-	def set_room(self, room):
-		self.room = room
-		self.on_set_room()
 
 	def on_enter_room(self):
 		pass

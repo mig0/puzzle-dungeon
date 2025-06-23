@@ -52,7 +52,7 @@ class HeroPuzzle(Puzzle):
 		num_slots = self.area.size_x - 1
 
 		self.set_area_border_walls()
-		if self.area.x1 > self.room.x1:
+		if self.area.x1 > room.x1:
 			self.map[self.area.x1 - 1, (self.area.y1 + self.area.y2) // 2] = CELL_GATE1
 
 		for cell in self.area.cells:
@@ -70,4 +70,4 @@ class HeroPuzzle(Puzzle):
 			else:
 				self.generate_random_nonsolvable_floor_cell(cell)
 
-		self.map[self.room.x1, self.room.y2] = CELL_FINISH
+		self.map[room.x1, room.y2] = CELL_FINISH

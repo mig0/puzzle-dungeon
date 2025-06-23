@@ -46,14 +46,14 @@ class StoneAgePuzzle(Puzzle):
 		while True:
 			start_cell = self.Globals.get_random_floor_cell()
 			finish_cell = self.Globals.get_random_floor_cell()
-			if cell_distance(start_cell, finish_cell) > self.Globals.get_max_room_distance() / 2:
+			if cell_distance(start_cell, finish_cell) > get_max_room_distance() / 2:
 				break
 
 		self.map[start_cell] = CELL_START
 		self.map[finish_cell] = CELL_FINISH
 		self.Globals.set_char_cell(start_cell)
 
-		self.Globals.replace_random_floor_cell(CELL_VOID, (self.room.x2 - self.room.x1 + 1) * (self.room.y2 - self.room.y1 + 1) - 2)
+		self.Globals.replace_random_floor_cell(CELL_VOID, (room.x2 - room.x1 + 1) * (room.y2 - room.y1 + 1) - 2)
 		self.Globals.generate_random_free_path(start_cell, finish_cell, deviation=4)
 
 		path_cells = self.Globals.find_path(start_cell, finish_cell)[:-1]
