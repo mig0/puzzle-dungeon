@@ -68,7 +68,7 @@ class PortalPuzzle(Puzzle):
 		return False
 
 	def create_portal(self, portal_cell, hall_idx, dst_hall_id):
-		self.Globals.debug(3, "  create_portal %s %d -> %d" % (str(portal_cell), hall_idx, dst_hall_id))
+		debug(3, "  create_portal %s %d -> %d" % (str(portal_cell), hall_idx, dst_hall_id))
 		self.Globals.create_portal(portal_cell, get_hall_center_cell(dst_hall_id))
 		self.portal_cell_to_hall_idx[portal_cell] = dst_hall_id
 		self.dst_hall_idx_to_src_hall_idxs[dst_hall_id].append(hall_idx)
@@ -81,11 +81,11 @@ class PortalPuzzle(Puzzle):
 
 		while True:
 			for hall_idx in range(0, 9):
-				self.Globals.debug(3, "hall_idx %d" % hall_idx)
+				debug(3, "hall_idx %d" % hall_idx)
 				self.hall_center_cell_to_idx[get_hall_center_cell(hall_idx)] = hall_idx
 				if hall_idx != 4:
 					for portal_idx in range(0, 4):
-						self.Globals.debug(3, "  portal_idx %d" % portal_idx)
+						debug(3, "  portal_idx %d" % portal_idx)
 						if portal_idx in SKIPPED_PORTAL_IDXS_PER_NUM[self.num_portals_per_hall - 1]:
 							continue
 						portal_cell = get_hall_portal_cell(hall_idx, portal_idx)

@@ -236,7 +236,7 @@ class MinotaurPuzzle(Puzzle):
 			self.set_goal_and_finish_cell(goal_cell)
 			return
 
-		self.Globals.debug(0, "Can't generate minotaur level, making it random unsolvable")
+		debug(0, "Can't generate minotaur level, making it random unsolvable")
 		for cell in self.area.cells:
 			self.convert_to_floor(cell)
 		self.generate_random_nonsolvable_room()

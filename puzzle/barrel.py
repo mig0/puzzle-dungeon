@@ -388,7 +388,7 @@ class BarrelPuzzle(Puzzle):
 
 		if not neighbors:
 			# can't find free neighbor for barrel, stop
-			self.Globals.debug(2, "barrel #%d - failed to find free neighbor for barrel %s (%d left)" % (idx, barrel.c, num_moves))
+			debug(2, "barrel #%d - failed to find free neighbor for barrel %s (%d left)" % (idx, barrel.c, num_moves))
 			return False
 
 		for neighbor in neighbors:
@@ -403,7 +403,7 @@ class BarrelPuzzle(Puzzle):
 			barrel_cy = barrel.cy
 			new_char_cx = cx + (cx - barrel_cx)
 			new_char_cy = cy + (cy - barrel_cy)
-			self.Globals.debug(2, "barrel #%d - neighbor %s, next cell (%d, %d)" % (idx, neighbor, new_char_cx, new_char_cy))
+			debug(2, "barrel #%d - neighbor %s, next cell (%d, %d)" % (idx, neighbor, new_char_cx, new_char_cy))
 			self.Globals.debug_map(2, full=True, clean=True, dual=True)
 			was_wall2_replaced = False
 			if self.map[new_char_cx, new_char_cy] == CELL_WALL:
@@ -427,9 +427,9 @@ class BarrelPuzzle(Puzzle):
 				if self.pull_barrel_randomly(barrel, visited_cell_pairs, num_moves - 1):
 					return True
 				else:
-					self.Globals.debug(2, "barrel #%d - failed to pull barrel (%d moves left)" % (idx, num_moves - 1))
+					debug(2, "barrel #%d - failed to pull barrel (%d moves left)" % (idx, num_moves - 1))
 			else:
-				self.Globals.debug(2, "barrel #%d - failed to generate random free path to neighbor %s" % (idx, neighbor))
+				debug(2, "barrel #%d - failed to generate random free path to neighbor %s" % (idx, neighbor))
 
 			# can't create free path for char or can't pull barrel, restore the original state
 			char.c = old_char_c
@@ -458,12 +458,12 @@ class BarrelPuzzle(Puzzle):
 
 		# 4) for each area barrel do:
 		for barrel in barrels:
-			self.Globals.debug(2, "barrel #%d - starting (%d, %d)" % (barrels.index(barrel), barrel.cx, barrel.cy))
+			debug(2, "barrel #%d - starting (%d, %d)" % (barrels.index(barrel), barrel.cx, barrel.cy))
 			visited_cell_pairs = [(barrel.c, char.c)]
 			# 5) make random moves for the barrel until possible
 			num_moves = randint(10, 80)
 			self.pull_barrel_randomly(barrel, visited_cell_pairs, num_moves)
-			self.Globals.debug(2, "barrel #%d - finished (%d, %d)" % (barrels.index(barrel), barrel.cx, barrel.cy))
+			debug(2, "barrel #%d - finished (%d, %d)" % (barrels.index(barrel), barrel.cx, barrel.cy))
 
 		# 11) remember the char position, optionally try to move it as far left-top as possible
 		if char.c is None:
@@ -566,7 +566,7 @@ class BarrelPuzzle(Puzzle):
 		placed_barrel_cells = []
 
 		self.convert_to_floor(char_cell)
-		self.Globals.debug(2, "generate %s %s %s" % (str(char_cell), barrel_cells, plate_cells))
+		debug(2, "generate %s %s %s" % (str(char_cell), barrel_cells, plate_cells))
 		self.Globals.debug_map(2)
 
 		num_tries = 4000
@@ -574,7 +574,7 @@ class BarrelPuzzle(Puzzle):
 			path_cells, barrel_path_cells, barrel_cell, plate_cell = self.find_best_char_barrel_path(char_cell, unplaced_barrel_plate_cell_pairs, placed_barrel_cells)
 			if not path_cells:
 				break
-			self.Globals.debug(2, "%s %s %s %s" % (path_cells, barrel_path_cells, str(barrel_cell), str(plate_cell)))
+			debug(2, "%s %s %s %s" % (path_cells, barrel_path_cells, str(barrel_cell), str(plate_cell)))
 
 			unplaced_barrel_plate_cell_pairs.remove((barrel_cell, plate_cell))
 
@@ -599,7 +599,7 @@ class BarrelPuzzle(Puzzle):
 			else:
 				placed_barrel_cells.append(barrel_cell)
 
-			self.Globals.debug(2, "%s %s" % (str(char_cell), str(barrel_cell)))
+			debug(2, "%s %s" % (str(char_cell), str(barrel_cell)))
 			self.Globals.debug_map(2)
 
 			num_tries -= 1
@@ -649,7 +649,7 @@ class BarrelPuzzle(Puzzle):
 
 			num_tries -= 1
 
-		self.Globals.debug(0, "Can't generate barrel level, making it solved")
+		debug(0, "Can't generate barrel level, making it solved")
 		for cell in self.get_room_cells(CELL_PLATE):
 			self.Globals.create_barrel(cell)
 

@@ -58,7 +58,7 @@ class LockPuzzle(Puzzle):
 			else:
 				break
 
-			self.Globals.debug(2, "Failed to generate solvable lock room, trying again")
+			debug(2, "Failed to generate solvable lock room, trying again")
 			copyto(self.map, origin_map)
 			accessible_cells = orig_accessible_cells.copy()
 			if flags.is_enemy_key_drop:

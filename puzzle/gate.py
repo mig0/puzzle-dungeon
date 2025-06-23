@@ -55,23 +55,23 @@ class SpanModel:
 			if not self.spans:
 				return Solution()
 			if not self.validate_spans():
-				self.Globals.debug(3, "Fail solution for invalid spans: %s" % shortstr(self.spans))
+				debug(3, "Fail solution for invalid spans: %s" % shortstr(self.spans))
 				return False
 
 			self.visited_span_open_gates = {}
 			self.unfinished_span_open_gates = []
 
-		self.Globals.debug(3, depth=depth, str="span=%d open_gates=%s" % (span_idx, open_gate_bits.to01()))
+		debug(3, depth=depth, str="span=%d open_gates=%s" % (span_idx, open_gate_bits.to01()))
 
 		visited_key = (span_idx, open_gate_bits)
 
 		if visited_key in self.visited_span_open_gates:
-			self.Globals.debug(4, depth=depth, str="-> found: %s" % self.visited_span_open_gates[visited_key])
+			debug(4, depth=depth, str="-> found: %s" % self.visited_span_open_gates[visited_key])
 			return self.visited_span_open_gates[visited_key]
 
 		if span_idx == -1:
 			solution = Solution()
-			self.Globals.debug(4, depth=depth, str="-> finish: %s" % shortstr(solution))
+			debug(4, depth=depth, str="-> finish: %s" % shortstr(solution))
 			self.visited_span_open_gates[visited_key] = solution
 			return solution
 
@@ -112,14 +112,14 @@ class SpanModel:
 		self.unfinished_span_open_gates.pop()
 
 		if not best_solution:
-			self.Globals.debug(4, depth=depth, str="-> no solution")
+			debug(4, depth=depth, str="-> no solution")
 			self.visited_span_open_gates[visited_key] = None
 			return None
 
 		solution = best_solution.update_copy(best_new_open_gate_bits, best_combined_plate_idxs, best_gate_idx, span_idx, best_combined_plate_idxs)
-		self.Globals.debug(4, depth=depth, str="-> %s" % shortstr(solution))
+		debug(4, depth=depth, str="-> %s" % shortstr(solution))
 		if depth == 0:
-			self.Globals.debug(3, "[solution] plates: %d of %d, gates: %d of %d, spans: %d of %d, states: %d" % (
+			debug(3, "[solution] plates: %d of %d, gates: %d of %d, spans: %d of %d, states: %d" % (
 				len(solution.used_plates), self.num_plates,
 				len(solution.passed_gates), self.num_gates,
 				len(solution.visited_spans), len(self.spans), len(self.visited_span_open_gates))
@@ -303,7 +303,7 @@ class GatePuzzle(Puzzle):
 
 	def find_solution(self, span_model, init_open_gate_bits):
 		solution = span_model.find_solution(0, 0, init_open_gate_bits)
-		self.Globals.debug(2, "Found solution: %s" % shortstr(solution) if solution else "No solution found")
+		debug(2, "Found solution: %s" % shortstr(solution) if solution else "No solution found")
 		return solution
 
 	def find_map_solution(self, start_cell):
@@ -399,8 +399,8 @@ class GatePuzzle(Puzzle):
 			min_plate_idx = min(range(self.num_plates), key=lambda plate_idx: self.attached_plate_gate_idxs[plate_idx])
 			self.attached_plate_gate_idxs[min_plate_idx].extend(unused_gate_idxs)
 
-			self.Globals.debug(3, "Generating gate puzzle try=%d" % try_n)
-			self.Globals.debug(3, "Attached plate gates: %s" % str(self.attached_plate_gate_idxs))
+			debug(3, "Generating gate puzzle try=%d" % try_n)
+			debug(3, "Attached plate gates: %s" % str(self.attached_plate_gate_idxs))
 			self.finish_cell = finish_cell  # redundant, since it was already set
 			self.plate_cells = plate_cells
 			self.gate_cells = gate_cells

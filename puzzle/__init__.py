@@ -1,6 +1,7 @@
 from constants import *
 from cellactor import *
 from objects import *
+from debug import *
 from flags import flags
 from time import time
 from random import randint, random, shuffle, choice, choices

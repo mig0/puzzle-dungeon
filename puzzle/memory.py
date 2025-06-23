@@ -112,14 +112,14 @@ class MemoryPuzzle(Puzzle):
 			if self.is_empty_central_cell(cell1):
 				continue
 			if self.memory_map[cell1] == MEMORY_PUZZLE_VALUE_OUTSIDE:
-				self.Globals.debug(3, "Finding unused pair_ids for %s" % str(cell1))
+				debug(3, "Finding unused pair_ids for %s" % str(cell1))
 				while True:
 					pair_idx = randint(1, self.get_num_pairs())
 					if pair_idx not in memory_pairs:
 						break
-				self.Globals.debug(3, "	%d" % pair_idx)
+				debug(3, "	%d" % pair_idx)
 				self.memory_map[cell1] = pair_idx
-				self.Globals.debug(3, "Finding unused pair cell for %s" % str(cell1))
+				debug(3, "Finding unused pair cell for %s" % str(cell1))
 				while True:
 					pair_cx = randint(self.area.x_range.start, self.area.x_range.stop - 1)
 					pair_cy = randint(self.area.y_range.start, self.area.y_range.stop - 1)
@@ -128,7 +128,7 @@ class MemoryPuzzle(Puzzle):
 						continue
 					if self.memory_map[cell2] == MEMORY_PUZZLE_VALUE_OUTSIDE:
 						break
-				self.Globals.debug(3, "	%s" % str(cell2))
+				debug(3, "	%s" % str(cell2))
 				self.memory_map[cell2] = pair_idx
 				memory_pairs[pair_idx] = (cell1, cell2)  # or True
 		self.room_memory_pairs[self.room.idx] = memory_pairs

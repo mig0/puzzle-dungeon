@@ -18,6 +18,7 @@ from leveltools import *
 from translations import *
 from cellactor import *
 from objects import *
+from debug import *
 from game import game
 from drop import draw_status_drops
 from flags import flags
@@ -315,13 +316,6 @@ enter_room_idx = None
 
 def get_bg_image():
 	return bg_image
-
-def debug(level, str, depth=None):
-	if DEBUG_LEVEL < level:
-		return
-	if depth is not None:
-		print(" " * depth, end="")
-	print(str)
 
 def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, combined=True, dual=False, endl=False, char_cell=None, cell_chars={}):
 	if DEBUG_LEVEL < level:
@@ -1061,7 +1055,6 @@ class Globals:
 	get_actor_neighbors = get_actor_neighbors
 	get_all_neighbors = get_all_neighbors
 	get_bg_image = get_bg_image
-	debug = debug
 	debug_map = debug_map
 	is_cell_in_map = is_cell_in_map
 	convert_outer_walls = convert_outer_walls
