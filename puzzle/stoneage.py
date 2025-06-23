@@ -28,19 +28,19 @@ class StoneAgePuzzle(Puzzle):
 		self.Globals.replace_random_floor_cell(CELL_FINISH)
 		self.Globals.replace_random_floor_cell(CELL_SAND, 10)
 
-		self.Globals.replace_random_floor_cell(CELL_PORTAL, 2, self.Globals.create_portal_pair, extra_num=1)
+		self.Globals.replace_random_floor_cell(CELL_PORTAL, 2, create_portal_pair, extra_num=1)
 		self.Globals.replace_random_floor_cell(CELL_LOCK1, 1)
 		self.Globals.replace_random_floor_cell(CELL_LOCK2, 1)
 		drop_key1.instantiate(self.Globals.get_random_floor_cell())
 		drop_key2.instantiate(self.Globals.get_random_floor_cell())
 
-		self.Globals.replace_random_floor_cell(CELL_VOID, 5, self.Globals.create_lift, MOVE_A)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 2, self.Globals.create_lift, MOVE_H)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 2, self.Globals.create_lift, MOVE_V)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_L)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_R)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_U)
-		self.Globals.replace_random_floor_cell(CELL_VOID, 1, self.Globals.create_lift, MOVE_D)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 5, create_lift, MOVE_A)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 2, create_lift, MOVE_H)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 2, create_lift, MOVE_V)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, create_lift, MOVE_L)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, create_lift, MOVE_R)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, create_lift, MOVE_U)
+		self.Globals.replace_random_floor_cell(CELL_VOID, 1, create_lift, MOVE_D)
 
 	def generate_random_solvable_room(self):
 		while True:
@@ -60,7 +60,7 @@ class StoneAgePuzzle(Puzzle):
 		for i in range(int(randint(0, 60) * len(path_cells) / 100), int(randint(40, 100) * len(path_cells) / 100)):
 			self.map[path_cells[i]] = CELL_SAND
 
-		self.Globals.replace_random_floor_cell(CELL_PORTAL, 1, self.Globals.create_portal_pair, extra_num=1)
+		self.Globals.replace_random_floor_cell(CELL_PORTAL, 1, create_portal_pair, extra_num=1)
 		self.Globals.replace_random_floor_cell(CELL_LOCK1, 1)
 		self.Globals.replace_random_floor_cell(CELL_LOCK2, 1)
 		drop_key1.instantiate(self.Globals.get_random_floor_cell())

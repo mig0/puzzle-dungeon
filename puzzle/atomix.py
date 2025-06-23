@@ -341,7 +341,7 @@ class AtomixPuzzle(Puzzle):
 					scramble_dirs = [dir for dir in scramble_presense_dirs[neigh_presense] if dir != ' ']
 					for scramble_dir in scramble_dirs:
 						neigh = apply_diff(lift.c, dir_diffs[scramble_dir])
-						target = self.Globals.get_lift_target_at_neigh(lift, neigh)
+						target = get_lift_target_at_neigh(lift, neigh)
 						if not target:
 							continue
 						orig_cell = lift.c
@@ -371,7 +371,7 @@ class AtomixPuzzle(Puzzle):
 		text_surface = self.Globals.create_text_cell_image(self.get_atom_str(atom_id), color='#FFFFC0', gcolor="#808040", owidth=1, ocolor="#404030")
 		lift_image.blit(text_surface, (0, 0))
 
-		self.Globals.create_lift(cell, MOVE_A, lift_image)
+		create_lift(cell, MOVE_A, lift_image)
 		lift = lifts[-1]
 		lift.atom_id = atom_id
 		lift.goal_cell = goal_cell

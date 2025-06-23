@@ -462,6 +462,10 @@ def get_revealed_actors(actors):
 def set_char_flip(is_right_dir=True):
 	char.flip = None if is_right_dir else (True, False)
 
+def propagate_map():
+	set_map(map)  # this is objects.set_map
+	puzzle.set_map(map)
+
 def set_room_and_notify_puzzle(idx):
 	set_room(idx)
 	puzzle.on_set_room()
@@ -880,12 +884,6 @@ def generate_random_free_path(start_cell, target_cell, area=None, deviation=0, l
 
 	return False
 
-def create_barrel(cell):
-	global barrels
-
-	barrel = create_theme_actor("barrel", cell)
-	barrels.append(barrel)
-
 def get_random_floor_cell():
 	while True:
 		cell = randint(room.x1, room.x2), randint(room.y1, room.y2)
@@ -907,51 +905,6 @@ def replace_random_floor_cell(cell_type, num=1, callback=None, extra=None, extra
 				callback(cell, extra, *extra_cells)
 			else:
 				callback(cell, *extra_cells)
-
-def create_portal(cell, dst_cell):
-	if cell == dst_cell:
-		die("BUG: Portal destination can't be the same cell %s, exiting" % str(cell))
-
-	map[cell] = CELL_PORTAL
-	portal_destinations[cell] = dst_cell
-
-def create_portal_pair(cell1, cell2):
-	create_portal(cell1, cell2)
-	create_portal(cell2, cell1)
-
-def create_lift(cell, type, surface=None):
-	global lifts
-
-	image_name = "lift" + type
-	lift = create_actor(surface, cell) if surface else create_theme_actor(image_name, cell)
-	lift.type = type
-	lifts.append(lift)
-
-def get_lift_target(cell, diff):
-	lift = get_actor_on_cell(cell, lifts)
-	if not lift or diff not in MOVE_TYPE_DIRECTIONS[lift.type]:
-		return None
-	while True:
-		next_cell = apply_diff(cell, diff)
-		if not is_cell_in_room(next_cell) or map[next_cell] != CELL_VOID or is_cell_in_actors(next_cell, lifts):
-			return cell if cell != lift.c else None
-		cell = next_cell
-
-def get_lift_target_at_neigh(lift, neigh):
-	return get_lift_target(lift.c, cell_diff(lift.c, neigh))
-
-def create_enemy(cell, health=None, attack=None, drop=None):
-	global enemies
-
-	enemy = Fighter()
-	enemy.c = cell
-	enemy.power  = health if char.power else None
-	enemy.health = None if char.power else health if health is not None else randint(MIN_ENEMY_HEALTH, MAX_ENEMY_HEALTH)
-	enemy.attack = None if char.power else attack if attack is not None else randint(MIN_ENEMY_ATTACK, MAX_ENEMY_ATTACK)
-	enemy.drop   = None if char.power else drop   if drop   is not None else (None, drop_heart, drop_sword)[randint(0, 2)]
-	if enemy.drop:
-		enemy.drop.contain(enemy)
-	enemies.append(enemy)
 
 def switch_cell_type(cell, new_cell_type, duration):
 	game.remember_map_cell(cell)
@@ -1022,14 +975,8 @@ class Globals:
 	get_random_floor_cell_type = get_random_floor_cell_type
 	convert_to_floor_if_needed = convert_to_floor_if_needed
 	generate_random_free_path = generate_random_free_path
-	create_barrel = create_barrel
 	get_random_floor_cell = get_random_floor_cell
 	replace_random_floor_cell = replace_random_floor_cell
-	create_portal = create_portal
-	create_portal_pair = create_portal_pair
-	create_lift = create_lift
-	get_lift_target_at_neigh = get_lift_target_at_neigh
-	create_enemy = create_enemy
 	switch_cell_type = switch_cell_type
 	demolish_portal = demolish_portal
 	toggle_gate = toggle_gate
@@ -1099,12 +1046,12 @@ def generate_map():
 		if ret := load_map(filename_or_stringio, puzzle.load_map_special_cell_types):
 			if flags.MULTI_ROOMS:
 				print("Ignoring multi-room level config when loading map")
-			puzzle.set_map(map)
+			propagate_map()
 			set_room_and_notify_puzzle(0)
 			puzzle.on_load_map(*ret)
 			return
 
-	puzzle.set_map(map)
+	propagate_map()
 
 	for idx in range(flags.NUM_ROOMS):
 		generate_room(idx)
@@ -1354,7 +1301,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 		theme_name = stored_level["theme_name"]
 		char_cells = stored_level["char_cells"]
 		map = stored_level["map"]
-		puzzle.set_map(map)
+		propagate_map()
 		for enemy_info in stored_level["enemy_infos"]:
 			create_enemy(*enemy_info)
 		for barrel_cell in stored_level["barrel_cells"]:

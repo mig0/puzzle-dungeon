@@ -52,7 +52,7 @@ class LockPuzzle(Puzzle):
 					break
 				drop = drop_key1 if lock_type == CELL_LOCK1 else drop_key2
 				if flags.is_enemy_key_drop:
-					self.Globals.create_enemy(key_cell, drop=drop)
+					create_enemy(key_cell, drop=drop)
 				else:
 					drop.instantiate(key_cell)
 			else:

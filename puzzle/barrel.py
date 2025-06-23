@@ -55,7 +55,7 @@ class BarrelPuzzle(Puzzle):
 		orig_barrels = barrels.copy()
 		barrels.clear()
 		for cell in barrel_cells or self.barrel_cells:
-			self.Globals.create_barrel(cell)
+			create_barrel(cell)
 		orig_char_cell = char.c
 		char.c = char_cell or self.char_cell
 		self.Globals.debug_map(descr=descr)
@@ -454,7 +454,7 @@ class BarrelPuzzle(Puzzle):
 		for _ in range(self.num_barrels):
 			cell = self.get_random_wall_cell_in_area()
 			self.map[cell] = CELL_PLATE
-			self.Globals.create_barrel(cell)
+			create_barrel(cell)
 
 		# 4) for each area barrel do:
 		for barrel in barrels:
@@ -642,7 +642,7 @@ class BarrelPuzzle(Puzzle):
 				# optionally optimize level
 
 				for cell in barrel_cells:
-					self.Globals.create_barrel(cell)
+					create_barrel(cell)
 				self.Globals.set_char_cell(char_cell)
 				self.Globals.debug_map(2)
 				return
@@ -651,7 +651,7 @@ class BarrelPuzzle(Puzzle):
 
 		debug(0, "Can't generate barrel level, making it solved")
 		for cell in self.get_room_cells(CELL_PLATE):
-			self.Globals.create_barrel(cell)
+			create_barrel(cell)
 
 	def generate_room(self):
 		self.num_barrels = self.parse_config_num("num_barrels", DEFAULT_NUM_BARRELS)

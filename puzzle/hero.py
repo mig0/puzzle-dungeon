@@ -39,7 +39,7 @@ class HeroPuzzle(Puzzle):
 	def generate_random_nonsolvable_floor_cell(self, cell):
 		slot_type = randint(0, 2)
 		if slot_type == 0:
-			self.Globals.create_enemy(cell, randint(10, 50))
+			create_enemy(cell, randint(10, 50))
 		elif slot_type == 1:
 			op = choice('×÷+-')
 			factor = (2, 3)[randint(0, 1)] if op in ('×', '÷') else (50, 100)[randint(0, 1)]
@@ -64,7 +64,7 @@ class HeroPuzzle(Puzzle):
 					self.map[cell] = CELL_DIR_R
 			elif cell[0] == self.area.x2:
 				if self.is_strict_floors:
-					self.Globals.create_portal(cell, (self.area.x1, cell[1]))
+					create_portal(cell, (self.area.x1, cell[1]))
 				else:
 					choice((drop_key1, drop_key2)).instantiate(cell)
 			else:

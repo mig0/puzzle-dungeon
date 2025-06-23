@@ -90,7 +90,7 @@ class TrafficPuzzle(Puzzle):
 		for _ in range(self.area.num_cells - self.num_free_cells):
 			cell = self.get_random_matching_cell_in_area([CELL_VOID], [lift.c for lift in lifts])
 			lift_type = MOVE_V if randint(0, 1) == 0 else MOVE_H
-			self.Globals.create_lift(cell, lift_type)
+			create_lift(cell, lift_type)
 			lift = lifts[-1]
 			if num_targets_left > 0:
 				exit_cell = (self.area.x1 - 1, lift.cy) if lift_type == MOVE_H else (lift.cx, self.area.y1 - 1)
@@ -146,7 +146,7 @@ class TrafficPuzzle(Puzzle):
 			for car in carpark.cars:
 				lift_type = MOVE_H if car.type else MOVE_V
 				lift_cell = apply_diff(car.cell, self.area.cell11)
-				self.Globals.create_lift(lift_cell, lift_type)
+				create_lift(lift_cell, lift_type)
 				if car.is_target():
 					lift = lifts[-1]
 					if car.exit_dir == (0, -1):

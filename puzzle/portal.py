@@ -69,7 +69,7 @@ class PortalPuzzle(Puzzle):
 
 	def create_portal(self, portal_cell, hall_idx, dst_hall_id):
 		debug(3, "  create_portal %s %d -> %d" % (str(portal_cell), hall_idx, dst_hall_id))
-		self.Globals.create_portal(portal_cell, get_hall_center_cell(dst_hall_id))
+		create_portal(portal_cell, get_hall_center_cell(dst_hall_id))
 		self.portal_cell_to_hall_idx[portal_cell] = dst_hall_id
 		self.dst_hall_idx_to_src_hall_idxs[dst_hall_id].append(hall_idx)
 
