@@ -126,7 +126,7 @@ class FifteenPuzzle(Puzzle):
 			return self.frame_image
 		if cell_type == CELL_FIFTEEN_VALUE:
 			num = self.fifteen_map[cell] if not self.draw_solved_mode or not self.is_in_area(cell) else self.get_num_solved(cell)
-			return self.Globals.create_text_cell_image(str(num), color='#FFFFC0', gcolor="#808040", owidth=1, ocolor="#404030")
+			return create_text_cell_image(str(num), color='#FFFFC0', gcolor="#808040", owidth=1, ocolor="#404030")
 		return None
 
 	def press_cell(self, cell, button=None):

@@ -111,7 +111,7 @@ class PortalPuzzle(Puzzle):
 	def get_cell_image_to_draw(self, cell, cell_type):
 		if cell_type == CELL_ROTATEPIC_HINT:
 			hall_idx = self.hall_center_cell_to_idx[cell] if cell in self.hall_center_cell_to_idx else self.portal_cell_to_hall_idx[cell]
-			return self.Globals.create_text_cell_image(str(hall_idx + 1))
+			return create_text_cell_image(str(hall_idx + 1))
 		return None
 
 	def on_press_key(self, keyboard):

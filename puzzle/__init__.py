@@ -3,6 +3,7 @@ from cellactor import *
 from objects import *
 from common import *
 from debug import *
+from image import *
 from theme import *
 from room import *
 from flags import flags

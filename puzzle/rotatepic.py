@@ -45,7 +45,7 @@ class RotatePicPuzzle(Puzzle):
 	def on_enter_room(self):
 		self.is_shared_bg = self.level.get("bg_image") is not None
 		if not self.is_shared_bg:
-			self.image = self.Globals.load_image(self.config.get("image", "bg/stonehenge.jpg"), (self.area.size_x * CELL_W, self.area.size_y * CELL_H), self.config.get("image_crop", False))
+			self.image = load_image(self.config.get("image", "bg/stonehenge.jpg"), (self.area.size_x * CELL_W, self.area.size_y * CELL_H), self.config.get("image_crop", False))
 
 	def rotate_cell(self, cell, delta=COUNTERCLOCKWISE):
 		if self.rotatepic_map[cell] == ROTATEPIC_PUZZLE_VALUE_OUTSIDE:
@@ -83,7 +83,7 @@ class RotatePicPuzzle(Puzzle):
 			image = self.image if not self.is_shared_bg else self.Globals.get_bg_image()
 			starting_cell = (self.area.x1, self.area.y1) if not self.is_shared_bg else (0, 0)
 			rotate_angle = 0 if self.draw_solved_mode else self.rotatepic_map[cell] * 90
-			return self.Globals.create_cell_subimage(image, cell, starting_cell, rotate_angle)
+			return create_cell_subimage(image, cell, starting_cell, rotate_angle)
 		return None
 
 	def press_cell(self, cell, button=None):

@@ -29,7 +29,7 @@ class MemoryPuzzle(Puzzle):
 		gray_frame_image = load_theme_cell_image('floor_gray_frame')
 		self.cell_images = [gray_frame_image]
 		for color in MAIN_COLOR_RGB_VALUES:
-			cell_image = self.Globals.colorize_cell_image(gray_frame_image, color)
+			cell_image = colorize_cell_image(gray_frame_image, color)
 			self.cell_images.append(cell_image)
 
 	def on_set_room(self):
@@ -162,7 +162,7 @@ class MemoryPuzzle(Puzzle):
 			alpha = 1
 			if (reveal_fade_factor := self.get_reveal_fade_factor()) is not None:
 				alpha = reveal_fade_factor
-			return self.Globals.create_text_cell_image(str(self.memory_map[cell]), alpha=alpha)
+			return create_text_cell_image(str(self.memory_map[cell]), alpha=alpha)
 		if cell_type == CELL_MEMORY_OPENC:
 			return self.cell_images[0]
 		return None
