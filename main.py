@@ -390,7 +390,7 @@ def is_portal_destination(cell):
 	return cell in {v: k for k, v in portal_destinations.items()}
 
 def is_cell_occupied_except_char(cell, include_phased=False):
-	if is_cell_in_actors(cell, enemies + barrels, include_phased):
+	if is_cell_in_actors(cell, enemies + barrels, include_phased=include_phased):
 		return True
 
 	return get_drop_on_cell(cell) is not None

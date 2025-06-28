@@ -482,12 +482,12 @@ def create_actor(image_name, cell):
 	actor.c = cell
 	return actor
 
-def get_actor_on_cell(cell, actors, include_phased=False):
+def get_actor_on_cell(cell, actors, include_hidden=False, include_phased=False):
 	for actor in actors:
-		if not actor.hidden and (include_phased or not actor.phased) and cell == actor.c:
+		if (include_hidden or not actor.hidden) and (include_phased or not actor.phased) and cell == actor.c:
 			return actor
 	return None
 
-def is_cell_in_actors(cell, actors, include_phased=False):
-	return get_actor_on_cell(cell, actors, include_phased) is not None
+def is_cell_in_actors(cell, actors, include_hidden=False, include_phased=False):
+	return get_actor_on_cell(cell, actors, include_hidden, include_phased) is not None
 
