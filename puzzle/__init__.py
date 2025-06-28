@@ -6,6 +6,7 @@ from debug import *
 from image import *
 from theme import *
 from room import *
+from game import game
 from flags import flags
 from time import time
 from random import randint, random, shuffle, choice, choices

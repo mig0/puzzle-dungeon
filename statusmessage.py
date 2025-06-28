@@ -1,5 +1,6 @@
 from time import time
 from config import STATUS_MESSAGE_FADE_DURATION, STATUS_MESSAGE_REST_DURATION
+from game import game
 
 BEAT_TIME = 5
 
@@ -102,7 +103,7 @@ def get_new_current_message_and_duration():
 
 	return sm, duration
 
-def draw_status_message(screen, POS_STATUS_Y):
+def draw_status_message(POS_STATUS_Y):
 	global current_status_message, current_status_end_time
 
 	current_time = time()
@@ -129,7 +130,7 @@ def draw_status_message(screen, POS_STATUS_Y):
 
 		current_status_message.num_shown += duration // BEAT_TIME
 
-	screen.draw.text(current_status_message.msg, midleft=(20, POS_STATUS_Y), color="#FFF0A0", gcolor="#A09060", owidth=1.2, ocolor="#303020", alpha=alpha, fontsize=26)
+	game.screen.draw.text(current_status_message.msg, midleft=(20, POS_STATUS_Y), color="#FFF0A0", gcolor="#A09060", owidth=1.2, ocolor="#303020", alpha=alpha, fontsize=26)
 
 def reset_status_messages():
 	status_messages.clear()

@@ -1406,9 +1406,9 @@ def draw_status():
 	for cx in MAP_X_RANGE:
 		status_image.draw((cx, cy))
 
-	draw_status_drops(screen, drops)
+	draw_status_drops(drops)
 
-	draw_status_message(screen, POS_STATUS_Y)
+	draw_status_message(POS_STATUS_Y)
 
 	solution.set_status_drawn()
 
@@ -1439,6 +1439,8 @@ def draw_actor_hint(actor, hint, pos_diff, colors):
 def draw():
 	if mode == "start":
 		return
+	if not game.screen:
+		game.screen = screen
 	screen.fill("#2f3542")
 	if bg_image:
 		screen.blit(bg_image, (MAP_POS_X1, MAP_POS_Y1))

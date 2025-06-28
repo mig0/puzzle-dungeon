@@ -90,7 +90,7 @@ class Drop:
 	def str(self):
 		return "%s/%s" % (self.num_collected, self.num_total)
 
-def draw_status_drops(screen, drops):
+def draw_status_drops(drops):
 	active_drops = [ drop for drop in drops if drop.active ]
 	n = len(active_drops)
 	i = 0
@@ -98,5 +98,5 @@ def draw_status_drops(screen, drops):
 		pos_x = POS_CENTER_X + CELL_W * STATUS_DROP_X_SIZE * (i - (n - 1) / 2)
 		drop.status_actor.pos = (pos_x + CELL_W * STATUS_DROP_X_ACTOR_OFFSET, POS_STATUS_Y)
 		drop.status_actor.draw()
-		screen.draw.text(drop.str(), center=(pos_x + CELL_W * STATUS_DROP_X_TEXT_OFFSET, POS_STATUS_Y), color="#FFAA00", gcolor="#AA6600", owidth=1.2, ocolor="#404030", alpha=1, fontsize=24)
+		game.screen.draw.text(drop.str(), center=(pos_x + CELL_W * STATUS_DROP_X_TEXT_OFFSET, POS_STATUS_Y), color="#FFAA00", gcolor="#AA6600", owidth=1.2, ocolor="#404030", alpha=1, fontsize=24)
 		i += 1
