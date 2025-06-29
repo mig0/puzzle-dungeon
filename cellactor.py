@@ -102,6 +102,7 @@ class CellActor(Actor):
 		self.cell_to_draw = None
 		self._deferred_transform = False
 		self._pending_transform = False
+		self._mirror = None
 
 		self.reset_state()
 		self.animation = None
@@ -115,6 +116,8 @@ class CellActor(Actor):
 
 	def draw(self, cell=None, opacity=None):
 		if self.hidden:
+			if self.mirror:
+				self.mirror.draw(cell, opacity)
 			return
 		if self.phased and opacity is None and not self._inplace_animation_active:
 			opacity = ACTOR_PHASED_OPACITY
@@ -127,6 +130,8 @@ class CellActor(Actor):
 			real_opacity = self.opacity
 			self.opacity = opacity
 		super().draw()
+		if self.mirror:
+			self.mirror.draw(cell, opacity)
 		if cell:
 			self.c = real_cell
 		if opacity is not None:
@@ -156,6 +161,8 @@ class CellActor(Actor):
 	def c(self, cell):
 		self._cell = NONE_CELL if cell is None else cell
 		self.x, self.y = self.pos = self.get_pos()
+		if self.mirror:
+			self.mirror.c = self.c
 
 	@property
 	def s(self):
@@ -258,6 +265,16 @@ class CellActor(Actor):
 			print("CellActor.image: Unsupported type: " + str(image))
 			pass
 
+	@property
+	def mirror(self):
+		return self._mirror
+
+	@mirror.setter
+	def mirror(self, mirror):
+		self._mirror = mirror
+		if mirror is not None:
+			mirror.c = self.c
+
 	def reset_state(self):
 		self._cell, self._size, self.hidden, self.phased = NONE_CELL, None, False, False
 
@@ -298,10 +315,13 @@ class CellActor(Actor):
 		old_cell = self.c
 		self.move(diff)
 		if enable_animation:
-			self.pos = old_pos
 			distance = cell_distance(old_cell, target)
 			animate_time_factor = distance - (distance - 1) / 2
+			self.pos = old_pos
 			self.animate(animate_time_factor * ARROW_KEYS_RESOLUTION, on_finished=on_finished)
+			if self.mirror:
+				self.mirror.pos = old_pos
+				self.mirror.animate(animate_time_factor * ARROW_KEYS_RESOLUTION)
 
 	def _transform(self):
 		if not hasattr(self, '_orig_surf'):
@@ -482,12 +502,15 @@ def create_actor(image_name, cell):
 	actor.c = cell
 	return actor
 
-def get_actor_on_cell(cell, actors, include_hidden=False, include_phased=False):
+def get_actor_on_cell(cell, actors, include_hidden=None, include_phased=None):
 	for actor in actors:
-		if (include_hidden or not actor.hidden) and (include_phased or not actor.phased) and cell == actor.c:
+		if (cell == actor.c
+			and (not actor.hidden or (actor.mirror if include_hidden is None else include_hidden))
+			and (not actor.phased or (actor.mirror if include_phased is None else include_phased))
+		):
 			return actor
 	return None
 
-def is_cell_in_actors(cell, actors, include_hidden=False, include_phased=False):
+def is_cell_in_actors(cell, actors, include_hidden=None, include_phased=None):
 	return get_actor_on_cell(cell, actors, include_hidden, include_phased) is not None
 

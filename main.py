@@ -18,6 +18,7 @@ from translations import *
 from cellactor import *
 from objects import *
 from common import *
+from mirror import *
 from debug import *
 from image import *
 from theme import *
@@ -108,6 +109,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			print(filename_or_stringio.getvalue())
 		enemies.clear()
 		barrels.clear()
+		lifts.clear()
 		set_char_cell(None, 0)
 
 	if is_stringio:
@@ -159,10 +161,14 @@ def load_map(filename_or_stringio, special_cell_types={}):
 				return
 			ch = line[x]
 			cell = (x, y)
+			mirror_host = None
+			value_type = None
 			if ch == CELL_START:
 				set_char_cell(cell, 0)
 			if ch in LIFT_MOVE_TYPES_BY_CHAR:
-				create_lift(cell, LIFT_MOVE_TYPES_BY_CHAR[ch])
+				lift = create_lift(cell, LIFT_MOVE_TYPES_BY_CHAR[ch])
+				if ch in MIRROR_CHARS:
+					mirror_host = lift
 				ch = CELL_VOID
 			if ch in ACTOR_AND_PLATE_BY_CHAR:
 				actor_name, is_plate = ACTOR_AND_PLATE_BY_CHAR[ch]
@@ -175,11 +181,17 @@ def load_map(filename_or_stringio, special_cell_types={}):
 					create_enemy(cell)
 				if actor_name == "barrel":
 					create_barrel(cell)
+				if actor_name == "mirror":
+					mirror_host = create_barrel(cell)
 				if actor_name == "char":
 					set_char_cell(cell, 0)
 				if actor_name == "npc":
 					special_cell_infos.append((cell, None))
-			if value_type := special_cell_types.get(ch):
+			if mirror_host:
+				mirror_host.mirror = Mirror(get_theme_image_name('mirror'), mirror_host)
+				value_type = 'strs'
+			value_type = value_type or special_cell_types.get(ch)
+			if value_type:
 				special_cell_infos.append((cell, value_type))
 			map[x, y] = ch
 		line_n += 1
@@ -192,7 +204,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		line = file.readline()
 		if line == '':
 			map = orig_map.copy()
-			print_error("Failed to read value for special map cell %s" % str(cell))
+			print_error("Failed to read line for special map cell %s" % str(cell))
 			return
 		str = line.rstrip("\n")
 		def parse_int(str):
@@ -200,6 +212,8 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		try:
 			if value_type == 'str':
 				value = str
+			elif value_type == 'strs':
+				value = str.split()
 			elif value_type == 'int':
 				value = parse_int(str)
 			elif value_type == 'ints':
@@ -332,10 +346,10 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 					cell_ch = actor_chars[drop.name]
 				if is_cell_in_actors(cell, enemies):
 					cell_ch = actor_chars['enemy']
-				if is_cell_in_actors(cell, barrels):
-					cell_ch = actor_chars['barrel']
+				if barrel := get_actor_on_cell(cell, barrels):
+					cell_ch = actor_chars['mirror' if barrel.mirror else 'barrel']
 				if lift := get_actor_on_cell(cell, lifts):
-					cell_ch = LIFT_CHARS[lift.type]
+					cell_ch = LIFT_CHARS[1 if lift.mirror else 0][lift.type]
 				if cell == char_cell or char.c is not None and char.c == cell:
 					cell_ch = actor_chars['char']
 				print(cell_ch, end="")

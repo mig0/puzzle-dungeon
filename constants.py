@@ -42,6 +42,7 @@ ACTOR_CHARS = {
 	'key2':   '²',
 	'enemy':  '🕱',
 	'barrel': '■',
+	'mirror': '▬',
 	'char':   '☻',
 	'npc':    '☀',
 }
@@ -54,6 +55,7 @@ ACTOR_ON_PLATE_CHARS = {
 	'key2':   '₂',
 	'enemy':  '☠',
 	'barrel': '□',
+	'mirror': '▭',
 	'char':   '☺',
 	'npc':    '☼',
 }
@@ -100,18 +102,35 @@ MOVE_TYPE_DIRS = {
 }
 MOVE_TYPES = *MOVE_TYPE_DIRS,
 
-LIFT_CHARS = {
-	MOVE_A: '✥',
-	MOVE_H: '↔',
-	MOVE_V: '↕',
-	MOVE_L: '←',
-	MOVE_R: '→',
-	MOVE_U: '↑',
-	MOVE_D: '↓',
-	MOVE_N: '◉',
-}
+LIFT_CHARS = [
+	# regular
+	{
+		MOVE_A: '✥',
+		MOVE_H: '↔',
+		MOVE_V: '↕',
+		MOVE_L: '←',
+		MOVE_R: '→',
+		MOVE_U: '↑',
+		MOVE_D: '↓',
+		MOVE_N: '◉',
+	},
+	# mirror
+	{
+		MOVE_A: '✤',
+		MOVE_H: '⇆',
+		MOVE_V: '⇅',
+		MOVE_L: '⇇',
+		MOVE_R: '⇉',
+		MOVE_U: '⇈',
+		MOVE_D: '⇊',
+		MOVE_N: '◎',
+	},
+]
 
-LIFT_MOVE_TYPES_BY_CHAR = {v: k for k, v in LIFT_CHARS.items()}
+LIFT_MOVE_TYPES_BY_CHAR = {v: k for d in LIFT_CHARS for k, v in d.items()}
+
+MIRROR_CHARS = tuple(v for d in (LIFT_CHARS[1],) for k, v in d.items())
+MIRROR_ORIENTATION_CHARS = [ '-', '/', '|', '\\' ]
 
 IMAGES_DIR_PREFIX = DATA_DIR + '/images/'
 DEFAULT_IMAGE_PREFIX = 'default/'
