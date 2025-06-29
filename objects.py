@@ -61,11 +61,15 @@ def create_enemy(cell, health=None, attack=None, drop=None):
 		enemy.drop.contain(enemy)
 	enemies.append(enemy)
 
+	return enemy
+
 def create_barrel(cell):
 	global barrels
 
 	barrel = create_theme_actor("barrel", cell)
 	barrels.append(barrel)
+
+	return barrel
 
 def create_lift(cell, move_type, surface=None):
 	global lifts
@@ -74,6 +78,8 @@ def create_lift(cell, move_type, surface=None):
 	lift = create_actor(surface, cell) if surface else create_theme_actor(image_name, cell)
 	lift.type = move_type
 	lifts.append(lift)
+
+	return lift
 
 def get_lift_target(cell, diff):
 	lift = get_actor_on_cell(cell, lifts)
