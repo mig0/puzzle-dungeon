@@ -110,6 +110,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		enemies.clear()
 		barrels.clear()
 		lifts.clear()
+		portal_destinations.clear()
 		set_char_cell(None, 0)
 
 	if is_stringio:
@@ -147,6 +148,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 
 	line_n = 1
 	special_cell_infos = []
+	portal_cells = []
 	for y in range(0, size_y):
 		line = file.readline()
 		if line == '':
@@ -187,6 +189,8 @@ def load_map(filename_or_stringio, special_cell_types={}):
 					set_char_cell(cell, 0)
 				if actor_name == "npc":
 					special_cell_infos.append((cell, None))
+			if ch == CELL_PORTAL:
+				portal_cells.append(cell)
 			if mirror_host:
 				mirror_host.mirror = Mirror(get_theme_image_name('mirror'), mirror_host)
 				value_type = 'strs'
@@ -194,6 +198,37 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			if value_type:
 				special_cell_infos.append((cell, value_type))
 			map[x, y] = ch
+		line_n += 1
+
+	for cell in portal_cells:
+		line = file.readline()
+		if line == '':
+			map = orig_map.copy()
+			print_error("Failed to read line for portal cell %s" % str(cell))
+			return
+		values = line.split()
+		if not values:
+			continue
+		if len(values) > 2:
+			print_error("Must be up to 2 ints for portal %s in map line #%d" % (str(cell), line_n))
+			return
+		if len(values) == 1:
+			if not values[0].isdigit() or not 0 <= int(values[0]) < len(portal_cells):
+				print_error("Invalid dest portal idx for portal %s in map line #%d" % (str(cell), line_n))
+				return
+			dest_cell = portal_cells[int(values[0])]
+		else:
+			if not values[0].isdigit() or not values[1].isdigit():
+				print_error("Dest cell is not ints for portal %s in map line #%d" % (str(cell), line_n))
+				return
+			dest_cell = (int(values[0]), int(values[1]))
+		if dest_cell == cell:
+			print_error("Dest cell for portal cell %s can't be the same" % str(cell))
+			return
+		if not 0 <= dest_cell[0] < size_x or not 0 <= dest_cell[1] < size_y:
+			print_error("Dest cell for portal cell %s is out of map" % str(cell))
+			return
+		portal_destinations[cell] = dest_cell
 		line_n += 1
 
 	special_cell_values = {}
@@ -327,6 +362,7 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 		full = True
 		combined = True
 		dual = False
+		portal_cells = []
 		print("# Dungeon %s anonymous map %dx%d" % (puzzle.__class__.__name__ if puzzle else "non-puzzle", MAP_SIZE_X, MAP_SIZE_Y))
 	for cy in MAP_Y_RANGE if full else PLAY_Y_RANGE:
 		if not combined:
@@ -353,8 +389,15 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 				if cell == char_cell or char.c is not None and char.c == cell:
 					cell_ch = actor_chars['char']
 				print(cell_ch, end="")
+				if full_format and cell_ch == CELL_PORTAL:
+					portal_cells.append(cell)
 		print()
 	if full_format:
+		for cell in portal_cells:
+			if dest_cell := portal_destinations.get(cell):
+				print(portal_cells.index(dest_cell) if dest_cell in portal_cells else ' '.join(builtins.map(str, portal_destinations[cell])))
+			else:
+				print("")
 		for extra_value in puzzle.get_map_extra_values() if puzzle else ():
 			line = ' '.join(builtins.map(str, extra_value)) if hasattr(extra_value, '__iter__') else str(extra_value)
 			print(line)
