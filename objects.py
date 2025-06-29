@@ -77,7 +77,7 @@ def create_lift(cell, move_type, surface=None):
 
 def get_lift_target(cell, diff):
 	lift = get_actor_on_cell(cell, lifts)
-	if not lift or diff not in MOVE_TYPE_DIRECTIONS[lift.type]:
+	if not lift or diff not in MOVE_TYPE_DIRS[lift.type]:
 		return None
 	while True:
 		next_cell = apply_diff(cell, diff)

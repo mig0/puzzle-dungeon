@@ -69,17 +69,36 @@ MOVE_U = 'u'
 MOVE_D = 'd'
 MOVE_N = 'n'
 
-MOVE_TYPE_DIRECTIONS = {
-	MOVE_A: [(-1, 0), (+1, 0), (0, -1), (0, +1)],
-	MOVE_H: [(-1, 0), (+1, 0)],
-	MOVE_V: [(0, -1), (0, +1)],
-	MOVE_L: [(-1, 0)],
-	MOVE_R: [(+1, 0)],
-	MOVE_U: [(0, -1)],
-	MOVE_D: [(0, +1)],
+DIRECTION_L = 'l'
+DIRECTION_R = 'r'
+DIRECTION_U = 'u'
+DIRECTION_D = 'd'
+
+DIR_L = (-1, 0)
+DIR_R = (+1, 0)
+DIR_U = (0, -1)
+DIR_D = (0, +1)
+
+DIRS_BY_NAME = {
+	DIRECTION_L: DIR_L,
+	DIRECTION_R: DIR_R,
+	DIRECTION_U: DIR_U,
+	DIRECTION_D: DIR_D,
+}
+DIR_NAMES = {v: k for k, v in DIRS_BY_NAME.items()}
+DIRS = *DIR_NAMES,
+
+MOVE_TYPE_DIRS = {
+	MOVE_A: [DIR_L, DIR_R, DIR_U, DIR_D],
+	MOVE_H: [DIR_L, DIR_R],
+	MOVE_V: [DIR_U, DIR_D],
+	MOVE_L: [DIR_L],
+	MOVE_R: [DIR_R],
+	MOVE_U: [DIR_U],
+	MOVE_D: [DIR_D],
 	MOVE_N: [],
 }
-MOVE_TYPES = *MOVE_TYPE_DIRECTIONS,
+MOVE_TYPES = *MOVE_TYPE_DIRS,
 
 LIFT_CHARS = {
 	MOVE_A: '✥',
