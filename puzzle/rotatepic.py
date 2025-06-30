@@ -83,7 +83,7 @@ class RotatePicPuzzle(Puzzle):
 			image = self.image if not self.is_shared_bg else self.Globals.get_bg_image()
 			starting_cell = (self.area.x1, self.area.y1) if not self.is_shared_bg else (0, 0)
 			rotate_angle = 0 if self.draw_solved_mode else self.rotatepic_map[cell] * 90
-			return create_cell_subimage(image, cell, starting_cell, rotate_angle)
+			return create_cell_subimage(image, cell, starting_cell, rotate_angle=rotate_angle)
 		return None
 
 	def press_cell(self, cell, button=None):

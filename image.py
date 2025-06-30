@@ -39,10 +39,10 @@ def colorize_cell_image(image, color, alpha=1):
 	cell_surface.blit(image, (0, 0))
 	return cell_surface
 
-def create_cell_subimage(image, cell, starting_cell=(0, 0), rotate_angle=0):
+def create_cell_subimage(image, cell=(0, 0), starting_cell=(0, 0), area=None, rotate_angle=0):
 	cell_surface = pygame.Surface((CELL_W, CELL_H), pygame.SRCALPHA, 32)
 	cell = apply_diff(cell, starting_cell, subtract=True)
-	cell_surface.blit(image, (-cell[0] * CELL_W, -cell[1] * CELL_H))
+	cell_surface.blit(image, (-cell[0] * CELL_W, -cell[1] * CELL_H), area)
 	if rotate_angle != 0:
 		cell_surface = pygame.transform.rotate(cell_surface, rotate_angle)
 	return cell_surface
