@@ -130,7 +130,7 @@ LIFT_CHARS = [
 LIFT_MOVE_TYPES_BY_CHAR = {v: k for d in LIFT_CHARS for k, v in d.items()}
 
 MIRROR_CHARS = tuple(v for d in (LIFT_CHARS[1],) for k, v in d.items())
-MIRROR_ORIENTATION_CHARS = [ '-', '/', '|', '\\' ]
+MIRROR_ORIENTATION_CHARS = [ '|', '/', '-', '\\' ]
 
 IMAGES_DIR_PREFIX = DATA_DIR + '/images/'
 DEFAULT_IMAGE_PREFIX = 'default/'
