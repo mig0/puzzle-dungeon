@@ -102,6 +102,31 @@ MOVE_TYPE_DIRS = {
 }
 MOVE_TYPES = *MOVE_TYPE_DIRS,
 
+CART_CHARS = [
+	# regular
+	{
+		MOVE_A: '✣',
+		MOVE_H: '⇿',
+		MOVE_V: '⇳',
+		MOVE_L: '⇦',
+		MOVE_R: '⇧',
+		MOVE_U: '⇧',
+		MOVE_D: '⇩',
+		MOVE_N: '◍',
+	},
+	# mirror
+	{
+		MOVE_A: '✢',
+		MOVE_H: '⇔',
+		MOVE_V: '⇕',
+		MOVE_L: '⇐',
+		MOVE_R: '⇒',
+		MOVE_U: '⇓',
+		MOVE_D: '⇑',
+		MOVE_N: '◌',
+	},
+]
+
 LIFT_CHARS = [
 	# regular
 	{
@@ -127,9 +152,11 @@ LIFT_CHARS = [
 	},
 ]
 
+CART_MOVE_TYPES_BY_CHAR = {v: k for d in CART_CHARS for k, v in d.items()}
 LIFT_MOVE_TYPES_BY_CHAR = {v: k for d in LIFT_CHARS for k, v in d.items()}
+MOVE_TYPES_BY_CHAR = {**CART_MOVE_TYPES_BY_CHAR, **LIFT_MOVE_TYPES_BY_CHAR}
 
-MIRROR_CHARS = tuple(v for d in (LIFT_CHARS[1],) for k, v in d.items())
+MIRROR_CHARS = tuple(v for d in (CART_CHARS[1], LIFT_CHARS[1]) for k, v in d.items())
 MIRROR_ORIENTATION_CHARS = [ '|', '/', '-', '\\' ]
 
 IMAGES_DIR_PREFIX = DATA_DIR + '/images/'

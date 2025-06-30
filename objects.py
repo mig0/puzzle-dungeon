@@ -8,10 +8,10 @@ from drop import Drop
 
 __all__ = [
 	'set_map',  # temporarily
-	'char', 'enemies', 'barrels', 'lifts', 'portal_destinations',
+	'char', 'enemies', 'barrels', 'carts', 'lifts', 'portal_destinations',
 	'drop_heart', 'drop_sword', 'drop_might', 'drop_key1', 'drop_key2', 'drops',
 	'cursor', 'create_enemy', 'create_barrel',
-	'create_lift', 'get_lift_target', 'get_lift_target_at_neigh',
+	'create_cart', 'create_lift', 'get_lift_target', 'get_lift_target_at_neigh',
 	'create_portal', 'create_portal_pair',
 ]
 
@@ -26,6 +26,7 @@ char = Fighter()
 
 enemies = []
 barrels = []
+carts = []
 lifts = []
 
 portal_destinations = {}
@@ -70,6 +71,30 @@ def create_barrel(cell):
 	barrels.append(barrel)
 
 	return barrel
+
+def create_cart(cell, move_type, exit_cell=None, image_name=None, surface=None):
+	global carts
+
+	opacity = None
+	if image_name is None:
+		image_name = "lift" + move_type
+		opacity = 0.5
+	cart = create_actor(surface, cell) if surface else create_theme_actor(image_name, cell)
+	cart.type = move_type
+	if opacity is not None:
+		cart.opacity = opacity
+	if not surface:
+		angle = 0
+		if move_type in (MOVE_H, MOVE_L):
+			angle = -90
+		elif move_type in (MOVE_R):
+			angle = 90
+		elif move_type in (MOVE_D):
+			angle = 180
+		cart.angle = angle
+	carts.append(cart)
+
+	return cart
 
 def create_lift(cell, move_type, surface=None):
 	global lifts

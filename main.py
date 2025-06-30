@@ -109,6 +109,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			print(filename_or_stringio.getvalue())
 		enemies.clear()
 		barrels.clear()
+		carts.clear()
 		lifts.clear()
 		portal_destinations.clear()
 		set_char_cell(None, 0)
@@ -167,6 +168,11 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			value_type = None
 			if ch == CELL_START:
 				set_char_cell(cell, 0)
+			if ch in CART_MOVE_TYPES_BY_CHAR:
+				cart = create_cart(cell, CART_MOVE_TYPES_BY_CHAR[ch])
+				if ch in MIRROR_CHARS:
+					mirror_host = cart
+				ch = CELL_FLOOR
 			if ch in LIFT_MOVE_TYPES_BY_CHAR:
 				lift = create_lift(cell, LIFT_MOVE_TYPES_BY_CHAR[ch])
 				if ch in MIRROR_CHARS:
@@ -384,6 +390,8 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 					cell_ch = actor_chars['enemy']
 				if barrel := get_actor_on_cell(cell, barrels):
 					cell_ch = actor_chars['mirror' if barrel.mirror else 'barrel']
+				if cart := get_actor_on_cell(cell, carts):
+					cell_ch = CART_CHARS[1 if cart.mirror else 0][cart.type]
 				if lift := get_actor_on_cell(cell, lifts):
 					cell_ch = LIFT_CHARS[1 if lift.mirror else 0][lift.type]
 				if cell == char_cell or char.c is not None and char.c == cell:
@@ -1132,6 +1140,9 @@ def set_theme(theme_name):
 	for barrel in barrels:
 		reload_actor_theme_image(barrel)
 
+	for cart in carts:
+		reload_actor_theme_image(cart)
+
 	for lift in lifts:
 		reload_actor_theme_image(lift)
 
@@ -1234,7 +1245,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	global revealed_map
 	global switch_cell_infos, portal_demolition_infos
 	global char_cells, enter_room_idx
-	global enemies, barrels, killed_enemies, lifts
+	global enemies, barrels, killed_enemies, carts, lifts
 	global level_time
 	global map, stored_level
 
@@ -1274,6 +1285,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 
 	barrels.clear()
 	enemies.clear()
+	carts.clear()
 	lifts.clear()
 	killed_enemies.clear()
 	portal_destinations.clear()
@@ -1511,6 +1523,8 @@ def draw():
 
 	draw_map()
 	draw_status()
+	for cart in carts:
+		cart.draw()
 	for lift in lifts:
 		lift.draw()
 	for drop in drops:

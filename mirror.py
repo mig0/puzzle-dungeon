@@ -71,7 +71,7 @@ class Mirror(CellActor):
 		self.activeness ^= 2
 
 def get_mirror_on_cell(cell):
-	for actors in (barrels, lifts):
+	for actors in (barrels, carts, lifts):
 		if (actor := get_actor_on_cell(cell, actors)) and actor.mirror:
 			return actor.mirror
 	return None
