@@ -1404,7 +1404,7 @@ def draw_map():
 	for cy in range(len(map[0])):
 		for cx in range(len(map)):
 			cell = (cx, cy)
-			cell_type = map[cx, cy]
+			cell_type = map[cell]
 			cell_types = [cell_type]
 			if cell_type in CELL_FLOOR_EXTENSIONS and cell_type != CELL_FLOOR:
 				cell_types.insert(0, CELL_FLOOR)
@@ -1455,7 +1455,7 @@ def draw_map():
 				elif cell_image.__class__.__name__ == 'CellActor':
 					cell_image.draw(cell)
 				else:
-					screen.blit(cell_image, (CELL_W * cx, CELL_H * cy))
+					screen.blit(cell_image, cell_to_pos_00(cell))
 
 def get_time_str(time):
 	sec = int(time)

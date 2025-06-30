@@ -38,8 +38,14 @@ def cell_diff(cell1, cell2):
 def cell_direction(cell1, cell2):
 	return (cmp(cell2[0], cell1[0]), cmp(cell2[1], cell1[1]))
 
+def cell_to_pos_offset(cell, offset):
+	return (CELL_W * (cell[0] + offset[0]), CELL_H * (cell[1] + offset[1]))
+
+def cell_to_pos_00(cell):
+	return cell_to_pos_offset(cell, (0, 0))
+
 def cell_to_pos(cell):
-	return (CELL_W * (cell[0] + 0.5), CELL_H * (cell[1] + 0.5))
+	return cell_to_pos_offset(cell, (0.5, 0.5))
 
 def pos_to_cell(pos):
 	return (pos[0] // CELL_W, pos[1] // CELL_H)
