@@ -103,6 +103,7 @@ class CellActor(Actor):
 		self._deferred_transform = False
 		self._pending_transform = False
 		self._mirror = None
+		self._observers = {event_name: list() for event_name in ("cell_changed",)}
 
 		self.reset_state()
 		self.animation = None
@@ -159,10 +160,13 @@ class CellActor(Actor):
 
 	@c.setter
 	def c(self, cell):
+		old_cell = self._cell
 		self._cell = NONE_CELL if cell is None else cell
 		self.x, self.y = self.pos = self.get_pos()
 		if self.mirror:
 			self.mirror.c = self.c
+		if old_cell != cell:
+			self.emit("cell_changed")
 
 	@property
 	def s(self):
@@ -322,6 +326,17 @@ class CellActor(Actor):
 			if self.mirror:
 				self.mirror.pos = old_pos
 				self.mirror.animate(animate_time_factor * ARROW_KEYS_RESOLUTION)
+
+	def watch(self, event_name, observer):
+		method_name = f"on_actor_{event_name}"
+		assert hasattr(observer, method_name), f"{observer} must implement {method_name}"
+		assert event_name in self._observers, f"Invalid event name {event_name}"
+		self._observers[event_name].append(observer)
+
+	def emit(self, event_name):
+		for observer in self._observers[event_name]:
+			method = getattr(observer, f"on_actor_{event_name}")
+			method(self)
 
 	def _transform(self):
 		if not hasattr(self, '_orig_surf'):
