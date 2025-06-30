@@ -1330,8 +1330,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	else:
 		theme_name = level["theme"]
 		if puzzle.is_long_generation():
-			draw()
-			pygame.display.flip()
+			draw_long_level_generation()
 		generate_map()
 
 	set_theme(theme_name)
@@ -1394,6 +1393,12 @@ def init_main_screen():
 		"mainscreen_puzzle": {},
 	}
 	init_new_level(0, config)
+
+# this function is intended to be called outside of draw()
+def draw_long_level_generation():
+	screen.fill("#a8b6b7")
+	screen.draw.text(_("Initializing level\u2026"), center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#88AA66", owidth=1.2, ocolor="#404030", alpha=1, fontsize=80)
+	pygame.display.flip()
 
 def draw_map():
 	for cy in range(len(map[0])):
@@ -1494,36 +1499,36 @@ def draw_actor_hint(actor, hint, pos_diff, colors):
 	screen.draw.text(str(hint), center=apply_diff(actor.pos, pos_diff), color=colors[0], gcolor=colors[1], owidth=1.2, ocolor=colors[2], alpha=0.8, fontsize=24)
 
 def draw():
-	if mode == "start":
+	if mode in ("start", "finish", "init"):
 		return
 	if not game.screen:
 		game.screen = screen
 	screen.fill("#2f3542")
 	if bg_image:
 		screen.blit(bg_image, (MAP_POS_X1, MAP_POS_Y1))
-	if mode == "game" or mode == "end" or mode == "next":
-		visible_barrels = get_revealed_actors(barrels)
-		visible_enemies = get_revealed_actors(enemies)
-		draw_map()
-		draw_status()
-		for lift in lifts:
-			lift.draw()
-		for drop in drops:
-			drop.draw_instances(draw_actor_hint)
-		for barrel in visible_barrels:
-			barrel.draw()
-		for enemy in killed_enemies:
-			enemy.draw()
-		for enemy in visible_enemies:
-			enemy.draw()
-		char.draw()
-		for actor in visible_enemies + [char]:
-			if actor.power:
-				draw_actor_hint(actor, actor.power, (0, -CELL_H * 0.5 - 14), CHAR_POWER_COLORS if actor == char else ENEMY_POWER_COLORS)
-			elif actor.health is not None:
-				draw_actor_hint(actor, actor.health, (-12, -CELL_H * 0.5 - 14), ACTOR_HEALTH_COLORS)
-				draw_actor_hint(actor, actor.attack, (+12, -CELL_H * 0.5 - 14), ACTOR_ATTACK_COLORS)
-		cursor.draw()
+	visible_barrels = get_revealed_actors(barrels)
+	visible_enemies = get_revealed_actors(enemies)
+
+	draw_map()
+	draw_status()
+	for lift in lifts:
+		lift.draw()
+	for drop in drops:
+		drop.draw_instances(draw_actor_hint)
+	for barrel in visible_barrels:
+		barrel.draw()
+	for enemy in killed_enemies:
+		enemy.draw()
+	for enemy in visible_enemies:
+		enemy.draw()
+	char.draw()
+	for actor in visible_enemies + [char]:
+		if actor.power:
+			draw_actor_hint(actor, actor.power, (0, -CELL_H * 0.5 - 14), CHAR_POWER_COLORS if actor == char else ENEMY_POWER_COLORS)
+		elif actor.health is not None:
+			draw_actor_hint(actor, actor.health, (-12, -CELL_H * 0.5 - 14), ACTOR_HEALTH_COLORS)
+			draw_actor_hint(actor, actor.attack, (+12, -CELL_H * 0.5 - 14), ACTOR_ATTACK_COLORS)
+	cursor.draw()
 
 	puzzle.on_draw(mode)
 
@@ -1545,10 +1550,6 @@ def draw():
 		goal_line = _(level_goal)
 		draw_central_flash()
 		screen.draw.text(goal_line, center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#66AA00", owidth=1.2, ocolor="#404030", alpha=1, fontsize=40)
-
-	if mode == "init":
-		screen.fill("#a8b6b7")
-		screen.draw.text(_("Initializing level\u2026"), center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#88AA66", owidth=1.2, ocolor="#404030", alpha=1, fontsize=80)
 
 def kill_enemy_cleanup():
 	enemy = killed_enemies.pop(0)
