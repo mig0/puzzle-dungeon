@@ -66,6 +66,7 @@ class Game:
 		self.screen = None
 		self.undo_frames = []
 		self.in_level = False
+		self.during_undo = False
 
 	@property
 	def undo_frame(self):
@@ -135,7 +136,9 @@ class Game:
 		if not self.undo_frames:
 			return False
 
+		self.during_undo = True
 		self.undo_frames.pop().restore_all_changes()
+		self.during_undo = False
 
 		return True
 
