@@ -13,19 +13,25 @@ assert_filename() {
 	fi
 }
 
+export page_uri="`echo \"$pagename.html\" | sed -s 's:\(^\|/\)index.html$:\1:'`"
+
 export element_filename="elements/$pagename.html"
 assert_filename $element_filename
 
-export template_filename="elements/template.html"
+export template_filename="elements/template$(echo "$CREATE_REDIRECT_PAGE" | sed 's/.\+/-redirect/').html"
 assert_filename $template_filename
+
+# set base= before running the script if no fully qualified base urls needed
+: ${base=https://puzzle-dungeon.github.io/}
 
 export category=`dirname "$pagename"`
 if test "$category" = .; then
 	export category=home
-	export base_dir=.
+	: ${base=.}
 else
-	export base_dir=..
+	: ${base=..}
 fi
+export base
 
 export sidebar_filename="elements/sidebars/$category.html"
 assert_filename $sidebar_filename
@@ -33,10 +39,11 @@ assert_filename $sidebar_filename
 output_filename="html/$pagename.html"
 
 cat $template_filename | perl -pe '
-	s/<{BASE}>/$ENV{base_dir}/g;
+	s/<{BASE}>/$ENV{base}/g;
 	s/<{TITLE}>/$s = $ENV{pagename}; $s =~ s:(^|\/)index::; $s =~ s:\/: - :g; ucfirst($s || "home")/eg;
 	s/<{SIDEBAR}>/`cat $ENV{sidebar_filename}`/e;
 	s/<{CONTENT}>/`cat $ENV{element_filename}`/e;
+	s/<{PAGEURI}>/$ENV{page_uri}/e;
 	s/<{(.*?) IF (\w+) (.*?)}>/$ENV{$2} eq $3 ? $1 : ""/eg;
 ' >$output_filename.new
 
