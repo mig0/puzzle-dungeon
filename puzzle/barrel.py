@@ -205,6 +205,9 @@ class BarrelPuzzle(Puzzle):
 #		print(self.min_barrel_plate_pushes)
 #		print(self.min_char_barrel_plate_pushes)
 
+	def append_solution(self, path_cells, char_cell, barrel_cell):
+		self.solution.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell)]])
+
 	def find_solvable_cells_for_plate_cells(self, plate_cells):
 		start_time = time()
 		min_char_barrel_plate_pushes = {}
@@ -249,8 +252,7 @@ class BarrelPuzzle(Puzzle):
 					orig_char_cell = self.stock_char_cell
 					while True:
 						char_path = self.Globals.find_path(orig_char_cell, last_char_cell, self.barrel_cells)
-#						print(char_path + [last_barrel_cell])
-						self.solution.append(char_path + [last_barrel_cell])
+						self.append_solution(char_path, last_char_cell, last_barrel_cell)
 						if prev_state is None:
 							break
 						orig_char_cell = last_barrel_cell
@@ -334,7 +336,7 @@ class BarrelPuzzle(Puzzle):
 			char_path = self.Globals.find_path(self.char_cell, cell, self.barrel_cells)
 			self.push(cell, barrel_cell)
 
-			self.solution.append(char_path + [barrel_cell])
+			self.append_solution(char_path, cell, barrel_cell)
 			if self.find_solution(init=False):
 				return True
 			self.solution.pop()
@@ -695,7 +697,7 @@ class BarrelPuzzle(Puzzle):
 
 		if self.find_solution(True):
 			# solution found
-			solution_items = self.solution.copy()
+			solution_items = [item for pair in self.solution for item in pair]
 			self.reset_solution_data()
 			return solution_items, None
 		else:
