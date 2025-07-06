@@ -87,6 +87,28 @@ class Area:
 	def cell22(self):
 		return (self.x2, self.y2)
 
+	def is_cell_evnevn(self, cell):
+		return (cell[0] - self.x1) % 2 == 0 and (cell[1] - self.y1) % 2 == 0
+
+	def is_cell_evnodd(self, cell):
+		return (cell[0] - self.x1) % 2 == 0 and (cell[1] - self.y1) % 2 == 1
+
+	def is_cell_oddevn(self, cell):
+		return (cell[0] - self.x1) % 2 == 1 and (cell[1] - self.y1) % 2 == 0
+
+	def is_cell_oddodd(self, cell):
+		return (cell[0] - self.x1) % 2 == 1 and (cell[1] - self.y1) % 2 == 1
+
+	def is_cell_inside(self, cell, margin=0):
+		return self.x1 + margin <= cell[0] <= self.x2 - margin and self.y1 + margin <= cell[1] <= self.y2 - margin
+
+	def is_cell_on_margin(self, cell, margin=0):
+		if margin > 0:
+			return self.is_cell_inside(cell) and not self.is_cell_inside(cell, margin)
+		if margin < 0:
+			return not self.is_cell_inside(cell) and self.is_cell_inside(cell, margin)
+		return False
+
 def make_grayscale_image(image):
 	gray_image = pygame.transform.grayscale(image)
 	gray_image.fill((60, 60, 60), special_flags=pygame.BLEND_RGB_ADD)
