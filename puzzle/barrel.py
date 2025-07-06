@@ -20,6 +20,9 @@ class BarrelPuzzle(Puzzle):
 	def assert_config(self):
 		return not flags.is_any_maze
 
+	def has_border(self):
+		return True
+
 	def has_plate(self):
 		return True
 
@@ -28,6 +31,12 @@ class BarrelPuzzle(Puzzle):
 
 	def is_goal_to_be_solved(self):
 		return True
+
+	def store_level(self, stored_level):
+		stored_level["area"] = self.area
+
+	def restore_level(self, stored_level):
+		self.area = stored_level["area"]
 
 	def reset_solution_data(self):
 		self.min_char_barrel_plate_pushes = None
@@ -353,6 +362,7 @@ class BarrelPuzzle(Puzzle):
 		self.red_floor_image.fill(MAIN_COLOR_RGB_VALUES[0], special_flags=pygame.BLEND_RGB_MULT)
 
 	def on_load_map(self, special_cell_values, extra_values):
+		self.area = room
 		self.Globals.convert_outer_floors(CELL_VOID if "bg_image" in self.level else None)
 		self.on_generate_map()
 
