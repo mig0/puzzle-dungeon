@@ -15,6 +15,7 @@ OBSTACLE_COST = None
 
 class BarrelPuzzle(Puzzle):
 	def init(self):
+		self.is_zsb = False
 		self.disable_prepare_solution = False
 
 	def assert_config(self):
@@ -38,6 +39,146 @@ class BarrelPuzzle(Puzzle):
 	def restore_level(self, stored_level):
 		self.area = stored_level["area"]
 
+	def is_valid_zsb_area_size(self):
+		return self.area.size_x % 2 == 1 and self.area.size_y % 2 == 1 and self.area.size_x >= 5 and self.area.size_y >= 5
+
+	def get_zsb_size(self):
+		return ((self.area.size_x - 1) // 2, (self.area.size_y - 1) // 2)
+
+	def get_zsb_size_str(self):
+		return 'x'.join(map(str, self.get_zsb_size()))
+
+	def get_zsb_wall_cells(self):
+		return [cell for cell in self.area.cells if self.area.is_cell_oddodd(cell)]
+
+	def is_zsb_anchor_cell(self, cell):
+		return self.area.is_cell_inside(cell, 1) and (self.area.is_cell_evnodd(cell) or self.area.is_cell_oddevn(cell))
+
+	def get_all_zsb_anchor_cells(self):
+		return [cell for cell in self.area.cells if self.is_zsb_anchor_cell(cell)]
+
+	def get_zsb_anchor_move_type(self, cell):
+		return MOVE_V if self.area.is_cell_evnodd(cell) else MOVE_H if self.area.is_cell_oddevn(cell) else self.die("No anchor argument")
+
+	def is_zsb_graph_connected(self, anchor_cells):
+		wall_cells = self.get_zsb_wall_cells()
+		wall_graphs = [(wall_cell,) for wall_cell in wall_cells]
+		for anchor_cell in anchor_cells:
+			dirs = (DIR_L, DIR_R) if self.get_zsb_anchor_move_type(anchor_cell) == MOVE_V else (DIR_U, DIR_D)
+			wall1_cell = apply_diff(anchor_cell, dirs[0])
+			wall2_cell = apply_diff(anchor_cell, dirs[1])
+			wall1_graph = next(wall_graph for wall_graph in wall_graphs if wall1_cell in wall_graph)
+			wall2_graph = next(wall_graph for wall_graph in wall_graphs if wall2_cell in wall_graph)
+			if wall1_graph == wall2_graph:
+				return False
+			wall_graphs.remove(wall1_graph)
+			wall_graphs.remove(wall2_graph)
+			wall_graphs.append((*wall1_graph, *wall2_graph))
+		return True  # the same: len(wall_graphs) == 1
+
+	def is_zsb_correspondence(self, source_cells, target_cells):
+		zsb_size = self.get_zsb_size()
+		def count_anchors_in_row(anchor_cells, r):
+			return sum(1 for cell in anchor_cells if cell[0] == self.area.x1 + r * 2 + 2)
+		for r in range(zsb_size[0] - 1):
+			if count_anchors_in_row(source_cells, r) != count_anchors_in_row(target_cells, r):
+				return False
+		def count_anchors_in_col(anchor_cells, c):
+			return sum(1 for cell in anchor_cells if cell[1] == self.area.y1 + c * 2 + 2)
+		for c in range(zsb_size[1] - 1):
+			if count_anchors_in_col(source_cells, c) != count_anchors_in_col(target_cells, c):
+				return False
+		return True
+
+	def generate_random_zsb_room(self):
+		if not self.is_valid_zsb_area_size():
+			self.die("Invalid area size %s for Zero Space type-B puzzle" % str(self.area.size))
+		self.set_area_border_walls(0)
+
+		zsb_size = self.get_zsb_size()
+		num_barrels = zsb_size[0] * zsb_size[1] - 1
+		all_anchor_cells = self.get_all_zsb_anchor_cells()
+		debug(2, "Generating Zero Space type-B puzzle %s with %d barrels" % (self.get_zsb_size_str(), num_barrels))
+
+		# 1) initialize zsb walls
+		for cell in self.get_zsb_wall_cells():
+			self.map[cell] = CELL_WALL
+
+		# 2) create random barrels and plates until both are connected and correspond to each other
+		while True:
+			barrel_cells = sample(all_anchor_cells, k=num_barrels)
+			if not self.is_zsb_graph_connected(barrel_cells):
+				continue
+			plate_cells = sample(all_anchor_cells, k=num_barrels)
+			if sorted(plate_cells) == sorted(barrel_cells):
+				continue
+			if not self.is_zsb_graph_connected(plate_cells):
+				continue
+			if not self.is_zsb_correspondence(barrel_cells, plate_cells):
+				continue
+			break
+
+		# 3) initialize room barrels
+		for cell in barrel_cells:
+			create_barrel(cell)
+
+		# 4) initialize room plates
+		for cell in plate_cells:
+			self.map[cell] = CELL_PLATE
+
+		# 5) initialize char (optional)
+		self.Globals.set_char_cell(self.area.cell11)
+
+	def check_zsb(self):
+		self.is_zsb = False
+		zsb_size = self.get_zsb_size()
+		num_barrels = zsb_size[0] * zsb_size[1] - 1
+
+		# check valid area size
+		if not self.is_valid_zsb_area_size():
+			return
+
+		# check that walls are only on odd-odd cells and nowhere else
+		for cell in self.area.cells:
+			is_wall_cell = self.area.is_cell_oddodd(cell)
+			if is_wall_cell and self.map[cell] != CELL_WALL or not is_wall_cell and not self.map[cell] in (*CELL_FLOOR_TYPES, CELL_PLATE):
+				debug(2, "Cell %s must%s be WALL for ZSB, but it is '%s', concluding no ZSB" % (str(cell), "" if is_wall_cell else " NOT", self.map[cell]))
+				return
+
+		# check number and connectivity of barrels and plates
+		for archor_cells in (self.stock_barrel_cells, self.plate_cells):
+			if len(archor_cells) != num_barrels:
+				return
+			for cell in archor_cells:
+				if not self.is_zsb_anchor_cell(cell):
+					return
+			if not self.is_zsb_graph_connected(archor_cells):
+				return
+
+		# check correspondence of barrels and plates
+		if not self.is_zsb_correspondence(self.stock_barrel_cells, self.plate_cells):
+			return
+
+		self.is_zsb = True
+
+	def get_valid_zsb_pushes(self):
+		push_cell_pairs = []
+		for barrel_cell in self.barrel_cells:
+			dirs = (DIR_L, DIR_R) if self.get_zsb_anchor_move_type(barrel_cell) == MOVE_H else (DIR_U, DIR_D)
+			for dir in dirs:
+				target_cell = apply_diff(barrel_cell, dir, factor=2)
+				if target_cell in self.barrel_cells or self.map[target_cell] in CELL_CHAR_MOVE_OBSTACLES:
+					continue
+				if not self.is_zsb_graph_connected([cell for cell in self.barrel_cells if cell != barrel_cell] + [target_cell]):
+					continue
+				push_cell_pairs.append([apply_diff(barrel_cell, dir, subtract=True), barrel_cell])
+		return push_cell_pairs
+
+	def check_special_setups(self):
+		self.check_zsb()
+		if self.is_zsb:
+			set_status_message("This is Zero Space type-B %s puzzle!" % self.get_zsb_size_str(), self)
+
 	def reset_solution_data(self):
 		self.min_char_barrel_plate_pushes = None
 		self.min_barrel_plate_pushes = None
@@ -56,6 +197,7 @@ class BarrelPuzzle(Puzzle):
 		self.has_extra_plates  = len(self.plate_cells) > len(barrels)
 
 		self.reset_solution_data()
+		self.check_special_setups()
 
 	def get_room_barrels(self):
 		return [ barrel for barrel in barrels if is_actor_in_room(barrel) ]
@@ -215,6 +357,8 @@ class BarrelPuzzle(Puzzle):
 #		print(self.min_char_barrel_plate_pushes)
 
 	def append_solution(self, path_cells, char_cell, barrel_cell):
+		if path_cells is None:
+			self.die("No path for char %s to push barrel %s" % (char.c, barrel_cell))
 		self.solution.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell)]])
 
 	def find_solvable_cells_for_plate_cells(self, plate_cells):
@@ -324,15 +468,23 @@ class BarrelPuzzle(Puzzle):
 		if time() > self.end_solution_time:
 			return False
 
-		accessible_cells = self.Globals.get_accessible_cells(self.char_cell, self.barrel_cells)
-		accessible_cells.sort()
+		if self.is_zsb:
+			accessible_cells_near_barrels = self.get_valid_zsb_pushes()
+			position_id = [ *self.barrel_cells ]
+		else:
+			accessible_cells = self.Globals.get_accessible_cells(self.char_cell, self.barrel_cells)
+			accessible_cells.sort()
 
-		position_id = [ *accessible_cells, None, *self.barrel_cells ]
+			accessible_cells_near_barrels = None
+			position_id = [ *accessible_cells, None, *self.barrel_cells ]
+
 		if position_id in self.visited_positions:
 			return False
 		self.visited_positions.append(position_id)
 
-		accessible_cells_near_barrels = [ (cell, barrel_cell) for cell in accessible_cells for barrel_cell in self.barrel_cells if cell_distance(cell, barrel_cell) == 1 and self.can_push(cell, barrel_cell) ]
+		if not accessible_cells_near_barrels:
+			accessible_cells_near_barrels = [ (cell, barrel_cell) for cell in accessible_cells for barrel_cell in self.barrel_cells
+				if cell_distance(cell, barrel_cell) == 1 and self.can_push(cell, barrel_cell) ]
 
 		accessible_cells_near_barrels.sort(key=lambda cell_pair: self.get_barrel_distance_weight(*cell_pair))
 
@@ -343,11 +495,17 @@ class BarrelPuzzle(Puzzle):
 			old_char_cell = self.char_cell
 
 			char_path = self.Globals.find_path(self.char_cell, cell, self.barrel_cells)
-			self.push(cell, barrel_cell)
-
+			new_barrel_cell = self.push(cell, barrel_cell)
 			self.append_solution(char_path, cell, barrel_cell)
+			if self.is_zsb:
+				self.push(barrel_cell, new_barrel_cell)
+				self.append_solution([], barrel_cell, new_barrel_cell)
+
 			if self.find_solution(init=False):
 				return True
+
+			if self.is_zsb:
+				self.solution.pop()
 			self.solution.pop()
 
 			self.barrel_cells = old_barrel_cells
@@ -669,7 +827,9 @@ class BarrelPuzzle(Puzzle):
 		self.num_barrels = self.parse_config_num("num_barrels", DEFAULT_NUM_BARRELS)
 		self.set_area_from_config(default_size=DEFAULT_BARREL_PUZZLE_SIZE, align_to_center=True)
 
-		if self.config.get("use_ng"):
+		if self.config.get("zsb"):
+			self.generate_random_zsb_room()
+		elif self.config.get("use_ng"):
 			self.generate_ng_random_solvable_room()
 		else:
 			self.generate_random_solvable_room()
