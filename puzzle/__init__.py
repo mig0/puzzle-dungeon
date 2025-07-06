@@ -142,13 +142,10 @@ class Puzzle:
 	def is_in_room(self, cell):
 		return self.Globals.is_cell_in_area(cell, room.x_range, room.y_range)
 
-	def set_area_border_walls(self):
-		for x in self.area.x_range:
-			self.map[x, self.area.y1 - 1] = CELL_WALL
-			self.map[x, self.area.y2 + 1] = CELL_WALL
-		for y in range(self.area.y1 - 1, self.area.y2 + 2):
-			self.map[self.area.x1 - 1, y] = CELL_WALL
-			self.map[self.area.x2 + 1, y] = CELL_WALL
+	def set_area_border_walls(self, width=1):
+		for cell in room.cells:
+			if self.area.is_cell_on_margin(cell, -width if width > 0 else -100):
+				self.map[cell] = CELL_WALL
 
 	def set_area_cells(self, cell_type, add_border_walls=False):
 		for cell in self.area.cells:
