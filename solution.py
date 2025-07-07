@@ -1,5 +1,5 @@
 from time import time
-from config import SOLUTION_MOVE_DELAY
+from config import SOLUTION_MOVE_DELAY, SOLUTION_MOVE_DELAY_RANGE, SOLUTION_MOVE_DELAY_CHANGE
 from objects import char
 from constants import DIRS_BY_NAME
 from cellactor import cell_diff
@@ -85,6 +85,7 @@ class Solution:
 		self.solution_items = None
 		self.play_mode = False
 		self.is_status_drawn = False
+		self.reset_move_delay()
 		set_status_message(None, self, 1)
 
 	def is_active(self):
@@ -146,7 +147,7 @@ class Solution:
 	def set_play_mode(self):
 		self.play_mode = self.is_active()
 		if self.play_mode:
-			self.next_solution_move_time = time() + SOLUTION_MOVE_DELAY
+			self.next_solution_move_time = time() + self.move_delay
 			num_left_str = self.get_num_moves_presses_str()
 			set_status_message("%s left until solved" % num_left_str, self, 1)
 		else:
@@ -164,6 +165,22 @@ class Solution:
 				self.solution_items.pop(0)
 
 			self.set_play_mode()
+
+	def set_move_delay(self, new_move_delay):
+		if not SOLUTION_MOVE_DELAY_RANGE[0] <= new_move_delay <= SOLUTION_MOVE_DELAY_RANGE[1]:
+			return
+		if self.play_mode:
+			self.next_solution_move_time += new_move_delay - self.move_delay
+		self.move_delay = new_move_delay
+
+	def dec_move_delay(self):
+		self.set_move_delay(self.move_delay / SOLUTION_MOVE_DELAY_CHANGE)
+
+	def inc_move_delay(self):
+		self.set_move_delay(self.move_delay * SOLUTION_MOVE_DELAY_CHANGE)
+
+	def reset_move_delay(self):
+		self.set_move_delay(SOLUTION_MOVE_DELAY)
 
 solution = Solution()
 

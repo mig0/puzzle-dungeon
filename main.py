@@ -1588,6 +1588,18 @@ def press_cell(cell, button=None):
 		unset_prepared_solution()
 	return was_handled
 
+def change_solution_move_delay(is_reset, is_dec, is_inc):
+	if is_reset:
+		solution.reset_move_delay()
+		return True
+	if is_dec:
+		solution.dec_move_delay()
+		return True
+	if is_inc:
+		solution.inc_move_delay()
+		return True
+	return False
+
 def handle_press_key():
 	global is_main_screen
 	global lang
@@ -1611,6 +1623,10 @@ def handle_press_key():
 
 	if mode != "game" and mode != "end" and mode != "next":
 		return
+
+	if solution.is_play_mode():
+		if change_solution_move_delay(keyboard.insert, keyboard.pageup, keyboard.pagedown):
+			return
 
 	if keyboard.escape and not cursor.is_active():
 		init_main_screen()
@@ -1770,6 +1786,9 @@ def on_mouse_down(pos, button):
 	if mode != "game":
 		return
 
+	if solution.is_play_mode():
+		if change_solution_move_delay(button == 2, button == 4, button == 5):
+			return
 	if cancel_playing_solution():
 		return
 	if cursor.is_active():
