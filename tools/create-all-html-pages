@@ -6,6 +6,10 @@ if test "$1" = -r; then
 	export CREATE_REDIRECT_PAGE=1
 fi
 
+if test "$1" = -R; then
+	export ADD_REFRESH_TAG=1
+fi
+
 update-readme-md
 create-html-elements-index
 create-html-elements-news
