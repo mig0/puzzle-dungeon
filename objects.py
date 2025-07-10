@@ -2,17 +2,18 @@ from random import randint
 from constants import *
 from cellactor import *
 from common import *
+from mirror import Mirror
 from theme import *
 from room import is_cell_in_room
 from drop import Drop
 
 __all__ = [
 	'set_map',  # temporarily
-	'char', 'enemies', 'barrels', 'carts', 'lifts', 'portal_destinations',
+	'char', 'enemies', 'barrels', 'carts', 'lifts', 'mirrors', 'portal_destinations',
 	'drop_heart', 'drop_sword', 'drop_might', 'drop_key1', 'drop_key2', 'drops',
 	'cursor', 'create_enemy', 'create_barrel',
 	'create_cart', 'create_lift', 'get_lift_target', 'get_lift_target_at_neigh',
-	'create_portal', 'create_portal_pair',
+	'create_mirror', 'create_portal', 'create_portal_pair',
 ]
 
 class Fighter(CellActor):
@@ -28,6 +29,7 @@ enemies = []
 barrels = []
 carts = []
 lifts = []
+mirrors = []
 
 portal_destinations = {}
 
@@ -110,6 +112,15 @@ def get_lift_target(cell, diff):
 
 def get_lift_target_at_neigh(lift, neigh):
 	return get_lift_target(lift.c, cell_diff(lift.c, neigh))
+
+def create_mirror(host, data=None):
+	mirror = Mirror(get_theme_image_name('mirror'), host)
+	if data:
+		mirror.from_data(data)
+	host.mirror = mirror
+	mirrors.append(mirror)
+
+	return mirror
 
 def create_portal(cell, dst_cell):
 	if cell == dst_cell:

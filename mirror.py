@@ -1,7 +1,6 @@
 import pygame
 from typing import Union
 from cellactor import *
-from objects import *
 from common import die
 from game import game
 from constants import MIRROR_INACTIVE_OPACITY, MIRROR_ORIENTATION_CHARS
@@ -46,6 +45,16 @@ class Mirror(CellActor):
 			die("Invalid mirror orientation (%s), fix the bug" % str(orientation))
 		self._orientation = orientation
 
+	def to_data(self):
+		return self.c, self.orientation, self.activeness, self.fixed_orientation, self.fixed_activeness
+
+	def from_data(self, data):
+		self.c = data[0]
+		self.orientation = data[1]
+		self.activeness = data[2]
+		self.fixed_orientation = data[3]
+		self.fixed_activeness = data[4]
+
 	def reset(self):
 		if not self.fixed_orientation:
 			self.orientation = 0
@@ -70,8 +79,3 @@ class Mirror(CellActor):
 	def toggle_active_flip(self):
 		self.activeness ^= 2
 
-def get_mirror_on_cell(cell):
-	for actors in (barrels, carts, lifts):
-		if (actor := get_actor_on_cell(cell, actors)) and actor.mirror:
-			return actor.mirror
-	return None

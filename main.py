@@ -18,7 +18,6 @@ from translations import *
 from cellactor import *
 from objects import *
 from common import *
-from mirror import *
 from debug import *
 from image import *
 from theme import *
@@ -111,6 +110,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		barrels.clear()
 		carts.clear()
 		lifts.clear()
+		mirrors.clear()
 		portal_destinations.clear()
 		set_char_cell(None, 0)
 
@@ -198,7 +198,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			if ch == CELL_PORTAL:
 				portal_cells.append(cell)
 			if mirror_host:
-				mirror_host.mirror = Mirror(get_theme_image_name('mirror'), mirror_host)
+				create_mirror(mirror_host)
 				value_type = 'strs'
 			value_type = value_type or special_cell_types.get(ch)
 			if value_type:
@@ -1145,6 +1145,9 @@ def set_theme(theme_name):
 	for lift in lifts:
 		reload_actor_theme_image(lift)
 
+	for mirror in mirrors:
+		reload_actor_theme_image(mirror)
+
 	for drop in drops:
 		drop.set_image(get_theme_image_name(drop.name))
 
@@ -1285,6 +1288,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	enemies.clear()
 	carts.clear()
 	lifts.clear()
+	mirrors.clear()
 	killed_enemies.clear()
 	portal_destinations.clear()
 
@@ -1331,6 +1335,9 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 			create_barrel(barrel_cell)
 		for lift_info in stored_level["lift_infos"]:
 			create_lift(*lift_info)
+		for mirror_data in stored_level["mirror_datas"]:
+			mirror_host = get_actor_on_cell(mirror_data[0], barrels + carts + lifts)
+			create_mirror(mirror_host, mirror_data)
 		for portal_cell, dst_cell in stored_level["portal_destinations"].items():
 			create_portal(portal_cell, dst_cell)
 		for drop in drops:
@@ -1371,6 +1378,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 		"enemy_infos": tuple((enemy.c, enemy.power or enemy.health, enemy.attack, enemy.drop) for enemy in enemies),
 		"barrel_cells": tuple(barrel.c for barrel in barrels),
 		"lift_infos": tuple((lift.c, lift.type) for lift in lifts),
+		"mirror_datas": tuple(mirror.to_data() for mirror in mirrors),
 		"portal_destinations": dict(portal_destinations),
 		"drop_states": dict([(drop.name, drop.get_state()) for drop in drops]),
 		"theme_name": theme_name,
