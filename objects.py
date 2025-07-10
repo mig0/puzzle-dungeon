@@ -50,8 +50,6 @@ def set_map(_map):
 	map = _map
 
 def create_enemy(cell, health=None, attack=None, drop=None):
-	global enemies
-
 	enemy = Fighter()
 	enemy.c = cell
 	enemy.power  = health if char.power else None
@@ -65,16 +63,12 @@ def create_enemy(cell, health=None, attack=None, drop=None):
 	return enemy
 
 def create_barrel(cell):
-	global barrels
-
 	barrel = create_theme_actor("barrel", cell)
 	barrels.append(barrel)
 
 	return barrel
 
 def create_cart(cell, move_type, exit_cell=None, image_name=None, surface=None):
-	global carts
-
 	opacity = None
 	if image_name is None:
 		image_name = "lift" + move_type
@@ -97,8 +91,6 @@ def create_cart(cell, move_type, exit_cell=None, image_name=None, surface=None):
 	return cart
 
 def create_lift(cell, move_type, surface=None):
-	global lifts
-
 	image_name = "lift" + move_type
 	lift = create_actor(surface, cell) if surface else create_theme_actor(image_name, cell)
 	lift.type = move_type

@@ -1081,7 +1081,6 @@ def generate_map():
 
 def set_theme(theme_name):
 	global cell_images, status_image, cloud_image
-	global barrels
 
 	set_theme_name(theme_name)
 	image1 = create_theme_image('wall')
@@ -1245,7 +1244,6 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	global revealed_map
 	global switch_cell_infos, portal_demolition_infos
 	global char_cells, enter_room_idx
-	global enemies, barrels, killed_enemies, carts, lifts
 	global level_time
 	global map, stored_level
 
