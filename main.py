@@ -1139,10 +1139,10 @@ def set_theme(theme_name):
 	image12 = create_theme_image('sand')  if puzzle.has_sand() else None
 	image13 = create_theme_image('lock1') if puzzle.has_locks() else None
 	image14 = create_theme_image('lock2') if puzzle.has_locks() else None
-	image15 = create_theme_image('dirl')  if puzzle.has_dirs() else None
-	image16 = create_theme_image('dirr')  if puzzle.has_dirs() else None
-	image17 = create_theme_image('diru')  if puzzle.has_dirs() else None
-	image18 = create_theme_image('dird')  if puzzle.has_dirs() else None
+	image15 = create_theme_image('odirl') if puzzle.has_odirs() else None
+	image16 = create_theme_image('odirr') if puzzle.has_odirs() else None
+	image17 = create_theme_image('odiru') if puzzle.has_odirs() else None
+	image18 = create_theme_image('odird') if puzzle.has_odirs() else None
 	status_image = create_theme_image('status')
 	cloud_image = create_theme_image('cloud') if flags.is_cloud_mode and not bg_image else None
 
@@ -1164,10 +1164,10 @@ def set_theme(theme_name):
 		CELL_SAND:   image12,
 		CELL_LOCK1:  image13,
 		CELL_LOCK2:  image14,
-		CELL_DIR_L:  image15,
-		CELL_DIR_R:  image16,
-		CELL_DIR_U:  image17,
-		CELL_DIR_D:  image18,
+		CELL_ODIRL:  image15,
+		CELL_ODIRR:  image16,
+		CELL_ODIRU:  image17,
+		CELL_ODIRD:  image18,
 		CELL_OUTER_WALL: outer_wall_image,
 	}
 
@@ -2170,10 +2170,10 @@ def can_move(diff):
 		map[dest_cell] not in CELL_CHAR_MOVE_OBSTACLES
 		or map[dest_cell] == CELL_LOCK1 and drop_key1.num_collected > 0
 		or map[dest_cell] == CELL_LOCK2 and drop_key2.num_collected > 0
-		or map[dest_cell] == CELL_DIR_L and diff != (+1, 0)
-		or map[dest_cell] == CELL_DIR_R and diff != (-1, 0)
-		or map[dest_cell] == CELL_DIR_U and diff != (0, +1)
-		or map[dest_cell] == CELL_DIR_D and diff != (0, -1)
+		or map[dest_cell] == CELL_ODIRL and diff != (+1, 0)
+		or map[dest_cell] == CELL_ODIRR and diff != (-1, 0)
+		or map[dest_cell] == CELL_ODIRU and diff != (0, +1)
+		or map[dest_cell] == CELL_ODIRD and diff != (0, -1)
 		or is_cell_in_actors(dest_cell, lifts)
 		or get_lift_target(char.c, diff)
 	)

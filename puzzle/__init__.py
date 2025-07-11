@@ -75,7 +75,7 @@ class Puzzle:
 	def has_sand(self):
 		return False
 
-	def has_dirs(self):
+	def has_odirs(self):
 		return False
 
 	def is_goal_to_kill_enemies(self):

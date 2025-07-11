@@ -7,8 +7,9 @@
 
 <p>Our hero must build his power and defeat enemies in different floor
 sections. Once the hero enters a floor section, he must complete it
-before moving to another one. We will place one directional cells for
-this purpose.</p>
+before moving to another one. We will place one-directional cells that
+allow movement to the right but not back to the left for this
+purpose.</p>
 
 <p>The code of our new puzzle will reside in file
 <i>puzzle/myhero.py</i>.</p>
@@ -24,7 +25,7 @@ let's start to code it like this:</p>
 </code></pre>
 
 <p>This puzzle includes special cell types like finish, portals and
-directional cells. This should be declared like this:</p>
+one-directional cells. This should be declared like this:</p>
 
 <pre class="highlight"><code>	<span class="highlight kwa">def</span> <span class="highlight kwd">has_finish</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
 		<span class="highlight kwa">return True</span>
@@ -32,7 +33,7 @@ directional cells. This should be declared like this:</p>
 	<span class="highlight kwa">def</span> <span class="highlight kwd">has_portal</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
 		<span class="highlight kwa">return True</span>
 
-	<span class="highlight kwa">def</span> <span class="highlight kwd">has_dirs</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
+	<span class="highlight kwa">def</span> <span class="highlight kwd">has_odirs</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
 		<span class="highlight kwa">return True</span>
 </code></pre>
 
@@ -43,8 +44,11 @@ like this:</p>
 		<span class="highlight kwa">return True</span>
 </code></pre>
 
-<p>Now it is a time to implement a random generation of floor sections
-(with enemies and powerups), directional cells and portals:</p>
+<p>It's time to implement random generation of floor sections, which
+include enemies and powerups. Each floor section is enclosed by walls. A
+one-way cell to the right (CELL_ODIRR) serves as an entry lock, and a
+portal at the end of the section returns the player to its starting
+point:</p>
 
 <pre class="highlight"><code>	<span class="highlight kwa">def</span> <span class="highlight kwd">generate_room</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
 		self<span class="highlight opt">.</span><span class="highlight kwd">set_area_from_config</span><span class="highlight opt">(</span>default_size<span class="highlight opt">=(</span><span class="highlight num">5</span><span class="highlight opt">,</span> <span class="highlight num">5</span><span class="highlight opt">),</span> request_odd_size<span class="highlight opt">=</span><span class="highlight kwa">True</span><span class="highlight opt">,</span> align_to_center<span class="highlight opt">=</span><span class="highlight kwa">True</span><span class="highlight opt">)</span>
@@ -61,7 +65,7 @@ like this:</p>
 				<span class="highlight kwa">if</span> cell<span class="highlight opt">[</span><span class="highlight num">0</span><span class="highlight opt">] !=</span> self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x1<span class="highlight opt">:</span>
 					self<span class="highlight opt">.</span>map<span class="highlight opt">[</span>cell<span class="highlight opt">] =</span> CELL_WALL
 			<span class="highlight kwa">elif</span> cell<span class="highlight opt">[</span><span class="highlight num">0</span><span class="highlight opt">] ==</span> self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x1<span class="highlight opt">:</span>
-				self<span class="highlight opt">.</span>map<span class="highlight opt">[</span>cell<span class="highlight opt">] =</span> CELL_DIR_R
+				self<span class="highlight opt">.</span>map<span class="highlight opt">[</span>cell<span class="highlight opt">] =</span> CELL_ODIRR
 			<span class="highlight kwa">elif</span> cell<span class="highlight opt">[</span><span class="highlight num">0</span><span class="highlight opt">] ==</span> self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x2<span class="highlight opt">:</span>
 				self<span class="highlight opt">.</span>Globals<span class="highlight opt">.</span><span class="highlight kwd">create_portal</span><span class="highlight opt">(</span>cell<span class="highlight opt">, (</span>self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x1<span class="highlight opt">,</span> cell<span class="highlight opt">[</span><span class="highlight num">1</span><span class="highlight opt">]))</span>
 			<span class="highlight kwa">else</span><span class="highlight opt">:</span>
@@ -94,7 +98,7 @@ like in some other puzzles and more. But for now this will be enough.</p>
 	<span class="highlight kwa">def</span> <span class="highlight kwd">has_portal</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
 		<span class="highlight kwa">return True</span>
 
-	<span class="highlight kwa">def</span> <span class="highlight kwd">has_dirs</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
+	<span class="highlight kwa">def</span> <span class="highlight kwd">has_odirs</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
 		<span class="highlight kwa">return True</span>
 
 	<span class="highlight kwa">def</span> <span class="highlight kwd">is_goal_to_kill_enemies</span><span class="highlight opt">(</span>self<span class="highlight opt">):</span>
@@ -115,7 +119,7 @@ like in some other puzzles and more. But for now this will be enough.</p>
 				<span class="highlight kwa">if</span> cell<span class="highlight opt">[</span><span class="highlight num">0</span><span class="highlight opt">] !=</span> self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x1<span class="highlight opt">:</span>
 					self<span class="highlight opt">.</span>map<span class="highlight opt">[</span>cell<span class="highlight opt">] =</span> CELL_WALL
 			<span class="highlight kwa">elif</span> cell<span class="highlight opt">[</span><span class="highlight num">0</span><span class="highlight opt">] ==</span> self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x1<span class="highlight opt">:</span>
-				self<span class="highlight opt">.</span>map<span class="highlight opt">[</span>cell<span class="highlight opt">] =</span> CELL_DIR_R
+				self<span class="highlight opt">.</span>map<span class="highlight opt">[</span>cell<span class="highlight opt">] =</span> CELL_ODIRR
 			<span class="highlight kwa">elif</span> cell<span class="highlight opt">[</span><span class="highlight num">0</span><span class="highlight opt">] ==</span> self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x2<span class="highlight opt">:</span>
 				self<span class="highlight opt">.</span>Globals<span class="highlight opt">.</span><span class="highlight kwd">create_portal</span><span class="highlight opt">(</span>cell<span class="highlight opt">, (</span>self<span class="highlight opt">.</span>area<span class="highlight opt">.</span>x1<span class="highlight opt">,</span> cell<span class="highlight opt">[</span><span class="highlight num">1</span><span class="highlight opt">]))</span>
 			<span class="highlight kwa">else</span><span class="highlight opt">:</span>

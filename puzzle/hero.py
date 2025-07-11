@@ -16,7 +16,7 @@ class HeroPuzzle(Puzzle):
 	def has_gate(self):
 		return True
 
-	def has_dirs(self):
+	def has_odirs(self):
 		return self.is_strict_floors
 
 	def is_goal_to_kill_enemies(self):
@@ -61,7 +61,7 @@ class HeroPuzzle(Puzzle):
 					self.map[cell] = CELL_WALL
 			elif cell[0] == self.area.x1:
 				if self.is_strict_floors:
-					self.map[cell] = CELL_DIR_R
+					self.map[cell] = CELL_ODIRR
 			elif cell[0] == self.area.x2:
 				if self.is_strict_floors:
 					create_portal(cell, (self.area.x1, cell[1]))
