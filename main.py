@@ -1024,6 +1024,9 @@ def generate_room(idx):
 			map[char.c] = CELL_START
 		accessible_cells = get_all_accessible_cells()
 		accessible_cells.pop(0)  # remove char cell
+		if not accessible_cells:
+			debug_map()
+			die("Requested to generate finish cell with no accessible cells")
 		finish_cell = accessible_cells.pop()
 		map[finish_cell] = CELL_FINISH
 		puzzle.set_finish_cell(accessible_cells, finish_cell)
