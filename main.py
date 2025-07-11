@@ -102,7 +102,10 @@ def load_map(filename_or_stringio, special_cell_types={}):
 	is_stringio = type(filename_or_stringio) == io.StringIO
 	filename = "<from-string>" if is_stringio else filename_or_stringio
 
+	orig_map = map.copy()
+
 	def print_error(error):
+		global map
 		print("File %s: %s. Ignoring map file" % (filename, error))
 		if is_stringio:
 			print(filename_or_stringio.getvalue())
@@ -113,6 +116,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		mirrors.clear()
 		portal_destinations.clear()
 		set_char_cell(None, 0)
+		map = orig_map.copy()
 
 	if is_stringio:
 		file = filename_or_stringio
@@ -125,6 +129,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			print_error("Failed to open")
 			return
 
+	# parse first signature line
 	words = file.readline().split(" ")
 	if len(words) <= 1:
 		print_error("Invalid signature line, no expected space")
@@ -143,23 +148,20 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		print_error("Invalid size %dx%d instead of %dx%d" % (size_x, size_y, MAP_SIZE_X, MAP_SIZE_Y))
 		return
 
-	orig_map = map.copy()
-
 	set_char_cell(None, 0)
 
-	line_n = 1
+	# parse map lines
+	line_n = 2
 	special_cell_infos = []
 	portal_cells = []
 	for y in range(0, size_y):
 		line = file.readline()
 		if line == '':
-			map = orig_map.copy()
 			print_error("Failed to read map line #%d" % line_n)
 			return
 		line = line.rstrip("\n")
 		for x in range(0, size_x):
 			if len(line) <= x:
-				map = orig_map.copy()
 				print_error("Failed to read char #%d in map line #%d" % (x + 1, line_n))
 				return
 			ch = line[x]
@@ -206,10 +208,10 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			map[x, y] = ch
 		line_n += 1
 
+	# parse portal cell metadata lines if any
 	for cell in portal_cells:
 		line = file.readline()
 		if line == '':
-			map = orig_map.copy()
 			print_error("Failed to read line for portal cell %s" % str(cell))
 			return
 		values = line.split()
@@ -237,6 +239,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		portal_destinations[cell] = dest_cell
 		line_n += 1
 
+	# parse special cell metadata lines if any
 	special_cell_values = {}
 	for cell, value_type in special_cell_infos:
 		if value_type is None:
@@ -244,7 +247,6 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			continue
 		line = file.readline()
 		if line == '':
-			map = orig_map.copy()
 			print_error("Failed to read line for special map cell %s" % str(cell))
 			return
 		str = line.rstrip("\n")
