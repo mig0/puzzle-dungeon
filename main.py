@@ -167,7 +167,6 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			ch = line[x]
 			cell = (x, y)
 			mirror_host = None
-			value_type = None
 			if ch == CELL_START:
 				set_char_cell(cell, 0)
 			if ch in CART_MOVE_TYPES_BY_CHAR:
@@ -201,9 +200,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 				portal_cells.append(cell)
 			if mirror_host:
 				create_mirror(mirror_host)
-				value_type = 'strs'
-			value_type = value_type or special_cell_types.get(ch)
-			if value_type:
+			if value_type := special_cell_types.get(ch):
 				special_cell_infos.append((cell, value_type))
 			map[x, y] = ch
 		line_n += 1
@@ -242,6 +239,39 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			print_portal_error("Dest cell is out of map")
 			return
 		portal_destinations[cell] = dest_cell
+		line_n += 1
+
+	# parse mirror cell metadata lines if any
+	for mirror in mirrors:
+		line = file.readline()
+		def print_mirror_error(error):
+			print_metadata_cell_line_error("mirror", mirror.c, error)
+		if line == '':
+			print_mirror_error("Failed to read line")
+			return
+		values = line.split()
+		if not len(values) == 2:
+			print_mirror_error("Invalid metadata %s, must have 2 fields" % values)
+			return
+		if not values[0]:
+			print_mirror_error("Invalid empty orientation")
+			return
+		if not values[0][0] in MIRROR_ORIENTATION_CHARS:
+			print_mirror_error("Invalid orientation (%s)" % values[0][0])
+			return
+		mirror.orientation = values[0][0]
+		mirror.fixed_orientation = False if values[0][1:] == "*" else True
+		if not values[1]:
+			print_mirror_error("Invalid empty activeness")
+			return
+		if not values[1][0].isdigit():
+			print_mirror_error("Invalid activeness (%s), must be integer" % values[1][0])
+			return
+		mirror.activeness = int(values[1][0])
+		if not 0 <= mirror.activeness <= 3:
+			print_mirror_error("Invalid activeness (%d), must be [0..3]" % mirror.activeness)
+			return
+		mirror.fixed_activeness = False if values[1][1:] == "*" else True
 		line_n += 1
 
 	# parse special cell metadata lines if any
