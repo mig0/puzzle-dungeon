@@ -106,7 +106,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 
 	def print_error(error):
 		global map
-		print("File %s: %s. Ignoring map file" % (filename, error))
+		print("%sFile %s: %s\n%sIgnoring bad map file" % (ERROR_PREFIX, filename, error, CNTRL_PREFIX))
 		if is_stringio:
 			print(filename_or_stringio.getvalue())
 		enemies.clear()
@@ -208,33 +208,38 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			map[x, y] = ch
 		line_n += 1
 
+	def print_metadata_cell_line_error(name, cell, error):
+		print_error(error + " for %s %s in map line #%d" % (name, str(cell), line_n))
+
 	# parse portal cell metadata lines if any
 	for cell in portal_cells:
 		line = file.readline()
+		def print_portal_error(error):
+			print_metadata_cell_line_error("portal", cell, error)
 		if line == '':
-			print_error("Failed to read line for portal cell %s" % str(cell))
+			print_portal_error("Failed to read line")
 			return
 		values = line.split()
 		if not values:
 			continue
 		if len(values) > 2:
-			print_error("Must be up to 2 ints for portal %s in map line #%d" % (str(cell), line_n))
+			print_portal_error("Must be up to 2 ints")
 			return
 		if len(values) == 1:
 			if not values[0].isdigit() or not 0 <= int(values[0]) < len(portal_cells):
-				print_error("Invalid dest portal idx for portal %s in map line #%d" % (str(cell), line_n))
+				print_portal_error("Invalid dest portal idx")
 				return
 			dest_cell = portal_cells[int(values[0])]
 		else:
 			if not values[0].isdigit() or not values[1].isdigit():
-				print_error("Dest cell is not ints for portal %s in map line #%d" % (str(cell), line_n))
+				print_portal_error("Dest cell is not 2 ints")
 				return
 			dest_cell = (int(values[0]), int(values[1]))
 		if dest_cell == cell:
-			print_error("Dest cell for portal cell %s can't be the same" % str(cell))
+			print_portal_error("Dest cell can't be the same")
 			return
 		if not 0 <= dest_cell[0] < size_x or not 0 <= dest_cell[1] < size_y:
-			print_error("Dest cell for portal cell %s is out of map" % str(cell))
+			print_portal_error("Dest cell is out of map")
 			return
 		portal_destinations[cell] = dest_cell
 		line_n += 1
@@ -242,29 +247,31 @@ def load_map(filename_or_stringio, special_cell_types={}):
 	# parse special cell metadata lines if any
 	special_cell_values = {}
 	for cell, value_type in special_cell_infos:
+		def print_special_error(error):
+			print_metadata_cell_line_error("special cell", cell, error)
 		if value_type is None:
 			special_cell_values[cell] = None
 			continue
 		line = file.readline()
 		if line == '':
-			print_error("Failed to read line for special map cell %s" % str(cell))
+			print_special_error("Failed to read line")
 			return
-		str = line.rstrip("\n")
-		def parse_int(str):
-			return None if str == '-' else int(str)
+		value_str = line.rstrip("\n")
+		def parse_int(value_str):
+			return None if value_str == '-' else int(value_str)
 		try:
 			if value_type == 'str':
-				value = str
+				value = value_str
 			elif value_type == 'strs':
-				value = str.split()
+				value = value_str.split()
 			elif value_type == 'int':
-				value = parse_int(str)
+				value = parse_int(value_str)
 			elif value_type == 'ints':
-				value = tuple(builtins.map(parse_int, str.split()))
+				value = tuple(builtins.map(parse_int, value_str.split()))
 			else:
 				raise ValueError("Unsupported value type %s" % value_type)
 		except Exception as e:
-			print_error("Error: \"%s\" in map line #%d" % (e, line_n))
+			print_special_error("Error: \"%s\"" % e)
 			return
 		special_cell_values[cell] = value
 		line_n += 1
