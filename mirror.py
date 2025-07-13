@@ -35,13 +35,13 @@ class Mirror(CellActor):
 
 	@property
 	def orientation(self):
-		return self._orientation
+		return self._orientation % 4
 
 	@orientation.setter
 	def orientation(self, orientation):
 		if type(orientation) == str and orientation in MIRROR_ORIENTATION_CHARS:
 			orientation = MIRROR_ORIENTATION_CHARS.index(orientation)
-		if not (type(orientation) == int and 0 <= orientation <= 3):
+		if not (type(orientation) == int and 0 <= orientation <= 7):
 			die("Invalid mirror orientation (%s), fix the bug" % str(orientation))
 		self._orientation = orientation
 
@@ -62,10 +62,10 @@ class Mirror(CellActor):
 			self.activeness = 0
 
 	def sync_rotation(self):
-		self.angle = self.orientation * (-45)
+		self.angle = self._orientation * (-45)
 
 	def rotate_mirror(self, incr):
-		self.orientation = (self.orientation + incr) % 4
+		self.orientation = (self._orientation + incr) % 8
 
 	def is_active(self, visited=False):
 		return (self.activeness % 2 == 1) ^ (visited and self.is_active_flip())
