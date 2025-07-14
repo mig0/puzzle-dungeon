@@ -1,0 +1,47 @@
+Mirror Puzzle
+
+You control how beams of light travel from a beam generator to a beam
+collector, using mirrors attached to movable or static objects. These
+mirrors reflect the beam in different ways, and may have limited or
+flipped activeness. Your objective is to arrange mirrors and possibly
+move or reconfigure them so that at least one part of the beam reaches
+the collector.
+
+The beam is emitted from the generator in four directions: left, right,
+up, and down. Each direction of the beam proceeds cell by cell until it
+is reflected, redirected, or terminates. The beam continues through empty
+floor cells, void cells, glass, sand, open gates, trap cells, portals,
+and also through barrels, enemies, the character, and mirrors. It is
+terminated by walls and locks. If it enters a portal, it instantly
+appears at the paired portal in the same direction. Portals do not
+reflect or bypass; they relocate the beam to the peer.
+
+Mirrors are defined by their orientation, activeness and their carrier
+object. There are four mirror orientations:
+
+• Diagonal 1 (/): reflects left ↔ down and right ↔ up
+
+• Diagonal 2 (\): reflects left ↔ up and right ↔ down
+
+• Horizontal (-): reverses vertical direction (up ↔ down)
+
+• Vertical   (|): reverses horizontal direction (left ↔ right)
+
+Mirrors are active or inactive. An inactive mirror does not affect the
+beam at all - it continues straight. An active mirror reflects the beam
+according to the list above. Mirrors can also have flipped
+activeness: such mirrors are active the first time they are hit by a
+beam, but become inactive for that beam on subsequent hits (or vice
+versa).
+
+Each mirror is attached to one of three types of carriers:
+
+• Barrels: pushable by the character, move one cell per push on floor.
+
+• Carts: move on floor, one cell per player instruction, in 0, 1, 2, or 4
+  directions depending on movement type.
+
+• Lifts: move across void, stopping at the first obstacle, by player
+  instruction, with the same direction types as carts.
+
+Goal: Deliver at least one part of the beam using mirrors.
