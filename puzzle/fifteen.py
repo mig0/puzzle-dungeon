@@ -54,10 +54,10 @@ class FifteenPuzzle(Puzzle):
 		if cell1 == cell2 or cell1[0] != cell2[0] and cell1[1] != cell2[1]:
 			return cells
 
-		diff = cell_direction(cell1, cell2)
+		dir = cell_dir(cell1, cell2)
 		cell = cell1
 		while cell != cell2:
-			cell = apply_diff(cell, diff)
+			cell = apply_diff(cell, dir)
 			cells.append(cell)
 		return cells
 

@@ -35,7 +35,7 @@ def apply_diff(orig, diff, subtract=False, factor=1):
 def cell_diff(cell1, cell2):
 	return (cell2[0] - cell1[0], cell2[1] - cell1[1])
 
-def cell_direction(cell1, cell2):
+def cell_dir(cell1, cell2):
 	return (cmp(cell2[0], cell1[0]), cmp(cell2[1], cell1[1]))
 
 def cell_to_pos_offset(cell, offset):
