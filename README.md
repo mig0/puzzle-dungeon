@@ -2,15 +2,15 @@
 
 ## About Game
 
-Puzzle Dungeon is a cell-based puzzle game packed with features and
-diverse puzzles. It incorporates classic games like Sokoban, StoneAge,
-Atomix, Memory, Fifteen, and plans to include Chip's Challenge and Rogue
-in future updates.
+Puzzle Dungeon is a Free Software cell-based puzzle game packed with
+features and diverse challenges. It includes implementations of classic
+games like Sokoban, StoneAge, Atomix, The Minotaur and Theseus, Memory
+and Fifteen — along with completely new puzzle types.
 
 See the list of all [puzzles](#puzzles) for details.
 
-The game uses pygame and pgzero. It should work well on GNU/Linux and
-possibly other Operating Systems, but this should be tested yet.
+The game is multiplatform. It uses pygame and pgzero, and should run well
+on GNU/Linux, Windows, and other operating systems.
 
 ## Features
 
@@ -50,24 +50,29 @@ possibly other Operating Systems, but this should be tested yet.
 
 ## Static cells
 
-* floor (empty or textured with crack, bones, rocks)
-* wall
-* plate
-* gate0 (closed), gate1 (open)
-* start
-* finish
-* portal
-* lock1, lock2
-* dir_l, dir_r, dir_u, dir_d (blocked access from left, right, up and down)
-* sand (one time access, converted to void on leave)
-* void (for lifts only, not for character)
+* floor – empty cell, sometimes textured with cracks, bones, or rocks
+* wall – blocks all access
+* glass – like a wall, but passable for things like a beam
+* plate – can be pressed or weighted down
+* gate0 / gate1 – closed and open gates
+* trap1 / trap0 – active and inactive traps
+* start – if present, the character appears here at the beginning
+* finish – if present, this cell must be reached to complete the level or room
+* portal – teleports to an arbitrary cell or another portal
+* lock1, lock2 – can be opened with key1 and key2 respectively
+* odirl, odirr, odiru, odird – one-way blocked cells (from left, right, up, down)
+* sand – allows one-time access; turns into void after stepping off
+* void – inaccessible to the character; lifts are required to move across void
+* beamgn, beamcl – beam generator and collector (for mirror puzzles)
 
 ## Actors
 
-* character - it's you
-* enemy - you fight it
-* barrel - you push it
-* lift - you ride it
+* character – that's you
+* enemy – you fight it
+* barrel – you push it
+* cart – you slide it across the floor
+* lift – you ride it to move across void
+* mirror – can be attached to barrel, cart, or lift
 
 ## Drops from enemies or floor collectibles
 
@@ -111,8 +116,12 @@ possibly other Operating Systems, but this should be tested yet.
 |Delete|  Simulate mouse button 6
 |PageUp|  Simulate mouse button 4
 |PageDown|Simulate mouse button 5
+|Shift-Delete|Reset all mirrors
 
 ## Source code
+
+The [Puzzle Dungeon source code](https://github.com/mig0/puzzle-dungeon.git)
+is available on GitHub and can be cloned using:
 
 ```bash
 git clone https://github.com/mig0/puzzle-dungeon.git
@@ -300,6 +309,54 @@ alternative, more strategic route to outmaneuver the Minotaur and reach
 the finish safely.
 
 Goal: Reach the finish without being caught by the Minotaur.
+
+### Mirror Puzzle
+
+You control how beams of light travel from a beam generator to a beam
+collector, using mirrors attached to movable or static objects. These
+mirrors reflect the beam in different ways, and may have limited or
+flipped activeness. Your objective is to arrange mirrors and possibly
+move or reconfigure them so that at least one part of the beam reaches
+the collector.
+
+The beam is emitted from the generator in four directions: left, right,
+up, and down. Each direction of the beam proceeds cell by cell until it
+is reflected, redirected, or terminates. The beam continues through empty
+floor cells, void cells, glass, sand, open gates, trap cells, portals,
+and also through barrels, enemies, the character, and mirrors. It is
+terminated by walls and locks. If it enters a portal, it instantly
+appears at the paired portal in the same direction. Portals do not
+reflect or bypass; they relocate the beam to the peer.
+
+Mirrors are defined by their orientation, activeness and their carrier
+object. There are four mirror orientations:
+
+• Diagonal 1 (/): reflects left ↔ down and right ↔ up
+
+• Diagonal 2 (\): reflects left ↔ up and right ↔ down
+
+• Horizontal (-): reverses vertical direction (up ↔ down)
+
+• Vertical   (|): reverses horizontal direction (left ↔ right)
+
+Mirrors are active or inactive. An inactive mirror does not affect the
+beam at all - it continues straight. An active mirror reflects the beam
+according to the list above. Mirrors can also have flipped
+activeness: such mirrors are active the first time they are hit by a
+beam, but become inactive for that beam on subsequent hits (or vice
+versa).
+
+Each mirror is attached to one of three types of carriers:
+
+• Barrels: pushable by the character, move one cell per push on floor.
+
+• Carts: move on floor, one cell per player instruction, in 0, 1, 2, or 4
+directions depending on movement type.
+
+• Lifts: move across void, stopping at the first obstacle, by player
+instruction, with the same direction types as carts.
+
+Goal: Deliver at least one part of the beam using mirrors.
 
 ### Portal Puzzle
 
