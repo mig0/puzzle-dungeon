@@ -90,6 +90,37 @@ class BarrelPuzzle(Puzzle):
 				return False
 		return True
 
+	def get_all_valid_zsb_barrel_moves(self, barrel_cells):
+		all_barrel_moves = []
+		for barrel_cell in barrel_cells:
+			dirs = (DIR_L, DIR_R) if self.get_zsb_anchor_move_type(barrel_cell) == MOVE_H else (DIR_U, DIR_D)
+			for dir in dirs:
+				target_cell = apply_diff(barrel_cell, dir, factor=2)
+				if target_cell in barrel_cells or self.map[target_cell] in CELL_CHAR_MOVE_OBSTACLES:
+					continue
+				if not self.is_zsb_graph_connected([cell for cell in barrel_cells if cell != barrel_cell] + [target_cell]):
+					continue
+				all_barrel_moves.append((barrel_cell, target_cell))
+		return all_barrel_moves
+
+	def get_all_valid_zsb_barrel_pushes(self):
+		return [[apply_diff(barrel_cell, cell_dir(target_cell, barrel_cell)), barrel_cell]
+			for barrel_cell, target_cell in self.get_all_valid_zsb_barrel_moves(self.barrel_cells)]
+
+	def max_valid_zsb_barrel_shuffle(self, barrel_cells, num_moves):
+		orig_barrel_cells = barrel_cells
+		barrel_cells = barrel_cells.copy()
+		max_barrel_cells = orig_barrel_cells
+		max_total_distance = 0
+		for _ in range(num_moves):
+			barrel_cell, target_cell = choice(self.get_all_valid_zsb_barrel_moves(barrel_cells))
+			barrel_cells[barrel_cells.index(barrel_cell)] = target_cell
+			total_distance = sum(cell_distance(cell1, cell2) for cell1, cell2 in zip(barrel_cells, orig_barrel_cells))
+			if total_distance > max_total_distance:
+				max_barrel_cells = barrel_cells.copy()
+				max_total_distance = total_distance
+		return max_barrel_cells
+
 	def generate_random_zsb_room(self):
 		if not self.is_valid_zsb_area_size():
 			self.die("Invalid area size %s for Zero Space type-B puzzle" % str(self.area.size))
@@ -109,13 +140,7 @@ class BarrelPuzzle(Puzzle):
 			barrel_cells = sample(all_anchor_cells, k=num_barrels)
 			if not self.is_zsb_graph_connected(barrel_cells):
 				continue
-			plate_cells = sample(all_anchor_cells, k=num_barrels)
-			if sorted(plate_cells) == sorted(barrel_cells):
-				continue
-			if not self.is_zsb_graph_connected(plate_cells):
-				continue
-			if not self.is_zsb_correspondence(barrel_cells, plate_cells):
-				continue
+			plate_cells = self.max_valid_zsb_barrel_shuffle(barrel_cells, self.area.num_cells * 2)
 			break
 
 		# 3) initialize room barrels
@@ -160,19 +185,6 @@ class BarrelPuzzle(Puzzle):
 			return
 
 		self.is_zsb = True
-
-	def get_valid_zsb_pushes(self):
-		push_cell_pairs = []
-		for barrel_cell in self.barrel_cells:
-			dirs = (DIR_L, DIR_R) if self.get_zsb_anchor_move_type(barrel_cell) == MOVE_H else (DIR_U, DIR_D)
-			for dir in dirs:
-				target_cell = apply_diff(barrel_cell, dir, factor=2)
-				if target_cell in self.barrel_cells or self.map[target_cell] in CELL_CHAR_MOVE_OBSTACLES:
-					continue
-				if not self.is_zsb_graph_connected([cell for cell in self.barrel_cells if cell != barrel_cell] + [target_cell]):
-					continue
-				push_cell_pairs.append([apply_diff(barrel_cell, dir, subtract=True), barrel_cell])
-		return push_cell_pairs
 
 	def check_special_setups(self):
 		self.check_zsb()
@@ -469,7 +481,7 @@ class BarrelPuzzle(Puzzle):
 			return False
 
 		if self.is_zsb:
-			accessible_cells_near_barrels = self.get_valid_zsb_pushes()
+			accessible_cells_near_barrels = self.get_all_valid_zsb_barrel_pushes()
 			position_id = [ *self.barrel_cells ]
 		else:
 			accessible_cells = self.Globals.get_accessible_cells(self.char_cell, self.barrel_cells)
