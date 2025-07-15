@@ -78,6 +78,9 @@ class Puzzle:
 	def has_odirs(self):
 		return False
 
+	def has_glass(self):
+		return False
+
 	def is_goal_to_kill_enemies(self):
 		return not self.has_finish() and not self.is_goal_to_be_solved()
 

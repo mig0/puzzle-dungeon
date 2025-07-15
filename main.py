@@ -1143,6 +1143,7 @@ def set_theme(theme_name):
 	image16 = create_theme_image('odirr') if puzzle.has_odirs() else None
 	image17 = create_theme_image('odiru') if puzzle.has_odirs() else None
 	image18 = create_theme_image('odird') if puzzle.has_odirs() else None
+	image19 = create_theme_image('glass') if puzzle.has_glass() else None
 	status_image = create_theme_image('status')
 	cloud_image = create_theme_image('cloud') if flags.is_cloud_mode and not bg_image else None
 
@@ -1168,6 +1169,7 @@ def set_theme(theme_name):
 		CELL_ODIRR:  image16,
 		CELL_ODIRU:  image17,
 		CELL_ODIRD:  image18,
+		CELL_GLASS:  image19,
 		CELL_OUTER_WALL: outer_wall_image,
 	}
 
