@@ -1144,6 +1144,8 @@ def set_theme(theme_name):
 	image17 = create_theme_image('odiru') if puzzle.has_odirs() else None
 	image18 = create_theme_image('odird') if puzzle.has_odirs() else None
 	image19 = create_theme_image('glass') if puzzle.has_glass() else None
+	image20 = create_theme_image('trap0') if puzzle.has_trap() else None
+	image21 = create_theme_image('trap1') if puzzle.has_trap() else None
 	status_image = create_theme_image('status')
 	cloud_image = create_theme_image('cloud') if flags.is_cloud_mode and not bg_image else None
 
@@ -1170,6 +1172,8 @@ def set_theme(theme_name):
 		CELL_ODIRU:  image17,
 		CELL_ODIRD:  image18,
 		CELL_GLASS:  image19,
+		CELL_TRAP0:  image20,
+		CELL_TRAP1:  image21,
 		CELL_OUTER_WALL: outer_wall_image,
 	}
 
@@ -1870,6 +1874,7 @@ def check_victory():
 		or "time_limit" in level and level_time > level["time_limit"]
 		or char.health is not None and char.health <= 0
 		or char.power is not None and char.power <= 0
+		or map[char.c] == CELL_TRAP1
 	):
 		loose_game()
 		return
