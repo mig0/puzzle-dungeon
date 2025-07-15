@@ -104,6 +104,20 @@ levels = [
 		},
 	},
 	{
+		"n": 2.6,
+		"num_enemies": 5,
+		"theme": "minecraft",
+		"music": "film",
+		"random_maze": True,
+		"char_health": 100,
+		"gate_puzzle": {
+			"use_traps": True,
+			"num_gates": 6,
+			"num_plates": 3,
+			"num_plates_to_press": 4,
+		},
+	},
+	{
 		"n": 3.01,
 		"map_file": "switchbox/001.map",
 		"title": "SwitchBox - level 1",

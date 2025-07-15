@@ -980,14 +980,15 @@ def demolish_portal(cell, new_cell_type=CELL_FLOOR):
 
 def toggle_gate(gate_cell):
 	cell_type = map[gate_cell]
-	if cell_type not in (CELL_GATE0, CELL_GATE1):
-		die("Called toggle_gate not on CELL_GATE")
-	if cell_type == CELL_GATE1:
+	gate_cell_types = (CELL_TRAP1, CELL_TRAP0) if cell_type in (CELL_TRAP0, CELL_TRAP1) else (CELL_GATE0, CELL_GATE1)
+	if cell_type not in gate_cell_types:
+		die("Called toggle_gate not on CELL_GATE or CELL_TRAP")
+	if cell_type == gate_cell_types[1]:
 		sound_name = 'close.wav'
-		new_cell_type = CELL_GATE0
+		new_cell_type = gate_cell_types[0]
 	else:
 		sound_name = 'open.wav'
-		new_cell_type = CELL_GATE1
+		new_cell_type = gate_cell_types[1]
 
 	switch_cell_type(gate_cell, new_cell_type, GATE_SWITCH_DURATION)
 	play_sound(sound_name)

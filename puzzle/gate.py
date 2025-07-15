@@ -152,6 +152,9 @@ class GatePuzzle(Puzzle):
 	def has_gate(self):
 		return True
 
+	def has_trap(self):
+		return True
+
 	def on_create_map(self):
 		self.room_values = [[None, None, None, None, None, None] for _ in range(flags.NUM_ROOMS)]
 
@@ -308,7 +311,7 @@ class GatePuzzle(Puzzle):
 
 	def find_map_solution(self, start_cell):
 		span_model = self.create_span_model(start_cell, self.finish_cell, self.plate_cells, self.gate_cells)
-		init_open_gate_bits = frozenbitarray([0 if self.map[gate_cell] == CELL_GATE0 else 1 for gate_cell in self.gate_cells])
+		init_open_gate_bits = frozenbitarray([0 if self.map[gate_cell] in (CELL_GATE0, CELL_TRAP1) else 1 for gate_cell in self.gate_cells])
 		self.Globals.debug_map(2, descr="Checking solution for map", full_format=True)
 		return self.find_solution(span_model, init_open_gate_bits)
 
@@ -416,15 +419,16 @@ class GatePuzzle(Puzzle):
 		for plate_cell in plate_cells:
 			self.map[plate_cell] = CELL_PLATE
 
+		gate_cell_types = (CELL_TRAP1, CELL_TRAP0) if self.config.get("use_traps") else (CELL_GATE0, CELL_GATE1)
 		for gate_idx, gate_cell in enumerate(gate_cells):
-			self.map[gate_cell] = CELL_GATE1 if solution.init_open_gate_bits[gate_idx] else CELL_GATE0
+			self.map[gate_cell] = gate_cell_types[solution.init_open_gate_bits[gate_idx]]
 
 	def generate_room(self):
 		self.generate_random_solvable_room(self.accessible_cells, self.finish_cell)
 
 	def on_load_map(self, special_cell_values, extra_values):
 		plate_cells = self.get_map_cells(CELL_PLATE)
-		gate_cells = self.get_map_cells(CELL_GATE0, CELL_GATE1)
+		gate_cells = self.get_map_cells(CELL_GATE0, CELL_GATE1, CELL_TRAP0, CELL_TRAP1)
 
 		self.num_plates = len(plate_cells)
 		self.num_gates = len(gate_cells)
