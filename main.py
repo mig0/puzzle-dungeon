@@ -20,6 +20,7 @@ from common import *
 from debug import *
 from image import *
 from theme import *
+from draw import *
 from room import *
 from game import game
 from drop import draw_status_drops
@@ -1292,6 +1293,7 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	import_size_constants()
 	import_size_constants(puzzle)
 
+	draw_apply_sizes()
 	flags.apply_sizes()
 
 	bg_image = None
@@ -1404,12 +1406,6 @@ def init_main_screen():
 	}
 	init_new_level(0, config)
 
-# this function is intended to be called outside of draw()
-def draw_long_level_generation():
-	screen.fill("#a8b6b7")
-	screen.draw.text(_("Initializing level\u2026"), center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#88AA66", owidth=1.2, ocolor="#404030", alpha=1, fontsize=80)
-	pygame.display.flip()
-
 def draw_map():
 	for cy in range(len(map[0])):
 		for cx in range(len(map)):
@@ -1499,15 +1495,6 @@ def advance_main_screen_color():
 		main_screen_color -= step
 		advance_main_screen_color()
 
-def draw_central_flash(full=False, color=(0, 40, 40)):
-	surface = pygame.Surface((MAP_W, MAP_H if full else 120))
-	surface.set_alpha(50)
-	surface.fill(color)
-	screen.blit(surface, (0, POS_CENTER_Y - surface.get_height() / 2))
-
-def draw_actor_hint(actor, hint, pos_diff, colors):
-	screen.draw.text(str(hint), center=apply_diff(actor.pos, pos_diff), color=colors[0], gcolor=colors[1], owidth=1.2, ocolor=colors[2], alpha=0.8, fontsize=24)
-
 def draw():
 	if mode in ("start", "finish", "init"):
 		return
@@ -1526,7 +1513,7 @@ def draw():
 	for lift in lifts:
 		lift.draw()
 	for drop in drops:
-		drop.draw_instances(draw_actor_hint)
+		drop.draw_instances()
 	for barrel in visible_barrels:
 		barrel.draw()
 	for enemy in killed_enemies:

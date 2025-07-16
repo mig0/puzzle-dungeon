@@ -2,6 +2,7 @@ import sys
 from constants import *
 from cellactor import *
 from sizetools import import_size_constants
+from draw import draw_actor_hint
 from game import game
 
 class Drop:
@@ -60,7 +61,7 @@ class Drop:
 		game.remember_obj_state(self)
 		self.num_collected -= 1
 
-	def draw_instances(self, draw_actor_hint):
+	def draw_instances(self):
 		for cell in self.cells:
 			if is_cell_in_actors(cell, self.disappeared_actors):
 				continue

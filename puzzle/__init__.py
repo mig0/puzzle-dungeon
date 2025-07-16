@@ -5,6 +5,7 @@ from common import *
 from debug import *
 from image import *
 from theme import *
+from draw import *
 from room import *
 from game import game
 from flags import flags
