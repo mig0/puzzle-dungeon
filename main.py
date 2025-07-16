@@ -1147,6 +1147,8 @@ def set_theme(theme_name):
 	image19 = create_theme_image('glass') if puzzle.has_glass() else None
 	image20 = create_theme_image('trap0') if puzzle.has_trap() else None
 	image21 = create_theme_image('trap1') if puzzle.has_trap() else None
+	image22 = create_theme_image('beamgn') if puzzle.has_beam() else None
+	image23 = create_theme_image('beamcl') if puzzle.has_beam() else None
 	status_image = create_theme_image('status')
 	cloud_image = create_theme_image('cloud') if flags.is_cloud_mode and not bg_image else None
 
@@ -1175,6 +1177,8 @@ def set_theme(theme_name):
 		CELL_GLASS:  image19,
 		CELL_TRAP0:  image20,
 		CELL_TRAP1:  image21,
+		CELL_BEAMGN: image22,
+		CELL_BEAMCL: image23,
 		CELL_OUTER_WALL: outer_wall_image,
 	}
 
