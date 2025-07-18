@@ -2216,14 +2216,18 @@ def update(dt):
 	last_processed_arrow_keys = []
 	last_processed_arrow_diff = (0, 0)
 
+	new_char_flip_direction = None
 	def set_arrow_key_to_process(key, diff):
 		global last_processed_arrow_keys
 		nonlocal last_processed_arrow_diff
+		nonlocal new_char_flip_direction
 		if not ALLOW_DIAGONAL_MOVES and last_processed_arrow_keys:
 			return
 		pressed_arrow_keys.remove(key)
 		next_diff = apply_diff(last_processed_arrow_diff, diff)
-		if can_move(next_diff):
+		if cursor.is_char_selected() and key in (DIRECTION_R, DIRECTION_L):
+			new_char_flip_direction = key
+		if can_move(next_diff) and not keyboard.rctrl:
 			last_processed_arrow_keys.append(key)
 			last_processed_arrow_diff = next_diff
 
@@ -2240,22 +2244,17 @@ def update(dt):
 	diff_x = 0
 	diff_y = 0
 
-	flip_dir = None
 	if 'r' in last_processed_arrow_keys:
 		diff_x += 1
-		if cursor.is_char_selected():
-			flip_dir = 'r'
 	if 'l' in last_processed_arrow_keys:
 		diff_x -= 1
-		if cursor.is_char_selected():
-			flip_dir = 'l'
 	if 'd' in last_processed_arrow_keys:
 		diff_y += 1
 	if 'u' in last_processed_arrow_keys:
 		diff_y -= 1
 
-	if flip_dir is not None:
-		set_char_flip((flip_dir == 'l') ^ (not flags.allow_barrel_pull or not keyboard.lshift))
+	if new_char_flip_direction is not None:
+		set_char_flip((new_char_flip_direction == DIRECTION_L) ^ (not flags.allow_barrel_pull or not keyboard.lshift))
 
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)
