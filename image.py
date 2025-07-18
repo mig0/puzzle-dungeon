@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 def load_image(image_name, size, do_crop=False):
-	image = pygame.image.load(DATA_DIR + '/' + image_name).convert()
+	image = pygame.image.load(DATA_DIR + '/' + image_name).convert_alpha()
 	if do_crop:
 		# image=300x400 size=100x200 -> cropped=200x400
 		# image=300x400 size=200x100 -> cropped=300x150
