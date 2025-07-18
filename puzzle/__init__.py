@@ -254,7 +254,10 @@ class Puzzle:
 	def get_cell_image_to_draw(self, cell, cell_type):
 		return None
 
-	def on_draw(self, mode):
+	def on_draw_map(self):
+		pass
+
+	def on_draw(self):
 		pass
 
 	def press_cell(self, cell, button=None):

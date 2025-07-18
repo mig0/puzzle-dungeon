@@ -252,7 +252,7 @@ class MinotaurPuzzle(Puzzle):
 	def on_set_theme(self):
 		char.image = "theseus"
 
-	def on_draw(self, mode):
+	def on_draw(self):
 		self.minotaur.draw()
 
 	def press_cell(self, cell, button=None):

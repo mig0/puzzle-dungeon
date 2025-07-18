@@ -1462,6 +1462,7 @@ def draw_map():
 					cell_image.draw(cell)
 				else:
 					screen.blit(cell_image, cell_to_pos_00(cell))
+	puzzle.on_draw_map()
 
 def get_time_str(time):
 	sec = int(time)
@@ -1529,7 +1530,7 @@ def draw():
 			draw_actor_hint(actor, actor.attack, (+12, -CELL_H * 0.5 - 14), ACTOR_ATTACK_COLORS)
 	cursor.draw()
 
-	puzzle.on_draw(mode)
+	puzzle.on_draw()
 
 	if mode == "end":
 		end_line = _('victory-text') if is_game_won else _('defeat-text')
