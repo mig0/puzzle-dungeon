@@ -88,8 +88,11 @@ class Puzzle:
 	def has_beam(self):
 		return False
 
+	def is_virtual(self):
+		return False
+
 	def is_goal_to_kill_enemies(self):
-		return not self.has_finish() and not self.is_goal_to_be_solved()
+		return not self.is_virtual() and not self.has_finish() and not self.is_goal_to_be_solved()
 
 	def is_goal_to_be_solved(self):
 		return False
@@ -287,6 +290,10 @@ class Puzzle:
 	def prepare_solution(self):
 		return None
 
+class VirtualPuzzle(Puzzle):
+	def is_virtual(self):
+		return True
+
 import os, pkgutil
 for _, module, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
 	__import__(__name__ + "." + module)
@@ -294,15 +301,17 @@ for _, module, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
 def get_all_puzzle_subclasses():
 	return Puzzle.__subclasses__()
 
-def create_puzzle(level, Globals):
+def create_puzzle(level, Globals, puzzle_class=None):
 	if not Puzzle.__subclasses__():
 		print("Internal bug. Didn't find any Puzzle subclasses")
 		quit()
 
-	puzzle_class = Puzzle
-	for cls in get_all_puzzle_subclasses():
-		if cls.config_name() in level:
-			puzzle_class = cls
+	if not puzzle_class:
+		# detect class from level config
+		puzzle_class = Puzzle
+		for cls in get_all_puzzle_subclasses():
+			if cls.config_name() in level:
+				puzzle_class = cls
 
 	puzzle = puzzle_class(level, Globals)
 
