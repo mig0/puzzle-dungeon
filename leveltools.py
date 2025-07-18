@@ -3,6 +3,9 @@ from levels import levels
 levels = sorted(levels, key=lambda level: level["n"])
 level_idx = -1
 
+def is_level_unset():
+	return level_idx == -1
+
 def is_last_special_level(offset=0):
 	return level_idx + offset == len(levels)
 

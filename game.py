@@ -64,6 +64,7 @@ class UndoFrame:
 class Game:
 	def __init__(self):
 		self.screen = None
+		self.requested_new_level = None
 		self.undo_frames = []
 		self.in_level = False
 		self.during_undo = False

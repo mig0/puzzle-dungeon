@@ -6,7 +6,7 @@ import pygame
 import pgzero
 import builtins
 from pgzero.constants import keys
-from numpy import ndarray, array, any
+from numpy import ndarray
 from copy import deepcopy
 from random import randint, choice, shuffle
 from unicodedata import bidirectional
@@ -25,11 +25,12 @@ from room import *
 from game import game
 from drop import draw_status_drops
 from flags import flags
-from puzzle import create_puzzle
+from puzzle import create_puzzle, Puzzle
 from solution import solution, set_solution_funcs
 from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_joysticks_arrow_keys
 from clipboard import clipboard
 from translate import _, set_lang
+from mainscreen import main_screen_level_config, create_main_screen
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
 # set data dir and default encoding for the whole program
@@ -293,7 +294,6 @@ music_start_time  = None
 music_fadein_time = None
 
 mode = "start"
-is_main_screen = True
 
 puzzle = None
 
@@ -963,6 +963,7 @@ class Globals:
 	is_cell_accessible = is_cell_accessible
 	get_accessible_neighbors = get_accessible_neighbors
 	get_accessible_cells = get_accessible_cells
+	get_accessible_cell_distances = get_accessible_cell_distances
 	get_all_accessible_cells = get_all_accessible_cells
 	get_num_accessible_target_directions = get_num_accessible_target_directions
 	find_path = find_path
@@ -1232,7 +1233,7 @@ def reset_idle_time():
 	idle_time = 0
 	last_regeneration_time = 0
 
-def init_new_level(offset=1, config=None, reload_stored=False):
+def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_func=create_puzzle):
 	global level, level_time, mode, is_game_won
 	global level_title, level_name, level_goal
 	global puzzle
@@ -1244,12 +1245,12 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 	global map, stored_level
 
 	if config and offset != 0:
-		die("Can't reload a non-current level")
+		die("Can't init config for a non-current level")
 
 	if reload_stored and offset != 0:
 		die("Can't reload a non-current level")
 
-	if not is_main_screen and is_level_out_of_range(offset):
+	if not is_level_unset() and is_level_out_of_range(offset):
 		print("Requested level is out of range")
 		return
 
@@ -1287,10 +1288,11 @@ def init_new_level(offset=1, config=None, reload_stored=False):
 
 	solution.reset()
 
-	puzzle = create_puzzle(level, Globals)
+	puzzle = create_puzzle_func(level, Globals)
 
 	set_map_size(level.get("map_size", DEFAULT_MAP_SIZE), puzzle.has_border())
 	import_size_constants()
+	import_size_constants(Puzzle)
 	import_size_constants(puzzle)
 
 	draw_apply_sizes()
@@ -1389,22 +1391,8 @@ def init_new_room():
 		enter_room(enter_room_idx)
 
 def init_main_screen():
-	global is_main_screen
-
-	is_main_screen = True
 	reset_level()
-	config = {
-		"n": 0,
-		"num_enemies": 3,
-		"theme": "ancient2",
-		"music": "valiant_warriors",
-		"char_health": 100,
-		"use_clock": True,
-		"goal": 'select-level',
-		"random_maze": True,
-		"mainscreen_puzzle": {},
-	}
-	init_new_level(0, config)
+	init_new_level(0, main_screen_level_config, False, create_main_screen)
 
 def draw_map():
 	for cy in range(len(map[0])):
@@ -1486,16 +1474,6 @@ def draw_status():
 		time_str = get_time_str(level_time if "time_limit" not in level else level["time_limit"] - level_time)
 		screen.draw.text(time_str, midright=(WIDTH - 20, POS_STATUS_Y), color=color, gcolor=gcolor, owidth=1.2, ocolor="#404030", alpha=1, fontsize=27)
 
-main_screen_color = array((80, 80, 80))
-
-def advance_main_screen_color():
-	global main_screen_color
-	step = array(choice(((1, 1, -2), (1, -2, 1), (-2, 1, 1), (-1, -1, 2), (-1, 2, -1), (2, -1, -1)))) * randint(1, 2)
-	main_screen_color += step
-	if any(main_screen_color >= 256) or any(main_screen_color < 0):
-		main_screen_color -= step
-		advance_main_screen_color()
-
 def draw():
 	if mode in ("start", "finish", "init"):
 		return
@@ -1537,18 +1515,16 @@ def draw():
 		draw_central_flash()
 		screen.draw.text(end_line, center=(POS_CENTER_X, POS_CENTER_Y), color='white', gcolor=("#008080" if is_game_won else "#800000"), owidth=0.8, ocolor="#202020", alpha=1, fontsize=60)
 
-	if is_main_screen:
-		advance_main_screen_color()
-		draw_central_flash(True, tuple(main_screen_color))
-
 	if mode == "game" and level_title_time > 0:
-		draw_central_flash()
+		if puzzle.is_virtual():
+			draw_central_flash()
 		yd = -14 if level_name else 0
 		screen.draw.text(_(level_title), center=(POS_CENTER_X, POS_CENTER_Y + yd), color='yellow', gcolor="#AAA060", owidth=1.2, ocolor="#404030", alpha=1, fontsize=50)
 		screen.draw.text(_(level_name),  center=(POS_CENTER_X, POS_CENTER_Y + 21), color='white',  gcolor="#C08080", owidth=1.2, ocolor="#404030", alpha=1, fontsize=32)
 	elif mode == "game" and level_goal_time > 0:
 		goal_line = _(level_goal)
-		draw_central_flash()
+		if puzzle.is_virtual():
+			draw_central_flash()
 		screen.draw.text(goal_line, center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#66AA00", owidth=1.2, ocolor="#404030", alpha=1, fontsize=40)
 
 def kill_enemy_cleanup():
@@ -1586,8 +1562,14 @@ def change_solution_move_delay(is_reset, is_dec, is_inc):
 		return True
 	return False
 
+def handle_requested_new_level():
+	if game.requested_new_level:
+		new_level = game.requested_new_level
+		game.requested_new_level = None
+		init_new_level(new_level)
+		return
+
 def handle_press_key():
-	global is_main_screen
 	global is_move_animate_enabled, is_level_intro_enabled, is_sound_enabled
 
 	# apply workaround for the invalid syntax keyboard.return in python
@@ -1596,13 +1578,6 @@ def handle_press_key():
 	keyboard.shift = keyboard.lshift or keyboard.rshift
 	keyboard.ctrl  = keyboard.lctrl  or keyboard.rctrl
 	keyboard.alt   = keyboard.lalt   or keyboard.ralt
-
-	if mode == "game" and is_main_screen and keyboard._pressed \
-		and not ((keyboard.shift or keyboard.ctrl or keyboard.alt) and len(keyboard._pressed) == 1) \
-		and not (keyboard.escape or keyboard.right or keyboard.left or keyboard.up or keyboard.down):
-		is_main_screen = False
-		init_new_level()
-		return
 
 	reset_idle_time()
 
@@ -1689,46 +1664,18 @@ def handle_press_key():
 	if keyboard.q:
 		quit()
 
-	if mode == "next" or is_main_screen:
+	if mode == "next":
 		return
 
-	# if any key is pressed while playing solution, stop it
-	if cancel_playing_solution():
-		return
-
-	if keyboard.p:
-		offset = get_prev_level_group_offset() if keyboard.lctrl else get_prev_level_offset()
-		init_new_level(offset)
-	if keyboard.r:
-		offset = get_curr_level_group_offset() if keyboard.lctrl else 0
-		init_new_level(offset, reload_stored=keyboard.lalt and not keyboard.lctrl)
-	if keyboard.n:
-		offset = get_next_level_group_offset() if keyboard.lctrl else get_next_level_offset()
-		init_new_level(offset)
+	if keyboard.space and not cursor.is_active():
+		if map[char.c] == CELL_PORTAL:
+			teleport_char()
+		else:
+			press_cell(char.c)
 
 	if keyboard.u:
 		if not game.undo_move():
 			play_sound('error')
-
-	if keyboard.w:
-		win_room()
-
-	if keyboard.o:
-		priority = randint(0, 4)
-		set_status_message("Hello, world! [priority=%d]" % priority, None, priority, 10)
-
-	if keyboard.space and cursor.is_char_selected() and map[char.c] == CELL_PORTAL:
-		teleport_char()
-
-	if keyboard.kp_enter:
-		if solution.is_active():
-			solution.set_play_mode()
-		elif not solution.is_find_mode():
-			find_solution_info = puzzle.prepare_solution()
-			if find_solution_info:
-				msg, find_func = find_solution_info
-				solution.set_find_mode(msg)
-				solution.set_find_func(find_func)
 
 	cursor_was_active = cursor.is_active()
 
@@ -1746,9 +1693,6 @@ def handle_press_key():
 	if DEBUG_LEVEL > 0 and cursor_was_active and not cursor.is_active():
 		set_status_message(priority=0)
 
-	if keyboard.space and not cursor_was_active:
-		press_cell(char.c)
-
 	if keyboard.home:
 		press_cell(cursor.selected_actor.c, 1)
 	if keyboard.end:
@@ -1763,6 +1707,46 @@ def handle_press_key():
 		press_cell(cursor.selected_actor.c, 5)
 
 	puzzle.on_press_key(keyboard)
+	handle_requested_new_level()
+
+	if is_level_unset():
+		return
+
+	# if any key is pressed while playing solution, stop it
+	if cancel_playing_solution():
+		return
+
+	if keyboard.p:
+		offset = get_prev_level_group_offset() if keyboard.lctrl else get_prev_level_offset()
+		init_new_level(offset)
+	if keyboard.r:
+		offset = get_curr_level_group_offset() if keyboard.lctrl else 0
+		init_new_level(offset, reload_stored=keyboard.lalt and not keyboard.lctrl)
+	if keyboard.n:
+		offset = get_next_level_group_offset() if keyboard.lctrl else get_next_level_offset()
+		init_new_level(offset)
+
+	if keyboard.w:
+		win_room()
+
+	if keyboard.o:
+		priority = randint(0, 4)
+		set_status_message("Hello, world! [priority=%d]" % priority, None, priority, 10)
+
+	if keyboard.kp_enter:
+		if solution.is_active():
+			solution.set_play_mode()
+		elif not solution.is_find_mode():
+			find_solution_info = puzzle.prepare_solution()
+			if find_solution_info:
+				msg, find_func = find_solution_info
+				solution.set_find_mode(msg)
+				solution.set_find_func(find_func)
+
+	if keyboard.s and keyboard.alt:
+		print(clipboard.get())
+		clipboard.put("My text")
+		print(clipboard.get())
 
 def on_key_down(key):
 	handle_press_key()
@@ -1780,6 +1764,7 @@ def on_mouse_down(pos, button):
 		cursor.toggle()
 	cell = pos_to_cell(pos)
 	press_cell(cell, button)
+	handle_requested_new_level()
 
 def loose_game():
 	global mode, is_game_won
@@ -1822,9 +1807,7 @@ def check_victory():
 			can_win = False
 			status_messages.append("Solve puzzle!")
 
-	if is_main_screen:
-		status_messages.append("Press Enter to continue")
-	elif puzzle.is_goal_to_kill_enemies():
+	if puzzle.is_goal_to_kill_enemies():
 		if not sum(1 for enemy in enemies if is_actor_in_room(enemy)) and not killed_enemies:
 			goal_achieved = True
 			status_messages.append("All enemies killed!")
