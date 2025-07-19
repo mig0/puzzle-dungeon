@@ -27,9 +27,9 @@ assert_filename $template_filename
 export category=`dirname "$pagename"`
 if test "$category" = .; then
 	export category=home
-	: ${base=.}
+	: ${base:=.}
 else
-	: ${base=..}
+	: ${base:=..}
 fi
 export base
 

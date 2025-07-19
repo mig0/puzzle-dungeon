@@ -72,6 +72,15 @@ uninstall:
 web:
 	@tools/create-all-html-pages
 
+web-local:
+	@base= tools/create-all-html-pages
+
+web-redirect:
+	@tools/create-all-html-pages -r
+
+web-refresh:
+	@tools/create-all-html-pages -R
+
 dist: check-dependencies
 	@echo "Creating $(distdir)"
 	@$(RM) -rf $(distdir)
