@@ -16,12 +16,17 @@ all_names = get_dir_names("images/default", ext)
 
 def start_table(file): 
 	file.print('<script>function toggle_zoom() { elem = document.getElementById("img-table"); elem.className = elem.className == "img-table-half" ? "img-table-full" : "img-table-half" }</script>')
+	file.print('<div class="theme-images">')
 	file.print('<table id="img-table" class="img-table-half">')
 	file.write('<tr>')
 	file.write('<th class="zoom"><a href="javascript:toggle_zoom()">🔍</a></th>')
 	for name in all_names:
 		file.write('<th title="%s">%s</th>' % (name, name))
 	file.print("</tr>")
+
+def stop_table(file):
+	file.print('</table>')
+	file.print('</div>')
 
 file_eti = RegenerateFile("elements/themes/index.html")
 file_eti.print('<h1>Themes</h1>\n')
@@ -64,7 +69,7 @@ for theme in sorted([name for name in os.listdir("images") if os.path.isdir("ima
 	act_row += '</tr>'
 	file_et1.print(own_row)
 	file_et1.print(act_row)
-	file_et1.print('</table>')
+	stop_table(file_et1)
 	all_theme_videos_html = '\n'.join(info.get_html_for_index() for info in get_all_theme_video_infos(theme))
 	if all_theme_videos_html:
 		file_et1.print('<br>')
@@ -83,7 +88,7 @@ for theme in sorted([name for name in os.listdir("images") if os.path.isdir("ima
 
 	file_eti.print('</tr>')
 
-file_eti.print('</table>')
+stop_table(file_eti)
 file_eti.finalize()
 
 file_est.finalize()
