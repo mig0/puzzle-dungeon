@@ -97,3 +97,23 @@ NOTE_PREFIX  = '✎ '
 INFO_PREFIX  = 'ℹ '
 CNTRL_PREFIX = '• '
 DEBUG_PREFIX = '⚙ '
+
+pgconsole_config = {
+	"global": {
+		"animation": ["TOP", 1000],
+		"layout": "INPUT_BOTTOM",
+		"padding": [10, 10, 10, 10],
+		"bck_alpha": 150,
+		"welcome_msg": "Welcome to Console\n\nType 'help'/'?' for help\nType '? shell' for examples of python commands",
+		"welcome_msg_color": [0, 255, 0]
+	},
+	"input": {
+		"font_file": "/usr/share/fonts/gnu-free/FreeSans.ttf",
+		"bck_alpha": 0
+	},
+	"output": {
+		"font_file": "/usr/share/fonts/gnu-free/FreeSansBold.ttf",
+		"bck_alpha": 0,
+		"display_lines": 20,
+	}
+}

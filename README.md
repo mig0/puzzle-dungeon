@@ -116,6 +116,7 @@ on GNU/Linux, Windows, and other operating systems.
 |Delete|  Simulate mouse button 6
 |PageUp|  Simulate mouse button 4
 |PageDown|Simulate mouse button 5
+|Ctrl-Escape|Display Pygame Console if available
 |Shift-Delete|Reset all mirrors
 
 ## Source code

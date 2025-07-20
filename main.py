@@ -1292,11 +1292,14 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 
 	set_map_size(level.get("map_size", DEFAULT_MAP_SIZE), puzzle.has_border())
 	import_size_constants()
+	import_size_constants(game)
 	import_size_constants(Puzzle)
 	import_size_constants(puzzle)
 
 	draw_apply_sizes()
 	flags.apply_sizes()
+
+	game.init_console()
 
 	bg_image = None
 	if "bg_image" in level:
@@ -1510,6 +1513,8 @@ def draw():
 
 	puzzle.on_draw()
 
+	game.show_console()
+
 	if mode == "end":
 		end_line = _('victory-text') if is_game_won else _('defeat-text')
 		draw_central_flash()
@@ -1582,6 +1587,10 @@ def handle_press_key():
 	reset_idle_time()
 
 	if mode != "game" and mode != "end" and mode != "next":
+		return
+
+	if keyboard.escape and keyboard.ctrl:
+		game.toggle_console()
 		return
 
 	if solution.is_play_mode():
@@ -2168,7 +2177,7 @@ def update(dt):
 	if DEBUG_LEVEL > 0 and cursor.is_active():
 		set_status_message(str(cursor.c), priority=0)
 
-	if char.is_animated() or mode == "next":
+	if char.is_animated() or mode == "next" or game.is_console_enabled():
 		return
 
 	scan_joysticks_and_state()

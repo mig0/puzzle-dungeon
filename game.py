@@ -1,3 +1,7 @@
+from common import get_pgzero_game_from_stack
+from config import pgconsole_config
+import pygame
+
 class UndoFrame:
 	def __init__(self):
 		self.map_cell_types = {}
@@ -64,10 +68,50 @@ class UndoFrame:
 class Game:
 	def __init__(self):
 		self.screen = None
+		self.console = None
+		self.orig_handlers = {}
 		self.requested_new_level = None
 		self.undo_frames = []
 		self.in_level = False
 		self.during_undo = False
+
+	def init_console(self):
+		self.console = None
+		try:
+			from pgconsole import Console
+			self.console = Console(self, WIDTH, pgconsole_config)
+		except:
+			pass
+
+	def is_console_enabled(self):
+		return self.console and self.console.enabled
+
+	def show_console(self):
+		if self.is_console_enabled():
+			self.console.show(game.screen)
+
+	def update_console(self, event):
+		if not self.is_console_enabled():
+			return
+		if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+			self.toggle_console()
+			return
+		self.console.update([event])
+
+	def toggle_console(self):
+		if self.console:
+			self.console.toggle()
+			pgzgame = get_pgzero_game_from_stack()
+			for event_type in (pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.TEXTINPUT):
+				if self.is_console_enabled():
+					# replace handlers temporarily
+					self.orig_handlers[event_type] = pgzgame.handlers.get(event_type)
+					pgzgame.handlers[event_type] = self.update_console
+				else:
+					# restore original handlers
+					pgzgame.handlers[event_type] = self.orig_handlers[event_type]
+					if not pgzgame.handlers[event_type]: del pgzgame.handlers[event_type]
+
 
 	@property
 	def undo_frame(self):
