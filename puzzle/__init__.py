@@ -10,6 +10,7 @@ from room import *
 from game import game
 from flags import flags
 from time import time
+from pgzero import clock
 from random import randint, random, sample, shuffle, choice, choices
 from numpy import ndarray, arange, array_equal, ix_, argwhere, copyto
 from solution import solution

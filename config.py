@@ -60,6 +60,9 @@ ACTOR_PHASED_OPACITY = 0.4
 ACTOR_PHASED_DURATION = 0.3
 
 MIRROR_INACTIVE_OPACITY = 0.4
+# BEAM_DRAW_MODE - in all modes beam is always below char, beam generator and beam collector
+# 0 - beam below actors and mirrors, 1 - beam below mirrors, above actors, 2 - beam above actors and mirrors
+BEAM_DRAW_MODE = 2
 
 MEMORY_PUZZLE_OPEN_CELL2_TIME = 1
 MEMORY_PUZZLE_REVEAL_FADE_DURATION = 1.5
