@@ -1,8 +1,9 @@
 from time import time
 from config import SOLUTION_MOVE_DELAY, SOLUTION_MOVE_DELAY_RANGE, SOLUTION_MOVE_DELAY_CHANGE
 from objects import char
-from constants import DIRS_BY_NAME
-from cellactor import cell_diff
+from constants import DIR_NAMES, DIRS_BY_NAME
+from cellactor import apply_diff, cell_diff
+from clipboard import clipboard
 from statusmessage import set_status_message
 
 find_path    = None
@@ -47,6 +48,23 @@ class SolutionItem:
 
 	def get_num_targets(self):
 		return 1 if self.target_cell else 0
+
+	def get_str(self, current_cell_ref):
+		if self.push_dir:
+			current_cell_ref[0] = apply_diff(current_cell_ref[0], self.push_dir)
+			return DIR_NAMES[self.push_dir].upper()
+		if self.cell_to_press:
+			return 'press%s%s' % (str(self.cell_to_press), '' if self.button_to_press is None else '^%d' % self.button_to_press)
+		if self.target_cell:
+			current_cell_ref[0] = self.target_cell
+			return 'goto%s' % str(self.target_cell)
+		if self.path_cells:
+			cell_directions = []
+			for cell in self.path_cells:
+				cell_directions.append(DIR_NAMES.get(cell_diff(current_cell_ref[0], cell), str(cell)))
+				current_cell_ref[0] = cell
+			return ' '.join(cell_directions)
+		return '?'
 
 	def play_move(self):
 		if self.target_cell and self.path_cells is None:
@@ -130,12 +148,17 @@ class Solution:
 			num_strs.append("%d targets" % num_targets)
 		return ", ".join(num_strs)
 
+	def get_str(self):
+		current_cell_ref = [char.c]
+		return ' '.join(item.get_str(current_cell_ref) for item in self.solution_items)
+
 	def set(self, args):
 		self.find_mode = False
 		self.solution_items = [item for item in (SolutionItem(arg) for arg in args) if not item.is_done]
 		self.play_mode = False
 		num_left_str = self.get_num_info_str()
 		set_status_message("Found solution with %s, press again to show" % num_left_str, self, 1)
+		clipboard.put(self.get_str())
 
 	def set_not_found(self):
 		self.reset()
