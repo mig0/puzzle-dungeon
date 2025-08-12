@@ -114,7 +114,7 @@ class Solution:
 			raise AssertionError("Called call_find_func not in find_mode")
 		return self.find_func()
 
-	def get_num_moves_presses_str(self):
+	def get_num_info_str(self):
 		num_moves = sum(item.get_num_moves() for item in self.solution_items)
 		num_pushes = sum(item.get_num_pushes() for item in self.solution_items)
 		num_presses = sum(item.get_num_presses() for item in self.solution_items)
@@ -134,7 +134,7 @@ class Solution:
 		self.find_mode = False
 		self.solution_items = [item for item in (SolutionItem(arg) for arg in args) if not item.is_done]
 		self.play_mode = False
-		num_left_str = self.get_num_moves_presses_str()
+		num_left_str = self.get_num_info_str()
 		set_status_message("Found solution with %s, press again to show" % num_left_str, self, 1)
 
 	def set_not_found(self):
@@ -148,7 +148,7 @@ class Solution:
 		self.play_mode = self.is_active()
 		if self.play_mode:
 			self.next_solution_move_time = time() + self.move_delay
-			num_left_str = self.get_num_moves_presses_str()
+			num_left_str = self.get_num_info_str()
 			set_status_message("%s left until solved" % num_left_str, self, 1)
 		else:
 			self.next_solution_move_time = None
