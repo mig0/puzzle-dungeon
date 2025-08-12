@@ -856,7 +856,7 @@ class BarrelPuzzle(Puzzle):
 		return self.is_solved_for_barrel_cells([ barrel.c for barrel in self.get_room_barrels() ])
 
 	def get_cell_image_to_draw(self, cell, cell_type):
-		if cell_type in CELL_FLOOR_TYPES and self.min_barrel_plate_pushes is not None and cell not in self.min_barrel_plate_pushes:
+		if cell_type == CELL_FLOOR and self.min_barrel_plate_pushes is not None and cell not in self.min_barrel_plate_pushes:
 			return self.red_floor_image
 
 	def on_press_key(self, keyboard):
