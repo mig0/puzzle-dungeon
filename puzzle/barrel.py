@@ -17,6 +17,7 @@ class BarrelPuzzle(Puzzle):
 	def init(self):
 		self.is_zsb = False
 		self.disable_prepare_solution = False
+		self.orig_barrels_stack = []
 
 	def assert_config(self):
 		return not flags.is_any_maze
@@ -214,16 +215,22 @@ class BarrelPuzzle(Puzzle):
 	def get_room_barrels(self):
 		return [ barrel for barrel in barrels if is_actor_in_room(barrel) ]
 
-	def show_map(self, descr=None, char_cell=None, barrel_cells=None):
-		orig_barrels = barrels.copy()
+	def store_reset_barrels(self):
+		self.orig_barrels_stack.append(barrels.copy())
 		barrels.clear()
-		for cell in barrel_cells or self.barrel_cells:
+
+	def restore_barrels(self):
+		barrels.clear()
+		barrels.extend(self.orig_barrels_stack.pop())
+
+	def show_map(self, descr=None, level=0, char_cell=None, barrel_cells=None, cell_chars=None):
+		self.store_reset_barrels()
+		for cell in self.barrel_cells if barrel_cells is None else barrel_cells:
 			create_barrel(cell)
 		orig_char_cell = char.c
 		char.c = char_cell or self.char_cell
-		self.Globals.debug_map(descr=descr)
-		barrels.clear()
-		barrels.extend(orig_barrels)
+		self.Globals.debug_map(level=level, descr=descr, cell_chars=cell_chars)
+		self.restore_barrels()
 		char.c = orig_char_cell
 
 	def show_deadlock_map(self, char_cell, barrel_cell, cell1, cell2, cell3, cell4):
