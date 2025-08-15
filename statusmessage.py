@@ -47,8 +47,11 @@ def get_fade_text_factor(current_time, fade_out_time, fade_duration=2, rest_dura
 		return (fade_out_time - current_time) / fade_duration
 	return 1
 
-def set_status_message(msg=None, source='main', priority=DEF_PRIORITY, duration=None):
+def set_status_message(msg=None, source='main', priority=None, duration=None):
 	global current_status_message, current_status_end_time
+
+	if priority is None:
+		priority = DEF_PRIORITY
 
 	priority = min(max(priority, MIN_PRIORITY), MAX_PRIORITY)
 	duration = duration or None
