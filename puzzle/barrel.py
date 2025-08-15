@@ -349,10 +349,11 @@ class BarrelPuzzle(Puzzle):
 		return ((solution_depth - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP
 
 	def prepare_to_find_solution(self):
-		self.min_char_barrel_plate_pushes = {}
-		self.min_barrel_plate_pushes = {}
 		if self.disable_prepare_solution:
 			return
+		self.store_reset_barrels()
+		self.min_char_barrel_plate_pushes = {}
+		self.min_barrel_plate_pushes = {}
 
 		all_char_barrel_plate_pushes = {}
 		all_barrel_plate_pushes = {}
@@ -372,6 +373,8 @@ class BarrelPuzzle(Puzzle):
 			self.min_char_barrel_plate_pushes[pair] = min(all_char_barrel_plate_pushes[pair])
 		for cell in all_barrel_plate_pushes:
 			self.min_barrel_plate_pushes[cell] = min(all_barrel_plate_pushes[cell])
+		self.restore_barrels()
+		self.Globals.debug_map(2, "min_barrel_plate_pushes", full=True, clean=True, combined=False, dual=True, cell_chars=self.min_barrel_plate_pushes)
 #		print(self.min_barrel_plate_pushes)
 #		print(self.min_char_barrel_plate_pushes)
 
@@ -383,28 +386,17 @@ class BarrelPuzzle(Puzzle):
 	def find_solvable_cells_for_plate_cells(self, plate_cells):
 		start_time = time()
 		min_char_barrel_plate_pushes = {}
-		min_barrel_plate_pushes = {}
+		min_barrel_plate_pushes = dict(zip(plate_cells, [0] * len(plate_cells)))
 		visited_positions = []
 
 		# start from plates and make all available pulls using BFS
-		states = { 0: [] }
-
-		last_barrel_cells = plate_cells.copy()
-		self.barrel_cells = last_barrel_cells.copy()
-		for barrel_cell in last_barrel_cells:
-			for char_cell in self.Globals.get_accessible_neighbors(barrel_cell, self.barrel_cells):
-				if self.can_pull(char_cell, barrel_cell):
-					new_char_cell = self.pull(char_cell, barrel_cell)
-					new_barrel_cell = char_cell
-					states[0].append((new_char_cell, new_barrel_cell, self.barrel_cells, None))
-					self.barrel_cells = last_barrel_cells.copy()
-					min_char_barrel_plate_pushes[new_char_cell, new_barrel_cell] = 1
-					min_barrel_plate_pushes[new_barrel_cell] = 1
+		states = { 0: [[None, None, plate_cells.copy(), None]] }
 
 		stop = False
 		for depth in range(1, MAX_SOLUTION_DEPTH + 1):
 			if stop:
 				break
+			non_start = depth > 1
 			# for each (char_cell, barrel_cell) from depth-1 do all possible next pulls and save as new states
 			states[depth] = []
 			min_pushes_updated = False
@@ -413,13 +405,16 @@ class BarrelPuzzle(Puzzle):
 					stop = True
 					break
 				last_char_cell, last_barrel_cell, last_barrel_cells, prev_state = state
-				if (last_char_cell, last_barrel_cells) in visited_positions:
-					break
-				visited_positions.append((last_char_cell, last_barrel_cells))
+
+				if non_start:
+					if (last_char_cell, last_barrel_cells) in visited_positions:
+						continue
+					visited_positions.append((last_char_cell, last_barrel_cells))
+
 				self.barrel_cells = last_barrel_cells.copy()
 
-				if self.barrel_cells == self.stock_barrel_cells and self.Globals.find_path(last_char_cell, self.stock_char_cell, self.barrel_cells):
-#					print("Found solution by pulls")
+				if non_start and self.barrel_cells == self.stock_barrel_cells and self.Globals.find_path(last_char_cell, self.stock_char_cell, self.barrel_cells):
+					set_status_message("Found solution by pulls", self, None, 2)
 					self.solution = []
 					orig_char_cell = self.stock_char_cell
 					while True:
@@ -434,7 +429,7 @@ class BarrelPuzzle(Puzzle):
 
 				for barrel_cell in last_barrel_cells:
 					for char_cell in self.Globals.get_accessible_neighbors(barrel_cell, self.barrel_cells):
-						if self.Globals.find_path(last_char_cell, char_cell, self.barrel_cells) is None:
+						if non_start and self.Globals.find_path(last_char_cell, char_cell, self.barrel_cells) is None:
 							continue
 						new_char_cell = self.try_pull(char_cell, barrel_cell)
 						if new_char_cell is not None:
@@ -443,10 +438,10 @@ class BarrelPuzzle(Puzzle):
 							states[depth].append((new_char_cell, new_barrel_cell, self.barrel_cells, state))
 							self.barrel_cells = last_barrel_cells.copy()
 							if (new_char_cell, new_barrel_cell) not in min_char_barrel_plate_pushes:
-								min_char_barrel_plate_pushes[new_char_cell, new_barrel_cell] = depth + 1
+								min_char_barrel_plate_pushes[new_char_cell, new_barrel_cell] = depth
 								min_pushes_updated = True
 								if new_barrel_cell not in min_barrel_plate_pushes:
-									min_barrel_plate_pushes[new_barrel_cell] = depth + 1
+									min_barrel_plate_pushes[new_barrel_cell] = depth
 			if not min_pushes_updated:
 				stop = True
 				break
