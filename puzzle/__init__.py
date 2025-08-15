@@ -151,10 +151,10 @@ class Puzzle:
 		self.area.y_range = range(self.area.y1, self.area.y2 + 1)
 
 	def is_in_area(self, cell):
-		return self.Globals.is_cell_in_area(cell, self.area.x_range, self.area.y_range)
+		return is_cell_in_area(cell, self.area.x_range, self.area.y_range)
 
 	def is_in_room(self, cell):
-		return self.Globals.is_cell_in_area(cell, room.x_range, room.y_range)
+		return is_cell_in_room(cell)
 
 	def set_area_border_walls(self, width=1):
 		for cell in room.cells:

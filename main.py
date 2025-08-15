@@ -955,7 +955,6 @@ def toggle_actor_phased(actor):
 	play_sound(sound_name)
 
 class Globals:
-	is_cell_in_area = is_cell_in_area
 	get_actor_neighbors = get_actor_neighbors
 	get_all_neighbors = get_all_neighbors
 	get_bg_image = get_bg_image
