@@ -1,6 +1,6 @@
 Title: Main Screen
-Puzzle: main
+Puzzle: 
 
-This shows the main screen. Press any key to start the actual puzzle
-levels.
-
+This is the main screen. Press *Tab* to play the puzzle levels in order,
+or move to a plate representing the desired level collection and press
+*Space* to play that collection.
