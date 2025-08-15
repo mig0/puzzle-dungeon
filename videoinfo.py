@@ -1,6 +1,7 @@
 import os
 import re
 from filetools import get_dir_names
+from common import markdown_to_html
 from config import DATA_DIR
 
 VIDEOS_SUBDIR   = "videos"
@@ -74,10 +75,10 @@ class VideoInfo:
 			theme_link_htmls = ['<a href="themes/%s.html">%s</a>' % (theme, theme) for theme in self.themes]
 			extra_html += '<p class="media-property"><b>Themes</b>: %s</p>\n' % ", ".join(theme_link_htmls)
 
-		description_html = "\n</p>\n\n<p>".join(self.description.split("\n\n"))
-		description_html = re.sub(r'\[(.*)\]\((.*)\)', r'<a href="%s/\2.html">\1</a>' % VIDEOS_SUBDIR, description_html)
+		description_html = markdown_to_html(self.description)
+		description_html = re.sub(r'(<a href=")([^/.]+)(")', r'\1%s/\2.html\3' % VIDEOS_SUBDIR, description_html)
 
-		return '<h1>%s</h1>\n\n%s<p>\n%s\n</p>\n<div class="media-container"><video class="media" controls><source src="%s"></video></div>\n' % (
+		return '<h1>%s</h1>\n\n%s\n%s\n<div class="media-container"><video class="media" controls><source src="%s"></video></div>\n' % (
 			self.title, extra_html, description_html, self.vid_filename)
 
 	def get_html_for_index(self):

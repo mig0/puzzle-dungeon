@@ -1,4 +1,5 @@
 import inspect
+import subprocess
 from traceback import extract_stack
 
 def warn(error, with_trace=False):
@@ -22,4 +23,20 @@ def get_pgzero_game_from_stack():
 			if type(self_obj).__name__ == 'PGZeroGame':
 					return self_obj
 	die("PGZeroGame not found in stack", True)
+
+def markdown_to_html(text):
+	markdown_to_html_cmd = "pandoc -f markdown -t html --columns 100"
+	try:
+		result = subprocess.run(
+			markdown_to_html_cmd.split(),
+			input=text,
+			capture_output=True,
+			text=True,
+		)
+		return result.stdout
+	except Exception as e:
+		if hasattr(e, "stderr"):
+			warn(e.stderr)
+		warn("markdown_to_html: Error executing '%s'" % markdown_to_html_cmd)
+		die(e)
 
