@@ -26,8 +26,8 @@ class PuzzleInfo:
 
 		while line := file.readline():
 			line = line.strip()
-			if line.startswith("Goal: "):
-				self.goal = line[6:]
+			if line.startswith("Goal:"):
+				self.goal = line[5:].strip()
 			else:
 				self.description += line + "\n"
 

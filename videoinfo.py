@@ -40,17 +40,17 @@ class VideoInfo:
 				self.description += line + '\n'
 			elif line == "":
 				is_header = False
-			elif line.startswith("Puzzles: "):
-				self.puzzles = (line[9:].replace(',', ' ')).split()
-			elif line.startswith("Themes: "):
-				self.themes = (line[8:].replace(',', ' ')).split()
-			elif line.startswith("Title: "):
-				self.title = line[7:]
-			elif line.startswith("Main: "):
-				value = line[6:].strip().lower()
+			elif line.startswith("Puzzles:"):
+				self.puzzles = (line[8:].strip().replace(',', ' ')).split()
+			elif line.startswith("Themes:"):
+				self.themes = (line[7:].strip().replace(',', ' ')).split()
+			elif line.startswith("Title:"):
+				self.title = line[6:].strip()
+			elif line.startswith("Main:"):
+				value = line[5:].strip().lower()
 				self.main_idx = int(value) if value.isdigit() else 10 if value == "true" else None
-			elif line.startswith("Front: "):
-				value = line[7:].strip().lower()
+			elif line.startswith("Front:"):
+				value = line[6:].strip().lower()
 				self.is_front = value != "false" and value != "0"
 			else:
 				print("%s: Invalid line: [%s]\n\tIgnoring this line" % (self.info_filename, line))
