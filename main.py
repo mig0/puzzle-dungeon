@@ -354,8 +354,13 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 			for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 				cell = (cx, cy)
 				print(CELL_FLOOR if clean and map[cell] in CELL_FLOOR_TYPES else map[cell], end="")
-		if dual:
-			print("    ", end="")
+			if dual and cell_chars:
+				print("    ", end="")
+				for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
+					cell = (cx, cy)
+					print(cell_chars.get(cell, CELL_FLOOR if clean and map[cell] in CELL_FLOOR_TYPES else map[cell]), end="")
+			if dual:
+				print("    ", end="")
 		if dual or combined:
 			for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 				cell = (cx, cy)
