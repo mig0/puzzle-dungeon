@@ -529,6 +529,8 @@ def clear_accessible_obstacles():
 	return accessible_obstacles0
 
 def is_cell_accessible(cell, obstacles=None, place=False, allow_obstacles=False, allow_enemy=False):
+	if not room.is_cell_inside(cell):
+		return False
 	is_cell_blocked = map[cell] in (() if allow_obstacles else CELL_CHAR_PLACE_OBSTACLES if place else CELL_CHAR_MOVE_OBSTACLES)
 	if obstacles is not None:
 		if accessible_obstacles is not None and cell in obstacles:
