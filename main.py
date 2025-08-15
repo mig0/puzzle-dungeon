@@ -1297,7 +1297,8 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 
 	puzzle = create_puzzle_func(level, Globals)
 
-	set_map_size(level.get("map_size", DEFAULT_MAP_SIZE), puzzle.has_border())
+	map_has_border = puzzle.has_border() and (reload_stored or not ("map_file" in level or "map_string" in level))
+	set_map_size(level.get("map_size", DEFAULT_MAP_SIZE), map_has_border)
 	import_size_constants()
 	import_size_constants(game)
 	import_size_constants(Puzzle)
