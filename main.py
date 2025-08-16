@@ -2024,7 +2024,7 @@ def move_char(diff):
 	barrel = get_actor_on_cell(pull_barrel_cell or char.c, barrels)
 	if barrel:
 		next_barrel_cell = apply_diff(barrel.c, diff)
-		if not is_cell_accessible(next_barrel_cell, allow_enemy=True):
+		if not is_cell_accessible(next_barrel_cell, allow_enemy=True) or is_cell_in_actors(next_barrel_cell, carts + lifts):
 			# can't push, cancel the move
 			char.move(diff, undo=True)
 			return
