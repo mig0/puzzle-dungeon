@@ -1894,6 +1894,8 @@ def leave_cell(old_char_cell):
 	puzzle.on_leave_cell()
 
 def prepare_enter_cell(animate_duration):
+	puzzle.on_prepare_enter_cell()
+
 	# prepare drop disappear if any
 	for drop in drops:
 		if drop.has_instance(char.c):
@@ -1906,7 +1908,6 @@ def prepare_enter_cell(animate_duration):
 		switch_cell_type(char.c, CELL_FLOOR, LOCK_DISAPPREAR_DURATION)
 		drop_key2.consume()
 
-	puzzle.on_prepare_enter_cell()
 	char.phased = puzzle.is_char_phased()
 
 def enter_cell():
