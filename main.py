@@ -1689,8 +1689,10 @@ def handle_press_key():
 		else:
 			press_cell(char.c)
 
-	if keyboard.u:
-		if not game.undo_move():
+	if keyboard.u or keyboard.z:
+		if game.undo_move():
+			puzzle.on_undo_move()
+		else:
 			play_sound('error')
 
 	cursor_was_active = cursor.is_active()

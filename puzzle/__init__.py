@@ -288,6 +288,9 @@ class Puzzle:
 	def is_char_phased(self):
 		return False
 
+	def on_undo_move(self):
+		pass
+
 	def prepare_solution(self):
 		return None
 

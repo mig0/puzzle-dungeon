@@ -294,3 +294,6 @@ class MirrorPuzzle(Puzzle):
 		self.beamgn.draw(self.beamgn_cell)
 		self.beamcl.draw(self.beamcl_cell)
 		char.draw()
+
+	def on_undo_move(self):
+		self.create_beam()
