@@ -60,6 +60,7 @@ DIR_USAGE = {
 class MirrorPuzzle(Puzzle):
 	def init(self):
 		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
+		self.update_beam = False
 		self.won = False
 		self.load_beam_images()
 
@@ -176,6 +177,7 @@ class MirrorPuzzle(Puzzle):
 				if i > 10000:
 					self.Globals.debug_map(0, "Deadlock")
 					return
+		self.update_beam = False
 
 	def set_beam_cells(self, beamgn_cell, beamcl_cell):
 		self.beamgn_cell = beamgn_cell
@@ -294,6 +296,14 @@ class MirrorPuzzle(Puzzle):
 		self.beamgn.draw(self.beamgn_cell)
 		self.beamcl.draw(self.beamcl_cell)
 		char.draw()
+
+	def on_prepare_enter_cell(self):
+		if self.map[char.c] in (CELL_LOCK1, CELL_LOCK2):
+			self.update_beam = True
+
+	def on_enter_cell(self):
+		if self.update_beam:
+			self.create_beam()
 
 	def on_undo_move(self):
 		self.create_beam()
