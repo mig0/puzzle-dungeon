@@ -1,0 +1,9 @@
+Title: Mirror puzzle with barrels, gates and portals
+Puzzle: mirror
+Theme: modern1
+
+In this level, you need to toggle gates to affect the beam, then move the
+the barrels that host the mirrors and adjust the mirrors’ orientations to
+solve the puzzle.
+
+Also see [solved screenshot](mirror-puzzle-6).

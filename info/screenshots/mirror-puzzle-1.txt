@@ -1,0 +1,10 @@
+Title: Mirror Sunbeam level
+Puzzle: mirror
+Theme: classic
+
+This shows Sunbeam level where you need to toggle the mirrors' activeness
+to direct the beam from the generator in the center to the collector in
+the bottom-right corner. The mirrors' orientations are fixed.
+
+This level is logically the same as
+[Mazelog Sunbeam level by David Johnson-Davies](http://www.mazelog.com/show?1C2).

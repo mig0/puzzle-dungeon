@@ -1,0 +1,8 @@
+Title: Mirror level with gates, locks, portals, and barrels
+Puzzle: mirror
+Theme: default
+
+In this level, you need to open gates and collect keys in the correct
+order to gain access to the plates and barrels. Then, move the barrels
+that host the mirrors and adjust the mirrors’ orientations to solve the
+puzzle.

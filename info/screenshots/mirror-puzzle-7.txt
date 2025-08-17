@@ -1,0 +1,6 @@
+Title: Simple Mirror puzzle with barrels
+Puzzle: mirror
+Theme: classic
+
+In this simple example level, you need to move the barrels hosting the
+mirrors and adjust the mirrors' orientations.

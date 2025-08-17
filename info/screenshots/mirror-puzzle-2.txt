@@ -1,0 +1,10 @@
+Title: Mirror Reflectivity level
+Puzzle: mirror
+Theme: ancient2
+
+This shows Reflectivity level where you need to toggle the mirrors'
+activeness to direct the beam from the generator in the top-left corner
+to the collector in the center. The mirrors' orientations are fixed.
+
+This level is logically the same as
+[Mazelog Reflectivity level by David Johnson-Davies](http://www.mazelog.com/show?179).
