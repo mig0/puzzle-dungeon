@@ -12,6 +12,12 @@ collections = [
 		"icon": 'default/gate0.png',
 	},
 	{
+		"id": "mirror",
+		"name": "Mirror levels",
+		"n": 2.901,
+		"icon": 'default/mirror.png',
+	},
+	{
 		"id": "switchbox",
 		"name": "SwitchBoxPuzzle levels",
 		"n": 3.01,
