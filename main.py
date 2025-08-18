@@ -404,7 +404,7 @@ def is_outer_wall(cell):
 		return False
 
 	for neigh in get_all_neighbors(cell):
-		if is_cell_in_map(neigh) and map[neigh] not in CELL_WALL_TYPES:
+		if is_cell_in_map(neigh) and map[neigh] not in (*CELL_WALL_TYPES, CELL_VOID):
 			return False
 	return True
 
