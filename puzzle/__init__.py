@@ -14,6 +14,7 @@ from pgzero import clock
 from random import randint, random, sample, shuffle, choice, choices
 from numpy import ndarray, arange, array_equal, ix_, argwhere, copyto
 from solution import solution
+from translate import t, concatenate_items
 from sizetools import import_size_constants
 from puzzleinfo import PuzzleInfo
 from statusmessage import set_status_message

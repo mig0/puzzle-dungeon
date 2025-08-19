@@ -20,6 +20,16 @@ def autodetect_lang():
 		pass
 	set_lang(lang)
 
+# return 'a' or 'a and b' or 'a, b, c and d'
+def concatenate_items(items, and_token=" {and-word} "):
+	if not items:
+		return ""
+	if len(items) == 1:
+		return items[0]
+	if len(items) == 2:
+		return and_token.join(items)
+	return and_token.join([', '.join(items[:-1]), items[-1]])
+
 # translate key like "default-goal" or embedded keys like "{reach-finish} {in-word} 5 {seconds-word}"
 def _(str_key, disable_bidi=False):
 	if str_key == '' or str_key is None:

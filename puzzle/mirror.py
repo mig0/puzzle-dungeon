@@ -57,6 +57,41 @@ DIR_USAGE = {
 	DIR_D: 1 << 3,
 }
 
+class HintFlags:
+	can_move     = False
+	can_rotate   = False
+	can_activate = False
+	all_active   = True
+	has_gates    = False
+	has_locks    = False
+	has_portals  = False
+
+def build_hint(hint):
+	mirror_verbs = []
+	if hint.can_move:
+		mirror_verbs.append("{move-word}")
+	if hint.can_rotate:
+		mirror_verbs.append("{rotate-word}")
+	if hint.can_activate:
+		mirror_verbs.append("{deactivate-word}" if hint.all_active else "{activate-word}")
+
+	parts = []
+
+	if mirror_verbs:
+		parts.append(concatenate_items(mirror_verbs) + " {mirrors-word}")
+
+	if hint.has_gates:
+		parts.append("{toggle-gates}")
+	if hint.has_locks:
+		parts.append("{open-locks}")
+	if hint.has_portals:
+		parts.append("{use-portals}")
+
+	if not parts:
+		parts = ["{think-word}"]
+
+	return concatenate_items(parts) + " {to-solve}"
+
 class MirrorPuzzle(Puzzle):
 	def init(self):
 		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
@@ -202,8 +237,31 @@ class MirrorPuzzle(Puzzle):
 	def on_actor_cell_changed(self, actor):
 		clock.schedule(self.create_beam, ARROW_KEYS_RESOLUTION * (0.1 if game.during_undo else 0.8))
 
+	def get_room_hint(self):
+		hint = HintFlags()
+		for mirror in mirrors:
+			if mirror.host in barrels or mirror.host in (carts + lifts) and mirror.host.type != MOVE_N:
+				hint.can_move = True
+			if not mirror.fixed_orientation:
+				hint.can_rotate = True
+			if not mirror.fixed_activeness:
+				hint.can_activate = True
+			if not mirror.is_active():
+				hint.all_active = False
+
+		if self.get_room_cells(CELL_GATE0, CELL_GATE1):
+			hint.has_gates = True
+		if self.get_room_cells(CELL_LOCK1, CELL_LOCK2):
+			hint.has_locks = True
+		if self.get_room_cells(CELL_PORTAL):
+			hint.has_portals = True
+		return hint
+
 	def on_enter_room(self):
 		self.create_beam()
+
+		hint = self.get_room_hint()
+		set_status_message(t(build_hint(hint)).capitalize(), self, 2, 15)
 
 	def on_load_map(self, special_cell_values, extra_values):
 		beam_cells = self.get_map_cells(CELL_BEAMGN, CELL_BEAMCL)
