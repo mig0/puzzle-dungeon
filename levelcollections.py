@@ -13,7 +13,7 @@ collections = [
 	},
 	{
 		"id": "mirror",
-		"name": "Mirror levels",
+		"name": "MirrorPuzzle levels",
 		"n": 2.901,
 		"icon": 'default/mirror.png',
 	},
