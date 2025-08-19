@@ -44,4 +44,4 @@ Each mirror is attached to one of three types of carriers:
 • Lifts: move across void, stopping at the first obstacle, by player
   instruction, with the same direction types as carts.
 
-Goal: Deliver at least one part of the beam using mirrors.
+Goal: Guide the beam from generator to collector through mirrors.
