@@ -1,6 +1,5 @@
 from puzzle import *
 from numpy import array, all
-from leveltools import levels
 from levelcollections import collections
 
 class MainScreen(VirtualPuzzle):
@@ -27,7 +26,7 @@ class MainScreen(VirtualPuzzle):
 	def press_cell(self, cell, button=None):
 		if not cell in self.plate_collections:
 			return False
-		game.requested_new_level = 1 + levels.index(next(level for level in levels if level["n"] == self.plate_collections[cell]["n"]))
+		game.set_requested_new_level(self.plate_collections[cell]["n"])
 		return False
 
 	def on_press_key(self, keyboard):

@@ -1,5 +1,6 @@
 from common import get_pgzero_game_from_stack
 from config import pgconsole_config
+from leveltools import levels
 import pygame
 
 class UndoFrame:
@@ -185,6 +186,14 @@ class Game:
 		self.undo_frames.pop().restore_all_changes()
 		self.during_undo = False
 
+		return True
+
+	def set_requested_new_level(self, level_n):
+		try:
+			level_idx = levels.index(next(level for level in levels if level["n"] == level_n))
+		except StopIteration:
+			return False
+		self.requested_new_level = 1 + level_idx
 		return True
 
 game = Game()
