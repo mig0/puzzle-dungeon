@@ -64,4 +64,6 @@ def _(str_key, disable_bidi=False):
 
 	return bidi(str)
 
+t = _
+
 autodetect_lang()
