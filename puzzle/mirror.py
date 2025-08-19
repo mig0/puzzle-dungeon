@@ -62,7 +62,6 @@ class MirrorPuzzle(Puzzle):
 		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
 		self.update_beam = False
 		self.won = False
-		self.load_beam_images()
 
 	def load_beam_images(self):
 		beam_image = load_theme_cell_image('beam')
@@ -128,6 +127,9 @@ class MirrorPuzzle(Puzzle):
 	def restore_level(self, stored_level):
 		self.set_beam_cells(stored_level["beamgn_cell"], stored_level["beamcl_cell"])
 		self.bind_mirrors()
+
+	def on_set_theme():
+		self.load_beam_images()
 
 	def get_cell_beam_mask(self, cell):
 		return self.cell_beam_masks.get(cell, 0)
