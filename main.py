@@ -21,6 +21,7 @@ from image import *
 from theme import *
 from draw import *
 from room import *
+from cmdargs import cmdargs
 from game import game
 from drop import draw_status_drops
 from flags import flags
