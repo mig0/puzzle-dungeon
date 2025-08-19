@@ -9,7 +9,6 @@ from pgzero.constants import keys
 from numpy import ndarray
 from copy import deepcopy
 from random import randint, choice, shuffle
-from unicodedata import bidirectional
 from constants import *
 from teestream import *
 from leveltools import *

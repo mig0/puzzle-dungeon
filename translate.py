@@ -1,5 +1,6 @@
 import os
 import re
+from unicodedata import bidirectional
 from translations import *
 
 lang = 'en'
