@@ -224,8 +224,8 @@ levels = [
 	},
 	{
 		"n": 2.911,
-		"map_file": "mirror/6x3-1.map",
-		"name": "Mincraft Mirror #1",
+		"map_file": "mirror/3x6-1.map",
+		"name": "Minecraft Mirror #1",
 		"num_enemies": 0,
 		"theme": "minecraft",
 		"music": "gaming_spirit",
@@ -235,8 +235,8 @@ levels = [
 	},
 	{
 		"n": 2.912,
-		"map_file": "mirror/6x3-2.map",
-		"name": "Mincraft Mirror #2",
+		"map_file": "mirror/3x6-2.map",
+		"name": "Minecraft Mirror #2",
 		"num_enemies": 0,
 		"theme": "minecraft",
 		"music": "gaming_spirit",

@@ -1,9 +1,9 @@
-Title: Mirror Minecraft themed 6x3 level
+Title: Mirror Minecraft themed 3x6 level
 Puzzle: mirror
 Theme: minecraft
 Front: true
 
-This is one of the 6×3 levels designed for the Minecraft-themed Mirror
+This is one of the 3×6 levels designed for the Minecraft-themed Mirror
 Puzzle. Some mirrors have fixed activeness, and most of the mirrors have
 fixed orientation. Direct the beam from the generator to the collector by
 clicking and rotating the mirrors.
