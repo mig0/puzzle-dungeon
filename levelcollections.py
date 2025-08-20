@@ -113,6 +113,12 @@ collections = [
 		"n": 43.001,
 		"icon": 'modern1/barrel.png',
 	},
+	{
+		"id": "sokoban/zsb",
+		"name": "Sokoban - Zero Space Type B",
+		"n": 4.6,
+		"icon": 'default/barrel.png',
+	},
 ]
 
 collections_by_id = dict((collection["id"], collection) for collection in collections)
