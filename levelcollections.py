@@ -108,3 +108,5 @@ collections = [
 		"icon": 'modern1/barrel.png',
 	},
 ]
+
+collections_by_id = dict((collection["id"], collection) for collection in collections)
