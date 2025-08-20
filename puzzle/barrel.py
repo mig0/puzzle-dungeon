@@ -204,8 +204,7 @@ class BarrelPuzzle(Puzzle):
 		self.num_total_cells = room.size_x * room.size_y
 		self.plate_cells = [ tuple(cell) for cell in argwhere(self.map == CELL_PLATE) if is_cell_in_room(cell) ]
 		self.plate_cells.sort()
-		self.stock_barrel_cells = [ barrel.c for barrel in self.get_room_barrels() ]
-		self.stock_barrel_cells.sort()
+		self.stock_barrel_cells = self.get_room_barrel_cells()
 		self.has_extra_barrels = len(self.plate_cells) < len(barrels)
 		self.has_extra_plates  = len(self.plate_cells) > len(barrels)
 
@@ -214,6 +213,9 @@ class BarrelPuzzle(Puzzle):
 
 	def get_room_barrels(self):
 		return [ barrel for barrel in barrels if is_actor_in_room(barrel) ]
+
+	def get_room_barrel_cells(self):
+		return sorted([ barrel.c for barrel in self.get_room_barrels() ])
 
 	def store_reset_barrels(self):
 		self.orig_barrels_stack.append(barrels.copy())
@@ -340,7 +342,7 @@ class BarrelPuzzle(Puzzle):
 			return None
 
 		solution_depth = 0
-		for barrel_cell in self.stock_barrel_cells:
+		for barrel_cell in self.get_room_barrel_cells():
 			num_pushes = self.min_barrel_plate_pushes[min(self.min_barrel_plate_pushes.keys(), key=lambda cell:
 				self.min_barrel_plate_pushes[cell] if cell == barrel_cell else self.num_total_cells
 			)]
@@ -468,7 +470,7 @@ class BarrelPuzzle(Puzzle):
 		if init:
 			self.solution = []
 			self.char_cell = self.stock_char_cell
-			self.barrel_cells = self.stock_barrel_cells.copy()
+			self.barrel_cells = self.get_room_barrel_cells()
 			self.barrel_cells.sort()
 			self.visited_positions = []
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
