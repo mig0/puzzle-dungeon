@@ -2132,7 +2132,7 @@ def handle_cmdargs():
 	if cmdargs.list_collections:
 		max_id_len = max(builtins.map(len, collections_by_id.keys()))
 		for collection in collections:
-			print("%s - %s" % (collection["id"].ljust(max_id_len), collection["name"]))
+			print("%s - %s levels" % (collection["id"].ljust(max_id_len), collection["name"]))
 		exit()
 	level_n = cmdargs.level
 	if collection_id := cmdargs.collection:
