@@ -117,7 +117,17 @@ on GNU/Linux, Windows, and other operating systems.
 |PageUp|  Simulate mouse button 4
 |PageDown|Simulate mouse button 5
 |Ctrl-Escape|Display Pygame Console if available
-|Shift-Delete|Reset all mirrors
+
+## Controls for MirrorPuzzle
+
+|mouse button|key|action
+|--|--|--
+|1|Home *or* Space|Toggle mirror activeness
+|3|End|Toggle mirror flipped-activeness
+|4 (wheel)|PgUp|Rotate mirror counter-clockwise
+|5 (wheel) *or* 2|PgDown *or* Insert|Rotate mirror clockwise
+|6|Delete|Reset mirror
+|-|Shift-Delete|Reset all mirrors
 
 ## Source code
 
@@ -357,7 +367,7 @@ directions depending on movement type.
 • Lifts: move across void, stopping at the first obstacle, by player
 instruction, with the same direction types as carts.
 
-Goal: Deliver at least one part of the beam using mirrors.
+Goal: Guide the beam from generator to collector through mirrors.
 
 ### Portal Puzzle
 
