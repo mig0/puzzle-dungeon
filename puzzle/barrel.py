@@ -651,11 +651,7 @@ class BarrelPuzzle(Puzzle):
 
 		# 11) remember the char position, optionally try to move it as far left-top as possible
 		if char.c is None:
-			print("Failed to generate random solvable barrel room")
-			if DEBUG_LEVEL:
-				return
-			else:
-				quit()
+			self.die("Failed to generate random solvable room")
 
 		self.Globals.place_char_in_topleft_accessible_cell()
 		self.Globals.set_char_cell(char.c)

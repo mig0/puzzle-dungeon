@@ -194,15 +194,13 @@ class MinotaurPuzzle(Puzzle):
 		else:
 			all_shortest_paths = self.Globals.find_all_paths(char_cell, self.goal_cell)
 		if not all_shortest_paths:
-			print("Bug #1 in generate_random_solvable_room after find_all_paths")
-			quit()
+			self.die("Bug #1 in generate_random_solvable_room after find_all_paths")
 
 		# 9) check whether any shortest path leads to win
 		has_trivial_solution = False
 		for path_cells in all_shortest_paths:
 			if not path_cells:
-				print("Bug #2 in generate_random_solvable_room after find_all_paths")
-				quit()
+				self.die("Bug #2 in generate_random_solvable_room after find_all_paths")
 			has_trivial_solution |= self.check_path_victory(path_cells, minotaur_cell)
 
 		solution_cells = None

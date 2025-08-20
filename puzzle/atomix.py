@@ -388,8 +388,7 @@ class AtomixPuzzle(Puzzle):
 			molecules = tuple(real_molecules.values())
 
 		if molecules is None:
-			print("Unknown bonus_mode %s in atomix puzzle" % bonus_mode)
-			quit()
+			self.die("Unknown bonus_mode %s" % bonus_mode)
 
 		goal_molecule = molecules[randint(0, len(molecules) - 1)] if type(molecules) == tuple else molecules
 		self.goal_molecule = goal_molecule
@@ -397,8 +396,7 @@ class AtomixPuzzle(Puzzle):
 		if "size" not in self.config:
 			sizes = bonus_sizes.get(bonus_mode) if bonus_mode else (len(goal_molecule[0]) + 1, len(goal_molecule))
 			if sizes is None:
-				print("Unknown size for bonus_mode %s in atomix puzzle" % bonus_mode)
-				quit()
+				self.die("Unknown size for bonus_mode %s" % bonus_mode)
 			size = sizes[randint(0, len(sizes) - 1)] if type(sizes[0]) == tuple else sizes
 			self.config["size"] = size
 

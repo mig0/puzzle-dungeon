@@ -67,8 +67,7 @@ class LockPuzzle(Puzzle):
 			drop_key2.reset()
 			num_tries -= 1
 		else:
-			print("Can't generate lock puzzle, sorry")
-			quit()
+			self.die("Can't generate random solvable room, sorry")
 
 	def generate_room(self):
 		self.generate_random_solvable_room(self.accessible_cells, self.finish_cell)

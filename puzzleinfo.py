@@ -6,8 +6,7 @@ PUZZLE_INFO_DIR = DATA_DIR + "/info/puzzles"
 
 class PuzzleInfo:
 	def die(self, error):
-		print("PuzzleInfo for %s: %s" % (self.name, error))
-		quit()
+		die("PuzzleInfo for %s: %s" % (self.name, error))
 
 	def __init__(self, name):
 		self.name = name

@@ -413,8 +413,7 @@ class GatePuzzle(Puzzle):
 
 			try_n += 1
 		else:
-			print("Can't generate gate puzzle for %d plates and %d gates, sorry" % (self.num_plates, self.num_gates))
-			quit()
+			self.die("Can't generate room for %d plates and %d gates, sorry" % (self.num_plates, self.num_gates))
 
 		for plate_cell in plate_cells:
 			self.map[plate_cell] = CELL_PLATE
