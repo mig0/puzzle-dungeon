@@ -35,3 +35,5 @@ def create_theme_image(image_name):
 def create_theme_actor(image_name, cell):
 	return create_actor(get_theme_image_name(image_name), cell)
 
+# should not be needed after redesigning CellActor to actually load img only on set-theme
+set_theme_name("default")

@@ -32,6 +32,7 @@ from clipboard import clipboard
 from translate import _, set_lang
 from mainscreen import main_screen_level_config, create_main_screen
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
+from levelcollections import collections, collections_by_id
 
 # set data dir and default encoding for the whole program
 pgzero.loaders.set_root(DATA_DIR)
@@ -1579,7 +1580,8 @@ def handle_requested_new_level():
 		new_level = game.requested_new_level
 		game.requested_new_level = None
 		init_new_level(new_level)
-		return
+		return True
+	return False
 
 def handle_press_key():
 	global is_move_animate_enabled, is_level_intro_enabled, is_sound_enabled
@@ -1725,7 +1727,8 @@ def handle_press_key():
 		press_cell(cursor.selected_actor.c, 5)
 
 	puzzle.on_press_key(keyboard)
-	handle_requested_new_level()
+	if handle_requested_new_level():
+		return
 
 	if is_level_unset():
 		return
@@ -2125,12 +2128,35 @@ ARROW_KEY_CODE = {
 	'u': pygame.K_UP,
 }
 
+def handle_cmdargs():
+	if cmdargs.list_collections:
+		max_id_len = max(builtins.map(len, collections_by_id.keys()))
+		for collection in collections:
+			print("%s - %s" % (collection["id"].ljust(max_id_len), collection["name"]))
+		exit()
+	level_n = cmdargs.level
+	if collection_id := cmdargs.collection:
+		if collection_id in collections_by_id:
+			level_n = collections_by_id[collection_id]["n"]
+		else:
+			warn("Ignoring unexisting collection '%s'" % collection_id)
+	if level_n:
+		if game.set_requested_new_level(level_n):
+			return True
+		else:
+			warn("Ignoring unexisting level '%s'" % level_n)
+	return False
+
 def update(dt):
 	global level_title_time, level_goal_time
 	global game_time, level_time, idle_time, last_regeneration_time
 	global last_time_arrow_keys_processed, last_processed_arrow_keys, pressed_arrow_keys
 
 	if mode == "start":
+		if handle_requested_new_level():
+			return
+		if handle_cmdargs():
+			return
 		init_main_screen()
 		return
 

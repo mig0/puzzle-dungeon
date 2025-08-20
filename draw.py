@@ -15,6 +15,8 @@ def draw_actor_hint(actor, hint, pos_diff, colors):
 
 # this function is intended to be called outside of draw(), so need display.flip
 def draw_long_level_generation():
+	if not game.screen:
+		return
 	game.screen.fill("#a8b6b7")
 	game.screen.draw.text(_("Initializing level…"), center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#88AA66", owidth=1.2, ocolor="#404030", alpha=1, fontsize=80)
 	pygame.display.flip()
