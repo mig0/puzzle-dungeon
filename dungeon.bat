@@ -13,4 +13,14 @@ if not defined PGZRUN_EXE (
 set PYGAME_HIDE_SUPPORT_PROMPT=1
 set PYTHONDONTWRITEBYTECODE=1
 
+set CMD_ARGS=
+:build_args
+if "%~1" == "" goto after_args
+set "ARG=%~1"
+set "ARG=%ARG:"=""%"
+set "CMD_ARGS=%CMD_ARGS% "%ARG%""
+shift
+goto build_args
+:after_args
+
 "%PGZRUN_EXE%" main.py
