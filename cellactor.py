@@ -61,7 +61,14 @@ def example(n):
 	return n
 
 class Area:
-	# x1, y1, x2, y2, size_x, size_y, x_range, y_range, idx
+	x1 = None
+	y1 = None
+	x2 = None
+	y2 = None
+	size_x = None
+	size_y = None
+	x_range = None
+	y_range = None
 
 	@property
 	def num_cells(self):
