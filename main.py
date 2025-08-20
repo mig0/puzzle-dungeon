@@ -400,12 +400,14 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 def is_cell_in_map(cell):
 	return is_cell_in_area(cell, MAP_X_RANGE, MAP_Y_RANGE)
 
-def is_outer_wall(cell):
+def is_outer_wall(cell, void_is_like_wall=False):
 	if map[cell] not in CELL_WALL_TYPES:
 		return False
 
+	wall_types = (*CELL_WALL_TYPES, CELL_VOID) if void_is_like_wall else CELL_WALL_TYPES
+
 	for neigh in get_all_neighbors(cell):
-		if is_cell_in_map(neigh) and map[neigh] not in (*CELL_WALL_TYPES, CELL_VOID):
+		if is_cell_in_map(neigh) and map[neigh] not in wall_types:
 			return False
 	return True
 
@@ -415,10 +417,10 @@ def replace_outer_walls(*cell_types):
 			if map[cx, cy] == CELL_OUTER_WALL:
 				map[cx, cy] = choice(cell_types)
 
-def convert_outer_walls(cell_type=None):
+def convert_outer_walls(cell_type=None, void_is_like_wall=False):
 	for cy in MAP_Y_RANGE:
 		for cx in MAP_X_RANGE:
-			if is_outer_wall((cx, cy)):
+			if is_outer_wall((cx, cy), void_is_like_wall=void_is_like_wall):
 				map[cx, cy] = CELL_OUTER_WALL
 
 	if cell_type is not None:

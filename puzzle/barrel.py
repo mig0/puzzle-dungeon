@@ -539,7 +539,7 @@ class BarrelPuzzle(Puzzle):
 		self.on_generate_map()
 
 	def on_generate_map(self):
-		self.Globals.convert_outer_walls(CELL_VOID if "bg_image" in self.level else None)
+		self.Globals.convert_outer_walls(CELL_VOID if "bg_image" in self.level else None, True)
 
 	def pull_barrel_randomly(self, barrel, visited_cell_pairs, num_moves):
 		idx = barrels.index(barrel)
