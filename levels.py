@@ -169,8 +169,8 @@ levels = [
 	},
 	{
 		"n": 2.906,
-		"map_file": "mirror/sunbeam.map",
-		"name": "Sunbeam",
+		"map_file": "mirror/sunbeams.map",
+		"name": "Sunbeams",
 		"num_enemies": 0,
 		"theme": "classic",
 		"music": "gaming_spirit",
