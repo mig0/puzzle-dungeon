@@ -1,0 +1,13 @@
+Title: 12 Mirror Puzzle levels
+Puzzles: mirror
+Themes: ancient2, classic, default, minecraft, modern1, moss
+Main: 4
+
+Mirror Puzzle is one of the most feature-rich puzzles. It supports
+mirrors on barrels, carts, and lifts, as well as toggling gates, opening
+locks, using portals, traps, and almost all other elements.
+
+The goal is to deliver at least one beam segment from the generator to
+the collector using mirrors. This video shows the solution of 12
+different manually crafted levels. You can find these maps in the
+*maps/mirror/* files.
