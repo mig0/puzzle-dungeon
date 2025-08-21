@@ -204,6 +204,7 @@ class BarrelPuzzle(Puzzle):
 		self.num_total_cells = room.size_x * room.size_y
 		self.plate_cells = [ tuple(cell) for cell in argwhere(self.map == CELL_PLATE) if is_cell_in_room(cell) ]
 		self.plate_cells.sort()
+		self.stock_char_cell = char.c
 		self.stock_barrel_cells = self.get_room_barrel_cells()
 		self.has_extra_barrels = len(self.plate_cells) < len(barrels)
 		self.has_extra_plates  = len(self.plate_cells) > len(barrels)
@@ -469,7 +470,7 @@ class BarrelPuzzle(Puzzle):
 	def find_solution(self, init=True):
 		if init:
 			self.solution = []
-			self.char_cell = self.stock_char_cell
+			self.char_cell = char.c
 			self.barrel_cells = self.get_room_barrel_cells()
 			self.barrel_cells.sort()
 			self.visited_positions = []
@@ -865,7 +866,6 @@ class BarrelPuzzle(Puzzle):
 			set_status_message("Prepare solution is %s" % ("disabled" if self.disable_prepare_solution else "enabled"), self, None, 4)
 
 	def find_solution_func(self):
-		self.stock_char_cell = char.c
 		if self.min_barrel_plate_pushes is None:
 			# preparing to find solution
 			self.prepare_to_find_solution()
