@@ -340,10 +340,11 @@ class GatePuzzle(Puzzle):
 
 	def press_plate(self, cell):
 		if self.map[cell] != CELL_PLATE:
-			return
+			return False
 		plate_idx = self.plate_cells.index(cell)
 		for gate_idx in self.attached_plate_gate_idxs[plate_idx]:
 			self.toggle_gate(self.gate_cells[gate_idx])
+		return True
 
 	def generate_random_solvable_room(self, accessible_cells, finish_cell):
 		self.num_plates = self.parse_config_num("num_plates", DEFAULT_NUM_GATE_PUZZLE_PLATES)
@@ -446,7 +447,7 @@ class GatePuzzle(Puzzle):
 		return self.attached_plate_gate_idxs
 
 	def press_cell(self, cell, button=None):
-		self.press_plate(char.c)
+		return self.press_plate(char.c)
 
 	def find_solution_func(self):
 		solution = self.find_map_solution(char.c)

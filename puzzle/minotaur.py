@@ -256,6 +256,7 @@ class MinotaurPuzzle(Puzzle):
 	def press_cell(self, cell, button=None):
 		# skip move
 		self.make_minotaur_move()
+		return True
 
 	def on_prepare_enter_cell(self):
 		if char.c == self.goal_cell and self.map[char.c] == CELL_PORTAL:
