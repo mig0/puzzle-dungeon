@@ -1,3 +1,68 @@
+Version 0.3.0 - 2025-08-21
+--------------------------
+
+* Improved Windows support:
+	- New install-deps.bat to check for and install missing dependencies.
+	- dungeon.bat now prompts you to run install-deps.bat if needed.
+
+* Level collections
+	- Introduced named collections that contain actual levels.
+	- Main Screen now shows collection plates in the maze; press
+	  Space on a plate to jump into that collection.
+
+* Command line support
+	- New command line options for Unix and Windows, see: dungeon --help.
+	- Implemented: --level N, --collection NAME, --list-collections.
+	  Start directly in a level / collection; list available collections.
+
+* Solution system
+	- Solutions now include notions of 'push' and 'press-cell' primitives.
+	- Solutions are summarized as: N moves, N pushes, N presses, N targets.
+
+* New Mirror Puzzle
+	- Reflect beam from generator to collector using mirrors.
+	- Mirrors are static or moveable, attached to barrels, lifts, carts.
+	- Mirrors may be rotatable or have a fixed orientation.
+	- Mirrors may be activated or deactivated, or have fixed activeness.
+	- Walls, closed gates and locks stop the beam; portals relocate it.
+
+* New actors and map cell types
+	- Cart: like lift, but slides by 1 cell on floor in 4 directions,
+	  while lift moves in void until obstacle.
+	- Mirrors attached to barrels, carts, or lifts.
+	- New map cells: glass (an obstacle that passes the beam), traps,
+	  beam generator, beam collector.
+
+* Themes
+	- Added variants of mirrors and all new cell types across themes.
+	- Added beam image for clipping, currently identical across themes.
+	- The minecraft theme is now quite complete and pleasing.
+	- New character and enemy images in moss theme (druid and troll).
+
+* GatePuzzle now supports traps:
+	- Traps are like gates with reversed meaning; toggled by plates.
+	- The character dies when stepping on non-disarmed trap.
+	- Added one GatePuzzle level demonstrating traps in place of gates.
+
+* BarrelPuzzle improvements:
+	- Auto-detect Sokoban Zero-Space type B (ZSB) levels.
+	- Generate ZSB levels of given size when "zsb" flag is set in config.
+	- Optimize solution for ZSB levels using double-push.
+	- Fix and improve solution in many level configurations.
+	- Fix solution when not at level start (after pushes).
+
+* Clipboard support
+	- RShift-D now copies the current map to the clipboard too.
+	- The solution string (on KP-Enter) is also copied to the clipboard.
+
+* The actor selected by the cursor is now highlighted for clarity.
+
+* The native map format now supports portals and mirrors (with metadata).
+
+* Solution speed can now be changed with the mouse wheel or PgUp/PgDown keys.
+
+* Update web site with Mirror Puzzle info, controls, video and screenshots.
+
 Version 0.2.1 - 2025-06-13
 --------------------------
 
