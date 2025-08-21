@@ -63,7 +63,7 @@ collections = [
 		"id": "fifteen",
 		"name": "FifteenPuzzle",
 		"n": 7.1,
-		"icon": 'classic/beamcl.png',
+		"icon": 'ancient2/glass.png',
 	},
 	{
 		"id": "rotatepic",
