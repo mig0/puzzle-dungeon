@@ -68,7 +68,11 @@ def _(str_key, disable_bidi=False):
 		)
 
 	# replace all {sub-key} occurrences (flat, no nesting)
-	str_key = re.sub(r'{([^{}]+)}', lambda m: _(m.group(1), True), str_key)
+	while True:
+		str_key_new = re.sub(r'{([^{}]+)}', lambda m: _(m.group(1), True), str_key)
+		if str_key == str_key_new:
+			break
+		str_key = str_key_new
 
 	str = translations[lang].get(str_key) or translations['en'].get(str_key) or str_key
 
