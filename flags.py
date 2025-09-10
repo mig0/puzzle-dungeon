@@ -6,17 +6,17 @@ def round_odd(n):
 
 class Flags:
 	def parse_level(self, level):
-		self.is_random_maze    = level.get("random_maze")
-		self.is_spiral_maze    = level.get("spiral_maze")
-		self.is_grid_maze      = level.get("grid_maze")
-		self.is_four_rooms     = level.get("four_rooms")
-		self.is_nine_rooms     = level.get("nine_rooms")
-		self.is_cloud_mode     = level.get("cloud_mode")
-		self.is_enemy_key_drop = level.get("enemy_key_drop")
-		self.is_stopless       = level.get("stopless")
-		self.allow_barrel_pull = level.get("allow_barrel_pull")
-		self.has_start         = level.get("has_start")
-		self.has_finish        = level.get("has_finish")
+		self.is_random_maze    = level.random_maze
+		self.is_spiral_maze    = level.spiral_maze
+		self.is_grid_maze      = level.grid_maze
+		self.is_four_rooms     = level.four_rooms
+		self.is_nine_rooms     = level.nine_rooms
+		self.is_cloud_mode     = level.cloud_mode
+		self.is_enemy_key_drop = level.enemy_key_drop
+		self.is_stopless       = level.stopless
+		self.allow_barrel_pull = level.allow_barrel_pull
+		self.has_start         = level.has_start
+		self.has_finish        = level.has_finish
 
 		self.is_any_maze = self.is_random_maze or self.is_spiral_maze or self.is_grid_maze
 

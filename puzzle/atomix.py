@@ -458,7 +458,7 @@ class AtomixPuzzle(Puzzle):
 			self.map[cell] = CELL_VOID
 
 	def modify_cell_types_to_draw(self, cell, cell_types):
-		if self.draw_solved_mode and "map_file" in self.level:
+		if self.draw_solved_mode and game.level.map_file:
 			cell_types.clear()
 
 	def on_press_key(self, keyboard):

@@ -43,7 +43,7 @@ class RotatePicPuzzle(Puzzle):
 		self.max_num = self.area.size_x * self.area.size_y
 
 	def on_enter_room(self):
-		self.is_shared_bg = self.level.get("bg_image") is not None
+		self.is_shared_bg = bool(game.level.bg_image)
 		if not self.is_shared_bg:
 			self.image = load_image(self.config.get("image", "bg/stonehenge.jpg"), (self.area.size_x * CELL_W, self.area.size_y * CELL_H), self.config.get("image_crop", False))
 

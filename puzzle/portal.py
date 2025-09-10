@@ -97,7 +97,7 @@ class PortalPuzzle(Puzzle):
 					self.map[ROOM_9_X2[hall_idx], ROOM_9_Y2[hall_idx]] = CELL_FINISH
 
 			if self.is_fully_reachable_and_solvable():
-				if "has_start" not in self.level:
+				if not game.level.has_start:
 					self.Globals.set_char_cell(get_hall_center_cell(0))
 				return
 

@@ -1,7 +1,10 @@
-from common import get_pgzero_game_from_stack
-from config import pgconsole_config
-from leveltools import levels
+from common import load_tabbed_yaml, get_pgzero_game_from_stack, warn
+from config import DATA_DIR, pgconsole_config
+from level import Collection, Level
+from sokobanparser import parse_sokoban_levels
 import pygame
+import copy
+import os
 
 class UndoFrame:
 	def __init__(self):
@@ -75,6 +78,10 @@ class Game:
 		self.undo_frames = []
 		self.in_level = False
 		self.during_undo = False
+
+		self.collections = []
+		self.level = Level()
+		self._register_all_collections()
 
 	def init_console(self):
 		self.console = None
@@ -188,12 +195,154 @@ class Game:
 
 		return True
 
-	def set_requested_new_level(self, level_n):
-		try:
-			level_idx = levels.index(next(level for level in levels if level["n"] == level_n))
-		except StopIteration:
+	def set_requested_new_level(self, level_id):
+		if not self.is_valid_level_id(level_id):
 			return False
-		self.requested_new_level = 1 + level_idx
+		self.requested_new_level = level_id
 		return True
+
+	def _find_all_collections(self, dir_path, id, all_collections=None):
+		if all_collections is None:
+			all_collections = []
+
+		config_path = dir_path + '/config'
+		if os.path.isfile(config_path):
+			config = load_tabbed_yaml(config_path)
+			collection = Collection(id, config)
+			collections = []
+			sokoban_map_files_by_id = {}
+			if sokoban_map_files_by_sub_id := config.get('sokoban-map-files'):
+				del config['sokoban-map-files']
+				if type(sokoban_map_files_by_sub_id) == tuple:
+					sokoban_map_files_by_sub_id_tuple = sokoban_map_files_by_sub_id
+					width = len(str(len(sokoban_map_files_by_sub_id_tuple)))
+					sokoban_map_files_by_sub_id = {}
+					for i, sokoban_map_file in enumerate(sokoban_map_files_by_sub_id_tuple):
+						sub_id = "%0*d" % (width, i + 1)
+						sokoban_map_files_by_sub_id[sub_id] = sokoban_map_file
+				for sub_id, sokoban_map_file in sokoban_map_files_by_sub_id.items():
+					c = copy.copy(collection)
+					c.id += '/%s' % sub_id
+					c.name += ' - %s' % sub_id
+					collections.append(c)
+					sokoban_map_files_by_id[c.id] = sokoban_map_file
+			elif collection.level_configs is not None or config.get('sokoban-map-file'):
+				collections.append(collection)
+			for collection in collections:
+				if sokoban_map_file := config.get('sokoban-map-file') or sokoban_map_files_by_id.get(collection.id):
+					if 'sokoban-map-file' in config:
+						del config['sokoban-map-file']
+					collection.level_configs = parse_sokoban_levels(sokoban_map_file)
+				if collection.num_levels == 0:
+					warn("Ignoring collection %s with no levels" % collection.id)
+				else:
+					all_collections.append(collection)
+			if not collections:
+				warn("Ignoring collection %s with no levels and no sokoban-map-files" % collection.id)
+
+		with os.scandir(dir_path) as entries:
+			for entry in entries:
+				if entry.is_dir():
+					entry_id = id + ('/' if id else '') + entry.name
+					self._find_all_collections(dir_path + '/' + entry.name, entry_id, all_collections)
+
+		return all_collections
+
+	def _register_all_collections(self):
+		collections = self._find_all_collections(DATA_DIR + '/levels', '')
+
+		# assign unique integer 'n' with magic-n fill logic
+		def sort_collection_by_magic_n(c):
+			# None goes last; otherwise by magic_n numeric; tie-breaker by id
+			return (c.magic_n or 1000, c.id)
+
+		collections.sort(key=sort_collection_by_magic_n)
+
+		used_n = set()
+		next_n = 1
+
+		for collection in collections:
+			if collection.magic_n is not None and next_n < collection.magic_n:
+				next_n = collection.magic_n
+			while next_n in used_n:
+				next_n += 1
+			collection.n = next_n
+			used_n.add(next_n)
+			next_n += 1
+
+		self.collections = sorted(collections, key=lambda c: c.n)
+
+	def get_collection_by_id(self, collection_id):
+		try:
+			return next(c for c in self.collections if c.has_id(collection_id))
+		except:
+			return None
+
+	def get_adjacent_collection(self, offset, collection=None):
+		collection = collection or self.level.collection
+		idx = self.collections.index(collection)
+		if offset < 0 and idx + offset < 0 or offset > 0 and idx + offset > len(self.collections) - 1:
+			return None
+		return self.collections[idx + offset]
+
+	def get_adjacent_level_id(self, offset, collection_offset=None):
+		if collection_offset is not None:
+			collection = self.get_adjacent_collection(collection_offset)
+			if collection is None:
+				collection = self.level.collection
+				if offset <= 0:
+					# very first level
+					return collection.get_level_id()
+				if self.level.index >= collection.num_levels:
+					# end of levels
+					return None
+				# very last level
+				return collection.get_id() + collection.get_padded_level_index_suffix(collection.num_levels)
+			return collection.get_level_id()
+
+		if offset == 0:
+			return self.level.get_id()
+		if offset == -1:
+			if self.level.index <= 1:
+				collection = self.get_adjacent_collection(-1)
+				if collection is None:
+					return self.level.get_id()
+				level_index = collection.num_levels
+			else:
+				collection = self.level.collection
+				level_index = self.level.index - 1
+		elif offset == 1:
+			if self.level.index >= self.level.collection.num_levels:
+				collection = self.get_adjacent_collection(+1)
+				if collection is None:
+					return None
+				level_index = 1
+			else:
+				collection = self.level.collection
+				level_index = self.level.index + 1
+		else:
+			die("Currently get_adjacent_level_id only supports offset (-1, 0, 1), not %s" % str(offset))
+
+		return collection.get_id() + collection.get_padded_level_index_suffix(level_index)
+
+	def set_level(self, collection, level_index):
+		config = collection.level_configs[level_index - 1]
+		self.level.set_from_config(collection, level_index, config)
+
+	def set_level_id(self, level_id):
+		collection_id, level_index = level_id.rsplit('.', 1)
+		level_index = int(level_index)
+		if collection_id.isnumeric():
+			collection_n = int(collection_id)
+			collection = next(c for c in self.collections if c.n == collection_n)
+		else:
+			collection = next(c for c in self.collections if c.id == collection_id)
+		self.set_level(collection, level_index)
+
+	def is_valid_level_id(self, level_id):
+		for collection in self.collections:
+			if collection.has_level_id(level_id):
+				return True
+		return False
 
 game = Game()

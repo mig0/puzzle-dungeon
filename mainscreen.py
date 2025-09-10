@@ -1,6 +1,6 @@
 from puzzle import *
 from numpy import array, all
-from levelcollections import collections
+from level import Level, Collection
 
 class MainScreen(VirtualPuzzle):
 	def init(self):
@@ -26,7 +26,7 @@ class MainScreen(VirtualPuzzle):
 	def press_cell(self, cell, button=None):
 		if not cell in self.plate_collections:
 			return False
-		game.set_requested_new_level(self.plate_collections[cell]["n"])
+		game.set_requested_new_level(self.plate_collections[cell].get_level_id())
 		return False
 
 	def on_press_key(self, keyboard):
@@ -35,7 +35,7 @@ class MainScreen(VirtualPuzzle):
 			or keyboard.right or keyboard.left or keyboard.up or keyboard.down
 			or keyboard.escape or keyboard.space or keyboard.enter
 		):
-			game.requested_new_level = 1
+			game.requested_new_level = game.collections[0].get_level_id()
 
 	def on_draw_map(self):
 		for cell in self.plate_cells:
@@ -51,7 +51,7 @@ class MainScreen(VirtualPuzzle):
 
 	def on_enter_cell(self):
 		if self.map[char.c] == CELL_PLATE:
-			set_status_message("Press Space to play %s" % self.plate_collections[char.c]["name"])
+			set_status_message("Press Space to play %s" % self.plate_collections[char.c].name)
 		else:
 			set_status_message("Press Tab to play levels in order")
 
@@ -60,26 +60,24 @@ class MainScreen(VirtualPuzzle):
 		accessible_cell_distances = self.Globals.get_accessible_cell_distances(char_cell, allow_enemy=True)
 		del accessible_cell_distances[char_cell]  # remove char cell
 		accessible_cells = list(accessible_cell_distances.keys())
-		self.plate_cells = sample(accessible_cells, k=len(collections))
+		self.plate_cells = sample(accessible_cells, k=len(game.collections))
 		self.plate_cells.sort(key=lambda cell: accessible_cell_distances[cell])
-		self.plate_collections = dict(zip(self.plate_cells, collections))
+		self.plate_collections = dict(zip(self.plate_cells, game.collections))
 
 		self.plate_icons = {}
 		for cell in self.plate_cells:
 			self.map[cell] = CELL_PLATE
-			plate_icon = CellActor(load_image('images/' + self.plate_collections[cell]["icon"], (CELL_W * 0.4, CELL_H * 0.4)))
+			plate_icon = CellActor(load_image('images/' + self.plate_collections[cell].icon, (CELL_W * 0.4, CELL_H * 0.4)))
 			self.plate_icons[cell] = plate_icon
 
-main_screen_level_config = {
-	"n": 0,
-	"num_enemies": 3,
+main_screen_level = Level()
+main_screen_level.set_from_config(Collection("mainscreen", {}), 1, {
+	"num-enemies": 3,
 	"theme": "ancient2",
 	"music": "valiant_warriors",
-	"char_health": 100,
-	"use_clock": True,
+	"char-health": 100,
+	"use-clock": True,
 	"goal": 'select-level',
-	"random_maze": True,
-}
-
-def create_main_screen(level, Globals):
-	return create_puzzle(level, Globals, MainScreen)
+	"random-maze": True,
+	"puzzle-type": "MainScreen",
+})

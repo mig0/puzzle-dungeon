@@ -72,7 +72,7 @@ def create_map_string(lines):
 
 	return (size_x, size_y), '\n'.join([sig_line] + lines) + '\n'
 
-def parse_sokoban_levels(major, filename):
+def parse_sokoban_levels(filename):
 	levels = []
 
 	full_filename = MAPS_DIR_PREFIX + 'sokoban/' + filename
@@ -86,7 +86,6 @@ def parse_sokoban_levels(major, filename):
 	level_name = None
 	is_pre_level_name = False
 	pre_level_name = None
-	i = 0
 	while True:
 		line = file.readline()
 		is_eof = line == ''
@@ -98,19 +97,16 @@ def parse_sokoban_levels(major, filename):
 
 		if is_eof or map_lines and not old_is_in_map and is_in_map:
 			map_size, map_string = create_map_string(map_lines)
-			i += 1
 			levels.append({
-				"n": major + i / 1000,
 				"name": level_name or "No Name",
-				"bg_image": "bg/starry-sky.webp",
+				"bg-image": "bg/starry-sky.webp",
 				"theme": ("stoneage1", "stoneage2", "stoneage3", "stoneage4", "stoneage5", "default", "modern1", "moss")[randint(0, 7)],
 				"music": ("playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures")[randint(0, 4)] + ".mp3",
-				"map_size": map_size,
-				"map_string": map_string,
-				"void_outer_floor": True,
-				"num_enemies": 0,
-				"char_health": None,
-				"barrel_puzzle": {},
+				"map-size": map_size,
+				"map-string": map_string,
+				"num-enemies": 0,
+				"char-health": None,
+				"puzzle-config": {},
 			})
 
 		if is_eof:

@@ -1,3 +1,5 @@
+import re
+import yaml
 import inspect
 import subprocess
 from traceback import extract_stack
@@ -39,4 +41,28 @@ def markdown_to_html(text):
 			warn(e.stderr)
 		warn("markdown_to_html: Error executing '%s'" % markdown_to_html_cmd)
 		die(e)
+
+def load_tabbed_yaml(path):
+	'''
+	Load a YAML-like config that uses TAB indentation.
+	This function converts leading tabs to 8 spaces per tab, then safe-loads YAML.
+	Then it converts lists to tuples recursively.
+	'''
+	with open(path, 'r', encoding='utf-8') as f:
+		text = f.read()
+
+	def _tabs_to_spaces(m):
+		return ' ' * 8 * len(m.group(1))
+	text = re.sub(r'(^\t+)', _tabs_to_spaces, text, flags=re.MULTILINE)
+
+	data = yaml.safe_load(text)
+
+	def _normalize(obj):
+		if isinstance(obj, dict):
+			return {k: _normalize(v) for k, v in obj.items()}
+		if isinstance(obj, list):
+			return tuple(_normalize(x) for x in obj)
+		return obj
+
+	return _normalize(data)
 

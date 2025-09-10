@@ -32,13 +32,11 @@ class Puzzle:
 	def get_info(cls):
 		return PuzzleInfo(cls.canonic_name())
 
-	def __init__(self, level, Globals):
+	def __init__(self, Globals):
 		self.map = None
-		self.level = level
 		self.Globals = Globals
 		self.area = Area()
-		self.config_name = self.__class__.config_name()
-		self.config = {} if type(level.get(self.config_name)) != dict else dict(level[self.config_name])
+		self.config = game.level.puzzle_config
 		self.load_map_special_cell_types = {CELL_SPECIAL0: 'str'}
 		self.init()
 
@@ -49,7 +47,7 @@ class Puzzle:
 		return True
 
 	def has_border(self):
-		return self.level.get("has_border", True) and self.level.get("map_file") is None and self.level.get("map_string") is None
+		return game.level.has_border and game.level.map_file is None and game.level.map_string is None
 
 	def is_long_generation(self):
 		return False
@@ -303,22 +301,17 @@ import os, pkgutil
 for _, module, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
 	__import__(__name__ + "." + module)
 
-def get_all_puzzle_subclasses():
-	return Puzzle.__subclasses__()
+def get_all_puzzle_classes():
+	return [Puzzle] + Puzzle.__subclasses__() + VirtualPuzzle.__subclasses__()
 
-def create_puzzle(level, Globals, puzzle_class=None):
+def create_puzzle(Globals):
 	if not Puzzle.__subclasses__():
 		print("Internal bug. Didn't find any Puzzle subclasses")
 		quit()
 
-	if not puzzle_class:
-		# detect class from level config
-		puzzle_class = Puzzle
-		for cls in get_all_puzzle_subclasses():
-			if cls.config_name() in level:
-				puzzle_class = cls
+	puzzle_class = next(pc for pc in get_all_puzzle_classes() if pc.__name__ == game.level.puzzle_type)
 
-	puzzle = puzzle_class(level, Globals)
+	puzzle = puzzle_class(Globals)
 
 	if not puzzle.assert_config():
 		print("Level #%s: Requested %s, but config is incompatible, so ignoring it" % (level.get("n"), puzzle.__class__.__name__))

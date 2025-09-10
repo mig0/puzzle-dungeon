@@ -11,7 +11,6 @@ from copy import deepcopy
 from random import randint, choice, shuffle
 from constants import *
 from teestream import *
-from leveltools import *
 from sizetools import *
 from cellactor import *
 from objects import *
@@ -30,9 +29,8 @@ from solution import solution, set_solution_funcs
 from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_joysticks_arrow_keys
 from clipboard import clipboard
 from translate import _, set_lang
-from mainscreen import main_screen_level_config, create_main_screen
+from mainscreen import main_screen_level
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
-from levelcollections import collections, collections_by_id
 
 # set data dir and default encoding for the whole program
 pgzero.loaders.set_root(DATA_DIR)
@@ -332,8 +330,6 @@ killed_enemies = []
 level_title_time = 0
 level_goal_time = 0
 
-level = None
-
 enter_room_idx = None
 
 def get_bg_image():
@@ -462,7 +458,7 @@ def reveal_map_near_char():
 		revealed_map[cell] = True
 
 def get_revealed_actors(actors):
-	if not flags.is_cloud_mode or level.get("actors_always_revealed", False):
+	if not flags.is_cloud_mode or game.level.actors_always_revealed:
 		return actors
 
 	revealed_actors = []
@@ -1026,7 +1022,7 @@ def generate_room(idx):
 	# generate enemies
 	if char.power:
 		return
-	for i in range(level["num_enemies"] if "num_enemies" in level else DEFAULT_NUM_ENEMIES):
+	for i in range(game.level.num_enemies):
 		place_char_in_room()
 		num_tries = 10000
 		while num_tries > 0:
@@ -1055,8 +1051,8 @@ def generate_map():
 					cell_type = get_random_floor_cell_type()
 			map[cx, cy] = cell_type
 
-	if "map_file" in level or "map_string" in level:
-		filename_or_stringio = MAPS_DIR_PREFIX + level["map_file"] if "map_file" in level else io.StringIO(level["map_string"])
+	if game.level.map_file or game.level.map_string:
+		filename_or_stringio = MAPS_DIR_PREFIX + game.level.map_file if game.level.map_file else io.StringIO(game.level.map_string)
 		if ret := load_map(filename_or_stringio, puzzle.load_map_special_cell_types):
 			if flags.MULTI_ROOMS:
 				print("Ignoring multi-room level config when loading map")
@@ -1182,7 +1178,7 @@ def start_music():
 
 	if is_music_enabled:
 		set_music_fadein()
-		track = level["music"] if mode == "game" else "victory" if is_game_won else "defeat"
+		track = game.level.music if mode == "game" else "victory" if is_game_won else "defeat"
 		music.play(track)
 
 def stop_music():
@@ -1242,8 +1238,8 @@ def reset_idle_time():
 	idle_time = 0
 	last_regeneration_time = 0
 
-def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_func=create_puzzle):
-	global level, level_time, mode, is_game_won
+def init_new_level(level_id, reload_stored=False):
+	global mode, is_game_won
 	global level_title, level_name, level_goal
 	global puzzle
 	global bg_image
@@ -1253,15 +1249,24 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 	global level_time
 	global map, stored_level
 
-	if config and offset != 0:
-		die("Can't init config for a non-current level")
+	if level_id is None:
+		is_game_won = True
+		level_id = game.level.get_id()
+	else:
+		is_game_won = False
 
-	if reload_stored and offset != 0:
+	if type(level_id) != str:
+		level = level_id
+		game.level.set_from_level(level)
+		level_id = level.get_id()
+
+	is_current_level = game.level.has_id(level_id)
+
+	if not is_current_level and reload_stored:
 		die("Can't reload a non-current level")
 
-	if not is_level_unset() and is_level_out_of_range(offset):
-		print("Requested level is out of range")
-		return
+	if not is_current_level and not game.is_valid_level_id(level_id):
+		die("Requested level id %s is invalid" % level_id)
 
 	if puzzle:
 		mode = "finish"
@@ -1272,10 +1277,13 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 	clear_level_title_and_goal_time()
 	mode = "init"
 
-	level = config if config else set_level(offset)
-	if not level:
+	if not is_current_level:
+		game.set_level_id(level_id)
+
+	level = game.level
+
+	if is_game_won:
 		mode = "end"
-		is_game_won = True
 		start_music()
 		return
 
@@ -1283,8 +1291,8 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 
 	char.reset_state()
 	char_cells = [None] * flags.NUM_ROOMS
-	char.power  = level.get("char_power")
-	char.health = level.get("char_health")
+	char.power  = level.char_power
+	char.health = level.char_health
 	char.attack = None if char.power else INITIAL_CHAR_ATTACK
 
 	barrels.clear()
@@ -1297,10 +1305,10 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 
 	solution.reset()
 
-	puzzle = create_puzzle_func(level, Globals)
+	puzzle = create_puzzle(Globals)
 
-	map_has_border = puzzle.has_border() and (reload_stored or not ("map_file" in level or "map_string" in level))
-	set_map_size(level.get("map_size", DEFAULT_MAP_SIZE), map_has_border)
+	map_has_border = puzzle.has_border() and (reload_stored or not (level.map_file or level.map_string))
+	set_map_size(level.map_size, map_has_border)
 	import_size_constants()
 	import_size_constants(game)
 	import_size_constants(Puzzle)
@@ -1312,22 +1320,22 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 	game.init_console()
 
 	bg_image = None
-	if "bg_image" in level:
-		bg_image = load_image(level["bg_image"], (MAP_W, MAP_H), level.get("bg_image_crop", False))
+	if level.bg_image:
+		bg_image = load_image(level.bg_image, (MAP_W, MAP_H), level.bg_image_crop)
 
-	level_title = "main-screen" if level["n"] == 0 else level.get("title", "{level-label} %s" % level["n"])
-	level_name = "level-%s-name" % level["n"]
-	level_name = level.get("name", level_name if _(level_name) != level_name else "")
-	if "goal" in level:
-		level_goal = level["goal"]
+	level_title = "main-screen" if type(puzzle).__name__ == 'MainScreen' else level.title or "{level-label} %s" % level.get_id(True)
+	level_name = "level-%s-name" % level.get_id(True)
+	level_name = level.name or (level_name if _(level_name) != level_name else "")
+	if level.goal:
+		level_goal = level.goal
 	elif puzzle.is_goal_to_be_solved():
 		level_goal = "solve-%s-puzzle" % puzzle.canonic_name()
 	elif puzzle.is_goal_to_kill_enemies() and not flags.has_finish:
 		level_goal = "kill-enemies"
 	else:
 		level_goal = "reach-finish"
-	if "time_limit" in level:
-		level_goal = "{%s} {in-word} %d {seconds-word}" % (level_goal, level["time_limit"])
+	if level.time_limit:
+		level_goal = "{%s} {in-word} %d {seconds-word}" % (level_goal, level.time_limit)
 
 	for drop in drops:
 		# should be called after set_map_size()
@@ -1354,7 +1362,7 @@ def init_new_level(offset=1, config=None, reload_stored=False, create_puzzle_fun
 		set_room_and_notify_puzzle(0)
 		puzzle.restore_level(stored_level)
 	else:
-		theme_name = level["theme"]
+		theme_name = level.theme
 		if puzzle.is_long_generation():
 			draw_long_level_generation()
 		generate_map()
@@ -1398,14 +1406,14 @@ def init_new_room():
 	global enter_room_idx
 
 	if not flags.MULTI_ROOMS or enter_room_idx == flags.NUM_ROOMS - 1:
-		init_new_level()
+		init_new_level(game.get_adjacent_level_id(+1))
 	else:
 		enter_room_idx += 1
 		enter_room(enter_room_idx)
 
 def init_main_screen():
-	reset_level()
-	init_new_level(0, main_screen_level_config, False, create_main_screen)
+	game.level.unset()
+	init_new_level(main_screen_level)
 
 def draw_map():
 	for cy in range(len(map[0])):
@@ -1483,8 +1491,8 @@ def draw_status():
 	solution.set_status_drawn()
 
 	if mode == "game":
-		color, gcolor = ("#60C0FF", "#0080A0") if "time_limit" not in level else ("#FFC060", "#A08000") if level["time_limit"] - level_time > CRITICAL_REMAINING_LEVEL_TIME else ("#FF6060", "#A04040")
-		time_str = get_time_str(level_time if "time_limit" not in level else level["time_limit"] - level_time)
+		color, gcolor = ("#60C0FF", "#0080A0") if not game.level.time_limit else ("#FFC060", "#A08000") if game.level.time_limit - level_time > CRITICAL_REMAINING_LEVEL_TIME else ("#FF6060", "#A04040")
+		time_str = get_time_str(level_time if not game.level.time_limit else game.level.time_limit - level_time)
 		screen.draw.text(time_str, midright=(WIDTH - 20, POS_STATUS_Y), color=color, gcolor=gcolor, owidth=1.2, ocolor="#404030", alpha=1, fontsize=27)
 
 def draw():
@@ -1579,9 +1587,9 @@ def change_solution_move_delay(is_reset, is_dec, is_inc):
 
 def handle_requested_new_level():
 	if game.requested_new_level:
-		new_level = game.requested_new_level
+		new_level_id = game.requested_new_level
 		game.requested_new_level = None
-		init_new_level(new_level)
+		init_new_level(new_level_id)
 		return True
 	return False
 
@@ -1732,7 +1740,7 @@ def handle_press_key():
 	if handle_requested_new_level():
 		return
 
-	if is_level_unset():
+	if not game.level.is_set():
 		return
 
 	# if any key is pressed while playing solution, stop it
@@ -1740,14 +1748,14 @@ def handle_press_key():
 		return
 
 	if keyboard.p:
-		offset = get_prev_level_group_offset() if keyboard.lctrl else get_prev_level_offset()
-		init_new_level(offset)
+		level_id = game.get_adjacent_level_id(-1, -1 if keyboard.lctrl else None)
+		init_new_level(level_id)
 	if keyboard.r:
-		offset = get_curr_level_group_offset() if keyboard.lctrl else 0
-		init_new_level(offset, reload_stored=keyboard.lalt and not keyboard.lctrl)
+		level_id = game.get_adjacent_level_id( 0,  0 if keyboard.lctrl else None)
+		init_new_level(level_id, reload_stored=keyboard.lalt and not keyboard.lctrl)
 	if keyboard.n:
-		offset = get_next_level_group_offset() if keyboard.lctrl else get_next_level_offset()
-		init_new_level(offset)
+		level_id = game.get_adjacent_level_id(+1, +1 if keyboard.lctrl else None)
+		init_new_level(level_id)
 
 	if keyboard.w:
 		win_room()
@@ -1810,7 +1818,7 @@ def check_victory():
 		return
 
 	if (puzzle.is_lost()
-		or "time_limit" in level and level_time > level["time_limit"]
+		or game.level.time_limit and level_time > game.level.time_limit
 		or char.health is not None and char.health <= 0
 		or char.power is not None and char.power <= 0
 		or map[char.c] == CELL_TRAP1
@@ -1838,7 +1846,7 @@ def check_victory():
 			can_win = False
 			status_messages.append("Kill all enemies!")
 
-	if level.get("disable_win"):
+	if game.level.disable_win:
 		can_win = False
 
 	if flags.has_finish or puzzle.has_finish():
@@ -2132,21 +2140,22 @@ ARROW_KEY_CODE = {
 
 def handle_cmdargs():
 	if cmdargs.list_collections:
-		max_id_len = max(builtins.map(len, collections_by_id.keys()))
-		for collection in collections:
-			print("%s - %s levels" % (collection["id"].ljust(max_id_len), collection["name"]))
+		numeric = cmdargs.use_numeric
+		max_id_len = max(len(c.get_id(numeric)) for c in game.collections)
+		for collection in game.collections:
+			print("%s - %s levels (%d)" % (collection.get_id(numeric).ljust(max_id_len), collection.name, len(collection.level_configs)))
 		exit()
-	level_n = cmdargs.level
+	level_id = cmdargs.level
 	if collection_id := cmdargs.collection:
-		if collection_id in collections_by_id:
-			level_n = collections_by_id[collection_id]["n"]
+		if collection := game.get_collection_by_id(collection_id):
+			level_id = collection.get_level_id()
 		else:
 			warn("Ignoring unexisting collection '%s'" % collection_id)
-	if level_n:
-		if game.set_requested_new_level(level_n):
+	if level_id:
+		if game.set_requested_new_level(level_id):
 			return True
 		else:
-			warn("Ignoring unexisting level '%s'" % level_n)
+			warn("Ignoring unexisting level '%s'" % level_id)
 	return False
 
 def update(dt):
@@ -2194,8 +2203,8 @@ def update(dt):
 		last_regeneration_time != 0 and idle_time >= last_regeneration_time + REGENERATION_NEXT_TIME
 	):
 		char.health += REGENERATION_HEALTH
-		if char.health > level["char_health"]:
-			char.health = level["char_health"]
+		if char.health > game.level.char_health:
+			char.health = game.level.char_health
 		last_regeneration_time = idle_time
 
 	if solution.is_play_mode() and not teleport_char_in_progress:
