@@ -12,6 +12,8 @@ __all__ = [
 ]
 
 def load_image(image_name, size, do_crop=False):
+	if len(image_name.rsplit('.', 1)) == 1:
+		image_name += '.png'
 	image = pygame.image.load(DATA_DIR + '/' + image_name).convert_alpha()
 	if do_crop:
 		# image=300x400 size=100x200 -> cropped=200x400
