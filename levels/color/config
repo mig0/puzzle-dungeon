@@ -1,0 +1,31 @@
+name: ColorPuzzle
+icon: classic/plate
+magic-n: 15
+puzzle-type: ColorPuzzle
+levels:
+-
+	num-enemies: 0
+	theme: modern1
+	music: adventures
+	four-rooms: true
+	char-health: null
+	puzzle-config:
+		num_values: 2
+-
+	num-enemies: 5
+	theme: modern1
+	music: valiant_warriors
+	time-limit: 60
+	char-health: 100
+	puzzle-config:
+		num_values: 4
+		size: [9, 9]
+-
+	num-enemies: 5
+	theme: modern1
+	music: adventures
+	time-limit: 120
+	char-health: 100
+	puzzle-config:
+		num_values: 6
+		size: [11, 11]

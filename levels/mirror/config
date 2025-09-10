@@ -1,0 +1,108 @@
+name: MirrorPuzzle
+icon: default/mirror
+magic-n: 6
+puzzle-type: MirrorPuzzle
+levels:
+-
+	map-file: mirror/simple-barrels.map
+	name: Simple Barrels with Mirrors
+	num-enemies: 0
+	theme: classic
+	music: gaming_spirit
+	char-health: null
+	puzzle-config: {}
+-
+	map-file: mirror/locked-line.map
+	name: Locked Line
+	num-enemies: 0
+	theme: moss
+	music: gaming_spirit
+	char-health: null
+	puzzle-config: {}
+-
+	map-file: mirror/hike.map
+	name: Hike
+	num-enemies: 0
+	theme: default
+	music: gaming_spirit
+	char-health: null
+	puzzle-config: {}
+-
+	map-file: mirror/barrel-zsb-3x3.map
+	name: Screwed Barrels
+	num-enemies: 0
+	theme: ancient2
+	music: gaming_spirit
+	char-health: null
+	puzzle-config: {}
+-
+	map-file: mirror/gate-barrels.map
+	name: Gates with Barrels
+	num-enemies: 0
+	theme: modern1
+	music: gaming_spirit
+	char-health: 100
+	puzzle-config: {}
+-
+	map-file: mirror/sunbeams.map
+	name: Sunbeams
+	num-enemies: 0
+	theme: classic
+	music: gaming_spirit
+	char-health: null
+	bg-image: bg/palace-mirror-room-yellow.webp
+	puzzle-config: {}
+-
+	map-file: mirror/radiant.map
+	name: Radiant
+	num-enemies: 0
+	theme: classic
+	music: gaming_spirit
+	char-health: null
+	bg-image: bg/palace-mirror-room-purple.webp
+	puzzle-config: {}
+-
+	map-file: mirror/beamy.map
+	name: Beamy
+	num-enemies: 0
+	theme: default
+	music: gaming_spirit
+	char-health: null
+	bg-image: bg/palace-mirror-room-yellow.webp
+	puzzle-config: {}
+-
+	map-file: mirror/reflections.map
+	name: Reflections
+	num-enemies: 0
+	theme: default
+	music: gaming_spirit
+	char-health: null
+	bg-image: bg/palace-mirror-room-purple.webp
+	puzzle-config: {}
+-
+	map-file: mirror/reflectivity.map
+	name: Reflectivity
+	num-enemies: 0
+	theme: ancient2
+	music: gaming_spirit
+	char-health: null
+	bg-image: bg/palace-mirror-room-yellow.webp
+	puzzle-config: {}
+-
+	map-file: mirror/3x6-1.map
+	name: 'Minecraft Mirror #1'
+	num-enemies: 0
+	theme: minecraft
+	music: gaming_spirit
+	char-health: null
+	bg-image: bg/minecraft-mirror-grot.webp
+	puzzle-config: {}
+-
+	map-file: mirror/3x6-2.map
+	name: 'Minecraft Mirror #2'
+	num-enemies: 0
+	theme: minecraft
+	music: gaming_spirit
+	char-health: null
+	bg-image: bg/minecraft-mirror-grot.webp
+	puzzle-config: {}

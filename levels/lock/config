@@ -1,0 +1,32 @@
+name: LockPuzzle
+icon: default/lock1
+magic-n: 3
+puzzle-type: LockPuzzle
+levels:
+-
+	num-enemies: 3
+	theme: ancient1
+	music: breath
+	random-maze: true
+	char-health: 100
+	puzzle-config:
+		min_locks: 2
+		max_locks: 3
+-
+	num-enemies: 5
+	theme: ancient1
+	music: breath
+	random-maze: true
+	char-health: 100
+	puzzle-config:
+		min_locks: 3
+		max_locks: 5
+-
+	theme: ancient1
+	music: breath
+	random-maze: true
+	enemy-key-drop: true
+	char-health: 150
+	puzzle-config:
+		min_locks: 5
+		max_locks: 7

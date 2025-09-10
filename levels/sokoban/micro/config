@@ -1,0 +1,12 @@
+name: Sokoban - Micro collection
+icon: modern1/barrel
+magic-n: 51
+puzzle-type: BarrelPuzzle
+sokoban-map-files:
+	microban: microban.txt
+	microcosmos: microcosmos.txt
+	minicosmos: minicosmos.txt
+	nabokosmos: nabokosmos.txt
+	picokosmos: picokosmos.txt
+	sokogen: sokogen.txt
+	yoshio: yoshio.txt

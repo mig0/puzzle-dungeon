@@ -1,0 +1,27 @@
+name: PortalPuzzle
+icon: default/portal
+magic-n: 14
+puzzle-type: PortalPuzzle
+levels:
+-
+	theme: default
+	music: stoneage/01_stardust_falling
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		num_portals_per_hall: 2
+-
+	theme: stoneage2
+	music: stoneage/08_the_golden_valley.mp3
+	has-start: true
+	has-finish: true
+	num-enemies: 5
+	char-health: 100
+	puzzle-config:
+		num_portals_per_hall: 3
+-
+	theme: moss
+	music: forest_walk
+	num-enemies: 10
+	char-health: 150
+	puzzle-config: {}

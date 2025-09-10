@@ -1,0 +1,41 @@
+name: SwitchBoxPuzzle
+icon: ancient2/gate0
+magic-n: 9
+puzzle-type: SwitchBoxPuzzle
+levels:
+-
+	map-file: switchbox/001.map
+	title: SwitchBox - level 1
+	name: Push and Open
+	goal: Push barrels into plates to open path
+	num-enemies: 0
+	theme: classic
+	music: stoneage/02_bone_and_stone
+	puzzle-config: {}
+-
+	map-file: switchbox/002.map
+	title: SwitchBox - level 2
+	name: Phase and Open
+	goal: Push and phase in barrels to open path
+	num-enemies: 0
+	theme: modern1
+	music: stoneage/02_bone_and_stone
+	puzzle-config: {}
+-
+	map-file: switchbox/003.map
+	title: SwitchBox - level 3
+	name: Swap and Open
+	goal: Push, phase in and swap barrels to open path
+	num-enemies: 0
+	theme: ancient2
+	music: stoneage/02_bone_and_stone
+	puzzle-config: {}
+-
+	map-file: switchbox/004.map
+	title: SwitchBox - level 4
+	name: Think and Open
+	goal: Think, push and phase in barrels to open path
+	num-enemies: 0
+	theme: default
+	music: stoneage/02_bone_and_stone
+	puzzle-config: {}

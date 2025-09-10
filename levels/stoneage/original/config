@@ -1,0 +1,145 @@
+name: Original StoneAge
+icon: dinosaur
+magic-n: 31
+puzzle-type: StoneAgePuzzle
+levels:
+-
+	title: Original Stone Age
+	name: '{level-label} 1'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/001.map
+	theme: stoneage1
+	music: stoneage/01_stardust_falling
+	bg-image: images/stoneage1/bg.webp
+	time-limit: 87
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: null
+-
+	title: Original Stone Age
+	name: '{level-label} 2'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/002.map
+	theme: stoneage1
+	music: stoneage/02_bone_and_stone
+	bg-image: images/stoneage1/bg.webp
+	time-limit: 118
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: BOVIDO
+-
+	title: Original Stone Age
+	name: '{level-label} 3'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/003.map
+	theme: stoneage2
+	music: stoneage/03_plastic_age
+	bg-image: images/stoneage2/bg.webp
+	time-limit: 87
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: SIDULA
+-
+	title: Original Stone Age
+	name: '{level-label} 4'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/004.map
+	theme: stoneage3
+	music: stoneage/04_autumn_storm
+	bg-image: images/stoneage3/bg.webp
+	time-limit: 50
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: BIFISI
+-
+	title: Original Stone Age
+	name: '{level-label} 5'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/005.map
+	theme: stoneage2
+	music: stoneage/05_the_dragon's_tale
+	bg-image: images/stoneage2/bg.webp
+	time-limit: 125
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: LOVUHO
+-
+	title: Original Stone Age
+	name: '{level-label} 6'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/006.map
+	theme: stoneage1
+	music: stoneage/06_no_choice_left
+	bg-image: images/stoneage1/bg.webp
+	time-limit: 125
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: BADEBA
+-
+	title: Original Stone Age
+	name: '{level-label} 7'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/007.map
+	theme: stoneage3
+	music: stoneage/07_wildlife
+	bg-image: images/stoneage3/bg.webp
+	time-limit: 100
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: LUFIDO
+-
+	title: Original Stone Age
+	name: '{level-label} 8'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/008.map
+	theme: stoneage4
+	music: stoneage/08_the_golden_valley
+	bg-image: images/stoneage4/bg.webp
+	time-limit: 81
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: HAVULU
+-
+	title: Original Stone Age
+	name: '{level-label} 9'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/009.map
+	theme: stoneage3
+	music: stoneage/01_stardust_falling
+	bg-image: images/stoneage3/bg.webp
+	time-limit: 131
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: LODISE
+-
+	title: Original Stone Age
+	name: '{level-label} 10'
+	goal: finish-stoneage-puzzle
+	map-size: [20, 11]
+	map-file: stoneage/010.map
+	theme: stoneage4
+	music: stoneage/02_bone_and_stone
+	bg-image: images/stoneage4/bg.webp
+	time-limit: 100
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		code: HIFUHI

@@ -1,0 +1,44 @@
+name: RotatePicPuzzle
+icon: classic/car
+magic-n: 18
+puzzle-type: RotatePicPuzzle
+levels:
+-
+	theme: default
+	music: forest_walk
+	bg-image: pictures/danik-lion-motocycle.jpg
+	bg-image-crop: true
+	num-enemies: 0
+	char-health: null
+	goal: solve-rotatepic-puzzle
+	puzzle-config:
+		size: [8, 8]
+-
+	theme: default
+	music: stoneage/01_stardust_falling
+	has-start: true
+	has-finish: true
+	num-enemies: 10
+	char-health: 150
+	goal: solve-rotatepic-puzzle
+	puzzle-config:
+		size: [7, 7]
+		image: pictures/danik-lion-irisha-square.jpg
+-
+	theme: default
+	music: forest_walk
+	num-enemies: 0
+	char-health: null
+	goal: solve-rotatepic-puzzle
+	puzzle-config:
+		image: pictures/danik-lego-tiger.jpg
+		image_crop: true
+-
+	theme: default
+	music: stoneage/01_stardust_falling
+	bg-image: pictures/danik-lion-irisha-cafe.jpg
+	num-enemies: 0
+	char-health: null
+	goal: solve-rotatepic-puzzle
+	puzzle-config:
+		size: [9, 9]

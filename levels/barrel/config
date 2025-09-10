@@ -1,0 +1,53 @@
+name: BarrelPuzzle
+icon: default/barrel
+magic-n: 7
+puzzle-type: BarrelPuzzle
+levels:
+-
+	bg-image: bg/starry-sky.webp
+	theme: classic
+	music: breath
+	char-health: null
+	four-rooms: true
+	num-enemies: 0
+	allow-barrel-pull: true
+	puzzle-config:
+		num_barrels: [3, 4, 5]
+		use_ng: true
+-
+	num-enemies: 5
+	theme: default
+	music: the_last_kingdom
+	char-health: 100
+	puzzle-config:
+		size: [5, 5]
+		num_barrels: 5
+		use_ng: true
+-
+	theme: moss
+	music: adventures
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		num_barrels: 7
+		use_ng: true
+-
+	theme: stoneage1
+	music: stoneage/03_plastic_age
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		size: [9, 9]
+		num_barrels: 16
+-
+	bg-image: bg/starry-sky.webp
+	theme: stoneage5
+	music: stoneage/06_no_choice_left
+	time-limit: 72
+	char-health: null
+	nine-rooms: true
+	num-enemies: 0
+	allow-barrel-pull: true
+	puzzle-config:
+		num_barrels: 2
+		use_ng: true

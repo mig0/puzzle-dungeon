@@ -1,0 +1,8 @@
+name: Sokoban - DrFogh collection
+icon: minecraft/barrel
+magic-n: 60
+puzzle-type: BarrelPuzzle
+sokoban-map-files:
+- DrFogh-Original-1.txt
+- DrFogh-Original-2.txt
+- DrFogh-Original-3.txt

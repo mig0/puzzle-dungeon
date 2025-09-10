@@ -1,0 +1,7 @@
+name: Sokoban - David Holland collection
+icon: minecraft/barrel
+magic-n: 58
+puzzle-type: BarrelPuzzle
+sokoban-map-files:
+- dh1.txt
+- dh2.txt

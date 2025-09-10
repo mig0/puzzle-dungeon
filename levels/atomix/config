@@ -1,0 +1,51 @@
+name: Generated Atomix
+icon: classic/beamcl
+magic-n: 12
+puzzle-type: AtomixPuzzle
+levels:
+-
+	theme: stoneage1
+	bg-image: bg/chemistry-1.webp
+	music: playful_sparrow.mp3
+	goal: '{compose-bonus-molecule-with} 9 {atoms-word}'
+	num-enemies: 0
+	char-health: null
+	four-rooms: true
+	puzzle-config:
+		bonus_mode: 9
+-
+	theme: default
+	bg-image: bg/chemistry-2.webp
+	music: film.mp3
+	goal: compose-molecule
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule: ethanol
+-
+	theme: moss
+	bg-image: bg/chemistry-2.webp
+	music: forest_walk
+	goal: '{compose-bonus-molecule-with} 6 {atoms-word}'
+	num-enemies: 0
+	char-health: null
+	nine-rooms: true
+	puzzle-config:
+		bonus_mode: 6
+-
+	theme: stoneage2
+	bg-image: bg/chemistry-1.webp
+	music: epic_cinematic_trailer.mp3
+	goal: '{compose-bonus-molecule-with} 15-16 {atoms-word}'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		bonus_mode: [15, 16]
+-
+	theme: modern1
+	bg-image: bg/chemistry-2.webp
+	music: adventures.mp3
+	goal: compose-molecule
+	num-enemies: 0
+	char-health: null
+	puzzle-config: {}

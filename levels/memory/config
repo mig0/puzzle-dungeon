@@ -1,0 +1,48 @@
+name: MemoryPuzzle
+icon: modern2/cloud
+magic-n: 17
+puzzle-type: MemoryPuzzle
+levels:
+-
+	theme: modern1
+	music: epic_cinematic_trailer
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		size: [5, 3]
+		reveal_time: 10
+-
+	theme: stoneage1
+	music: stoneage/08_the_golden_valley
+	has-start: true
+	has-finish: true
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		size: [3, 4]
+-
+	theme: classic
+	music: epic_cinematic_trailer
+	four-rooms: true
+	num-enemies: 2
+	char-health: 100
+	puzzle-config: {}
+-
+	theme: ancient1
+	music: warfare
+	nine-rooms: true
+	time-limit: 150
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		size: [3, 3]
+		reveal_time: 8
+-
+	theme: moss
+	music: forest_walk
+	num-enemies: 0
+	time-limit: 300
+	char-health: null
+	goal: solve-memory-puzzle-revealed
+	puzzle-config:
+		is_revealed: true

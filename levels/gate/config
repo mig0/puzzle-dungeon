@@ -1,0 +1,64 @@
+name: GatePuzzle
+icon: default/gate0
+magic-n: 2
+puzzle-type: GatePuzzle
+levels:
+-
+	num-enemies: 5
+	theme: classic
+	music: a_new_path
+	random-maze: true
+	char-health: 100
+	puzzle-config:
+		num_gates: 2
+		num_plates: 2
+-
+	num-enemies: 5
+	theme: ancient2
+	music: the_last_kingdom
+	random-maze: true
+	char-health: 100
+	puzzle-config:
+		num_gates: 4
+		num_plates: 4
+		all_gates_to_open: true
+-
+	num-enemies: 5
+	theme: modern1
+	music: playful_sparrow
+	spiral-maze: true
+	char-health: 100
+	cloud-mode: true
+	puzzle-config:
+		num_gates: 6
+		num_plates: 4
+-
+	num-enemies: 5
+	theme: moss
+	music: forest_walk
+	random-maze: true
+	char-health: 100
+	puzzle-config:
+		num_gates: 5
+		num_plates: 5
+-
+	num-enemies: 3
+	theme: minecraft
+	music: superepic_short
+	random-maze: true
+	char-health: 170
+	four-rooms: true
+	puzzle-config:
+		num_gates: [2, 3]
+		num_plates: [2, 3]
+-
+	num-enemies: 5
+	theme: minecraft
+	music: film
+	random-maze: true
+	char-health: 100
+	puzzle-config:
+		use_traps: true
+		num_gates: 6
+		num_plates: 3
+		num_plates_to_press: 4

@@ -1,0 +1,5 @@
+name: Sokoban - Thinking Rabbit original + extra
+icon: ancient2/barrel
+magic-n: 50
+puzzle-type: BarrelPuzzle
+sokoban-map-file: Thinking-Rabbit-Original-Plus-Extra.txt

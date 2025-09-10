@@ -1,0 +1,23 @@
+name: HeroPuzzle
+icon: default/might
+magic-n: 13
+puzzle-type: HeroPuzzle
+levels:
+-
+	theme: classic
+	music: stoneage/08_the_golden_valley.mp3
+	char-power: 40
+	puzzle-config: {}
+-
+	theme: default
+	music: stoneage/08_the_golden_valley.mp3
+	char-power: 40
+	puzzle-config:
+		size: [7, 7]
+		strict_floors: true
+-
+	theme: moss
+	music: stoneage/08_the_golden_valley.mp3
+	char-power: 40
+	four-rooms: true
+	puzzle-config: {}

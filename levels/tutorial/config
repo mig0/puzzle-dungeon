@@ -1,0 +1,34 @@
+name: Tutorial
+icon: skeleton
+magic-n: 1
+puzzle-type: Puzzle
+levels:
+-
+	num-enemies: 5
+	theme: classic
+	music: a_new_path
+	random-maze: true
+	char-health: 100
+-
+	num-enemies: 0
+	theme: modern1
+	music: inspire
+	time-limit: 30
+	spiral-maze: true
+	char-health: null
+	has-finish: true
+-
+	num-enemies: 5
+	theme: classic
+	music: playful_sparrow
+	random-maze: true
+	four-rooms: true
+	char-health: 200
+-
+	num-enemies: 20
+	theme: classic
+	music: valiant_warriors
+	time-limit: 60
+	char-health: 250
+	bg-image: bg/stonehenge.jpg
+	cloud-mode: true

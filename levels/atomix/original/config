@@ -1,0 +1,214 @@
+name: Original Atomix
+icon: default/sphere-gray
+magic-n: 30
+puzzle-type: AtomixPuzzle
+levels:
+-
+	name: 'Atomix: Water'
+	bg-image: bg/chemistry-1.webp
+	theme: default
+	music: epic_cinematic_trailer.mp3
+	map-file: atomix/water.map
+	goal: '{compose-molecule-label} Water'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Water
+-
+	name: 'Atomix: Methane'
+	bg-image: bg/chemistry-1.webp
+	theme: default
+	music: epic_cinematic_trailer.mp3
+	map-file: atomix/methane.map
+	goal: '{compose-molecule-label} Methane'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Methane
+-
+	name: 'Atomix: Methanol'
+	bg-image: bg/chemistry-1.webp
+	theme: stoneage1
+	music: adventures.mp3
+	map-file: atomix/methanol.map
+	goal: '{compose-molecule-label} Methanol'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Methanol
+-
+	name: 'Atomix: Ethylene'
+	bg-image: bg/chemistry-2.webp
+	theme: modern1
+	music: forest_walk.mp3
+	map-file: atomix/ethylene.map
+	goal: '{compose-molecule-label} Ethylene'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Ethylene
+-
+	name: 'Atomix: Propylene'
+	bg-image: bg/chemistry-2.webp
+	theme: stoneage1
+	music: forest_walk.mp3
+	map-file: atomix/propylene.map
+	goal: '{compose-molecule-label} Propylene'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Propylene
+-
+	name: 'Atomix: Ethanal'
+	bg-image: bg/chemistry-1.webp
+	theme: stoneage2
+	music: forest_walk.mp3
+	map-file: atomix/ethanal.map
+	goal: '{compose-molecule-label} Ethanal'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Ethanal
+-
+	name: 'Atomix: Ethanol'
+	bg-image: bg/chemistry-2.webp
+	theme: modern1
+	music: film.mp3
+	map-file: atomix/ethanol.map
+	goal: '{compose-molecule-label} Ethanol'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Ethanol
+-
+	name: 'Atomix: Acetic Acid'
+	bg-image: bg/chemistry-1.webp
+	theme: stoneage1
+	music: epic_cinematic_trailer.mp3
+	map-file: atomix/acetic-acid.map
+	goal: '{compose-molecule-label} Acetic Acid'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Acetic Acid
+-
+	name: 'Atomix: Dimethyl Ether'
+	bg-image: bg/chemistry-2.webp
+	theme: modern1
+	music: epic_cinematic_trailer.mp3
+	map-file: atomix/dimethyl-ether.map
+	goal: '{compose-molecule-label} Dimethyl Ether'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Dimethyl Ether
+-
+	name: 'Atomix: Methanal'
+	bg-image: bg/chemistry-1.webp
+	theme: default
+	music: film.mp3
+	map-file: atomix/methanal.map
+	goal: '{compose-molecule-label} Methanal'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Methanal
+-
+	name: 'Atomix: Acetone'
+	bg-image: bg/chemistry-1.webp
+	theme: moss
+	music: forest_walk.mp3
+	map-file: atomix/acetone.map
+	goal: '{compose-molecule-label} Acetone'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Acetone
+-
+	name: 'Atomix: Trans Butylen'
+	bg-image: bg/chemistry-2.webp
+	theme: stoneage2
+	music: adventures.mp3
+	map-file: atomix/trans-butylen.map
+	goal: '{compose-molecule-label} Trans Butylen'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Trans Butylen
+-
+	name: 'Atomix: Butanol'
+	bg-image: bg/chemistry-2.webp
+	theme: stoneage1
+	music: adventures.mp3
+	map-file: atomix/butanol.map
+	goal: '{compose-molecule-label} Butanol'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Butanol
+-
+	name: 'Atomix: Propanal'
+	bg-image: bg/chemistry-2.webp
+	theme: stoneage1
+	music: adventures.mp3
+	map-file: atomix/propanal.map
+	goal: '{compose-molecule-label} Propanal'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Propanal
+-
+	name: 'Atomix: Pyran'
+	bg-image: bg/chemistry-1.webp
+	theme: default
+	music: forest_walk.mp3
+	map-file: atomix/pyran.map
+	goal: '{compose-molecule-label} Pyran'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Pyran
+-
+	name: 'Atomix: Cyclobutane'
+	bg-image: bg/chemistry-1.webp
+	theme: default
+	music: adventures.mp3
+	map-file: atomix/cyclobutane.map
+	goal: '{compose-molecule-label} Cyclobutane'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Cyclobutane
+-
+	name: 'Atomix: Ethane'
+	bg-image: bg/chemistry-2.webp
+	theme: stoneage2
+	music: playful_sparrow.mp3
+	map-file: atomix/ethane.map
+	goal: '{compose-molecule-label} Ethane'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Ethane
+-
+	name: 'Atomix: Lactic Acid'
+	bg-image: bg/chemistry-2.webp
+	theme: default
+	music: forest_walk.mp3
+	map-file: atomix/lactic-acid.map
+	goal: '{compose-molecule-label} Lactic Acid'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Lactic Acid
+-
+	name: 'Atomix: Glycerin'
+	bg-image: bg/chemistry-2.webp
+	theme: stoneage1
+	music: adventures.mp3
+	map-file: atomix/glycerin.map
+	goal: '{compose-molecule-label} Glycerin'
+	num-enemies: 0
+	char-health: null
+	puzzle-config:
+		molecule_name: Glycerin

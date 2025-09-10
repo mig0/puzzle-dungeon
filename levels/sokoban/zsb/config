@@ -1,0 +1,42 @@
+name: Sokoban - Zero Space Type B
+icon: default/barrel
+magic-n: 8
+puzzle-type: BarrelPuzzle
+levels:
+-
+	name: Zero Space type B - 3x3
+	num-enemies: 0
+	theme: default
+	music: gaming_spirit
+	char-health: null
+	puzzle-config:
+		size: [7, 7]
+		zsb: true
+-
+	name: Zero Space type B - 4x4
+	num-enemies: 0
+	theme: default
+	music: gaming_spirit
+	char-health: null
+	puzzle-config:
+		size: [9, 9]
+		zsb: true
+-
+	name: Zero Space type B - 5x5
+	num-enemies: 0
+	theme: default
+	music: gaming_spirit
+	char-health: null
+	puzzle-config:
+		size: [11, 11]
+		zsb: true
+-
+	name: Zero Space type B - 6x6
+	map-size: [15, 15]
+	num-enemies: 0
+	theme: default
+	music: gaming_spirit
+	char-health: null
+	puzzle-config:
+		size: [13, 13]
+		zsb: true

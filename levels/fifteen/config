@@ -1,0 +1,40 @@
+name: FifteenPuzzle
+icon: ancient2/glass
+magic-n: 16
+puzzle-type: FifteenPuzzle
+levels:
+-
+	theme: default
+	music: stoneage/01_stardust_falling
+	num-enemies: 0
+	char-health: null
+	goal: solve-fifteen-puzzle
+	puzzle-config:
+		size: [3, 2]
+-
+	theme: moss
+	music: forest_walk
+	nine-rooms: true
+	num-enemies: 0
+	char-health: null
+	goal: solve-fifteen-puzzle
+	puzzle-config: {}
+-
+	theme: stoneage1
+	music: film
+	four-rooms: true
+	num-enemies: 0
+	char-health: null
+	goal: solve-fifteen-puzzle
+	puzzle-config:
+		size: [4, 4]
+-
+	theme: stoneage2
+	music: stoneage/08_the_golden_valley.mp3
+	num-enemies: 15
+	char-health: 200
+	has-start: true
+	has-finish: true
+	goal: solve-fifteen-puzzle
+	puzzle-config:
+		size: [7, 7]
