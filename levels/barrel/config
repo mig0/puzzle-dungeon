@@ -10,7 +10,6 @@ levels:
 	char-health: null
 	four-rooms: true
 	num-enemies: 0
-	allow-barrel-pull: true
 	puzzle-config:
 		num_barrels: [3, 4, 5]
 		use_ng: true
@@ -47,7 +46,6 @@ levels:
 	char-health: null
 	nine-rooms: true
 	num-enemies: 0
-	allow-barrel-pull: true
 	puzzle-config:
 		num_barrels: 2
 		use_ng: true

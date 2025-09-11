@@ -1645,6 +1645,10 @@ def handle_press_key():
 			clipboard.put(map_stringio.getvalue())
 			set_status_message("The current map copied to clipboard and stdout", priority=4, duration=5)
 
+		if keyboard.c:
+			flags.is_cheat_mode = not flags.is_cheat_mode
+			set_status_message("The cheat mode is now %s" % ("on" if flags.is_cheat_mode else "off"), priority=4, duration=5)
+
 		return
 
 	if keyboard.f1:
@@ -2008,7 +2012,7 @@ def move_char(diff):
 			char.animate(get_move_animate_duration(old_char_cell), on_finished=continue_move_char)
 			return
 
-	should_pull = flags.allow_barrel_pull and keyboard.shift
+	should_pull = flags.is_cheat_mode and keyboard.shift
 	pull_barrel_cell = None
 	if should_pull:
 		if not is_cell_accessible(char.c):
@@ -2294,7 +2298,7 @@ def update(dt):
 		diff_y -= 1
 
 	if new_char_flip_direction is not None:
-		set_char_flip((new_char_flip_direction == DIRECTION_L) ^ (not flags.allow_barrel_pull or not keyboard.lshift))
+		set_char_flip((new_char_flip_direction == DIRECTION_L) ^ not (flags.is_cheat_mode and keyboard.shift))
 
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)

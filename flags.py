@@ -14,9 +14,9 @@ class Flags:
 		self.is_cloud_mode     = level.cloud_mode
 		self.is_enemy_key_drop = level.enemy_key_drop
 		self.is_stopless       = level.stopless
-		self.allow_barrel_pull = level.allow_barrel_pull
 		self.has_start         = level.has_start
 		self.has_finish        = level.has_finish
+		self.is_cheat_mode     = CHEAT_MODE
 
 		self.is_any_maze = self.is_random_maze or self.is_spiral_maze or self.is_grid_maze
 

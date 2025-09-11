@@ -25,7 +25,6 @@ class Level:
 
 		# reset all fields to defaults
 		self.actors_always_revealed = False
-		self.allow_barrel_pull = False
 		self.bg_image = None
 		self.bg_image_crop = False
 		self.char_health = None
