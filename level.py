@@ -63,13 +63,13 @@ class Level:
 				expected_type = type(default) if default is not None or value is None else \
 					int if any(map(key.endswith, ("-power", "-limit", "-health"))) else str
 				if expected_type != type(value):
-					warn("Ignoring level config %s=%s in %s/config; expected type %s" %
-						(key, str(value), collection.id, expected_type.__name__))
+					warn("Ignoring config %s=%s in level %s; expected type %s" %
+						(key, str(value), self.get_id(), expected_type.__name__))
 				else:
 					setattr(self, field, value)
 			else:
-				warn("Ignoring unknown level config %s=%s in %s/config" %
-					(key, str(value), collection.id), True)
+				warn("Ignoring unknown config %s=%s in level %s" %
+					(key, str(value), self.get_id()))
 
 	def get_id(self, numeric=False):
 		return self.collection.get_id(numeric) + self.collection.get_padded_level_index_suffix(self.index)
