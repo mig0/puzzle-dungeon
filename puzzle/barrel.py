@@ -189,8 +189,12 @@ class BarrelPuzzle(Puzzle):
 
 	def check_special_setups(self):
 		self.check_zsb()
+		reverse_str = " reverse" if flags.is_reverse_barrel else ""
 		if self.is_zsb:
-			set_status_message("This is Zero Space type-B %s puzzle!" % self.get_zsb_size_str(), self)
+			msg = "This is Zero Space type-B %s%s puzzle!" % (self.get_zsb_size_str(), reverse_str)
+		else:
+			msg = "This is Sokoban%s puzzle" % reverse_str
+		set_status_message(msg, self)
 
 	def reset_solution_data(self):
 		self.min_char_barrel_plate_pushes = None
@@ -202,7 +206,7 @@ class BarrelPuzzle(Puzzle):
 	def on_enter_room(self):
 		# prepare some invariant data
 		self.num_total_cells = room.size_x * room.size_y
-		self.plate_cells = [ tuple(cell) for cell in argwhere(self.map == CELL_PLATE) if is_cell_in_room(cell) ]
+		self.plate_cells = self.get_room_plate_cells()
 		self.plate_cells.sort()
 		self.stock_char_cell = char.c
 		self.stock_barrel_cells = self.get_room_barrel_cells()
@@ -211,6 +215,9 @@ class BarrelPuzzle(Puzzle):
 
 		self.reset_solution_data()
 		self.check_special_setups()
+
+	def get_room_plate_cells(self):
+		return self.get_room_cells(CELL_PLATE)
 
 	def get_room_barrels(self):
 		return [ barrel for barrel in barrels if is_actor_in_room(barrel) ]
@@ -833,7 +840,7 @@ class BarrelPuzzle(Puzzle):
 			num_tries -= 1
 
 		debug(0, "Can't generate barrel level, making it solved")
-		for cell in self.get_room_cells(CELL_PLATE):
+		for cell in self.get_room_plate_cells():
 			create_barrel(cell)
 
 	def generate_room(self):
@@ -847,6 +854,18 @@ class BarrelPuzzle(Puzzle):
 		else:
 			self.generate_random_solvable_room()
 
+		if flags.is_reverse_barrel:
+			barrel_cells = self.get_room_plate_cells()
+			plate_cells = self.get_room_barrel_cells()
+			for cell in barrel_cells:
+				if not cell in plate_cells:
+					self.map[cell] = self.Globals.get_random_floor_cell_type()
+			for cell in plate_cells:
+				self.map[cell] = CELL_PLATE
+			barrels.clear()
+			for cell in barrel_cells:
+				create_barrel(cell)
+
 	def is_solved_for_barrel_cells(self, barrel_cells):
 		return \
 			len([cell for cell in barrel_cells if cell in self.plate_cells]) == len(barrel_cells) \
@@ -854,7 +873,7 @@ class BarrelPuzzle(Puzzle):
 			len([cell for cell in self.plate_cells if cell in barrel_cells]) == len(self.plate_cells)
 
 	def is_solved(self):
-		return self.is_solved_for_barrel_cells([ barrel.c for barrel in self.get_room_barrels() ])
+		return game.in_level and self.is_solved_for_barrel_cells([ barrel.c for barrel in self.get_room_barrels() ])
 
 	def get_cell_image_to_draw(self, cell, cell_type):
 		if cell_type == CELL_FLOOR and self.min_barrel_plate_pushes is not None and cell not in self.min_barrel_plate_pushes:

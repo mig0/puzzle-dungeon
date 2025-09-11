@@ -107,6 +107,11 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			ch = line[x]
 			cell = (x, y)
 			mirror_host = None
+			if flags.is_reverse_barrel:
+				if ch == ACTOR_CHARS['barrel']:
+					ch = CELL_PLATE
+				elif ch == CELL_PLATE:
+					ch = ACTOR_CHARS['barrel']
 			if ch == CELL_START:
 				set_char_cell(cell, 0)
 			if ch in CART_MOVE_TYPES_BY_CHAR:
@@ -1990,6 +1995,9 @@ def beat_or_kill_enemy(enemy, diff):
 		kill_enemy(enemy)
 	activate_beat_animation(char, diff, 'bounce_end')
 
+def check_should_pull():
+	return flags.is_reverse_barrel and not keyboard.shift or not flags.is_reverse_barrel and flags.is_cheat_mode and keyboard.shift
+
 def move_char(diff):
 	global last_move_diff
 
@@ -2012,7 +2020,7 @@ def move_char(diff):
 			char.animate(get_move_animate_duration(old_char_cell), on_finished=continue_move_char)
 			return
 
-	should_pull = flags.is_cheat_mode and keyboard.shift
+	should_pull = check_should_pull()
 	pull_barrel_cell = None
 	if should_pull:
 		if not is_cell_accessible(char.c):
@@ -2044,8 +2052,9 @@ def move_char(diff):
 	barrel = get_actor_on_cell(pull_barrel_cell or char.c, barrels)
 	if barrel:
 		next_barrel_cell = apply_diff(barrel.c, diff)
-		if not is_cell_accessible(next_barrel_cell, allow_enemy=True) or is_cell_in_actors(next_barrel_cell, carts + lifts):
-			# can't push, cancel the move
+		if flags.is_reverse_barrel and not should_pull and not flags.is_cheat_mode or \
+			not is_cell_accessible(next_barrel_cell, allow_enemy=True) or is_cell_in_actors(next_barrel_cell, carts + lifts):
+			# can't push or pull, cancel the move
 			char.move(diff, undo=True)
 			return
 		else:
@@ -2298,7 +2307,7 @@ def update(dt):
 		diff_y -= 1
 
 	if new_char_flip_direction is not None:
-		set_char_flip((new_char_flip_direction == DIRECTION_L) ^ not (flags.is_cheat_mode and keyboard.shift))
+		set_char_flip((new_char_flip_direction == DIRECTION_L) ^ (not check_should_pull()))
 
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)

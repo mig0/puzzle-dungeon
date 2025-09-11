@@ -40,3 +40,13 @@ levels:
 	puzzle-config:
 		size: [13, 13]
 		zsb: true
+-
+	name: Reverse Zero Space type B - 4x4
+	num-enemies: 0
+	theme: moss
+	music: gaming_spirit
+	char-health: null
+	reverse-barrel-mode: True
+	puzzle-config:
+		size: [9, 9]
+		zsb: true

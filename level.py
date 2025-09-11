@@ -51,6 +51,7 @@ class Level:
 		self.time_limit = None
 		self.title = None
 		self.use_clock = False
+		self.reverse_barrel_mode = collection.config.get('reverse-barrel-mode') or False
 		self.map_string = None
 		self.puzzle_type = collection.puzzle_type
 		self.puzzle_config = {}

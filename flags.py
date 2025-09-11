@@ -14,6 +14,7 @@ class Flags:
 		self.is_cloud_mode     = level.cloud_mode
 		self.is_enemy_key_drop = level.enemy_key_drop
 		self.is_stopless       = level.stopless
+		self.is_reverse_barrel = level.reverse_barrel_mode
 		self.has_start         = level.has_start
 		self.has_finish        = level.has_finish
 		self.is_cheat_mode     = CHEAT_MODE
