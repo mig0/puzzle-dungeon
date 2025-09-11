@@ -427,7 +427,7 @@ class BarrelPuzzle(Puzzle):
 					set_status_message("Found solution by pulls", self, None, 2)
 					self.solution = []
 					orig_char_cell = self.stock_char_cell
-					while True:
+					while last_char_cell is not None:
 						char_path = self.Globals.find_path(orig_char_cell, last_char_cell, self.barrel_cells)
 						self.append_solution(char_path, last_char_cell, last_barrel_cell)
 						if prev_state is None:
