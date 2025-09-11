@@ -12,8 +12,7 @@ press_cell   = None
 prepare_move = None
 
 def is_cell(cell):
-	return type(cell) == tuple and len(cell) == 2 and \
-		all(type(i) == int and type(i) == int for i in cell)
+	return type(cell) == tuple and len(cell) == 2 and all(type(i) == int for i in cell)
 
 def is_cell_list(cells):
 	return type(cells) in (tuple, list) and all(is_cell(cell) for cell in cells)
@@ -23,6 +22,7 @@ def is_cell_button_tuple(pair):
 
 class SolutionItem:
 	def __init__(self, arg):
+		# TODO: slide - arg = (cell, direction)
 		self.cell_to_press = arg if is_cell(arg) else None
 		self.button_to_press = None
 		if is_cell_button_tuple(arg):
