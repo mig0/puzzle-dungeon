@@ -2157,18 +2157,20 @@ def handle_cmdargs():
 		for collection in game.collections:
 			print("%s - %s levels (%d)" % (collection.get_id(numeric).ljust(max_id_len), collection.name, len(collection.level_configs)))
 		exit()
-	level_id = cmdargs.level
-	if collection_id := cmdargs.collection:
-		if collection := game.get_collection_by_id(collection_id):
+	fallback_to_main_screen = True
+	if level_or_collection_id := cmdargs.start:
+		level_id = None
+		if game.is_valid_level_id(level_or_collection_id):
+			level_id = level_or_collection_id
+		elif collection := game.get_collection_by_id(level_or_collection_id):
 			level_id = collection.get_level_id()
 		else:
 			warn("Ignoring unexisting collection '%s'" % collection_id)
-	if level_id:
-		if game.set_requested_new_level(level_id):
-			return True
+		if level_id and game.set_requested_new_level(level_id):
+			fallback_to_main_screen = False
 		else:
-			warn("Ignoring unexisting level '%s'" % level_id)
-	return False
+			warn("Can not start with level or collection '%s'" % level_or_collection_id)
+	return not fallback_to_main_screen
 
 def update(dt):
 	global level_title_time, level_goal_time

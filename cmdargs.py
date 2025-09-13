@@ -8,8 +8,7 @@ sys.argv[0] = 'dungeon'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--debug', type=int, help="debug level for extra output (default: %d)" % DEBUG_LEVEL, default=DEBUG_LEVEL)
-parser.add_argument('-l', '--level', type=str, help="start with given level")
-parser.add_argument('-c', '--collection', type=str, help="start with given collection")
+parser.add_argument('-s', '--start', metavar='LEVEL-ID', type=str, help="start with given level or collection id")
 parser.add_argument('-C', '--list-collections', help="list all collections", action='store_true')
 parser.add_argument('-n', '--use-numeric', help="use numeric ids to list collections", action='store_true')
 parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reverse-barrel-mode", action='store_true')
