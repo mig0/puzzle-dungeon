@@ -1998,6 +1998,8 @@ def beat_or_kill_enemy(enemy, diff):
 	activate_beat_animation(char, diff, 'bounce_end')
 
 def check_should_pull():
+	if solution.is_play_mode():
+		return solution.is_push_or_pull_requested() and flags.is_reverse_barrel
 	return flags.is_reverse_barrel and not keyboard.shift or not flags.is_reverse_barrel and flags.is_cheat_mode and keyboard.shift
 
 def move_char(diff):

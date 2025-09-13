@@ -189,6 +189,9 @@ class Solution:
 
 			self.set_play_mode()
 
+	def is_push_or_pull_requested(self):
+		return self.is_play_mode() and self.solution_items[0].push_dir
+
 	def set_move_delay(self, new_move_delay):
 		if not SOLUTION_MOVE_DELAY_RANGE[0] <= new_move_delay <= SOLUTION_MOVE_DELAY_RANGE[1]:
 			return
