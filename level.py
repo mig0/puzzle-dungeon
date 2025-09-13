@@ -106,7 +106,10 @@ class Collection:
 		return self.n == int(id) if id.isnumeric() else self.id == id
 
 	def has_level_id(self, level_id):
-		collection_id, level_index = level_id.rsplit('.', 1)
+		parts = level_id.rsplit('.', 1)
+		if len(parts) != 2 or not parts[1].isnumeric():
+			return False
+		collection_id, level_index = parts
 		return self.has_id(collection_id) and 1 <= int(level_index) <= self.num_levels
 
 	def get_padded_level_index_suffix(self, level_index):
