@@ -1594,9 +1594,9 @@ def change_solution_move_delay(is_reset, is_dec, is_inc):
 
 def handle_requested_new_level():
 	if game.requested_new_level:
-		new_level_id = game.requested_new_level
+		new_level_id, reload_stored = game.requested_new_level
 		game.requested_new_level = None
-		init_new_level(new_level_id)
+		init_new_level(new_level_id, reload_stored)
 		return True
 	return False
 

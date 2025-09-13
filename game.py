@@ -195,10 +195,12 @@ class Game:
 
 		return True
 
-	def set_requested_new_level(self, level_id):
+	def set_requested_new_level(self, level_id=None, reload_stored=False):
+		if not level_id:
+			level_id = self.level.get_id()
 		if not self.is_valid_level_id(level_id):
 			return False
-		self.requested_new_level = level_id
+		self.requested_new_level = (level_id, reload_stored)
 		return True
 
 	def _find_all_collections(self, dir_path, id, all_collections=None):
