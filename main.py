@@ -1390,11 +1390,6 @@ def init_new_level(level_id, reload_stored=False):
 	switch_cell_infos.clear()
 	portal_demolition_infos.clear()
 
-	enter_room_idx = 0
-	enter_room(enter_room_idx)
-
-	start_music()
-
 	stored_level = {
 		"map": map.copy(),
 		"char_cells": char_cells.copy(),
@@ -1408,6 +1403,11 @@ def init_new_level(level_id, reload_stored=False):
 	}
 	game.stored_level = stored_level
 	puzzle.store_level(stored_level)
+
+	enter_room_idx = 0
+	enter_room(enter_room_idx)
+
+	start_music()
 
 def init_new_room():
 	global enter_room_idx
