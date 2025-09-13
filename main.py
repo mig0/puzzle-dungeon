@@ -1252,7 +1252,7 @@ def init_new_level(level_id, reload_stored=False):
 	global switch_cell_infos, portal_demolition_infos
 	global char_cells, enter_room_idx
 	global level_time
-	global map, stored_level
+	global map
 
 	if level_id is None:
 		is_game_won = True
@@ -1347,6 +1347,7 @@ def init_new_level(level_id, reload_stored=False):
 		drop.reset()
 
 	if reload_stored:
+		stored_level = game.stored_level
 		theme_name = stored_level["theme_name"]
 		char_cells = stored_level["char_cells"]
 		map = stored_level["map"]
@@ -1405,6 +1406,7 @@ def init_new_level(level_id, reload_stored=False):
 		"drop_states": dict([(drop.name, drop.get_state()) for drop in drops]),
 		"theme_name": theme_name,
 	}
+	game.stored_level = stored_level
 	puzzle.store_level(stored_level)
 
 def init_new_room():
