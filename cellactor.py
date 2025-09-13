@@ -5,6 +5,8 @@ from pgzero import loaders
 from typing import Union, Tuple
 from sizetools import CELL_W, CELL_H
 from config import ARROW_KEYS_RESOLUTION, ACTOR_PHASED_OPACITY
+from constants import DIR_NAMES
+from common import die
 from game import game
 
 MAX_ALPHA = 255  # based on pygame
@@ -32,8 +34,13 @@ def apply_diff(orig, diff, subtract=False, factor=1):
 		factor = -factor
 	return (orig[0] + diff[0] * factor, orig[1] + diff[1] * factor)
 
-def cell_diff(cell1, cell2):
-	return (cell2[0] - cell1[0], cell2[1] - cell1[1])
+def cell_diff(cell1, cell2, reverse=False, assert_adjacent=False):
+	diff = (cell2[0] - cell1[0], cell2[1] - cell1[1])
+	if reverse:
+		diff = (-diff[0], -diff[1])
+	if assert_adjacent and diff not in DIR_NAMES:
+		die("Cells %s and %s are not adjacent", True)
+	return diff
 
 def cell_dir(cell1, cell2):
 	return (cmp(cell2[0], cell1[0]), cmp(cell2[1], cell1[1]))
