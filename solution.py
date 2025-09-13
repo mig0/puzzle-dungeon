@@ -1,4 +1,5 @@
 from time import time
+from flags import flags
 from config import SOLUTION_MOVE_DELAY, SOLUTION_MOVE_DELAY_RANGE, SOLUTION_MOVE_DELAY_CHANGE
 from objects import char
 from constants import DIR_NAMES, DIRS_BY_NAME
@@ -28,11 +29,11 @@ class SolutionItem:
 		if is_cell_button_tuple(arg):
 			self.cell_to_press = arg[0]
 			self.button_to_press = arg[1]
-		self.push_dir = DIRS_BY_NAME[arg] if type(arg) == str and arg in DIRS_BY_NAME else None
+		self.shift_dir = DIRS_BY_NAME[arg] if type(arg) == str and arg in DIRS_BY_NAME else None
 		self.target_cell = list(arg)[0] if type(arg) == set and is_cell(list(arg)[0]) else None
 		self.path_cells = list(arg) if is_cell_list(arg) else None
 
-		if not self.target_cell and self.path_cells is None and not self.push_dir and not self.cell_to_press:
+		if not self.target_cell and self.path_cells is None and not self.shift_dir and not self.cell_to_press:
 			raise TypeError("Unsupported arg %s in constuctor" % str(arg))
 
 		self.is_done = True if self.path_cells is not None and not self.path_cells else False
@@ -40,8 +41,8 @@ class SolutionItem:
 	def get_num_moves(self):
 		return len(self.path_cells) if self.path_cells is not None else 0
 
-	def get_num_pushes(self):
-		return 1 if self.push_dir else 0
+	def get_num_shifts(self):
+		return 1 if self.shift_dir else 0
 
 	def get_num_presses(self):
 		return 1 if self.cell_to_press else 0
@@ -50,9 +51,9 @@ class SolutionItem:
 		return 1 if self.target_cell else 0
 
 	def get_str(self, current_cell_ref):
-		if self.push_dir:
-			current_cell_ref[0] = apply_diff(current_cell_ref[0], self.push_dir)
-			return DIR_NAMES[self.push_dir].upper()
+		if self.shift_dir:
+			current_cell_ref[0] = apply_diff(current_cell_ref[0], self.shift_dir)
+			return DIR_NAMES[self.shift_dir].upper()
 		if self.cell_to_press:
 			return 'press%s%s' % (str(self.cell_to_press), '' if self.button_to_press is None else '^%d' % self.button_to_press)
 		if self.target_cell:
@@ -81,10 +82,10 @@ class SolutionItem:
 		if self.cell_to_press:
 			press_cell(self.cell_to_press, self.button_to_press)
 			self.is_done = True
-		elif self.push_dir:
+		elif self.shift_dir:
 			old_cell = char.c
-			move_char(self.push_dir)
-			# allow repeating the same push until a potentional enemy is killed
+			move_char(self.shift_dir)
+			# allow repeating the same push or pull until a potentional enemy is killed
 			self.is_done = char.c != old_cell
 		else:
 			new_cell = self.path_cells[0]
@@ -134,14 +135,14 @@ class Solution:
 
 	def get_num_info_str(self):
 		num_moves = sum(item.get_num_moves() for item in self.solution_items)
-		num_pushes = sum(item.get_num_pushes() for item in self.solution_items)
+		num_shifts = sum(item.get_num_shifts() for item in self.solution_items)
 		num_presses = sum(item.get_num_presses() for item in self.solution_items)
 		num_targets = sum(item.get_num_targets() for item in self.solution_items)
 		num_strs = []
 		if num_moves:
 			num_strs.append("%d moves" % num_moves)
-		if num_pushes:
-			num_strs.append("%d pushes" % num_pushes)
+		if num_shifts:
+			num_strs.append("%d %s" % (num_shifts, "pulls" if flags.is_reverse_barrel else "pushes"))
 		if num_presses:
 			num_strs.append("%d presses" % num_presses)
 		if num_targets:
@@ -189,8 +190,8 @@ class Solution:
 
 			self.set_play_mode()
 
-	def is_push_or_pull_requested(self):
-		return self.is_play_mode() and self.solution_items[0].push_dir
+	def is_pull_in_progress(self):
+		return self.is_play_mode() and self.solution_items[0].shift_dir and flags.is_reverse_barrel
 
 	def set_move_delay(self, new_move_delay):
 		if not SOLUTION_MOVE_DELAY_RANGE[0] <= new_move_delay <= SOLUTION_MOVE_DELAY_RANGE[1]:

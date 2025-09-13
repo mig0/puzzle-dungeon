@@ -1999,7 +1999,7 @@ def beat_or_kill_enemy(enemy, diff):
 
 def check_should_pull():
 	if solution.is_play_mode():
-		return solution.is_push_or_pull_requested() and flags.is_reverse_barrel
+		return solution.is_pull_in_progress()
 	return flags.is_reverse_barrel and not keyboard.shift or not flags.is_reverse_barrel and flags.is_cheat_mode and keyboard.shift
 
 def move_char(diff):
