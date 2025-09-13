@@ -2,6 +2,7 @@ import os
 from common import warn
 from config import DEFAULT_NUM_ENEMIES
 from sizetools import DEFAULT_MAP_SIZE
+from cmdargs import cmdargs
 
 class Level:
 	def __init__(self):
@@ -51,7 +52,7 @@ class Level:
 		self.time_limit = None
 		self.title = None
 		self.use_clock = False
-		self.reverse_barrel_mode = collection.config.get('reverse-barrel-mode') or False
+		self.reverse_barrel_mode = collection.config.get('reverse-barrel-mode') or cmdargs.reverse_barrel_mode
 		self.map_string = None
 		self.puzzle_type = collection.puzzle_type
 		self.puzzle_config = {}
