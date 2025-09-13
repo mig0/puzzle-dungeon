@@ -104,8 +104,8 @@ class BarrelPuzzle(Puzzle):
 				all_barrel_moves.append((barrel_cell, target_cell))
 		return all_barrel_moves
 
-	def get_all_valid_zsb_barrel_pushes(self):
-		return [[apply_diff(barrel_cell, cell_dir(target_cell, barrel_cell)), barrel_cell]
+	def get_all_valid_zsb_char_barrel_moves(self):
+		return [[apply_diff(barrel_cell, cell_dir(target_cell, barrel_cell), flags.is_reverse_barrel), barrel_cell]
 			for barrel_cell, target_cell in self.get_all_valid_zsb_barrel_moves(self.barrel_cells)]
 
 	def max_valid_zsb_barrel_shuffle(self, barrel_cells, num_moves):
@@ -321,6 +321,21 @@ class BarrelPuzzle(Puzzle):
 		self.char_cell = new_char_cell
 		return new_char_cell
 
+	def can_shift(self, char_cell, barrel_cell):
+		return self.can_pull(char_cell, barrel_cell) if flags.is_reverse_barrel else self.can_push(char_cell, barrel_cell)
+
+	def shift(self, char_cell, barrel_cell):
+		new_cell = self.pull(char_cell, barrel_cell) if flags.is_reverse_barrel else self.push(char_cell, barrel_cell)
+		return (None, None) if not new_cell else (new_cell, char_cell) if flags.is_reverse_barrel else (barrel_cell, new_cell)
+
+	def try_opposite_shift(self, char_cell, barrel_cell):
+		new_cell = self.try_push(char_cell, barrel_cell) if flags.is_reverse_barrel else self.try_pull(char_cell, barrel_cell)
+		return (None, None) if not new_cell else (barrel_cell, new_cell) if flags.is_reverse_barrel else (new_cell, char_cell)
+
+	def opposite_shift(self, char_cell, barrel_cell):
+		new_cell = self.push(char_cell, barrel_cell) if flags.is_reverse_barrel else self.pull(char_cell, barrel_cell)
+		return (None, None) if not new_cell else (barrel_cell, new_cell) if flags.is_reverse_barrel else (new_cell, char_cell)
+
 	def get_barrel_plate_distance(self, char_cell, barrel_cell, plate_cell):
 		char_path = self.Globals.find_path(barrel_cell, plate_cell, self.barrel_cells)
 		return len(char_path) + 1 if char_path is not None else None
@@ -332,18 +347,18 @@ class BarrelPuzzle(Puzzle):
 		orig_barrel_cells = self.barrel_cells.copy()
 		orig_char_cell = self.char_cell
 
-		barrel_cell = self.push(char_cell, barrel_cell)
+		_, barrel_cell = self.shift(char_cell, barrel_cell)
 
-		min_num_pushes = self.num_total_cells
+		min_num_shifts = self.num_total_cells
 		for plate_cell in self.plate_cells:
-			num_pushes = self.get_barrel_plate_distance(self.char_cell, barrel_cell, plate_cell) or self.num_total_cells
-			if num_pushes < min_num_pushes:
-				min_num_pushes = num_pushes
+			num_shifts = self.get_barrel_plate_distance(self.char_cell, barrel_cell, plate_cell) or self.num_total_cells
+			if num_shifts < min_num_shifts:
+				min_num_shifts = num_shifts
 
 		self.barrel_cells = orig_barrel_cells
 		self.char_cell = orig_char_cell
 
-		return min_num_pushes
+		return min_num_shifts
 
 	def estimate_solution_depth(self):
 		if not self.min_char_barrel_plate_pushes:
@@ -362,8 +377,6 @@ class BarrelPuzzle(Puzzle):
 		if self.disable_prepare_solution:
 			return
 		self.store_reset_barrels()
-		self.min_char_barrel_plate_pushes = {}
-		self.min_barrel_plate_pushes = {}
 
 		all_char_barrel_plate_pushes = {}
 		all_barrel_plate_pushes = {}
@@ -379,6 +392,9 @@ class BarrelPuzzle(Puzzle):
 					all_barrel_plate_pushes[cell] = []
 				all_barrel_plate_pushes[cell].append(barrel_plate_pushes[cell])
 
+		self.min_char_barrel_plate_pushes = {}
+		self.min_barrel_plate_pushes = {}
+
 		for pair in all_char_barrel_plate_pushes:
 			self.min_char_barrel_plate_pushes[pair] = min(all_char_barrel_plate_pushes[pair])
 		for cell in all_barrel_plate_pushes:
@@ -390,8 +406,8 @@ class BarrelPuzzle(Puzzle):
 
 	def append_solution(self, path_cells, char_cell, barrel_cell):
 		if path_cells is None:
-			self.die("No path for char %s to push barrel %s" % (char.c, barrel_cell))
-		self.solution.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell)]])
+			self.die("No path for char %s to push/pull barrel %s" % (char.c, barrel_cell))
+		self.solution.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell, flags.is_reverse_barrel, True)]])
 
 	def find_solvable_cells_for_plate_cells(self, plate_cells):
 		start_time = time()
@@ -424,7 +440,7 @@ class BarrelPuzzle(Puzzle):
 				self.barrel_cells = last_barrel_cells.copy()
 
 				if non_start and self.barrel_cells == self.stock_barrel_cells and self.Globals.find_path(last_char_cell, self.stock_char_cell, self.barrel_cells):
-					set_status_message("Found solution by pulls", self, None, 2)
+					set_status_message("Found reverse solution", self, None, 2)
 					self.solution = []
 					orig_char_cell = self.stock_char_cell
 					while last_char_cell is not None:
@@ -441,10 +457,9 @@ class BarrelPuzzle(Puzzle):
 					for char_cell in self.Globals.get_accessible_neighbors(barrel_cell, self.barrel_cells):
 						if non_start and self.Globals.find_path(last_char_cell, char_cell, self.barrel_cells) is None:
 							continue
-						new_char_cell = self.try_pull(char_cell, barrel_cell)
+						new_char_cell, new_barrel_cell = self.try_opposite_shift(char_cell, barrel_cell)
 						if new_char_cell is not None:
-							new_barrel_cell = char_cell
-							self.pull(char_cell, barrel_cell)
+							self.opposite_shift(char_cell, barrel_cell)
 							states[depth].append((new_char_cell, new_barrel_cell, self.barrel_cells, state))
 							self.barrel_cells = last_barrel_cells.copy()
 							if (new_char_cell, new_barrel_cell) not in min_char_barrel_plate_pushes:
@@ -493,7 +508,7 @@ class BarrelPuzzle(Puzzle):
 			return False
 
 		if self.is_zsb:
-			accessible_cells_near_barrels = self.get_all_valid_zsb_barrel_pushes()
+			accessible_cells_near_barrels = self.get_all_valid_zsb_char_barrel_moves()
 			position_id = [ *self.barrel_cells ]
 		else:
 			accessible_cells = self.Globals.get_accessible_cells(self.char_cell, self.barrel_cells)
@@ -508,7 +523,7 @@ class BarrelPuzzle(Puzzle):
 
 		if not accessible_cells_near_barrels:
 			accessible_cells_near_barrels = [ (cell, barrel_cell) for cell in accessible_cells for barrel_cell in self.barrel_cells
-				if cell_distance(cell, barrel_cell) == 1 and self.can_push(cell, barrel_cell) ]
+				if cell_distance(cell, barrel_cell) == 1 and self.can_shift(cell, barrel_cell) ]
 
 		accessible_cells_near_barrels.sort(key=lambda cell_pair: self.get_barrel_distance_weight(*cell_pair))
 
@@ -519,11 +534,11 @@ class BarrelPuzzle(Puzzle):
 			old_char_cell = self.char_cell
 
 			char_path = self.Globals.find_path(self.char_cell, cell, self.barrel_cells)
-			new_barrel_cell = self.push(cell, barrel_cell)
+			new_char_cell, new_barrel_cell = self.shift(cell, barrel_cell)
 			self.append_solution(char_path, cell, barrel_cell)
 			if self.is_zsb:
-				self.push(barrel_cell, new_barrel_cell)
-				self.append_solution([], barrel_cell, new_barrel_cell)
+				self.shift(new_char_cell, new_barrel_cell)
+				self.append_solution([], new_char_cell, new_barrel_cell)
 
 			if self.find_solution(init=False):
 				return True
