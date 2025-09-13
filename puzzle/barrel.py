@@ -204,6 +204,18 @@ class BarrelPuzzle(Puzzle):
 		self.end_solution_time = 99999999999
 
 	def on_enter_room(self):
+		if flags.is_reverse_barrel:
+			barrel_cells = self.get_room_plate_cells()
+			plate_cells = self.get_room_barrel_cells()
+			for cell in plate_cells:
+				if not cell in barrel_cells:
+					self.map[cell] = CELL_PLATE
+					barrels.remove(get_actor_on_cell(cell, barrels))
+			for cell in barrel_cells:
+				if not cell in plate_cells:
+					self.map[cell] = self.Globals.get_random_floor_cell_type()
+					create_barrel(cell)
+
 		# prepare some invariant data
 		self.num_total_cells = room.size_x * room.size_y
 		self.plate_cells = self.get_room_plate_cells()
@@ -869,18 +881,6 @@ class BarrelPuzzle(Puzzle):
 		else:
 			self.generate_random_solvable_room()
 
-		if flags.is_reverse_barrel:
-			barrel_cells = self.get_room_plate_cells()
-			plate_cells = self.get_room_barrel_cells()
-			for cell in barrel_cells:
-				if not cell in plate_cells:
-					self.map[cell] = self.Globals.get_random_floor_cell_type()
-			for cell in plate_cells:
-				self.map[cell] = CELL_PLATE
-			barrels.clear()
-			for cell in barrel_cells:
-				create_barrel(cell)
-
 	def is_solved_for_barrel_cells(self, barrel_cells):
 		return \
 			len([cell for cell in barrel_cells if cell in self.plate_cells]) == len(barrel_cells) \
@@ -898,6 +898,9 @@ class BarrelPuzzle(Puzzle):
 		if keyboard.d:
 			self.disable_prepare_solution = not self.disable_prepare_solution
 			set_status_message("Prepare solution is %s" % ("disabled" if self.disable_prepare_solution else "enabled"), self, None, 4)
+		if keyboard.e and keyboard.alt:
+			game.level.reverse_barrel_mode = not game.level.reverse_barrel_mode
+			game.set_requested_new_level(None, True)
 
 	def find_solution_func(self):
 		if self.min_barrel_plate_pushes is None:

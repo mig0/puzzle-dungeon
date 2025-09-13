@@ -107,11 +107,6 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			ch = line[x]
 			cell = (x, y)
 			mirror_host = None
-			if flags.is_reverse_barrel:
-				if ch == ACTOR_CHARS['barrel']:
-					ch = CELL_PLATE
-				elif ch == CELL_PLATE:
-					ch = ACTOR_CHARS['barrel']
 			if ch == CELL_START:
 				set_char_cell(cell, 0)
 			if ch in CART_MOVE_TYPES_BY_CHAR:
