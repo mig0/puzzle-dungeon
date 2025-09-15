@@ -1,6 +1,6 @@
-from common import load_tabbed_yaml, get_pgzero_game_from_stack, warn
+from common import load_tabbed_yaml, get_pgzero_game_from_stack, warn, die
 from config import DATA_DIR, pgconsole_config
-from level import Collection, Level
+from level import Collection, Level, parse_level_id
 from sokobanparser import parse_sokoban_levels
 import pygame
 import copy
@@ -274,6 +274,19 @@ class Game:
 
 		self.collections = sorted(collections, key=lambda c: c.n)
 
+	def get_collection_level_config_by_id(self, level_id, assert_valid=False):
+		collection_id, level_index = parse_level_id(level_id, assert_valid)
+		if not collection_id:
+			return (None, None, None)
+		collection = self.get_collection_by_id(collection_id)
+		if collection and 1 <= level_index <= collection.num_levels:
+			return collection, level_index, collection.level_configs[level_index - 1]
+		if assert_valid:
+			if not collection:
+				die("Unexisting collection for level_id %s" % level_id, True)
+			die("Level is out of range in collection for level_id %s" % level_id, True)
+		return (None, None, None)
+
 	def get_collection_by_id(self, collection_id):
 		try:
 			return next(c for c in self.collections if c.has_id(collection_id))
@@ -327,19 +340,8 @@ class Game:
 
 		return collection.get_id() + collection.get_padded_level_index_suffix(level_index)
 
-	def set_level(self, collection, level_index):
-		config = collection.level_configs[level_index - 1]
-		self.level.set_from_config(collection, level_index, config)
-
 	def set_level_id(self, level_id):
-		collection_id, level_index = level_id.rsplit('.', 1)
-		level_index = int(level_index)
-		if collection_id.isnumeric():
-			collection_n = int(collection_id)
-			collection = next(c for c in self.collections if c.n == collection_n)
-		else:
-			collection = next(c for c in self.collections if c.id == collection_id)
-		self.set_level(collection, level_index)
+		self.level.set_from_config(*self.get_collection_level_config_by_id(level_id, True))
 
 	def is_valid_level_id(self, level_id):
 		for collection in self.collections:

@@ -1,5 +1,5 @@
 import os
-from common import warn
+from common import warn, die
 from config import DEFAULT_NUM_ENEMIES
 from sizetools import DEFAULT_MAP_SIZE
 from cmdargs import cmdargs
@@ -77,8 +77,8 @@ class Level:
 		return self.collection.get_id(numeric) + self.collection.get_padded_level_index_suffix(self.index)
 
 	def has_id(self, id):
-		collection_id, level_index = id.rsplit('.', 1)
-		if int(level_index) != self.index:
+		collection_id, level_index = parse_level_id(id)
+		if not collection_id or level_index != self.index:
 			return False
 		return self.collection.has_id(collection_id)
 
@@ -106,11 +106,8 @@ class Collection:
 		return self.n == int(id) if id.isnumeric() else self.id == id
 
 	def has_level_id(self, level_id):
-		parts = level_id.rsplit('.', 1)
-		if len(parts) != 2 or not parts[1].isnumeric():
-			return False
-		collection_id, level_index = parts
-		return self.has_id(collection_id) and 1 <= int(level_index) <= self.num_levels
+		collection_id, level_index = parse_level_id(level_id)
+		return collection_id and self.has_id(collection_id) and 1 <= int(level_index) <= self.num_levels
 
 	def get_padded_level_index_suffix(self, level_index):
 		width = len(str(self.num_levels)) if self.level_configs else 1
@@ -119,3 +116,12 @@ class Collection:
 	def get_level_id(self):
 		return self.get_id() + self.get_padded_level_index_suffix(1)
 
+def parse_level_id(level_id, assert_valid=False):
+	parts = level_id.rsplit('.', 1)
+	if len(parts) != 2 or not parts[1].isnumeric():
+		collection_id, level_index = None, 0
+	else:
+		collection_id, level_index = parts[0], int(parts[1])
+	if assert_valid and not collection_id:
+		die("Can't parse level id %s" % level_id, True)
+	return collection_id, level_index
