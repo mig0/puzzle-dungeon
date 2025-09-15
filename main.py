@@ -20,6 +20,7 @@ from image import *
 from theme import *
 from draw import *
 from room import *
+from level import Collection
 from cmdargs import cmdargs
 from game import game
 from drop import draw_status_drops
@@ -2170,6 +2171,43 @@ def handle_cmdargs():
 			fallback_to_main_screen = False
 		else:
 			warn("Can not start with level or collection '%s'" % level_or_collection_id)
+
+	custom_config = {
+		'icon': 'default/trap0',
+		'name': 'Custom collection',
+		'n': 0,
+	}
+	if cmdargs.bg_image:
+		custom_config["bg-image"] = cmdargs.bg_image
+	if cmdargs.cloud_mode:
+		custom_config["cloud-mode"] = True
+	if cmdargs.music:
+		custom_config["music"] = cmdargs.music
+	if cmdargs.puzzle_type:
+		custom_config["puzzle-type"] = cmdargs.puzzle_type
+	if cmdargs.reverse_barrel_mode:
+		custom_config["reverse-barrel-mode"] = True
+	if cmdargs.theme:
+		custom_config["theme"] = cmdargs.theme
+
+	if args := cmdargs.args:
+		custom_collection = Collection("custom", custom_config)
+		level_configs = []
+		for arg in args:
+			if game.is_valid_level_id(arg):
+				collection, _, level_config = game.get_collection_level_config_by_id(arg)
+				level_configs.append(collection.with_level_config_defaults(level_config))
+			elif collection := game.get_collection_by_id(arg):
+				for level_config in collection.level_configs:
+					level_configs.append(collection.with_level_config_defaults(level_config))
+			else:
+				warn("Ignoring unknown argument %s" % arg)
+		if level_configs:
+			custom_collection.level_configs = level_configs
+			game.collections.insert(0, custom_collection)
+			if game.set_requested_new_level(custom_collection.get_level_id()):
+				fallback_to_main_screen = False
+
 	return not fallback_to_main_screen
 
 def update(dt):

@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from common import warn, die
 from config import DEFAULT_NUM_ENEMIES
 from sizetools import DEFAULT_MAP_SIZE
@@ -26,11 +27,11 @@ class Level:
 
 		# reset all fields to defaults
 		self.actors_always_revealed = False
-		self.bg_image = None
+		self.bg_image = collection.config.get('bg-image') or None
 		self.bg_image_crop = False
 		self.char_health = None
 		self.char_power = None
-		self.cloud_mode = False
+		self.cloud_mode = collection.config.get('cloud-mode') or False
 		self.disable_win = False
 		self.enemy_key_drop = False
 		self.four_rooms = False
@@ -40,22 +41,22 @@ class Level:
 		self.has_start = False
 		self.map_file = None
 		self.map_size = DEFAULT_MAP_SIZE
-		self.music = "valiant_warriors"
+		self.map_string = None
+		self.music = collection.config.get('music') or "valiant_warriors"
 		self.name = None
 		self.nine_rooms = False
 		self.num_enemies = DEFAULT_NUM_ENEMIES
 		self.grid_maze = False
 		self.random_maze = False
 		self.spiral_maze = False
+		self.puzzle_type = collection.config.get('puzzle-type') or 'Puzzle'
+		self.puzzle_config = {}
+		self.reverse_barrel_mode = collection.config.get('reverse-barrel-mode') or False
 		self.stopless = False
-		self.theme = "default"
+		self.theme = collection.config.get('theme') or "default"
 		self.time_limit = None
 		self.title = None
 		self.use_clock = False
-		self.reverse_barrel_mode = collection.config.get('reverse-barrel-mode') or cmdargs.reverse_barrel_mode
-		self.map_string = None
-		self.puzzle_type = collection.puzzle_type
-		self.puzzle_config = {}
 
 		# apply config fields
 		for key, value in config.items():
@@ -89,9 +90,8 @@ class Collection:
 
 		self.name = config.get('name', id)
 		self.icon = config.get('icon', 'default/cloud')
-		self.puzzle_type = config.get('puzzle-type', 'Puzzle')
 		self.magic_n = config.get('magic-n', None)
-		self.n = None
+		self.n = config.get('n')
 
 		self.level_configs = config.get('levels', None)
 
@@ -115,6 +115,13 @@ class Collection:
 
 	def get_level_id(self):
 		return self.get_id() + self.get_padded_level_index_suffix(1)
+
+	def with_level_config_defaults(self, level_config):
+		level_config = deepcopy(level_config)
+		for key in ('bg-image', 'cloud-mode', 'music', 'puzzle-type', 'reverse-barrel-mode', 'theme'):
+			if level_config.get(key) is None and self.config.get(key) is not None:
+				level_config[key] = self.config[key]
+		return level_config
 
 def parse_level_id(level_id, assert_valid=False):
 	parts = level_id.rsplit('.', 1)
