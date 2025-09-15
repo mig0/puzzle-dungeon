@@ -37,6 +37,25 @@ from statusmessage import reset_status_messages, set_status_message, draw_status
 pgzero.loaders.set_root(DATA_DIR)
 sys.stdout.reconfigure(encoding='utf-8')
 
+def parse_map_file_signature(file):
+	words = file.readline().split(" ")
+	if len(words) <= 1:
+		return "Invalid signature line, no expected space", None, None, None
+	if words[0] != '#' or words[1] != 'Dungeon':
+		return "Invalid signature line, no expected '# Dungeon'", None, None, None
+	if len(words) <= 4:
+		return "Invalid signature line, no expected puzzle-type and size", None, None, None
+	puzzle_type = words[2]
+#	if not puzzle_type.endswith("Puzzle"):
+#		return "Invalid signature line, invalid puzzle-type %s" % puzzle_type, None, None, None
+	size_str = words[-1].rstrip("\n")
+	sizes = size_str.split("x")
+	if len(sizes) != 2 or not sizes[0].isdigit() or not sizes[1].isdigit():
+		return "Invalid signature line, invalid size '%s'" % size_str, None, None, None
+	size_x = int(sizes[0])
+	size_y = int(sizes[1])
+	return None, puzzle_type, size_x, size_y
+
 def load_map(filename_or_stringio, special_cell_types={}):
 	global map
 
@@ -71,20 +90,10 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			return
 
 	# parse first signature line
-	words = file.readline().split(" ")
-	if len(words) <= 1:
-		print_error("Invalid signature line, no expected space")
+	error, puzzle_type, size_x, size_y = parse_map_file_signature(file)
+	if error:
+		print_error(error)
 		return
-	if words[0] != '#' or words[1] != 'Dungeon':
-		print_error("Invalid signature line, no expected '# Dungeon'")
-		return
-	size_str = words[-1].rstrip("\n")
-	sizes = size_str.split("x")
-	if len(sizes) != 2 or not sizes[0].isdigit() or not sizes[1].isdigit():
-		print_error("Invalid signature line, invalid size '%s'" % size_str)
-		return
-	size_x = int(sizes[0])
-	size_y = int(sizes[1])
 	if size_x != MAP_SIZE_X or size_y != MAP_SIZE_Y:
 		print_error("Invalid size %dx%d instead of %dx%d" % (size_x, size_y, MAP_SIZE_X, MAP_SIZE_Y))
 		return
@@ -2200,6 +2209,18 @@ def handle_cmdargs():
 			elif collection := game.get_collection_by_id(arg):
 				for level_config in collection.level_configs:
 					level_configs.append(collection.with_level_config_defaults(level_config))
+			elif os.path.isfile(MAPS_DIR_PREFIX + arg):
+				file = open(MAPS_DIR_PREFIX + arg, 'r')
+				error, puzzle_type, size_x, size_y = parse_map_file_signature(file)
+				if error:
+					warn("Ignoring map-file %s: %s" % (arg, error))
+					continue
+				level_configs.append({
+					'puzzle-type': puzzle_type,
+					'map-size': (size_x, size_y),
+					'map-file': arg,
+					'name': "Map %s" % arg,
+				})
 			else:
 				warn("Ignoring unknown argument %s" % arg)
 		if level_configs:
