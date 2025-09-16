@@ -35,7 +35,7 @@ class MainScreen(VirtualPuzzle):
 			or keyboard.right or keyboard.left or keyboard.up or keyboard.down
 			or keyboard.escape or keyboard.space or keyboard.enter
 		):
-			game.requested_new_level = game.collections[0].get_level_id()
+			game.set_requested_new_level(game.collections[0].get_level_id())
 
 	def on_draw_map(self):
 		for cell in self.plate_cells:
