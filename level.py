@@ -15,7 +15,7 @@ class Level:
 		self.config = None
 
 	def is_set(self):
-		return self.index is not None
+		return self.collection is None or self.index is not None or self.config is None
 
 	def set_from_level(self, level):
 		self.set_from_config(level.collection, level.index, level.config)
@@ -75,9 +75,13 @@ class Level:
 					(key, str(value), self.get_id()))
 
 	def get_id(self, numeric=False):
+		if not self.is_set():
+			return ''
 		return self.collection.get_id(numeric) + self.collection.get_padded_level_index_suffix(self.index)
 
 	def has_id(self, id):
+		if not self.is_set():
+			return id == ''
 		collection_id, level_index = parse_level_id(id)
 		if not collection_id or level_index != self.index:
 			return False
