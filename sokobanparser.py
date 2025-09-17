@@ -1,5 +1,7 @@
+import io
 from constants import *
 from random import randint
+from common import die
 
 CHAR_CELL_TYPES = {
 	'#': CELL_WALL,
@@ -72,14 +74,18 @@ def create_map_string(lines):
 
 	return (size_x, size_y), '\n'.join([sig_line] + lines) + '\n'
 
-def parse_sokoban_levels(filename):
-	levels = []
+def parse_sokoban_levels(string_or_filename_or_file):
+	if type(string_or_filename_or_file) == str and "\n" in string_or_filename_or_file:
+		file = io.StringIO(string_or_filename_or_file)
+	elif type(string_or_filename_or_file) == str:
+		full_filename = MAPS_DIR_PREFIX + 'sokoban/' + string_or_filename_or_file
+		file = open(full_filename, "r", encoding="utf-8")
+		if not file:
+			die("Can't open file %s with sokoban levels" % full_filename)
+	elif not (isinstance(string_or_filename_or_file, io.IOBase) and string_or_filename_or_file.readable()):
+		die("parse_sokoban_levels requires string, filename or file, not %s" % str(string_or_filename_or_file), True)
 
-	full_filename = MAPS_DIR_PREFIX + 'sokoban/' + filename
-	file = open(full_filename, "r", encoding="utf-8")
-	if not file:
-		print("Can't open file %s with sokoban levels" % full_filename)
-		return levels
+	levels = []
 
 	is_in_map = False
 	map_lines = None
