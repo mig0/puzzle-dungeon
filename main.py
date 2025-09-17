@@ -1737,6 +1737,20 @@ def handle_press_key():
 		if not cursor.is_char_selected():
 			cursor.reset()
 
+	if keyboard.c and keyboard.alt:
+		if map_string := clipboard.get():
+			try:
+				level_configs = parse_sokoban_levels(map_string)
+				if not level_configs:
+					warn("No levels found in clipboard")
+			except:
+				warn("Failed to parse levels in clipboard")
+				level_configs = []
+			if level_configs and not game.set_custom_collection_level_configs(level_configs):
+				warn("Failed to activate levels in clipboard")
+		else:
+			warn("Clipboard is empty")
+
 	if DEBUG_LEVEL > 0 and cursor_was_active and not cursor.is_active():
 		set_status_message(priority=0)
 
@@ -2212,6 +2226,11 @@ def handle_cmdargs():
 					'map-file': arg,
 					'name': "Map %s" % arg,
 				})
+			elif arg == "clipboard:":
+				if map_string := clipboard.get():
+					level_configs.extend(parse_sokoban_levels(map_string))
+				else:
+					warn("Ignoring 'clipboard:', since clipboard is empty")
 			else:
 				warn("Ignoring unknown argument %s" % arg)
 		if level_configs:
