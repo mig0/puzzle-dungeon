@@ -101,7 +101,7 @@ def parse_sokoban_levels(string_or_filename_or_file):
 		old_is_in_map = is_in_map
 		is_in_map = is_map_line(line)
 
-		if is_eof or map_lines and not old_is_in_map and is_in_map:
+		if is_eof and map_lines or map_lines and not old_is_in_map and is_in_map:
 			map_size, map_string = create_map_string(map_lines)
 			levels.append({
 				"name": level_name or "No Name",
@@ -112,6 +112,7 @@ def parse_sokoban_levels(string_or_filename_or_file):
 				"map-string": map_string,
 				"num-enemies": 0,
 				"char-health": None,
+				"puzzle-type": "BarrelPuzzle",
 				"puzzle-config": {},
 			})
 
