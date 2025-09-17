@@ -82,6 +82,7 @@ class Game:
 		self.collections = []
 		self.level = Level()
 		self._register_all_collections()
+		self._create_custom_collection()
 
 	def init_console(self):
 		self.console = None
@@ -273,6 +274,31 @@ class Game:
 			next_n += 1
 
 		self.collections = sorted(collections, key=lambda c: c.n)
+
+	def _create_custom_collection(self):
+		self.custom_collection_config = {
+			'icon': 'default/trap0',
+			'name': 'Custom collection',
+			'n': 0,
+		}
+		self.custom_collection = Collection("custom", self.custom_collection_config)
+
+	def set_custom_collection_config(self, config):
+		config |= self.custom_collection_config
+		self.custom_collection.config = config
+
+	def set_custom_collection_level_configs(self, level_configs):
+		num_levels0 = self.custom_collection.num_levels
+		self.custom_collection.level_configs = level_configs
+		num_levels1 = self.custom_collection.num_levels
+		if num_levels0 and not num_levels1:
+			game.collections.remove(self.custom_collection)
+		if not num_levels0 and num_levels1:
+			game.collections.insert(0, self.custom_collection)
+		if num_levels1 and game.set_requested_new_level(self.custom_collection.get_level_id()):
+			self.level.unset()
+			return True
+		return False
 
 	def get_collection_level_config_by_id(self, level_id, assert_valid=False):
 		collection_id, level_index = parse_level_id(level_id, assert_valid)

@@ -31,6 +31,7 @@ from joystick import scan_joysticks_and_state, emulate_joysticks_press_key, get_
 from clipboard import clipboard
 from translate import _, set_lang
 from mainscreen import main_screen_level
+from sokobanparser import parse_sokoban_levels
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
 # set data dir and default encoding for the whole program
@@ -2181,26 +2182,16 @@ def handle_cmdargs():
 		else:
 			warn("Can not start with level or collection '%s'" % level_or_collection_id)
 
-	custom_config = {
-		'icon': 'default/trap0',
-		'name': 'Custom collection',
-		'n': 0,
-	}
-	if cmdargs.bg_image:
-		custom_config["bg-image"] = cmdargs.bg_image
-	if cmdargs.cloud_mode:
-		custom_config["cloud-mode"] = True
-	if cmdargs.music:
-		custom_config["music"] = cmdargs.music
-	if cmdargs.puzzle_type:
-		custom_config["puzzle-type"] = cmdargs.puzzle_type
-	if cmdargs.reverse_barrel_mode:
-		custom_config["reverse-barrel-mode"] = True
-	if cmdargs.theme:
-		custom_config["theme"] = cmdargs.theme
+	game.set_custom_collection_config({
+		"bg-image": cmdargs.bg_image,
+		"cloud-mode": cmdargs.cloud_mode,
+		"music": cmdargs.music,
+		"puzzle-type": cmdargs.puzzle_type,
+		"reverse-barrel-mode": cmdargs.reverse_barrel_mode,
+		"theme": cmdargs.theme,
+	})
 
 	if args := cmdargs.args:
-		custom_collection = Collection("custom", custom_config)
 		level_configs = []
 		for arg in args:
 			if game.is_valid_level_id(arg):
@@ -2224,9 +2215,7 @@ def handle_cmdargs():
 			else:
 				warn("Ignoring unknown argument %s" % arg)
 		if level_configs:
-			custom_collection.level_configs = level_configs
-			game.collections.insert(0, custom_collection)
-			if game.set_requested_new_level(custom_collection.get_level_id()):
+			if game.set_custom_collection_level_configs(level_configs):
 				fallback_to_main_screen = False
 
 	return not fallback_to_main_screen
