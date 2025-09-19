@@ -72,6 +72,7 @@ class UndoFrame:
 
 class Game:
 	def __init__(self):
+		self.map = None
 		self.screen = None
 		self.console = None
 		self.char_cells = None
@@ -130,8 +131,7 @@ class Game:
 	def undo_frame(self):
 		return self.undo_frames[-1] if self.undo_frames else None
 
-	def start_level(self, map):
-		self.map = map
+	def start_level(self):
 		self.undo_frames.clear()
 		self.in_level = True
 		self.start_move()  # always have undo_frame, even before the first char move

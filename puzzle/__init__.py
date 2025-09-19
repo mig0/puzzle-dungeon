@@ -210,8 +210,8 @@ class Puzzle:
 	def on_set_theme(self):
 		pass
 
-	def set_map(self, map):
-		self.map = map
+	def set_map(self):
+		self.map = game.map
 		self.on_create_map()
 
 	def on_create_map(self):

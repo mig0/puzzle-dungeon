@@ -4,7 +4,6 @@ import sys
 import random
 import pygame
 import pgzero
-import builtins
 from pgzero.constants import keys
 from numpy import ndarray
 from copy import deepcopy
@@ -24,6 +23,7 @@ from level import Collection
 from cmdargs import cmdargs
 from game import game
 from drop import draw_status_drops
+from load import load_map, parse_map_file_signature
 from flags import flags
 from puzzle import create_puzzle, Puzzle
 from solution import solution, set_solution_funcs
@@ -37,236 +37,6 @@ from statusmessage import reset_status_messages, set_status_message, draw_status
 # set data dir and default encoding for the whole program
 pgzero.loaders.set_root(DATA_DIR)
 sys.stdout.reconfigure(encoding='utf-8')
-
-def parse_map_file_signature(file):
-	words = file.readline().split(" ")
-	if len(words) <= 1:
-		return "Invalid signature line, no expected space", None, None, None
-	if words[0] != '#' or words[1] != 'Dungeon':
-		return "Invalid signature line, no expected '# Dungeon'", None, None, None
-	if len(words) <= 4:
-		return "Invalid signature line, no expected puzzle-type and size", None, None, None
-	puzzle_type = words[2]
-#	if not puzzle_type.endswith("Puzzle"):
-#		return "Invalid signature line, invalid puzzle-type %s" % puzzle_type, None, None, None
-	size_str = words[-1].rstrip("\n")
-	sizes = size_str.split("x")
-	if len(sizes) != 2 or not sizes[0].isdigit() or not sizes[1].isdigit():
-		return "Invalid signature line, invalid size '%s'" % size_str, None, None, None
-	size_x = int(sizes[0])
-	size_y = int(sizes[1])
-	return None, puzzle_type, size_x, size_y
-
-def load_map(filename_or_stringio, special_cell_types={}):
-	global map
-
-	is_stringio = type(filename_or_stringio) == io.StringIO
-	filename = "<from-string>" if is_stringio else filename_or_stringio
-
-	orig_map = map.copy()
-
-	def print_error(error):
-		global map
-		print("%sFile %s: %s\n%sIgnoring bad map file" % (ERROR_PREFIX, filename, error, CNTRL_PREFIX))
-		if is_stringio:
-			print(filename_or_stringio.getvalue())
-		enemies.clear()
-		barrels.clear()
-		carts.clear()
-		lifts.clear()
-		mirrors.clear()
-		portal_destinations.clear()
-		game.set_char_cell(None, 0)
-		map = orig_map.copy()
-
-	if is_stringio:
-		file = filename_or_stringio
-		if DEBUG_LEVEL >= 2:
-			print(filename_or_stringio.getvalue())
-	else:
-		try:
-			file = open(filename, "r", encoding="utf-8")
-		except:
-			print_error("Failed to open")
-			return
-
-	# parse first signature line
-	error, puzzle_type, size_x, size_y = parse_map_file_signature(file)
-	if error:
-		print_error(error)
-		return
-	if size_x != MAP_SIZE_X or size_y != MAP_SIZE_Y:
-		print_error("Invalid size %dx%d instead of %dx%d" % (size_x, size_y, MAP_SIZE_X, MAP_SIZE_Y))
-		return
-
-	game.set_char_cell(None, 0)
-
-	# parse map lines
-	line_n = 2
-	special_cell_infos = []
-	portal_cells = []
-	for y in range(0, size_y):
-		line = file.readline()
-		if line == '':
-			print_error("Failed to read map line #%d" % line_n)
-			return
-		line = line.rstrip("\n")
-		for x in range(0, size_x):
-			if len(line) <= x:
-				print_error("Failed to read char #%d in map line #%d" % (x + 1, line_n))
-				return
-			ch = line[x]
-			cell = (x, y)
-			mirror_host = None
-			if ch == CELL_START:
-				game.set_char_cell(cell, 0)
-			if ch in CART_MOVE_TYPES_BY_CHAR:
-				cart = create_cart(cell, CART_MOVE_TYPES_BY_CHAR[ch])
-				if ch in MIRROR_CHARS:
-					mirror_host = cart
-				ch = CELL_FLOOR
-			if ch in LIFT_MOVE_TYPES_BY_CHAR:
-				lift = create_lift(cell, LIFT_MOVE_TYPES_BY_CHAR[ch])
-				if ch in MIRROR_CHARS:
-					mirror_host = lift
-				ch = CELL_VOID
-			if ch in ACTOR_AND_PLATE_BY_CHAR:
-				actor_name, is_plate = ACTOR_AND_PLATE_BY_CHAR[ch]
-				ch = CELL_PLATE if is_plate else CELL_FLOOR
-				if actor_name == "key1":
-					drop_key1.instantiate(cell)
-				if actor_name == "key2":
-					drop_key2.instantiate(cell)
-				if actor_name == "enemy":
-					create_enemy(cell)
-				if actor_name == "barrel":
-					create_barrel(cell)
-				if actor_name == "mirror":
-					mirror_host = create_barrel(cell)
-				if actor_name == "char":
-					game.set_char_cell(cell, 0)
-				if actor_name == "npc":
-					special_cell_infos.append((cell, None))
-			if ch == CELL_PORTAL:
-				portal_cells.append(cell)
-			if mirror_host:
-				create_mirror(mirror_host)
-			if value_type := special_cell_types.get(ch):
-				special_cell_infos.append((cell, value_type))
-			map[x, y] = ch
-		line_n += 1
-
-	def print_metadata_cell_line_error(name, cell, error):
-		print_error(error + " for %s %s in map line #%d" % (name, str(cell), line_n))
-
-	# parse portal cell metadata lines if any
-	for cell in portal_cells:
-		line = file.readline()
-		def print_portal_error(error):
-			print_metadata_cell_line_error("portal", cell, error)
-		if line == '':
-			print_portal_error("Failed to read line")
-			return
-		values = line.split()
-		if not values:
-			continue
-		if len(values) > 2:
-			print_portal_error("Must be up to 2 ints")
-			return
-		if len(values) == 1:
-			if not values[0].isdigit() or not 0 <= int(values[0]) < len(portal_cells):
-				print_portal_error("Invalid dest portal idx")
-				return
-			dest_cell = portal_cells[int(values[0])]
-		else:
-			if not values[0].isdigit() or not values[1].isdigit():
-				print_portal_error("Dest cell is not 2 ints")
-				return
-			dest_cell = (int(values[0]), int(values[1]))
-		if dest_cell == cell:
-			print_portal_error("Dest cell can't be the same")
-			return
-		if not 0 <= dest_cell[0] < size_x or not 0 <= dest_cell[1] < size_y:
-			print_portal_error("Dest cell is out of map")
-			return
-		portal_destinations[cell] = dest_cell
-		line_n += 1
-
-	# parse mirror cell metadata lines if any
-	for mirror in mirrors:
-		line = file.readline()
-		def print_mirror_error(error):
-			print_metadata_cell_line_error("mirror", mirror.c, error)
-		if line == '':
-			print_mirror_error("Failed to read line")
-			return
-		values = line.split()
-		if not len(values) == 2:
-			print_mirror_error("Invalid metadata %s, must have 2 fields" % values)
-			return
-		if not values[0]:
-			print_mirror_error("Invalid empty orientation")
-			return
-		if not values[0][0] in MIRROR_ORIENTATION_CHARS:
-			print_mirror_error("Invalid orientation (%s)" % values[0][0])
-			return
-		mirror.orientation = values[0][0]
-		mirror.fixed_orientation = False if values[0][1:] == "*" else True
-		if not values[1]:
-			print_mirror_error("Invalid empty activeness")
-			return
-		if not values[1][0].isdigit():
-			print_mirror_error("Invalid activeness (%s), must be integer" % values[1][0])
-			return
-		mirror.activeness = int(values[1][0])
-		if not 0 <= mirror.activeness <= 3:
-			print_mirror_error("Invalid activeness (%d), must be [0..3]" % mirror.activeness)
-			return
-		mirror.fixed_activeness = False if values[1][1:] == "*" else True
-		line_n += 1
-
-	# parse special cell metadata lines if any
-	special_cell_values = {}
-	for cell, value_type in special_cell_infos:
-		def print_special_error(error):
-			print_metadata_cell_line_error("special cell", cell, error)
-		if value_type is None:
-			special_cell_values[cell] = None
-			continue
-		line = file.readline()
-		if line == '':
-			print_special_error("Failed to read line")
-			return
-		value_str = line.rstrip("\n")
-		def parse_int(value_str):
-			return None if value_str == '-' else int(value_str)
-		try:
-			if value_type == 'str':
-				value = value_str
-			elif value_type == 'strs':
-				value = value_str.split()
-			elif value_type == 'int':
-				value = parse_int(value_str)
-			elif value_type == 'ints':
-				value = tuple(builtins.map(parse_int, value_str.split()))
-			else:
-				raise ValueError("Unsupported value type %s" % value_type)
-		except Exception as e:
-			print_special_error("Error: \"%s\"" % e)
-			return
-		special_cell_values[cell] = value
-		line_n += 1
-
-	extra_values = []
-	while True:
-		line = file.readline()
-		if line == '':
-			break
-		extra_values.append(line.rstrip("\n"))
-
-	file.close()
-
-	return (special_cell_values, extra_values)
 
 # get 4 neughbour cells for cell
 def get_cell_neighbors(cell, x_range=None, y_range=None):
@@ -323,7 +93,6 @@ level_title = None
 level_name = None
 level_goal = None
 
-map = None  # will be generated
 cell_images = {}  # will be generated
 revealed_map = None
 
@@ -361,18 +130,18 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 		if not combined:
 			for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 				cell = (cx, cy)
-				print(CELL_FLOOR if clean and map[cell] in CELL_FLOOR_TYPES else map[cell], end="")
+				print(CELL_FLOOR if clean and game.map[cell] in CELL_FLOOR_TYPES else game.map[cell], end="")
 			if dual and cell_chars:
 				print("    ", end="")
 				for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 					cell = (cx, cy)
-					print(cell_chars.get(cell, CELL_FLOOR if clean and map[cell] in CELL_FLOOR_TYPES else map[cell]), end="")
+					print(cell_chars.get(cell, CELL_FLOOR if clean and game.map[cell] in CELL_FLOOR_TYPES else game.map[cell]), end="")
 			if dual:
 				print("    ", end="")
 		if dual or combined:
 			for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 				cell = (cx, cy)
-				cell_ch = CELL_FLOOR if clean and map[cell] in CELL_FLOOR_TYPES else map[cell]
+				cell_ch = CELL_FLOOR if clean and game.map[cell] in CELL_FLOOR_TYPES else game.map[cell]
 				actor_chars = ACTOR_ON_PLATE_CHARS if cell_ch == CELL_PLATE else ACTOR_CHARS
 				if cell in cell_chars:
 					cell_ch = cell_chars[cell]
@@ -395,11 +164,11 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 	if full_format:
 		for cell in portal_cells:
 			if dest_cell := portal_destinations.get(cell):
-				print(portal_cells.index(dest_cell) if dest_cell in portal_cells else ' '.join(builtins.map(str, portal_destinations[cell])))
+				print(portal_cells.index(dest_cell) if dest_cell in portal_cells else ' '.join(map(str, portal_destinations[cell])))
 			else:
 				print("")
 		for extra_value in puzzle.get_map_extra_values() if puzzle else ():
-			line = ' '.join(builtins.map(str, extra_value)) if hasattr(extra_value, '__iter__') else str(extra_value)
+			line = ' '.join(map(str, extra_value)) if hasattr(extra_value, '__iter__') else str(extra_value)
 			print(line)
 	if endl:
 		print()
@@ -408,27 +177,27 @@ def is_cell_in_map(cell):
 	return is_cell_in_area(cell, MAP_X_RANGE, MAP_Y_RANGE)
 
 def is_outer_wall(cell, void_is_like_wall=False):
-	if map[cell] not in CELL_WALL_TYPES:
+	if game.map[cell] not in CELL_WALL_TYPES:
 		return False
 
 	wall_types = (*CELL_WALL_TYPES, CELL_VOID) if void_is_like_wall else CELL_WALL_TYPES
 
 	for neigh in get_all_neighbors(cell):
-		if is_cell_in_map(neigh) and map[neigh] not in wall_types:
+		if is_cell_in_map(neigh) and game.map[neigh] not in wall_types:
 			return False
 	return True
 
 def replace_outer_walls(*cell_types):
 	for cy in MAP_Y_RANGE:
 		for cx in MAP_X_RANGE:
-			if map[cx, cy] == CELL_OUTER_WALL:
-				map[cx, cy] = choice(cell_types)
+			if game.map[cx, cy] == CELL_OUTER_WALL:
+				game.map[cx, cy] = choice(cell_types)
 
 def convert_outer_walls(cell_type=None, void_is_like_wall=False):
 	for cy in MAP_Y_RANGE:
 		for cx in MAP_X_RANGE:
 			if is_outer_wall((cx, cy), void_is_like_wall=void_is_like_wall):
-				map[cx, cy] = CELL_OUTER_WALL
+				game.map[cx, cy] = CELL_OUTER_WALL
 
 	if cell_type is not None:
 		replace_outer_walls(*cell_type)
@@ -437,10 +206,10 @@ def convert_outer_floors(cell_type=None):
 	floor_cells_to_convert = set()
 	for cy in (0, MAP_SIZE_Y - 1):
 		for cx in (0, MAP_SIZE_X - 1):
-			if map[cx, cy] in CELL_FLOOR_TYPES:
+			if game.map[cx, cy] in CELL_FLOOR_TYPES:
 				floor_cells_to_convert.update(get_accessible_cells((cx, cy)))
 	for cell in floor_cells_to_convert:
-		map[cell] = CELL_OUTER_WALL
+		game.map[cell] = CELL_OUTER_WALL
 
 	if cell_type is not None:
 		replace_outer_walls(cell_type)
@@ -459,7 +228,7 @@ def is_cell_occupied(cell, include_phased=False):
 
 # used for positioning enemies during level generation
 def is_cell_occupied_for_enemy(cell):
-	return map[cell] in CELL_ENEMY_PLACE_OBSTACLES or is_cell_occupied(cell, True) or is_portal_destination(cell)
+	return game.map[cell] in CELL_ENEMY_PLACE_OBSTACLES or is_cell_occupied(cell, True) or is_portal_destination(cell)
 
 def reveal_map_near_char():
 	if not flags.is_cloud_mode:
@@ -480,10 +249,6 @@ def get_revealed_actors(actors):
 
 def set_char_flip(is_right_dir=True):
 	char.flip = None if is_right_dir else (True, False)
-
-def propagate_map():
-	set_map(map)  # this is objects.set_map
-	puzzle.set_map(map)
 
 def set_room_and_notify_puzzle(idx):
 	set_room(idx)
@@ -511,14 +276,14 @@ def enter_room(idx):
 
 	reveal_map_near_char()
 
-	if map[char.c] == CELL_START:
+	if game.map[char.c] == CELL_START:
 		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(0, 1), angle=(180, 720))
 
 	cursor.reset()
 
 	mode = "game"
 
-	game.start_level(map)
+	game.start_level()
 
 	puzzle.on_enter_room()
 
@@ -540,7 +305,7 @@ def clear_accessible_obstacles():
 def is_cell_accessible(cell, obstacles=None, place=False, allow_obstacles=False, allow_enemy=False):
 	if not room.is_cell_inside(cell):
 		return False
-	is_cell_blocked = map[cell] in (() if allow_obstacles else CELL_CHAR_PLACE_OBSTACLES if place else CELL_CHAR_MOVE_OBSTACLES)
+	is_cell_blocked = game.map[cell] in (() if allow_obstacles else CELL_CHAR_PLACE_OBSTACLES if place else CELL_CHAR_MOVE_OBSTACLES)
 	if obstacles is not None:
 		if accessible_obstacles is not None and cell in obstacles:
 			accessible_obstacles.add(cell)
@@ -558,7 +323,7 @@ def get_accessible_neighbors(cell, obstacles=None, allow_obstacles=False, allow_
 	for diff in directions + ((0, 0),) if allow_stay else directions:
 		neigh = apply_diff(cell, diff)
 		if is_cell_in_room(neigh) and (
-			allow_closed_gate and map[neigh] == CELL_GATE0 or
+			allow_closed_gate and game.map[neigh] == CELL_GATE0 or
 			is_cell_accessible(neigh, obstacles, allow_obstacles=allow_obstacles, allow_enemy=allow_enemy)
 		):
 			neighbors.append(neigh)
@@ -780,8 +545,8 @@ def convert_to_floor_if_needed(cell):
 	if not cell:
 		warn("Called convert_to_floor_if_needed without cell, ignoring", True)
 		return
-	if map[cell] in (*CELL_WALL_TYPES, CELL_VOID, CELL_INTERNAL1):
-		map[cell] = get_random_floor_cell_type()
+	if game.map[cell] in (*CELL_WALL_TYPES, CELL_VOID, CELL_INTERNAL1):
+		game.map[cell] = get_random_floor_cell_type()
 
 def get_random_even_point(a1, a2):
 	return a1 + randint(0, int((a2 - a1) / 2)) * 2
@@ -796,16 +561,18 @@ def generate_random_maze_area(x1, y1, x2, y2):
 
 	# create the horizontal and vertical wall via this point
 	for x in range(x1, x2 + 1):
-		map[x, random_y] = CELL_WALL
+		game.map[x, random_y] = CELL_WALL
 	for y in range(y1, y2 + 1):
-		map[random_x, y] = CELL_WALL
+		game.map[random_x, y] = CELL_WALL
 
 	# select 3 random holes on the 4 just created wall walls
+	def set_floor_on(x, y):
+		game.map[x, y] = get_random_floor_cell_type()
 	skipped_wall = randint(0, 3)
-	if skipped_wall != 0: map[get_random_even_point(x1, random_x - 1), random_y] = get_random_floor_cell_type()
-	if skipped_wall != 1: map[random_x, get_random_even_point(y1, random_y - 1)] = get_random_floor_cell_type()
-	if skipped_wall != 2: map[get_random_even_point(random_x + 1, x2), random_y] = get_random_floor_cell_type()
-	if skipped_wall != 3: map[random_x, get_random_even_point(random_y + 1, y2)] = get_random_floor_cell_type()
+	if skipped_wall != 0: set_floor_on(get_random_even_point(x1, random_x - 1), random_y)
+	if skipped_wall != 1: set_floor_on(random_x, get_random_even_point(y1, random_y - 1))
+	if skipped_wall != 2: set_floor_on(get_random_even_point(random_x + 1, x2), random_y)
+	if skipped_wall != 3: set_floor_on(random_x, get_random_even_point(random_y + 1, y2))
 
 	# recurse into 4 sub-areas
 	generate_random_maze_area(x1, y1, random_x - 1, random_y - 1)
@@ -817,7 +584,7 @@ def generate_grid_maze():
 	for cy in room.y_range:
 		for cx in room.x_range:
 			if (cx - room.x1 - 1) % 2 == 0 and (cy - room.y1 - 1) % 2 == 0:
-				map[cx, cy] = CELL_WALL
+				game.map[cx, cy] = CELL_WALL
 
 def generate_spiral_maze():
 	if randint(0, 1) == 0:
@@ -835,7 +602,7 @@ def generate_spiral_maze():
 		step = steps[dir]
 		for i in range(len[dir % 2]):
 			pointer = apply_diff(pointer, step)
-			map[pointer] = CELL_WALL
+			game.map[pointer] = CELL_WALL
 
 		if dir % 2 == 0:
 			len[0] -= 2
@@ -846,8 +613,6 @@ def generate_random_maze_room():
 	generate_random_maze_area(room.x1, room.y1, room.x2, room.y2)
 
 def generate_random_free_path(start_cell, target_cell, area=None, deviation=0, level=0):
-	global map
-
 	if randint(0, deviation) == 0:
 		start_cell = get_closest_accessible_cell(start_cell, target_cell)
 
@@ -871,7 +636,7 @@ def generate_random_free_path(start_cell, target_cell, area=None, deviation=0, l
 			continue
 		weight = randint(0, max_distance)
 		weight -= cell_distance(cell, target_cell)
-		if map[cell] in CELL_FLOOR_TYPES:
+		if game.map[cell] in CELL_FLOOR_TYPES:
 			weight -= randint(0, max_distance)
 		weighted_neighbors.append((weight, cell))
 
@@ -882,7 +647,7 @@ def generate_random_free_path(start_cell, target_cell, area=None, deviation=0, l
 		return False
 
 	for neigh in neighbors:
-		old_cell_type = map[neigh]
+		old_cell_type = game.map[neigh]
 		if old_cell_type not in (*CELL_WALL_TYPES, CELL_VOID):
 			print("BUG!")
 			return False
@@ -895,25 +660,25 @@ def generate_random_free_path(start_cell, target_cell, area=None, deviation=0, l
 			if level == 0:
 				debug_map(2)
 			return True
-		map[neigh] = old_cell_type
+		game.map[neigh] = old_cell_type
 
 	return False
 
 def get_random_floor_cell():
 	while True:
 		cell = randint(room.x1, room.x2), randint(room.y1, room.y2)
-		if map[cell] in CELL_FLOOR_TYPES:
+		if game.map[cell] in CELL_FLOOR_TYPES:
 			return cell
 
 def replace_random_floor_cell(cell_type, num=1, callback=None, extra=None, extra_num=None):
 	for n in range(num):
 		cell = get_random_floor_cell()
-		map[cell] = cell_type
+		game.map[cell] = cell_type
 		extra_cells = []
 		if extra_num:
 			for i in range(extra_num):
 				extra_cell = get_random_floor_cell()
-				map[extra_cell] = cell_type
+				game.map[extra_cell] = cell_type
 				extra_cells.append(extra_cell)
 		if callback:
 			if extra is not None:
@@ -923,14 +688,14 @@ def replace_random_floor_cell(cell_type, num=1, callback=None, extra=None, extra
 
 def switch_cell_type(cell, new_cell_type, duration):
 	game.remember_map_cell(cell)
-	switch_cell_infos[cell] = (map[cell], new_cell_type, level_time + duration, duration)
-	map[cell] = new_cell_type
+	switch_cell_infos[cell] = (game.map[cell], new_cell_type, level_time + duration, duration)
+	game.map[cell] = new_cell_type
 
 def demolish_portal(cell, new_cell_type=CELL_FLOOR):
 	portal_demolition_infos[cell] = (new_cell_type, level_time + PORTAL_DEMOLITION_DELAY)
 
 def toggle_gate(gate_cell):
-	cell_type = map[gate_cell]
+	cell_type = game.map[gate_cell]
 	gate_cell_types = (CELL_TRAP1, CELL_TRAP0) if cell_type in (CELL_TRAP0, CELL_TRAP1) else (CELL_GATE0, CELL_GATE1)
 	if cell_type not in gate_cell_types:
 		die("Called toggle_gate not on CELL_GATE or CELL_TRAP")
@@ -1011,14 +776,14 @@ def generate_room(idx):
 		char.c = (room.x1, room.y1)
 		game.set_char_cell(char.c)
 		if flags.has_start:
-			map[char.c] = CELL_START
+			game.map[char.c] = CELL_START
 		accessible_cells = get_all_accessible_cells()
 		accessible_cells.pop(0)  # remove char cell
 		if not accessible_cells:
 			debug_map()
 			die("Requested to generate finish cell with no accessible cells")
 		finish_cell = accessible_cells.pop()
-		map[finish_cell] = CELL_FINISH
+		game.map[finish_cell] = CELL_FINISH
 		puzzle.set_finish_cell(accessible_cells, finish_cell)
 
 	puzzle.generate_room()
@@ -1040,9 +805,7 @@ def generate_room(idx):
 		create_enemy((cx, cy))
 
 def generate_map():
-	global map
-
-	map = ndarray((MAP_SIZE_X, MAP_SIZE_Y), dtype='U5')
+	game.map = ndarray((MAP_SIZE_X, MAP_SIZE_Y), dtype='U5')
 	bw = 0 if flags.MULTI_ROOMS and not puzzle.has_border() else 1
 	for cy in MAP_Y_RANGE:
 		for cx in MAP_X_RANGE:
@@ -1053,19 +816,19 @@ def generate_map():
 					cell_type = CELL_WALL
 				else:
 					cell_type = get_random_floor_cell_type()
-			map[cx, cy] = cell_type
+			game.map[cx, cy] = cell_type
 
 	if game.level.map_file or game.level.map_string:
 		filename_or_stringio = MAPS_DIR_PREFIX + game.level.map_file if game.level.map_file else io.StringIO(game.level.map_string)
 		if ret := load_map(filename_or_stringio, puzzle.load_map_special_cell_types):
 			if flags.MULTI_ROOMS:
 				print("Ignoring multi-room level config when loading map")
-			propagate_map()
+			puzzle.set_map()
 			set_room_and_notify_puzzle(0)
 			puzzle.on_load_map(*ret)
 			return
 
-	propagate_map()
+	puzzle.set_map()
 
 	for idx in range(flags.NUM_ROOMS):
 		generate_room(idx)
@@ -1251,7 +1014,6 @@ def init_new_level(level_id, reload_stored=False):
 	global switch_cell_infos, portal_demolition_infos
 	global enter_room_idx
 	global level_time
-	global map
 
 	if level_id is None:
 		is_game_won = True
@@ -1349,8 +1111,8 @@ def init_new_level(level_id, reload_stored=False):
 		stored_level = game.stored_level
 		theme_name = stored_level["theme_name"]
 		game.char_cells = stored_level["char_cells"]
-		map = stored_level["map"]
-		propagate_map()
+		game.map = stored_level["map"]
+		puzzle.set_map()
 		for enemy_info in stored_level["enemy_infos"]:
 			create_enemy(*enemy_info)
 		for barrel_cell in stored_level["barrel_cells"]:
@@ -1390,7 +1152,7 @@ def init_new_level(level_id, reload_stored=False):
 	portal_demolition_infos.clear()
 
 	stored_level = {
-		"map": map.copy(),
+		"map": game.map.copy(),
 		"char_cells": game.char_cells.copy(),
 		"enemy_infos": tuple((enemy.c, enemy.power or enemy.health, enemy.attack, enemy.drop) for enemy in enemies),
 		"barrel_cells": tuple(barrel.c for barrel in barrels),
@@ -1422,10 +1184,10 @@ def init_main_screen():
 	init_new_level(main_screen_level)
 
 def draw_map():
-	for cy in range(len(map[0])):
-		for cx in range(len(map)):
+	for cy in range(len(game.map[0])):
+		for cx in range(len(game.map)):
 			cell = (cx, cy)
-			cell_type = map[cell]
+			cell_type = game.map[cell]
 			cell_types = [cell_type]
 			if cell_type in CELL_FLOOR_EXTENSIONS and cell_type != CELL_FLOOR:
 				cell_types.insert(0, CELL_FLOOR)
@@ -1706,7 +1468,7 @@ def handle_press_key():
 		return
 
 	if keyboard.space and not cursor.is_active():
-		if map[char.c] == CELL_PORTAL:
+		if game.map[char.c] == CELL_PORTAL:
 			teleport_char()
 		else:
 			press_cell(char.c)
@@ -1845,7 +1607,7 @@ def check_victory():
 		or game.level.time_limit and level_time > game.level.time_limit
 		or char.health is not None and char.health <= 0
 		or char.power is not None and char.power <= 0
-		or map[char.c] == CELL_TRAP1
+		or game.map[char.c] == CELL_TRAP1
 	):
 		loose_game()
 		return
@@ -1874,7 +1636,7 @@ def check_victory():
 		can_win = False
 
 	if flags.has_finish or puzzle.has_finish():
-		if map[char.c] == CELL_FINISH and can_win:
+		if game.map[char.c] == CELL_FINISH and can_win:
 			char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(1, 0))
 			win_room()
 		else:
@@ -1914,7 +1676,7 @@ def finish_teleport_char():
 def teleport_char():
 	global teleport_char_in_progress
 
-	if map[char.c] != CELL_PORTAL and not teleport_char_in_progress:
+	if game.map[char.c] != CELL_PORTAL and not teleport_char_in_progress:
 		die("Called teleport_char not on CELL_PORTAL and not in progress")
 
 	if not teleport_char_in_progress:
@@ -1925,7 +1687,7 @@ def teleport_char():
 		char.activate_inplace_animation(level_time, CHAR_APPEARANCE_SCALE_DURATION, scale=(0, 1), angle=(540, 0), on_finished=finish_teleport_char)
 
 def leave_cell(old_char_cell):
-	if map[old_char_cell] == CELL_SAND:
+	if game.map[old_char_cell] == CELL_SAND:
 		switch_cell_type(old_char_cell, CELL_VOID, SAND_DISAPPREAR_DURATION)
 
 	puzzle.on_leave_cell()
@@ -1938,10 +1700,10 @@ def prepare_enter_cell(animate_duration):
 		if drop.has_instance(char.c):
 			drop.disappear(char.c, level_time, animate_duration)
 
-	if map[char.c] == CELL_LOCK1:
+	if game.map[char.c] == CELL_LOCK1:
 		switch_cell_type(char.c, CELL_FLOOR, LOCK_DISAPPREAR_DURATION)
 		drop_key1.consume()
-	elif map[char.c] == CELL_LOCK2:
+	elif game.map[char.c] == CELL_LOCK2:
 		switch_cell_type(char.c, CELL_FLOOR, LOCK_DISAPPREAR_DURATION)
 		drop_key2.consume()
 
@@ -1963,7 +1725,7 @@ def enter_cell():
 				if op == '+': char.power += factor
 				if op == '-': char.power -= factor
 
-	if map[char.c] == CELL_PORTAL:
+	if game.map[char.c] == CELL_PORTAL:
 		teleport_char()
 
 	puzzle.on_enter_cell()
@@ -2026,7 +1788,7 @@ def move_char(diff):
 
 	if flags.is_stopless:
 		is_jumped = False
-		while map[char.c] in CELL_FLOOR_TYPES and not is_cell_occupied_except_char(char.c) and can_move(diff):
+		while game.map[char.c] in CELL_FLOOR_TYPES and not is_cell_occupied_except_char(char.c) and can_move(diff):
 			char.move(diff)
 			is_jumped = True
 		if is_move_animate_enabled and is_jumped and is_cell_occupied_except_char(char.c) and last_move_diff is None:
@@ -2146,17 +1908,19 @@ def can_move(diff):
 	if cursor.is_active():
 		return True
 
+	cell_type = game.map[dest_cell]
+
 	if cursor.is_lift_selected():
-		return map[dest_cell] == CELL_VOID and not is_cell_in_actors(dest_cell, lifts)
+		return cell_type == CELL_VOID and not is_cell_in_actors(dest_cell, lifts)
 
 	return (
-		map[dest_cell] not in CELL_CHAR_MOVE_OBSTACLES
-		or map[dest_cell] == CELL_LOCK1 and drop_key1.num_collected > 0
-		or map[dest_cell] == CELL_LOCK2 and drop_key2.num_collected > 0
-		or map[dest_cell] == CELL_ODIRL and diff != (+1, 0)
-		or map[dest_cell] == CELL_ODIRR and diff != (-1, 0)
-		or map[dest_cell] == CELL_ODIRU and diff != (0, +1)
-		or map[dest_cell] == CELL_ODIRD and diff != (0, -1)
+		cell_type not in CELL_CHAR_MOVE_OBSTACLES
+		or cell_type == CELL_LOCK1 and drop_key1.num_collected > 0
+		or cell_type == CELL_LOCK2 and drop_key2.num_collected > 0
+		or cell_type == CELL_ODIRL and diff != (+1, 0)
+		or cell_type == CELL_ODIRR and diff != (-1, 0)
+		or cell_type == CELL_ODIRU and diff != (0, +1)
+		or cell_type == CELL_ODIRD and diff != (0, -1)
 		or is_cell_in_actors(dest_cell, lifts)
 		or get_lift_target(char.c, diff)
 	)

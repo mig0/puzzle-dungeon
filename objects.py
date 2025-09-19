@@ -6,9 +6,9 @@ from mirror import Mirror
 from theme import *
 from room import is_cell_in_room
 from drop import Drop
+from game import game
 
 __all__ = [
-	'set_map',  # temporarily
 	'char', 'enemies', 'barrels', 'carts', 'lifts', 'mirrors', 'portal_destinations',
 	'drop_heart', 'drop_sword', 'drop_might', 'drop_key1', 'drop_key2', 'drops',
 	'cursor', 'create_enemy', 'create_barrel',
@@ -44,12 +44,6 @@ drops = (drop_heart, drop_sword, drop_might, drop_key1, drop_key2)
 from cursor import Cursor
 
 cursor = Cursor()
-
-# temporary solution, will be refactored later
-map = None
-def set_map(_map):
-	global map
-	map = _map
 
 def create_enemy(cell, health=None, attack=None, drop=None):
 	enemy = Fighter()
@@ -106,7 +100,7 @@ def get_lift_target(cell, diff):
 		return None
 	while True:
 		next_cell = apply_diff(cell, diff)
-		if not is_cell_in_room(next_cell) or map[next_cell] != CELL_VOID or is_cell_in_actors(next_cell, lifts):
+		if not is_cell_in_room(next_cell) or game.map[next_cell] != CELL_VOID or is_cell_in_actors(next_cell, lifts):
 			return cell if cell != lift.c else None
 		cell = next_cell
 
@@ -126,7 +120,7 @@ def create_portal(cell, dst_cell):
 	if cell == dst_cell:
 		die("BUG: Portal destination can't be the same cell %s, exiting" % str(cell))
 
-	map[cell] = CELL_PORTAL
+	game.map[cell] = CELL_PORTAL
 	portal_destinations[cell] = dst_cell
 
 def create_portal_pair(cell1, cell2):
