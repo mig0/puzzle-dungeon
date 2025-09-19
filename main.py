@@ -76,7 +76,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		lifts.clear()
 		mirrors.clear()
 		portal_destinations.clear()
-		set_char_cell(None, 0)
+		game.set_char_cell(None, 0)
 		map = orig_map.copy()
 
 	if is_stringio:
@@ -99,7 +99,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		print_error("Invalid size %dx%d instead of %dx%d" % (size_x, size_y, MAP_SIZE_X, MAP_SIZE_Y))
 		return
 
-	set_char_cell(None, 0)
+	game.set_char_cell(None, 0)
 
 	# parse map lines
 	line_n = 2
@@ -119,7 +119,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			cell = (x, y)
 			mirror_host = None
 			if ch == CELL_START:
-				set_char_cell(cell, 0)
+				game.set_char_cell(cell, 0)
 			if ch in CART_MOVE_TYPES_BY_CHAR:
 				cart = create_cart(cell, CART_MOVE_TYPES_BY_CHAR[ch])
 				if ch in MIRROR_CHARS:
@@ -144,7 +144,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 				if actor_name == "mirror":
 					mirror_host = create_barrel(cell)
 				if actor_name == "char":
-					set_char_cell(cell, 0)
+					game.set_char_cell(cell, 0)
 				if actor_name == "npc":
 					special_cell_infos.append((cell, None))
 			if ch == CELL_PORTAL:
@@ -497,7 +497,7 @@ def advance_room():
 	return True
 
 def enter_room(idx):
-	global mode, char_cells, last_time_arrow_keys_processed
+	global mode, last_time_arrow_keys_processed
 
 	set_room_and_notify_puzzle(idx)
 	reset_status_messages()
@@ -508,7 +508,6 @@ def enter_room(idx):
 	last_time_arrow_keys_processed = None
 
 	place_char_in_room()
-	char_cells[idx] = char.c  # needed for Alt-R
 
 	reveal_map_near_char()
 
@@ -735,11 +734,6 @@ def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=Fals
 def is_path_found(start_cell, target_cell, obstacles=None):
 	return target_cell in get_accessible_cells(start_cell, obstacles)
 
-def set_char_cell(cell, room_idx=None):
-	global char_cells
-
-	char_cells[room.idx if room_idx is None else room_idx] = cell
-
 def get_farthest_accessible_cell(start_cell):
 	accessible_cell_distances = get_accessible_cell_distances(start_cell)
 	return max(accessible_cell_distances, key=lambda cell: accessible_cell_distances[cell])
@@ -774,8 +768,8 @@ def place_char_in_first_free_spot():
 		quit()
 
 def place_char_in_room():
-	if char_cells[room.idx]:
-		char.c = char_cells[room.idx]
+	if game.char_cells[room.idx]:
+		char.c = game.char_cells[room.idx]
 	else:
 		place_char_in_first_free_spot()
 
@@ -986,7 +980,6 @@ class Globals:
 	find_all_paths = find_all_paths
 	find_best_path = find_best_path
 	is_path_found = is_path_found
-	set_char_cell = set_char_cell
 	get_farthest_accessible_cell = get_farthest_accessible_cell
 	get_closest_accessible_cell = get_closest_accessible_cell
 	place_char_in_topleft_accessible_cell = place_char_in_topleft_accessible_cell
@@ -1016,7 +1009,7 @@ def generate_room(idx):
 	finish_cell = None
 	if flags.has_finish or puzzle.is_finish_cell_required():
 		char.c = (room.x1, room.y1)
-		set_char_cell(char.c)
+		game.set_char_cell(char.c)
 		if flags.has_start:
 			map[char.c] = CELL_START
 		accessible_cells = get_all_accessible_cells()
@@ -1256,7 +1249,7 @@ def init_new_level(level_id, reload_stored=False):
 	global bg_image
 	global revealed_map
 	global switch_cell_infos, portal_demolition_infos
-	global char_cells, enter_room_idx
+	global enter_room_idx
 	global level_time
 	global map
 
@@ -1301,7 +1294,7 @@ def init_new_level(level_id, reload_stored=False):
 	flags.parse_level(level)
 
 	char.reset_state()
-	char_cells = [None] * flags.NUM_ROOMS
+	game.char_cells = [None] * flags.NUM_ROOMS
 	char.power  = level.char_power
 	char.health = level.char_health
 	char.attack = None if char.power else INITIAL_CHAR_ATTACK
@@ -1355,7 +1348,7 @@ def init_new_level(level_id, reload_stored=False):
 	if reload_stored:
 		stored_level = game.stored_level
 		theme_name = stored_level["theme_name"]
-		char_cells = stored_level["char_cells"]
+		game.char_cells = stored_level["char_cells"]
 		map = stored_level["map"]
 		propagate_map()
 		for enemy_info in stored_level["enemy_infos"]:
@@ -1398,7 +1391,7 @@ def init_new_level(level_id, reload_stored=False):
 
 	stored_level = {
 		"map": map.copy(),
-		"char_cells": char_cells.copy(),
+		"char_cells": game.char_cells.copy(),
 		"enemy_infos": tuple((enemy.c, enemy.power or enemy.health, enemy.attack, enemy.drop) for enemy in enemies),
 		"barrel_cells": tuple(barrel.c for barrel in barrels),
 		"lift_infos": tuple((lift.c, lift.type) for lift in lifts),

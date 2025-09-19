@@ -133,7 +133,7 @@ class MemoryPuzzle(Puzzle):
 				memory_pairs[pair_idx] = (cell1, cell2)  # or True
 		self.room_memory_pairs[room.idx] = memory_pairs
 
-		self.Globals.set_char_cell(self.get_empty_central_cell())
+		game.set_char_cell(self.get_empty_central_cell())
 
 	def get_reveal_fade_factor(self):
 		if self.is_time_to_reveal():

@@ -7,7 +7,6 @@ from sizetools import CELL_W, CELL_H
 from config import ARROW_KEYS_RESOLUTION, ACTOR_PHASED_OPACITY
 from constants import DIR_NAMES
 from common import die
-from game import game
 
 MAX_ALPHA = 255  # based on pygame
 
@@ -571,3 +570,4 @@ def get_actor_on_cell(cell, actors, include_hidden=None, include_phased=None):
 def is_cell_in_actors(cell, actors, include_hidden=None, include_phased=None):
 	return get_actor_on_cell(cell, actors, include_hidden, include_phased) is not None
 
+from game import game

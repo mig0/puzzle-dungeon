@@ -98,7 +98,7 @@ class PortalPuzzle(Puzzle):
 
 			if self.is_fully_reachable_and_solvable():
 				if not game.level.has_start:
-					self.Globals.set_char_cell(get_hall_center_cell(0))
+					game.set_char_cell(get_hall_center_cell(0))
 				return
 
 			self.portal_cell_to_hall_idx = {}

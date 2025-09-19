@@ -2,6 +2,7 @@ from common import load_tabbed_yaml, get_pgzero_game_from_stack, warn, die
 from config import DATA_DIR, pgconsole_config
 from level import Collection, Level, parse_level_id
 from sokobanparser import parse_sokoban_levels
+from room import room
 import pygame
 import copy
 import os
@@ -73,6 +74,7 @@ class Game:
 	def __init__(self):
 		self.screen = None
 		self.console = None
+		self.char_cells = None
 		self.orig_handlers = {}
 		self.requested_new_level = None
 		self.undo_frames = []
@@ -121,6 +123,8 @@ class Game:
 					pgzgame.handlers[event_type] = self.orig_handlers[event_type]
 					if not pgzgame.handlers[event_type]: del pgzgame.handlers[event_type]
 
+	def set_char_cell(self, cell, room_idx=None):
+		self.char_cells[room.idx if room_idx is None else room_idx] = cell
 
 	@property
 	def undo_frame(self):

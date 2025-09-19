@@ -153,7 +153,7 @@ class BarrelPuzzle(Puzzle):
 			self.map[cell] = CELL_PLATE
 
 		# 5) initialize char (optional)
-		self.Globals.set_char_cell(self.area.cell11)
+		game.set_char_cell(self.area.cell11)
 
 	def check_zsb(self):
 		self.is_zsb = False
@@ -691,7 +691,7 @@ class BarrelPuzzle(Puzzle):
 			self.die("Failed to generate random solvable room")
 
 		self.Globals.place_char_in_topleft_accessible_cell()
-		self.Globals.set_char_cell(char.c)
+		game.set_char_cell(char.c)
 
 	def cost_for_path(self, cell, parent_cell, visited_cells, start_cell, target_cell, obstacles, is_char):
 		if not self.is_in_area(cell):
@@ -860,7 +860,7 @@ class BarrelPuzzle(Puzzle):
 
 				for cell in barrel_cells:
 					create_barrel(cell)
-				self.Globals.set_char_cell(char_cell)
+				game.set_char_cell(char_cell)
 				self.Globals.debug_map(2)
 				return
 

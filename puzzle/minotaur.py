@@ -139,7 +139,7 @@ class MinotaurPuzzle(Puzzle):
 		for _ in range(7):
 			self.map[self.get_random_floor_cell_in_area()] = CELL_WALL
 		char_cell = self.get_random_floor_cell_in_area()
-		self.Globals.set_char_cell(char_cell)
+		game.set_char_cell(char_cell)
 		self.minotaur_cell = self.get_random_floor_cell_in_area([char_cell])
 
 	def generate_random_floor_path(self, start_cell, target_cell):
@@ -229,7 +229,7 @@ class MinotaurPuzzle(Puzzle):
 		if setup:
 			real_map, char_cell, minotaur_cell, goal_cell = setup
 			self.map[ix_(self.area.x_range, self.area.y_range)] = real_map
-			self.Globals.set_char_cell(char_cell)
+			game.set_char_cell(char_cell)
 			self.minotaur_cell = minotaur_cell
 			self.set_goal_and_finish_cell(goal_cell)
 			return
