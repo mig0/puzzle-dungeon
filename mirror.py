@@ -1,6 +1,6 @@
 import pygame
 from typing import Union
-from cellactor import *
+from cellactor import CellActor
 from common import die
 from game import game
 from constants import MIRROR_INACTIVE_OPACITY, MIRROR_ORIENTATION_CHARS

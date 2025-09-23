@@ -1,4 +1,4 @@
-from cellactor import Area, cell_distance
+from celltools import Area, cell_distance
 from flags import flags
 
 # TODO: Consider to move all room related things from flags to here

@@ -1,5 +1,6 @@
 from objects import char, lifts
-from cellactor import CellActor, apply_diff, get_actor_on_cell
+from cellactor import CellActor, get_actor_on_cell
+from celltools import apply_diff
 
 class Cursor(CellActor):
 	def __init__(self, image=None):

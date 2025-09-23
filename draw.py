@@ -1,7 +1,7 @@
 import pygame
 from translate import _
 from game import game
-from cellactor import apply_diff
+from celltools import apply_diff
 from sizetools import import_size_constants
 
 def draw_central_flash(full=False, color=(0, 40, 40)):

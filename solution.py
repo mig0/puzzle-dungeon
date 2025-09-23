@@ -3,7 +3,7 @@ from flags import flags
 from config import SOLUTION_MOVE_DELAY, SOLUTION_MOVE_DELAY_RANGE, SOLUTION_MOVE_DELAY_CHANGE
 from objects import char
 from constants import DIR_NAMES, DIRS_BY_NAME
-from cellactor import apply_diff, cell_diff
+from celltools import apply_diff, cell_diff
 from clipboard import clipboard
 from statusmessage import set_status_message
 

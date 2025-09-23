@@ -2,7 +2,7 @@ import pygame
 import pgzero
 from constants import DATA_DIR
 from sizetools import CELL_W, CELL_H
-from cellactor import *
+from celltools import *
 
 __all__ = [
 	'load_image',
