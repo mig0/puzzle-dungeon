@@ -4,6 +4,7 @@ from pgzero.animation import *
 from pgzero import loaders
 from typing import Union, Tuple
 from config import ARROW_KEYS_RESOLUTION, ACTOR_PHASED_OPACITY
+from constants import DIR_L, DIR_R, DIR_U, DIR_D
 from celltools import *
 from game import game
 
@@ -11,6 +12,11 @@ MAX_ALPHA = 255  # based on pygame
 
 NONE_CELL = (-1000, -1000)
 NONE_SURFACE = pygame.Surface((0, 0))
+
+class FacingMode:
+	STATIC = 0
+	H_FLIP = 1
+	ROTATE = 2
 
 active_inplace_animation_actors = []
 
@@ -452,6 +458,19 @@ class CellActor(Actor):
 		self._default_opacity = default_opacity
 		if is_default_opacity and self._opacity != self._default_opacity:
 			self.reset_opacity()
+
+	def set_facing_mode(self, facing_mode=FacingMode.STATIC):
+		self.flip = None
+		self.angle = 0
+		self.facing_mode = facing_mode
+
+	def set_h_flip_facing(self, is_right_dir=True):
+		if self.facing_mode == FacingMode.H_FLIP:
+			self.flip = None if is_right_dir else (True, False)
+
+	def set_rotate_facing(self, dir):
+		if self.facing_mode == FacingMode.ROTATE:
+			self.angle = 0 if dir == DIR_U else 90 if dir == DIR_L else 180 if dir == DIR_D else 270
 
 def create_actor(image_name, cell):
 	actor = CellActor(image_name)

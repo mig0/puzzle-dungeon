@@ -247,9 +247,6 @@ def get_revealed_actors(actors):
 			revealed_actors.append(actor)
 	return revealed_actors
 
-def set_char_flip(is_right_dir=True):
-	char.flip = None if is_right_dir else (True, False)
-
 def set_room_and_notify_puzzle(idx):
 	set_room(idx)
 	puzzle.on_set_room()
@@ -288,7 +285,7 @@ def enter_room(idx):
 	puzzle.on_enter_room()
 
 	char.phased = puzzle.is_char_phased()
-	set_char_flip((char.cx - room.x1) * 2 < room.size_x)
+	char.set_h_flip_facing((char.cx - room.x1) * 2 < room.size_x)
 
 accessible_obstacles = None
 
@@ -1056,6 +1053,7 @@ def init_new_level(level_id, reload_stored=False):
 	flags.parse_level(level)
 
 	char.reset_state()
+	char.set_facing_mode(FacingMode.H_FLIP)
 	game.char_cells = [None] * flags.NUM_ROOMS
 	char.power  = level.char_power
 	char.health = level.char_health
@@ -2094,15 +2092,19 @@ def update(dt):
 	last_processed_arrow_keys = []
 	last_processed_arrow_diff = (0, 0)
 
+	new_char_rotation_dir = None
 	new_char_flip_direction = None
 	def set_arrow_key_to_process(key, diff):
 		global last_processed_arrow_keys
 		nonlocal last_processed_arrow_diff
+		nonlocal new_char_rotation_dir
 		nonlocal new_char_flip_direction
 		if not ALLOW_DIAGONAL_MOVES and last_processed_arrow_keys:
 			return
 		pressed_arrow_keys.remove(key)
 		next_diff = apply_diff(last_processed_arrow_diff, diff)
+		if cursor.is_char_selected():
+			new_char_rotation_dir = DIRS_BY_NAME[key]
 		if cursor.is_char_selected() and key in (DIRECTION_R, DIRECTION_L):
 			new_char_flip_direction = key
 		if can_move(next_diff) and not keyboard.rctrl:
@@ -2131,8 +2133,10 @@ def update(dt):
 	if 'u' in last_processed_arrow_keys:
 		diff_y -= 1
 
-	if new_char_flip_direction is not None:
-		set_char_flip((new_char_flip_direction == DIRECTION_L) ^ (not check_should_pull()))
+	if new_char_rotation_dir:
+		char.set_rotate_facing(new_char_rotation_dir)
+	if new_char_flip_direction:
+		char.set_h_flip_facing((new_char_flip_direction == DIRECTION_L) ^ (not check_should_pull()))
 
 	if diff_x or diff_y:
 		process_move((diff_x, diff_y),)
