@@ -208,7 +208,7 @@ class MinotaurPuzzle(Puzzle):
 			state_func = self.get_solution_state_func(minotaur_cell)
 			solution_cells = self.Globals.find_best_path(char_cell, self.goal_cell, allow_stay=True, state_func=state_func)
 
-		if DEBUG_LEVEL:
+		if get_debug_lvl() > 0:
 			title = "Non-trivial solution" if solution_cells else "Only trivial solution" if has_trivial_solution else "No solution"
 			self.Globals.debug_map(2, title, char_cell=char_cell, cell_chars={c: '⨯' for c in (solution_cells or [0])[:-1]} | {minotaur_cell: '⚚'})
 

@@ -116,7 +116,7 @@ def get_bg_image():
 	return bg_image
 
 def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, combined=True, dual=False, endl=False, char_cell=None, cell_chars={}):
-	if DEBUG_LEVEL < level:
+	if get_debug_lvl() < level:
 		return
 	if descr:
 		print(descr)
@@ -527,7 +527,7 @@ def place_char_in_first_free_spot():
 		return
 
 	print("Was not able to find free spot for char, fix the level or a bug")
-	if DEBUG_LEVEL:
+	if get_debug_lvl() > 0:
 		char.c = (0, 0)
 	else:
 		quit()
@@ -1506,7 +1506,7 @@ def handle_press_key():
 		else:
 			warn("Clipboard is empty")
 
-	if DEBUG_LEVEL > 0 and cursor_was_active and not cursor.is_active():
+	if get_debug_lvl() > 0 and cursor_was_active and not cursor.is_active():
 		set_status_message(priority=0)
 
 	if keyboard.home:
@@ -2059,7 +2059,7 @@ def update(dt):
 
 	check_victory()
 
-	if DEBUG_LEVEL > 0 and cursor.is_active():
+	if get_debug_lvl() > 0 and cursor.is_active():
 		set_status_message(str(cursor.c), priority=0)
 
 	if char.is_animated() or mode == "next" or game.is_console_enabled():

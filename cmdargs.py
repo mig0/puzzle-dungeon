@@ -2,12 +2,13 @@ import os
 import sys
 import shlex
 import argparse
-from config import DEBUG_LEVEL
+from config import DEFAULT_DEBUG_LVL
+from debug import set_debug_level
 
 sys.argv[0] = 'dungeon'
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--debug', type=int, help="debug level for extra output (default: %d)" % DEBUG_LEVEL, default=DEBUG_LEVEL)
+parser.add_argument('-d', '--debug', type=int, help="debug level for extra output (default: %d)" % DEFAULT_DEBUG_LVL, default=DEFAULT_DEBUG_LVL)
 parser.add_argument('-s', '--start', metavar='LEVEL-ID', type=str, help="start with given level or collection id")
 parser.add_argument('-C', '--list-collections', help="list all collections", action='store_true')
 parser.add_argument('-n', '--use-numeric', help="use numeric ids to list collections", action='store_true')
@@ -25,3 +26,5 @@ if cmdargs_str == "''":
 	cmdargs_str = ""
 
 cmdargs = parser.parse_args(shlex.split(cmdargs_str))
+
+set_debug_level(cmdargs.debug)

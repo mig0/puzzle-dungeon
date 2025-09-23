@@ -45,8 +45,7 @@ def load_map(filename_or_stringio, special_cell_types={}):
 
 	if is_stringio:
 		file = filename_or_stringio
-		if DEBUG_LEVEL >= 2:
-			print(filename_or_stringio.getvalue())
+		debug(4, "Loading map:\n" + str(filename_or_stringio.getvalue()))
 	else:
 		try:
 			file = open(filename, "r", encoding="utf-8")
