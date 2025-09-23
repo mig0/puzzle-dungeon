@@ -1,6 +1,4 @@
 import io
-from game import game
-from objects import *
 from constants import *
 
 def parse_map_file_signature(file):
@@ -23,7 +21,9 @@ def parse_map_file_signature(file):
 	return None, puzzle_type, size_x, size_y
 
 def load_map(filename_or_stringio, special_cell_types={}):
+	from game import game
 	from sizetools import MAP_SIZE_X, MAP_SIZE_Y
+	from objects import enemies, barrels, carts, lifts, mirrors, portal_destinations, drop_key1, drop_key2, create_cart, create_lift, create_enemy, create_barrel, create_mirror
 
 	is_stringio = type(filename_or_stringio) == io.StringIO
 	filename = "<from-string>" if is_stringio else filename_or_stringio
