@@ -23,7 +23,7 @@ from level import Collection
 from cmdargs import cmdargs
 from game import game
 from drop import draw_status_drops
-from load import load_map, parse_map_file_signature
+from load import *
 from flags import flags
 from puzzle import create_puzzle, Puzzle
 from solution import solution, set_solution_funcs
@@ -1987,6 +1987,9 @@ def handle_cmdargs():
 					level_configs.extend(parse_sokoban_levels(map_string))
 				else:
 					warn("Ignoring 'clipboard:', since clipboard is empty")
+			elif arg.startswith("letslogic:"):
+				if map_string := fetch_letslogic_collection(arg[10:]):
+					level_configs.extend(parse_sokoban_levels(map_string))
 			else:
 				warn("Ignoring unknown argument %s" % arg)
 		if level_configs:

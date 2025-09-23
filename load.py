@@ -1,7 +1,10 @@
 import io
 import os
 import sys
+import codecs
+from urllib.request import urlopen
 from debug import debug
+from common import warn
 from constants import *
 
 USER_DIR = None
@@ -272,3 +275,58 @@ def load_map(filename_or_stringio, special_cell_types={}):
 
 	return (special_cell_values, extra_values)
 
+def fetch_letslogic(action):
+	url = LETSLOGIC_API_URL + action
+	debug(2, "Fetching %s" % url)
+	key = LETSLOGIC_API_KEY
+	if key.startswith('_'):
+		key = codecs.decode(key[1:][::-1], 'rot13')
+	try:
+		with urlopen(url, data=bytes('key=' + key, 'utf-8')) as res:
+			if res.status != 200:
+				warn("Got HTTP status %d on %s" % (res.status, url))
+				return None
+			output = res.read().decode()
+			debug(3, output)
+			return output
+	except Exception as e:
+		warn("%s on %s" % (e, url))
+		return None
+
+def get_ll_sokoban_level_string(config, ll_coll_name):
+	map_str = "\n".join([config['map'][i:i+config['width']] for i in range(0, len(config['map']), config['width'])])
+	string = map_str.translate(dict((ord(cn), (ch)) for cn, ch in zip('01234567', '-#@$.*+_'))) + "\n"
+	string += "ID: %s\n" % config['id']
+	string += "Title: %s\n" % config['title']
+	string += "Collection: %s\n" % ll_coll_name
+	string += "Author: %s\n" % config['author']
+	return string
+
+def fetch_letslogic_collection(ll_coll_id):
+	if not str(ll_coll_id).isascii() or not str(ll_coll_id).isdigit():
+		warn("Numeric parameter required to fetch letslogic collection")
+		return None
+	ll_coll_filename = "maps/sokoban/letslogic/%s.txt" % ll_coll_id
+	if exists_user_file(ll_coll_filename):
+		return load_user_file(ll_coll_filename)
+
+	level_configs = None
+	output = fetch_letslogic("collection/%s" % ll_coll_id)
+
+	if output is not None:
+		try:
+			ll_level_configs = eval(output)
+		except:
+			warn("Failed to parse letslogic response\n" + output)
+			return None
+		sokoban_coll_string = ""
+		for ll_level_config in ll_level_configs:
+			sokoban_level_string = get_ll_sokoban_level_string(ll_level_config, ll_coll_id)
+			ll_level_filename = "maps/sokoban/letslogic/levels/%s.txt" % ll_level_config['id']
+			save_user_file(ll_level_filename, sokoban_level_string)
+			sokoban_coll_string += sokoban_level_string + "\n"
+		save_user_file(ll_coll_filename, sokoban_coll_string)
+	else:
+		warn("Can't fetch letslogic collection, check url, key or internet")
+
+	return sokoban_coll_string
