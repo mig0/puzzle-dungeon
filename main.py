@@ -1064,6 +1064,7 @@ def init_new_level(level_id, reload_stored=False):
 	carts.clear()
 	lifts.clear()
 	mirrors.clear()
+	clock.unschedule(kill_enemy_cleanup)
 	killed_enemies.clear()
 	portal_destinations.clear()
 
