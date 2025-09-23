@@ -1,5 +1,46 @@
 import io
+import os
+import sys
+from debug import debug
 from constants import *
+
+USER_DIR = None
+
+def prepare_user_dir():
+	global USER_DIR
+	if USER_DIR:
+		return
+	if os.name == 'nt':  # Windows
+		base = os.environ.get('APPDATA') or os.environ.get('LOCALAPPDATA') or os.environ['USERPROFILE'].replace('\\', '/')
+		USER_DIR = base + '/Puzzle Dungeon'
+	elif sys.platform == 'darwin':  # macOS
+		USER_DIR = os.path.expanduser('~/Library/Application Support/Puzzle Dungeon')
+	else:  # POSIX
+		USER_DIR = os.path.expanduser('~/.puzzle-dungeon')
+	os.makedirs(USER_DIR, exist_ok=True)
+
+def normalize_user_file(filename):
+	return USER_DIR + '/' + filename
+
+def exists_user_file(filename):
+	prepare_user_dir()
+	return os.path.isfile(normalize_user_file(filename))
+
+def save_user_file(filename, content):
+	prepare_user_dir()
+	full_filename = normalize_user_file(filename)
+	debug(2, "Saving %s" % full_filename)
+	os.makedirs(os.path.dirname(full_filename), exist_ok=True)
+	with open(full_filename, 'w', encoding='utf-8') as f:
+		f.write(content)
+
+def load_user_file(filename):
+	if not exists_user_file(filename):
+		return None
+	full_filename = normalize_user_file(filename)
+	debug(2, "Loading %s" % full_filename)
+	with open(full_filename, 'r', encoding='utf-8') as f:
+		return f.read()
 
 def parse_map_file_signature(file):
 	words = file.readline().split(" ")
