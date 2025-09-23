@@ -51,6 +51,10 @@ class CellActor(Actor):
 		self.scale = scale
 		self.color = color
 		self.apply_transform()
+		self.init()
+
+	def init(self):
+		pass
 
 	def draw(self, cell=None, opacity=None):
 		if self.hidden:

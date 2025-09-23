@@ -3,8 +3,7 @@ from cellactor import CellActor, get_actor_on_cell
 from celltools import apply_diff
 
 class Cursor(CellActor):
-	def __init__(self, image=None):
-		super().__init__(image)
+	def init(self):
 		self.selected_actor = self
 		self.reset()
 
