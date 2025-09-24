@@ -293,12 +293,12 @@ def fetch_letslogic(action):
 		warn("%s on %s" % (e, url))
 		return None
 
-def get_ll_sokoban_level_string(config, ll_coll_name):
+def get_ll_sokoban_level_string(config, ll_coll_title):
 	map_str = "\n".join([config['map'][i:i+config['width']] for i in range(0, len(config['map']), config['width'])])
 	string = map_str.translate(dict((ord(cn), (ch)) for cn, ch in zip('01234567', '-#@$.*+_'))) + "\n"
 	string += "ID: %s\n" % config['id']
 	string += "Title: %s\n" % config['title']
-	string += "Collection: %s\n" % ll_coll_name
+	string += "Collection: %s\n" % ll_coll_title
 	string += "Author: %s\n" % config['author']
 	return string
 
@@ -313,6 +313,9 @@ def fetch_letslogic_collection(ll_coll_id):
 	level_configs = None
 	output = fetch_letslogic("collection/%s" % ll_coll_id)
 
+	ll_collections = fetch_letslogic_collections()
+	ll_coll_title = ll_collections.get(ll_coll_id, {'title': ll_coll_id})['title']
+
 	if output is not None:
 		try:
 			ll_level_configs = eval(output)
@@ -321,7 +324,7 @@ def fetch_letslogic_collection(ll_coll_id):
 			return None
 		sokoban_coll_string = ""
 		for ll_level_config in ll_level_configs:
-			sokoban_level_string = get_ll_sokoban_level_string(ll_level_config, ll_coll_id)
+			sokoban_level_string = get_ll_sokoban_level_string(ll_level_config, ll_coll_title)
 			ll_level_filename = "maps/sokoban/letslogic/levels/%s.txt" % ll_level_config['id']
 			save_user_file(ll_level_filename, sokoban_level_string)
 			sokoban_coll_string += sokoban_level_string + "\n"
@@ -330,3 +333,24 @@ def fetch_letslogic_collection(ll_coll_id):
 		warn("Can't fetch letslogic collection, check url, key or internet")
 
 	return sokoban_coll_string
+
+def fetch_letslogic_collections():
+	ll_colls_filename = "letslogic-collections.yaml"
+	if exists_user_file(ll_colls_filename):
+		output = load_user_file(ll_colls_filename)
+	else:
+		output = fetch_letslogic("collections")
+		if output is not None:
+			save_user_file(ll_colls_filename, output)
+		else:
+			warn("Can't fetch letslogic collection, check url, key or internet")
+			return []
+
+	null = None
+	try:
+		collections = eval(output)
+	except Exception as e:
+		warn("Failed to parse letslogic collections:\n%s" % str(e))
+		return []
+
+	return dict((str(c["id"]), c) for c in sorted(collections, key=lambda c: c["id"]))

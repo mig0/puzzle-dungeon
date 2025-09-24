@@ -1938,6 +1938,12 @@ def handle_cmdargs():
 		for collection in game.collections:
 			print("%s - %s levels (%d)" % (collection.get_id(numeric).ljust(max_id_len), collection.name, len(collection.level_configs)))
 		exit()
+	if cmdargs.list_ll_collections:
+		collections = fetch_letslogic_collections()
+		max_id_len = max(len(c_id) for c_id in collections)
+		for c_id, c in collections.items():
+			print("%s - %s (%d)" % (c_id.ljust(max_id_len), c['title'], c['levels']))
+		exit()
 	fallback_to_main_screen = True
 	if level_or_collection_id := cmdargs.start:
 		level_id = None
