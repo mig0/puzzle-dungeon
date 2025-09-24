@@ -2,12 +2,15 @@ import io
 import os
 import sys
 import codecs
+from time import time
 from urllib.request import urlopen
 from debug import debug
 from common import warn
 from constants import *
 
 USER_DIR = None
+
+DAY = 24 * 60 * 60
 
 def prepare_user_dir():
 	global USER_DIR
@@ -25,9 +28,15 @@ def prepare_user_dir():
 def normalize_user_file(filename):
 	return USER_DIR + '/' + filename
 
-def exists_user_file(filename):
+def exists_user_file(filename, valid_age=None):
 	prepare_user_dir()
-	return os.path.isfile(normalize_user_file(filename))
+	full_filename = normalize_user_file(filename)
+	if not os.path.isfile(full_filename):
+		return False
+	if valid_age is not None:
+		if time() - os.path.getmtime(full_filename) > valid_age:
+			return False
+	return True
 
 def save_user_file(filename, content):
 	prepare_user_dir()
@@ -336,7 +345,7 @@ def fetch_letslogic_collection(ll_coll_id):
 
 def fetch_letslogic_collections():
 	ll_colls_filename = "letslogic-collections.yaml"
-	if exists_user_file(ll_colls_filename):
+	if exists_user_file(ll_colls_filename, 7 * DAY):
 		output = load_user_file(ll_colls_filename)
 	else:
 		output = fetch_letslogic("collections")
