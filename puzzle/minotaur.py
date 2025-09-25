@@ -208,7 +208,7 @@ class MinotaurPuzzle(Puzzle):
 			state_func = self.get_solution_state_func(minotaur_cell)
 			solution_cells = self.Globals.find_best_path(char_cell, self.goal_cell, allow_stay=True, state_func=state_func)
 
-		if get_debug_lvl() > 0:
+		if debug.lvl > 0:
 			title = "Non-trivial solution" if solution_cells else "Only trivial solution" if has_trivial_solution else "No solution"
 			self.Globals.debug_map(2, title, char_cell=char_cell, cell_chars={c: '⨯' for c in (solution_cells or [0])[:-1]} | {minotaur_cell: '⚚'})
 
@@ -234,7 +234,7 @@ class MinotaurPuzzle(Puzzle):
 			self.set_goal_and_finish_cell(goal_cell)
 			return
 
-		debug(0, "Can't generate minotaur level, making it random unsolvable")
+		warn("Can't generate minotaur level, making it random unsolvable")
 		for cell in self.area.cells:
 			self.convert_to_floor(cell)
 		self.generate_random_nonsolvable_room()

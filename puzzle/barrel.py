@@ -1,7 +1,6 @@
 from . import *
 
 SHOW_DEADLOCK_MAPS = False
-DEBUG_FIND_SOLUTION = False
 MIN_SOLUTION_DEPTH = 8
 MAX_SOLUTION_DEPTH = 200
 SOLUTION_DEPTH_STEP = 4
@@ -168,7 +167,7 @@ class BarrelPuzzle(Puzzle):
 		for cell in self.area.cells:
 			is_wall_cell = self.area.is_cell_oddodd(cell)
 			if is_wall_cell and self.map[cell] != CELL_WALL or not is_wall_cell and not self.map[cell] in (*CELL_FLOOR_TYPES, CELL_PLATE):
-				debug(2, "Cell %s must%s be WALL for ZSB, but it is '%s', concluding no ZSB" % (str(cell), "" if is_wall_cell else " NOT", self.map[cell]))
+				debug(3, "Cell %s must%s be WALL for ZSB, but it is '%s', concluding no ZSB" % (str(cell), "" if is_wall_cell else " NOT", self.map[cell]))
 				return
 
 		# check number and connectivity of barrels and plates
@@ -510,13 +509,18 @@ class BarrelPuzzle(Puzzle):
 			self.visited_positions = []
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
 
+		depth = len(self.solution)
+
 		if self.is_solved_for_barrel_cells(self.barrel_cells):
+			debug([depth], DBG_SOLV, "Found solution of %d shifts in %.1fs" % (depth, time() + MAX_FIND_SOLUTION_TIME - self.end_solution_time))
 			return True
 
-		if len(self.solution) >= self.solution_depth:
+		if depth >= self.solution_depth:
+			debug([depth], DBG_SOLV, "Solution depth limit %d reached" % self.solution_depth)
 			return False
 
 		if time() > self.end_solution_time:
+			debug([depth], DBG_SOLV, "Solution time limit %ds reached" % MAX_FIND_SOLUTION_TIME)
 			return False
 
 		if self.is_zsb:
@@ -540,8 +544,7 @@ class BarrelPuzzle(Puzzle):
 		accessible_cells_near_barrels.sort(key=lambda cell_pair: self.get_barrel_distance_weight(*cell_pair))
 
 		for cell, barrel_cell in accessible_cells_near_barrels:
-			if DEBUG_FIND_SOLUTION:
-				print("%s%s -> %s" % (" " * len(self.solution), cell, barrel_cell))
+			debug([depth], DBG_SOLV, "%s -> %s" % (cell, barrel_cell))
 			old_barrel_cells = self.barrel_cells.copy()
 			old_char_cell = self.char_cell
 
@@ -866,7 +869,7 @@ class BarrelPuzzle(Puzzle):
 
 			num_tries -= 1
 
-		debug(0, "Can't generate barrel level, making it solved")
+		warn("Can't generate barrel level, making it solved")
 		for cell in self.get_room_plate_cells():
 			create_barrel(cell)
 

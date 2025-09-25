@@ -163,7 +163,7 @@ class TrafficPuzzle(Puzzle):
 					lift.color = EXTENDED_COLOR_RGB_VALUES[self.exit_color_idxs[exit_cell]]
 			return
 
-		debug(0, "Can't generate traffic level, making it random unsolvable")
+		warn("Can't generate traffic level, making it random unsolvable")
 		self.generate_random_nonsolvable_room()
 
 	def generate_room(self):
