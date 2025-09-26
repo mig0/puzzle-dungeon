@@ -508,7 +508,7 @@ class BarrelPuzzle(Puzzle):
 			self.char_cell = char.c
 			self.barrel_cells = self.get_room_barrel_cells()
 			self.barrel_cells.sort()
-			self.visited_positions = []
+			self.visited_positions = {}
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
 
 		depth = len(self.solution)
@@ -527,17 +527,17 @@ class BarrelPuzzle(Puzzle):
 
 		if self.is_zsb:
 			accessible_cells_near_barrels = self.get_all_valid_zsb_char_barrel_moves()
-			position_id = [ *self.barrel_cells ]
+			position_id = (*self.barrel_cells,)
 		else:
 			accessible_cells = self.Globals.get_accessible_cells(self.char_cell, self.barrel_cells)
 			accessible_cells.sort()
 
 			accessible_cells_near_barrels = None
-			position_id = [ *accessible_cells, None, *self.barrel_cells ]
+			position_id = (*accessible_cells, *self.barrel_cells)
 
-		if position_id in self.visited_positions:
+		if position_id in self.visited_positions and self.visited_positions[position_id] <= depth:
 			return False
-		self.visited_positions.append(position_id)
+		self.visited_positions[position_id] = depth
 
 		if not accessible_cells_near_barrels:
 			accessible_cells_near_barrels = [ (cell, barrel_cell) for cell in accessible_cells for barrel_cell in self.barrel_cells
