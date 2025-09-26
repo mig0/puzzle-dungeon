@@ -382,7 +382,9 @@ class BarrelPuzzle(Puzzle):
 			)]
 			solution_depth += num_pushes
 
-		return ((solution_depth - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP
+		solution_depth = max(solution_depth, MIN_SOLUTION_DEPTH)
+
+		return ((solution_depth - MIN_SOLUTION_DEPTH - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP + MIN_SOLUTION_DEPTH
 
 	def prepare_to_find_solution(self):
 		if self.disable_prepare_solution:
