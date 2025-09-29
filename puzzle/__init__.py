@@ -314,8 +314,8 @@ def create_puzzle(Globals):
 	puzzle = puzzle_class(Globals)
 
 	if not puzzle.assert_config():
-		print("Level #%s: Requested %s, but config is incompatible, so ignoring it" % (level.get("n"), puzzle.__class__.__name__))
-		puzzle = Puzzle(level, Globals)
+		print("Level %s: Requested %s, but config is incompatible, so ignoring it" % (game.level.get_id(), puzzle.__class__.__name__))
+		puzzle = Puzzle(Globals)
 
 	return puzzle
 

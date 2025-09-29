@@ -138,7 +138,7 @@ class GatePuzzle(Puzzle):
 		self.load_map_special_cell_types[CELL_PLATE] = 'ints'
 
 	def assert_config(self):
-		return flags.is_any_maze
+		return flags.is_any_maze or game.level.map_file or game.level.map_string
 
 	def is_long_generation(self):
 		return True
