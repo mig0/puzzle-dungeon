@@ -7,7 +7,7 @@ from urllib.request import urlopen
 from debug import debug
 from common import warn
 from constants import *
-from sokobanparser import find_map_file
+from sokobanparser import open_map, is_sokoban_file, find_map_file
 
 USER_DIR = None
 
@@ -58,21 +58,21 @@ def load_user_file(filename):
 def parse_map_file_signature(file):
 	words = file.readline().split(" ")
 	if len(words) <= 1:
-		return "Invalid signature line, no expected space", None, None, None
+		return "Invalid signature line, no expected space", None, None
 	if words[0] != '#' or words[1] != 'Dungeon':
-		return "Invalid signature line, no expected '# Dungeon'", None, None, None
+		return "Invalid signature line, no expected '# Dungeon'", None, None
 	if len(words) <= 4:
-		return "Invalid signature line, no expected puzzle-type and size", None, None, None
+		return "Invalid signature line, no expected puzzle-type and size", None, None
 	puzzle_type = words[2]
 #	if not puzzle_type.endswith("Puzzle"):
-#		return "Invalid signature line, invalid puzzle-type %s" % puzzle_type, None, None, None
+#		return "Invalid signature line, invalid puzzle-type %s" % puzzle_type, None, None
 	size_str = words[-1].rstrip("\n")
 	sizes = size_str.split("x")
 	if len(sizes) != 2 or not sizes[0].isdigit() or not sizes[1].isdigit():
-		return "Invalid signature line, invalid size '%s'" % size_str, None, None, None
+		return "Invalid signature line, invalid size '%s'" % size_str, None, None
 	size_x = int(sizes[0])
 	size_y = int(sizes[1])
-	return None, puzzle_type, size_x, size_y
+	return None, puzzle_type, (size_x, size_y)
 
 def load_map(filename_or_stringio, special_cell_types={}):
 	from game import game
@@ -112,10 +112,11 @@ def load_map(filename_or_stringio, special_cell_types={}):
 			return
 
 	# parse first signature line
-	error, puzzle_type, size_x, size_y = parse_map_file_signature(file)
+	error, puzzle_type, size = parse_map_file_signature(file)
 	if error:
 		print_error(error)
 		return
+	size_x, size_y = size
 	if size_x != MAP_SIZE_X or size_y != MAP_SIZE_Y:
 		print_error("Invalid size %dx%d instead of %dx%d" % (size_x, size_y, MAP_SIZE_X, MAP_SIZE_Y))
 		return
@@ -288,6 +289,17 @@ def load_map(filename_or_stringio, special_cell_types={}):
 	file.close()
 
 	return (special_cell_values, extra_values)
+
+def detect_map_file(filename, map_string=None):
+	file = open_map(filename) if filename else io.StringIO(map_string)
+	if not file:
+		return None
+	error, puzzle_type, size = parse_map_file_signature(file)
+	if not error:
+		return False, None, puzzle_type, size
+	if is_sokoban_file(file):
+		return True, None, None, None
+	return False, error, None, None
 
 def fetch_letslogic(action):
 	url = LETSLOGIC_API_URL + action

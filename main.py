@@ -1981,26 +1981,44 @@ def handle_cmdargs():
 			elif collection := game.get_collection_by_id(arg):
 				for level_config in collection.level_configs:
 					level_configs.append(collection.with_level_config_defaults(level_config))
-			elif os.path.isfile(MAPS_DIR_PREFIX + arg):
-				file = open(MAPS_DIR_PREFIX + arg, 'r')
-				error, puzzle_type, size_x, size_y = parse_map_file_signature(file)
+			elif arg == "clipboard:":
+				if not (map_string := clipboard.get()):
+					warn("Ignoring 'clipboard:', since clipboard is empty")
+					continue
+				map_info = detect_map_file(None, map_string=map_string)
+				if not map_info:
+					warn("Ignoring 'clipboard:', no map in clipboard")
+					continue
+				is_sokoban_map, error, puzzle_type, size = map_info
+				if is_sokoban_map:
+					level_configs.extend(parse_sokoban_levels(map_string))
+					continue
+				if error:
+					warn("Ignoring 'clipboard:', invalid map: %s" % error)
+					continue
+				level_configs.append({
+					'puzzle-type': puzzle_type,
+					'map-size': size,
+					'map-string': map_string,
+					'name': "%s map from clipboard" % puzzle_type,
+				})
+			elif arg.startswith("letslogic:"):
+				if map_string := fetch_letslogic_collection(arg[10:]):
+					level_configs.extend(parse_sokoban_levels(map_string))
+			elif map_info := detect_map_file(arg):
+				is_sokoban_map, error, puzzle_type, size = map_info
+				if is_sokoban_map:
+					level_configs.extend(parse_sokoban_levels(arg))
+					continue
 				if error:
 					warn("Ignoring map-file %s: %s" % (arg, error))
 					continue
 				level_configs.append({
 					'puzzle-type': puzzle_type,
-					'map-size': (size_x, size_y),
+					'map-size': size,
 					'map-file': arg,
-					'name': "Map %s" % arg,
+					'name': "%s map %s" % (puzzle_type, arg),
 				})
-			elif arg == "clipboard:":
-				if map_string := clipboard.get():
-					level_configs.extend(parse_sokoban_levels(map_string))
-				else:
-					warn("Ignoring 'clipboard:', since clipboard is empty")
-			elif arg.startswith("letslogic:"):
-				if map_string := fetch_letslogic_collection(arg[10:]):
-					level_configs.extend(parse_sokoban_levels(map_string))
 			else:
 				warn("Ignoring unknown argument %s" % arg)
 		if level_configs:
