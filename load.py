@@ -7,6 +7,7 @@ from urllib.request import urlopen
 from debug import debug
 from common import warn
 from constants import *
+from sokobanparser import find_map_file
 
 USER_DIR = None
 
@@ -100,10 +101,14 @@ def load_map(filename_or_stringio, special_cell_types={}):
 		file = filename_or_stringio
 		debug(4, "Loading map:\n" + str(filename_or_stringio.getvalue()))
 	else:
+		full_filename = find_map_file(filename)
+		if not full_filename:
+			print_error("Can't find")
+			return
 		try:
-			file = open(filename, "r", encoding="utf-8")
-		except:
-			print_error("Failed to open")
+			file = open(full_filename, "r", encoding="utf-8", errors="strict")
+		except Exception as e:
+			print_error("Failed to open: %s" % e.strerror)
 			return
 
 	# parse first signature line
