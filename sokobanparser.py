@@ -1,7 +1,8 @@
 import io
+import os
 from constants import *
 from random import randint
-from common import die
+from common import die, open_read
 
 CHAR_CELL_TYPES = {
 	'#': CELL_WALL,
@@ -35,6 +36,35 @@ def is_map_line(line):
 		if CHAR_CELL_TYPES[ch] != CELL_FLOOR:
 			is_all_floor = False
 	return not is_all_floor
+
+def is_sokoban_file(file):
+	num_map_lines = 0
+	while line := file.readline():
+		line = line.rstrip()
+		if is_map_line(line):
+			num_map_lines += 1
+		else:
+			num_map_lines = 0
+		if num_map_lines >= 3:
+			return True
+	return False
+
+def find_map_file(filename):
+	if os.path.isabs(filename):
+		return filename if os.path.isfile(filename) else None
+	full_filename = None
+	for candidate_dir in MAPS_DIR_PREFIX + 'sokoban/', MAPS_DIR_PREFIX, '':
+		if os.path.isfile(candidate_dir + filename):
+			full_filename = candidate_dir + filename
+	return full_filename
+
+def open_map(filename, descr="map", strict=False):
+	full_filename = find_map_file(filename)
+	if not full_filename:
+		if strict:
+			die("No %s file %s" % (descr, filename))
+		return None
+	return open_read(full_filename, descr)
 
 def create_map_string(lines):
 	min_size_x = 13
@@ -78,11 +108,10 @@ def parse_sokoban_levels(string_or_filename_or_file):
 	if type(string_or_filename_or_file) == str and "\n" in string_or_filename_or_file:
 		file = io.StringIO(string_or_filename_or_file)
 	elif type(string_or_filename_or_file) == str:
-		full_filename = MAPS_DIR_PREFIX + 'sokoban/' + string_or_filename_or_file
-		file = open(full_filename, "r", encoding="utf-8")
-		if not file:
-			die("Can't open file %s with sokoban levels" % full_filename)
-	elif not (isinstance(string_or_filename_or_file, io.IOBase) and string_or_filename_or_file.readable()):
+		file = open_map(string_or_filename_or_file, "sokoban", True)
+	elif isinstance(string_or_filename_or_file, io.IOBase) and string_or_filename_or_file.readable():
+		file = string_or_filename_or_file
+	else:
 		die("parse_sokoban_levels requires string, filename or file, not %s" % str(string_or_filename_or_file), True)
 
 	levels = []
