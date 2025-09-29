@@ -2,6 +2,8 @@ from constants import DEFAULT_DEBUG_LVL
 
 # features
 DBG_SOLV = "solv"
+DBG_SOLV2 = "solv+"
+DBG_SOLV3 = "solv++"
 DBG_PATH = "path"
 
 class Debug:
@@ -18,6 +20,9 @@ class Debug:
 				self.lvl = int(item)
 			except ValueError:
 				self.enable_feature(item)
+				while item.endswith('+'):
+					item = item[0:-1]
+					self.enable_feature(item)
 
 	def __call__(self, *args):
 		# optimize common case
