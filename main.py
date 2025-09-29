@@ -1949,19 +1949,8 @@ def handle_cmdargs():
 		for c_id, c in collections.items():
 			print("%s - %s (%d)" % (c_id.ljust(max_id_len), c['title'], c['levels']))
 		exit()
+
 	fallback_to_main_screen = True
-	if level_or_collection_id := cmdargs.start:
-		level_id = None
-		if game.is_valid_level_id(level_or_collection_id):
-			level_id = level_or_collection_id
-		elif collection := game.get_collection_by_id(level_or_collection_id):
-			level_id = collection.get_level_id()
-		else:
-			warn("Ignoring unexisting collection '%s'" % collection_id)
-		if level_id and game.set_requested_new_level(level_id):
-			fallback_to_main_screen = False
-		else:
-			warn("Can not start with level or collection '%s'" % level_or_collection_id)
 
 	game.set_custom_collection_config({
 		"bg-image": cmdargs.bg_image,
@@ -2024,6 +2013,19 @@ def handle_cmdargs():
 		if level_configs:
 			if game.set_custom_collection_level_configs(level_configs):
 				fallback_to_main_screen = False
+
+	if level_or_collection_id := cmdargs.start:
+		level_id = None
+		if game.is_valid_level_id(level_or_collection_id):
+			level_id = level_or_collection_id
+		elif collection := game.get_collection_by_id(level_or_collection_id):
+			level_id = collection.get_level_id()
+		else:
+			warn("Ignoring unexisting level or collection '%s'" % level_or_collection_id)
+		if level_id and game.set_requested_new_level(level_id):
+			fallback_to_main_screen = False
+		else:
+			warn("Can not start with level or collection '%s'" % level_or_collection_id)
 
 	return not fallback_to_main_screen
 
