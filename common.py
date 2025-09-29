@@ -16,6 +16,17 @@ def die(error, with_trace=False):
 	warn(error, with_trace)
 	quit()
 
+def open_read(filename, descr=None):
+	filename_descr = "%sfile %s" % (descr + " " if descr else "", filename)
+	try:
+		return open(filename, "r", encoding="utf-8", errors="replace")
+	except FileNotFoundError:
+		die("Requested %s not found" % filename_descr)
+	except PermissionError:
+		die("No read permissions for %s" % filename_descr)
+	except Exception as e:
+		die("Can't open %s (%s)" % (filename_descr, e))
+
 def get_pgzero_game_from_stack():
 	for frame_info in inspect.stack():
 		frame = frame_info.frame
