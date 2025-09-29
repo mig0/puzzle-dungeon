@@ -190,24 +190,29 @@ def is_outer_wall(cell, void_is_like_wall=False):
 def replace_outer_walls(*cell_types):
 	for cy in MAP_Y_RANGE:
 		for cx in MAP_X_RANGE:
-			if game.map[cx, cy] == CELL_OUTER_WALL:
-				game.map[cx, cy] = choice(cell_types)
+			cell = cx, cy
+			if game.map[cell] == CELL_OUTER_WALL:
+				game.map[cell] = choice(cell_types)
 
 def convert_outer_walls(cell_type=None, void_is_like_wall=False):
 	for cy in MAP_Y_RANGE:
 		for cx in MAP_X_RANGE:
-			if is_outer_wall((cx, cy), void_is_like_wall=void_is_like_wall):
-				game.map[cx, cy] = CELL_OUTER_WALL
+			cell = cx, cy
+			if is_outer_wall(cell, void_is_like_wall=void_is_like_wall):
+				game.map[cell] = CELL_OUTER_WALL
 
 	if cell_type is not None:
 		replace_outer_walls(*cell_type)
 
 def convert_outer_floors(cell_type=None):
 	floor_cells_to_convert = set()
-	for cy in (0, MAP_SIZE_Y - 1):
-		for cx in (0, MAP_SIZE_X - 1):
-			if game.map[cx, cy] in CELL_FLOOR_TYPES:
-				floor_cells_to_convert.update(get_accessible_cells((cx, cy)))
+	for cy in MAP_Y_RANGE:
+		for cx in MAP_X_RANGE:
+			if not (cx == 0 or cy == 0 or cx == MAP_SIZE_X - 1 or cy == MAP_SIZE_Y - 1):
+				continue
+			cell = cx, cy
+			if game.map[cell] in CELL_FLOOR_TYPES and not cell in floor_cells_to_convert:
+				floor_cells_to_convert.update(get_accessible_cells((cell)))
 	for cell in floor_cells_to_convert:
 		game.map[cell] = CELL_OUTER_WALL
 
