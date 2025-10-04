@@ -343,10 +343,11 @@ def fetch_letslogic_collection(ll_coll_id):
 	ll_coll_title = ll_collections.get(ll_coll_id, {'title': ll_coll_id})['title']
 
 	if output is not None:
+		null = None
 		try:
 			ll_level_configs = eval(output)
 		except:
-			warn("Failed to parse letslogic response\n" + output)
+			warn("Failed to parse letslogic collection response\n" + output)
 			return None
 		sokoban_coll_string = ""
 		for ll_level_config in ll_level_configs:
