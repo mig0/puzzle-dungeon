@@ -1323,13 +1323,14 @@ def kill_enemy_cleanup():
 def cancel_playing_solution():
 	if solution.is_play_mode():
 		solution.reset()
-		set_status_message("Playing solution stopped", "stop-auto-play", 1, 3)
+		set_status_message("Playing solution stopped", "cancel_playing_solution", 1, 3)
 		return True
 	return False
 
 def unset_prepared_solution():
 	if solution.is_active() and not solution.is_play_mode():
 		solution.reset()
+		set_status_message("Prepared solution unset", "unset_prepared_solution", 1, 3)
 		return True
 	return False
 
@@ -1529,6 +1530,10 @@ def handle_press_key():
 
 	# if any key is pressed while playing solution, stop it
 	if cancel_playing_solution():
+		return
+
+	# unset solution explicitely with Backspace
+	if keyboard.backspace and unset_prepared_solution():
 		return
 
 	if keyboard.p:

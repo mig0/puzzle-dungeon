@@ -105,6 +105,7 @@ on GNU/Linux, Windows, and other operating systems.
 |Enter|Activate cursor
 |Esc|Exit to the main screen
 |KP-Enter|Find solution, then replay it
+|Backspace|Unset prepared solution if any
 |RShift-E|Set language to English
 |RShift-R|Set language to Russian
 |RShift-H|Set language to Hebrew
