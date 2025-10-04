@@ -1990,7 +1990,7 @@ def handle_cmdargs():
 					continue
 				is_sokoban_map, error, puzzle_type, size = map_info
 				if is_sokoban_map:
-					level_configs.extend(parse_sokoban_levels(map_string))
+					level_configs.extend(parse_sokoban_levels(map_string, game.custom_collection.config))
 					continue
 				if error:
 					warn("Ignoring 'clipboard:', invalid map: %s" % error)
@@ -2003,11 +2003,11 @@ def handle_cmdargs():
 				})
 			elif arg.startswith("letslogic:"):
 				if map_string := fetch_letslogic_collection(arg[10:]):
-					level_configs.extend(parse_sokoban_levels(map_string))
+					level_configs.extend(parse_sokoban_levels(map_string, game.custom_collection.config))
 			elif map_info := detect_map_file(arg):
 				is_sokoban_map, error, puzzle_type, size = map_info
 				if is_sokoban_map:
-					level_configs.extend(parse_sokoban_levels(arg))
+					level_configs.extend(parse_sokoban_levels(arg, game.custom_collection.config))
 					continue
 				if error:
 					warn("Ignoring map-file %s: %s" % (arg, error))

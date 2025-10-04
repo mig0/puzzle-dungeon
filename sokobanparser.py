@@ -104,7 +104,7 @@ def create_map_string(lines):
 
 	return (size_x, size_y), '\n'.join([sig_line] + lines) + '\n'
 
-def parse_sokoban_levels(string_or_filename_or_file):
+def parse_sokoban_levels(string_or_filename_or_file, config={}):
 	if type(string_or_filename_or_file) == str and "\n" in string_or_filename_or_file:
 		file = io.StringIO(string_or_filename_or_file)
 	elif type(string_or_filename_or_file) == str:
@@ -134,9 +134,9 @@ def parse_sokoban_levels(string_or_filename_or_file):
 			map_size, map_string = create_map_string(map_lines)
 			levels.append({
 				"name": level_name or "No Name",
-				"bg-image": "bg/starry-sky.webp",
-				"theme": ("stoneage1", "stoneage2", "stoneage3", "stoneage4", "stoneage5", "default", "modern1", "moss")[randint(0, 7)],
-				"music": ("playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures")[randint(0, 4)] + ".mp3",
+				"bg-image": config.get('bg-image') or "bg/starry-sky.webp",
+				"theme": config.get('theme') or ("stoneage1", "stoneage2", "stoneage3", "stoneage4", "stoneage5", "default", "modern1", "moss")[randint(0, 7)],
+				"music": config.get('music') or ("playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures")[randint(0, 4)] + ".mp3",
 				"map-size": map_size,
 				"map-string": map_string,
 				"num-enemies": 0,
