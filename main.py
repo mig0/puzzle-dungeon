@@ -1245,12 +1245,6 @@ def draw_map():
 					screen.blit(cell_image, cell_to_pos_00(cell))
 	puzzle.on_draw_map()
 
-def get_time_str(time):
-	sec = int(time)
-	min = sec / 60
-	sec = sec % 60
-	return "%d:%02d" % (min, sec) if min < 60 else "%d:%02d:%02d" % (min / 60, min % 60, sec)
-
 def draw_status():
 	cy = MAP_SIZE_Y
 	for cx in MAP_X_RANGE:

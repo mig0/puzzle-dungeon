@@ -16,6 +16,12 @@ def die(error, with_trace=False):
 	warn(error, with_trace)
 	quit()
 
+def get_time_str(secs):
+	sec = int(secs)
+	min = sec / 60
+	sec = sec % 60
+	return "%d:%02d" % (min, sec) if min < 60 else "%d:%02d:%02d" % (min / 60, min % 60, sec)
+
 def open_read(filename, descr=None):
 	filename_descr = "%sfile %s" % (descr + " " if descr else "", filename)
 	try:
