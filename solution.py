@@ -101,6 +101,7 @@ class Solution:
 
 	def reset(self):
 		self.find_mode = False
+		self.stop_find = False
 		self.solution_items = None
 		self.play_mode = False
 		self.is_status_drawn = False

@@ -1327,6 +1327,13 @@ def cancel_playing_solution():
 		return True
 	return False
 
+def stop_finding_solution():
+	if solution.is_find_mode():
+		solution.stop_find = True
+		set_status_message("Requesting to stop finding solution", "stop_finding_solution", 1, 1)
+		return True
+	return False
+
 def unset_prepared_solution():
 	if solution.is_active() and not solution.is_play_mode():
 		solution.reset()
@@ -1530,6 +1537,10 @@ def handle_press_key():
 
 	# if any key is pressed while playing solution, stop it
 	if cancel_playing_solution():
+		return
+
+	# if any key is pressed while finding solution, mark it as stop-find
+	if stop_finding_solution():
 		return
 
 	# unset solution explicitely with Backspace
