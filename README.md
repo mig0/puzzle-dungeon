@@ -100,6 +100,7 @@ on GNU/Linux, Windows, and other operating systems.
 |s|Turn on/off sound
 |u|Undo move
 |a|Toggle move animation
+|q|Quit game
 |w|Win the level (cheating)
 |Space|Press cell, force teleport and more
 |Enter|Activate cursor

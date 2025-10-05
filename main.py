@@ -1377,6 +1377,8 @@ def handle_press_key():
 	keyboard.ctrl  = keyboard.lctrl  or keyboard.rctrl
 	keyboard.alt   = keyboard.lalt   or keyboard.ralt
 
+	keyboard.nomods = not (keyboard.shift or keyboard.ctrl or keyboard.alt)
+
 	reset_idle_time()
 
 	if mode != "game" and mode != "end" and mode != "next":
@@ -1461,23 +1463,24 @@ def handle_press_key():
 	if keyboard.f12:
 		pygame.mouse.set_visible(not pygame.mouse.get_visible())
 
-	if keyboard.l:
-		reset_level_title_and_goal_time()
+	if keyboard.nomods:
+		if keyboard.l:
+			reset_level_title_and_goal_time()
 
-	if keyboard.m:
-		if is_music_enabled:
-			disable_music()
-		else:
-			enable_music()
+		if keyboard.m:
+			if is_music_enabled:
+				disable_music()
+			else:
+				enable_music()
 
-	if keyboard.s:
-		is_sound_enabled = not is_sound_enabled
+		if keyboard.s:
+			is_sound_enabled = not is_sound_enabled
 
-	if keyboard.a:
-		is_move_animate_enabled = not is_move_animate_enabled
+		if keyboard.a:
+			is_move_animate_enabled = not is_move_animate_enabled
 
-	if keyboard.q:
-		quit()
+		if keyboard.q:
+			quit()
 
 	if mode == "next":
 		return
