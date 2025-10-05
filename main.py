@@ -1330,7 +1330,7 @@ def cancel_playing_solution():
 def stop_finding_solution():
 	if solution.is_find_mode():
 		solution.stop_find = True
-		set_status_message("Requesting to stop finding solution", "stop_finding_solution", 1, 1)
+		set_status_message("Requested to stop finding solution", "stop_finding_solution", 1, 3)
 		return True
 	return False
 
