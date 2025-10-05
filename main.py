@@ -1382,6 +1382,15 @@ def handle_press_key():
 	if mode != "game" and mode != "end" and mode != "next":
 		return
 
+	# ignore single modifier presses
+	if (keyboard.shift or keyboard.ctrl or keyboard.alt) and len(keyboard._pressed) == 1:
+		return
+
+	# right Alt and Ctrl are reserved for puzzles
+	if (keyboard.ralt or keyboard.rctrl) and not keyboard.rshift:
+		puzzle.on_press_key(keyboard)
+		return
+
 	if keyboard.escape and keyboard.ctrl:
 		game.toggle_console()
 		return

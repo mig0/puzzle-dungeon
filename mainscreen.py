@@ -30,8 +30,7 @@ class MainScreen(VirtualPuzzle):
 		return False
 
 	def on_press_key(self, keyboard):
-		if keyboard._pressed and not (
-			(keyboard.shift or keyboard.ctrl or keyboard.alt) and len(keyboard._pressed) == 1
+		if not (False
 			or keyboard.right or keyboard.left or keyboard.up or keyboard.down
 			or keyboard.escape or keyboard.space or keyboard.enter
 		):
