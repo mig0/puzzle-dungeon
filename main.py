@@ -1421,7 +1421,7 @@ def handle_press_key():
 		if keyboard.s:
 			flags.is_stopless = not flags.is_stopless
 
-		if keyboard.d:
+		if keyboard.m:
 			map_stringio = io.StringIO()
 			with stdout_redirected_to(sys.stdout, map_stringio):
 				debug_map(full_format=not keyboard.ralt, clean=not keyboard.rctrl)

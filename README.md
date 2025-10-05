@@ -110,7 +110,7 @@ on GNU/Linux, Windows, and other operating systems.
 |RShift-R|Set language to Russian
 |RShift-H|Set language to Hebrew
 |RShift-L|Enabled/disabled show title and goal
-|RShift-D|Print current map
+|RShift-M|Print current map + copy to clipboard
 |Home|    Simulate mouse button 1
 |End|     Simulate mouse button 3
 |Insert|  Simulate mouse button 2
