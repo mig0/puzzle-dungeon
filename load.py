@@ -5,7 +5,7 @@ import codecs
 from time import time
 from urllib.request import urlopen
 from debug import debug
-from common import warn
+from common import die, warn
 from constants import *
 from sokobanparser import open_map, is_sokoban_file, find_map_file
 
@@ -329,17 +329,31 @@ def get_ll_sokoban_level_string(config, ll_coll_title):
 	return string
 
 def fetch_letslogic_collection(ll_coll_id):
+	if not type(ll_coll_id) == str:
+		die("String parameter required to fetch letslogic collection")
+
+	ll_collections = None  # lazy filling
 	if not str(ll_coll_id).isascii() or not str(ll_coll_id).isdigit():
-		warn("Numeric parameter required to fetch letslogic collection")
-		return None
+		ll_collections = fetch_letslogic_collections()
+		ll_coll = next((ll_coll for ll_coll in ll_collections.values() if ll_coll['title'] == ll_coll_id), None)
+		if not ll_coll:
+			warn("Unknown non-numeric title %s to fetch letslogic collection" % ll_coll_id)
+			return None
+		ll_coll_id = str(ll_coll["id"])
+
 	ll_coll_filename = "maps/sokoban/letslogic/%s.txt" % ll_coll_id
 	if exists_user_file(ll_coll_filename):
 		return load_user_file(ll_coll_filename)
 
+	if not ll_collections:
+		ll_collections = fetch_letslogic_collections()
+	if ll_coll_id not in ll_collections:
+		warn("Unknown numeric id %s to fetch letslogic collection" % ll_coll_id)
+		return None
+
 	level_configs = None
 	output = fetch_letslogic("collection/%s" % ll_coll_id)
 
-	ll_collections = fetch_letslogic_collections()
 	ll_coll_title = ll_collections.get(ll_coll_id, {'title': ll_coll_id})['title']
 
 	if output is not None:
