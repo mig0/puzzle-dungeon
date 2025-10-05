@@ -139,6 +139,7 @@ class Solution:
 		num_shifts = sum(item.get_num_shifts() for item in self.solution_items)
 		num_presses = sum(item.get_num_presses() for item in self.solution_items)
 		num_targets = sum(item.get_num_targets() for item in self.solution_items)
+		num_moves += num_shifts  # a shift (push or pull) is considered a move too
 		num_strs = []
 		if num_moves:
 			num_strs.append("%d moves" % num_moves)
