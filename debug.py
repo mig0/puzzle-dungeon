@@ -1,4 +1,5 @@
 from constants import DEFAULT_DEBUG_LVL
+from common import warn, get_current_time_str
 
 # features
 DBG_SOLV = "solv"
@@ -9,6 +10,8 @@ DBG_PATH = "path"
 class Debug:
 	def __init__(self):
 		self.lvl = DEFAULT_DEBUG_LVL
+		self.show_time = False
+		self.time_digits = 3
 		self.features = set()
 
 	def enable_feature(self, feature):
@@ -16,6 +19,15 @@ class Debug:
 
 	def configure(self, args):
 		for item in args:
+			if item.startswith("time"):
+				if len(item) == 4:
+					self.show_time = True
+				elif item[4] == '=' and item[5:].isdigit():
+					self.show_time = True
+					self.time_digits = int(item[5:])
+				else:
+					warn("Ignoring unsupported format for debug configure item '%s'" % item)
+				continue
 			try:
 				self.lvl = int(item)
 			except ValueError:
@@ -48,6 +60,8 @@ class Debug:
 
 		# check conditions
 		if (lvl <= self.lvl) and (not features or self.features.intersection(features)):
-			print("%s%s" % (" " * depth if depth else "", msg))
+			print("%s%s%s" % (
+				"[%s] " % get_current_time_str(self.time_digits) if self.show_time else "",
+				" " * depth if depth else "", msg))
 
 debug = Debug()

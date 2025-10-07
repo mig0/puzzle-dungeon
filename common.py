@@ -3,6 +3,7 @@ import yaml
 import inspect
 import subprocess
 from traceback import extract_stack
+from datetime import datetime
 
 def warn(error, with_trace=False):
 	print(error)
@@ -21,6 +22,9 @@ def get_time_str(secs):
 	min = sec / 60
 	sec = sec % 60
 	return "%d:%02d" % (min, sec) if min < 60 else "%d:%02d:%02d" % (min / 60, min % 60, sec)
+
+def get_current_time_str(num_digits=0):
+	return datetime.now().strftime("%H:%M:%S.%f")[:num_digits - 6 or None if 1 <= num_digits <= 6 else -7]
 
 def open_read(filename, descr=None):
 	filename_descr = "%sfile %s" % (descr + " " if descr else "", filename)
