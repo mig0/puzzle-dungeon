@@ -1,0 +1,376 @@
+#!/usr/bin/python
+
+import os
+import sys
+import numpy
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+from constants import *
+from grid import Grid
+from test import TestSuite
+from celltools import cell_distance
+
+verbose = False
+def print_if_verbose(*args):
+	if verbose:
+		print(INFO_PREFIX, end='')
+		print(*args)
+
+def make_simple_map():
+	# create a uniform 7x6 layout
+	layout = [
+		" ######",
+		"#......#",
+		"#.#.#..#",
+		"#......#",
+		"#...#..#",
+		"#......#",
+		" ######",
+	]
+	# pad any non-uniform rows
+	w = max(len(r) for r in layout)
+	h = len(layout)
+	rows = []
+	for row in layout:
+		if len(row) < w:
+			row += CELL_VOID * (w - len(row))
+		rows.append(row)
+
+	# build numpy array using cell type constants
+	map = numpy.empty((w, h), dtype='<U1')
+	for cy, row in enumerate(rows):
+		for cx, ch in enumerate(row):
+			cell = (cx, cy)
+			if ch == '.':
+				map[cell] = CELL_FLOOR
+			elif ch == '#':
+				map[cell] = CELL_WALL
+			else:
+				map[cell] = CELL_VOID
+	return map
+
+def configure_simple_grid(reverse_barrel_mode=False):
+	game_map = make_simple_map()
+	grid = Grid()
+	grid.configure(game_map, reverse_barrel_mode)
+	return grid
+
+def test_basic_accessibility():
+	grid = configure_simple_grid()
+
+	start_cell = (1, 1)
+	corner_cell = (5, 5)
+	wall_cell = (2, 2)
+	accessible_cells = grid.get_accessible_cells(start_cell)
+	test.eq(type(accessible_cells), tuple)
+	test.is_in(start_cell, accessible_cells)
+	test.is_in(corner_cell, accessible_cells)
+	test.not_in(wall_cell, accessible_cells)
+
+	if verbose:
+		grid.show_map("Map after test_basic_accessibility")
+
+def test_distances():
+	grid = configure_simple_grid()
+
+	start_cell = (1, 1)
+	floor_cell = (5, 5)
+	wall_cell = (2, 2)
+	distances = grid.get_accessible_distances(start_cell)
+	test.eq(type(distances), numpy.ndarray)
+	if start_cell in grid.cell_idxs:
+		test.eq(distances[grid.cell_idxs[start_cell]], 0)
+	if floor_cell in grid.cell_idxs:
+		test.gt(distances[grid.cell_idxs[floor_cell]], 0)
+
+	cell_distances = grid.get_accessible_cell_distances(start_cell)
+	test.eq(type(cell_distances), dict)
+	test.is_in(start_cell, cell_distances)
+	test.is_in(floor_cell, cell_distances)
+	test.not_in(wall_cell, cell_distances)
+	test.eq(cell_distances.get(start_cell), 0)
+	test.eq(cell_distances.get(floor_cell), 8)
+
+	if verbose:
+		grid.show_map("Map after test_distances")
+
+def test_find_path():
+	grid = configure_simple_grid()
+
+	start_cell = (1, 1)
+	target_cell = (5, 5)
+	path_cells = grid.find_path(start_cell, target_cell)
+	test.not_none(path_cells)
+	# find_path semantics: excludes start cell, but includes target cell
+	if path_cells:
+		test.not_in(start_cell, path_cells)
+		test.eq(path_cells[-1], target_cell)
+
+	# check adjacency of consecutive steps
+	for i in range(len(path_cells) - 1):
+		cell1, cell2 = path_cells[i], path_cells[i + 1]
+		cell1_idx = grid.cell_idxs[cell1]
+		neigh_idxs = grid.all_passable_neigh_idxs[cell1_idx]
+		neigh_cells = grid.to_cells(neigh_idxs)
+		test.is_in(cell2, neigh_cells)
+
+	start_cell = (2, 1)
+	target_cell = (5, 2)
+	target_idx = grid.cell_idxs.get(target_cell)
+	test.not_none(target_idx)
+	if target_idx is not None:
+		path_cells = grid.get_accessible_distances(start_cell)
+		print_if_verbose(start_cell, target_cell, path_cells)
+		test.eq(path_cells[target_idx], 4)
+
+	if verbose:
+		grid.show_map("Map after test_find_path")
+
+def test_barrel_op(grid, name, char_cell, barrel_cell, expected_to_pass):
+	op = getattr(grid, name)
+	new_cells = op(char_cell, barrel_cell)
+	if expected_to_pass:
+		test.not_none(new_cells)
+	else:
+		test.none(new_cells)
+	if new_cells:
+		new_char_cell, new_barrel_cell = new_cells
+		test.is_cell(new_char_cell)
+		test.is_cell(new_barrel_cell)
+		# chech whether barrel_bits are shifted
+		must_change = not name.startswith("try_")
+		test.eq(grid.barrel_bits[grid.cell_idxs[barrel_cell]], not must_change)
+		test.eq(grid.barrel_bits[grid.cell_idxs[new_barrel_cell]], must_change)
+
+def test_barrel_three_ops(grid, name, char_cell, barrel_cell, expected_to_pass):
+	can_op = getattr(grid, "can_" + name)
+	if expected_to_pass:
+		test.ok(can_op(char_cell, barrel_cell), "Can't %s %s -> %s" % (name, char_cell, barrel_cell))
+	else:
+		test.ok(not can_op(char_cell, barrel_cell), "Can %s %s -> %s" % (name, char_cell, barrel_cell))
+	test_barrel_op(grid, "try_" + name, char_cell, barrel_cell, expected_to_pass)
+	test_barrel_op(grid,          name, char_cell, barrel_cell, expected_to_pass)
+
+def test_add_barrel_and_three_ops(grid, name, char_cell, barrel_cell, expected_to_pass):
+	existing_barrel_cells = grid.barrel_cells
+	grid.store_reset_barrels()
+
+	grid.set_barrels(existing_barrel_cells + (barrel_cell,))
+	test.ok(grid.barrel_bits[grid.cell_idxs[barrel_cell]], "No barrel bit at %s" % (barrel_cell,))
+
+	test_barrel_three_ops(grid, name, char_cell, barrel_cell, expected_to_pass)
+
+	grid.restore_barrels()
+
+def test_add_barrel_and_all_ops(grid, name, char_cell, barrel_cell, expected_to_pass):
+	if verbose:
+		grid.show_map("Map before test_barrel_and_shift_ops %s %s -> %s %s" % (name, char_cell, barrel_cell, expected_to_pass))
+	test_add_barrel_and_three_ops(grid, name,    char_cell, barrel_cell, expected_to_pass)
+	test_add_barrel_and_three_ops(grid, "shift", char_cell, barrel_cell, expected_to_pass)
+
+def test_push_pull_shift():
+	# forward (push) mode
+	grid = configure_simple_grid()
+	test_add_barrel_and_all_ops(grid, "push", (1, 4), (2, 4), True)
+	test_add_barrel_and_all_ops(grid, "push", (4, 3), (3, 3), True)
+	grid.set_barrels([(1, 2), (1, 3), (5, 4)])
+	test_add_barrel_and_all_ops(grid, "push", (1, 4), (2, 4), True)
+	test_add_barrel_and_all_ops(grid, "push", (4, 3), (3, 3), False)  # 2x2 deadlock
+	test_add_barrel_and_all_ops(grid, "push", (5, 2), (5, 3), False)  # blocking barrel
+	test_add_barrel_and_all_ops(grid, "push", (5, 5), (5, 4), True)
+	grid.set_barrels([(4, 1), (1, 3), (3, 4)])
+	test_add_barrel_and_all_ops(grid, "push", (1, 4), (2, 4), False)  # blocking barrel
+	test_add_barrel_and_all_ops(grid, "push", (4, 3), (3, 3), True)
+	test_add_barrel_and_all_ops(grid, "push", (5, 2), (5, 3), True)
+	test_add_barrel_and_all_ops(grid, "push", (5, 5), (5, 4), True)
+	test_barrel_three_ops(      grid, "push", (5, 5), (5, 4), False)  # no barrel
+
+	# reverse (pull) mode: configure a new Grid in reverse mode
+	grid = configure_simple_grid(reverse_barrel_mode=True)
+	test_add_barrel_and_all_ops(grid, "pull", (2, 4), (3, 4), True)
+	test_add_barrel_and_all_ops(grid, "pull", (4, 1), (5, 1), True)
+	grid.set_barrels([(1, 3), (1, 5), (5, 5)])
+	test_add_barrel_and_all_ops(grid, "pull", (2, 4), (3, 4), False)  # surrounding deadlock
+	test_add_barrel_and_all_ops(grid, "pull", (4, 1), (5, 1), True)
+	test_add_barrel_and_all_ops(grid, "pull", (5, 4), (5, 3), False)  # blocking barrel
+	test_add_barrel_and_all_ops(grid, "pull", (5, 4), (5, 5), True)
+	grid.set_barrels([(1, 3), (1, 5), (1, 4)])
+	test_add_barrel_and_all_ops(grid, "pull", (2, 4), (3, 4), False)  # blocking barrel
+	test_add_barrel_and_all_ops(grid, "pull", (4, 1), (5, 1), True)
+	test_add_barrel_and_all_ops(grid, "pull", (5, 4), (5, 3), True)
+	test_add_barrel_and_all_ops(grid, "pull", (5, 4), (5, 5), True)
+	test_barrel_three_ops(      grid, "pull", (5, 4), (5, 5), False)  # no barrel
+
+	if verbose:
+		grid.show_map("Map after test_push_pull_shift")
+
+def test_all_valid_shifts_consistency():
+	grid = configure_simple_grid()
+
+	char_cell = (2, 3)
+	grid.set_barrels([(3, 3), (4, 3)])
+	accessible_bits = grid.get_accessible_bits(char_cell)
+	cell_pairs = grid.get_all_valid_char_barrel_shifts(accessible_bits)
+
+	test.ok(cell_pairs, "Should find at least one shift")
+	test.len(cell_pairs, 2)
+	for char_cell, barrel_cell in cell_pairs:
+		# ensure these pairs are consistent
+		test.ok(grid.can_shift(char_cell, barrel_cell), "Can't really shift %s -> %s" % (char_cell, barrel_cell))
+		test.eq(barrel_cell, (3, 3))
+
+	grid.set_barrels([(2, 4)])
+	accessible_bits = grid.get_accessible_bits(char_cell)
+	cell_pairs = grid.get_all_valid_char_barrel_shifts()
+	test.len(cell_pairs, 4)
+	for char_cell, barrel_cell in cell_pairs:
+		test.eq(cell_distance(char_cell, barrel_cell), 1)
+		test.eq(barrel_cell, (2, 4))
+
+	if verbose:
+		grid.show_map("Map after test_all_valid_shifts_consistency")
+
+def test_store_and_restore_barrels():
+	grid = configure_simple_grid()
+
+	barrel_cells = [(2, 3), (4, 3)]
+	grid.set_barrels(barrel_cells)
+	barrel_bits_before = grid.barrel_bits.copy()
+
+	grid.store_barrels()
+	# check that store_barrels does not modify barrel_bits
+	test.eq(grid.barrel_bits, barrel_bits_before)
+	grid.barrel_bits.setall(False)
+	grid.restore_barrels()
+
+	# bitarray equality check: no differing bits
+	test.eq(grid.barrel_bits, barrel_bits_before)
+
+	grid.store_reset_barrels()
+	# check that store_reset_barrels resets barrel_bits
+	test.ne(grid.barrel_bits, barrel_bits_before)
+	test.eq(grid.barrel_bits, grid.no_bits)
+	grid.barrel_bits.setall(True)
+	grid.restore_barrels()
+
+	# bitarray equality check: no differing bits
+	test.eq(grid.barrel_bits, barrel_bits_before)
+
+	if verbose:
+		grid.show_map("Map after test_store_and_restore_barrels")
+
+def test_large_open_area_performance():
+	w, h = 40, 20
+	game_map = numpy.full((w, h), CELL_FLOOR, dtype='<U1')
+	# surround with walls
+	game_map[0, :] = CELL_WALL
+	game_map[-1, :] = CELL_WALL
+	game_map[:, 0] = CELL_WALL
+	game_map[:, -1] = CELL_WALL
+
+	grid = Grid()
+	grid.configure(game_map)
+	accessible_bits = grid.get_accessible_bits((1, 1))
+	test.eq(accessible_bits.count(), (w - 2) * (h - 2))
+	accessible_bits = grid.get_accessible_bits((3, 3))
+	test.eq(accessible_bits.count(), (w - 2) * (h - 2))
+	path_cells = grid.find_path((1, 1), (w - 2, h - 2))
+	test.not_none(path_cells)
+	test.len(path_cells, (w - 3) + (h - 3))
+
+	if verbose:
+		grid.show_map("Map after test_large_open_area_performance")
+
+def test_deadlock_detection():
+	grid = configure_simple_grid()
+	# Set up a 2x2 block of barrels — should trigger 2x2 deadlock
+	grid.set_barrels([(3, 2), (3, 3), (4, 3)])
+	if verbose:
+		grid.show_map("Map before 2x2 deadlock")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((3, 3), DIR_D), "Unexpected 2x2 deadlock detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_R), "Expected 2x2 deadlock #1 not detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_U), "Expected 2x2 deadlock #2 not detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((2, 3), DIR_U), "Expected 2x2 deadlock #3 not detected")
+
+	# Set up a character surrounded by walls/barrels (pull mode)
+	grid = configure_simple_grid(reverse_barrel_mode=True)
+	grid.set_barrels([(3, 2), (2, 3), (3, 4)])
+	if verbose:
+		grid.show_map("Map before surrounding deadlock")
+	test.ok(not grid.is_surrounding_barrel_deadlock((3, 3), (2, 3), DIR_R), "Unexpected surrounding deadlock detected")
+	test.ok(    grid.is_surrounding_barrel_deadlock((3, 3), (3, 4), DIR_L), "Expected surrounding deadlock not detected")
+
+def test_dead_barrel_preparation():
+	grid = configure_simple_grid()
+	grid.prepare_sokoban_solution()
+	test.ok(hasattr(grid, 'dead_barrel_bits'), "No expected dead_barrel_bits member")
+	test.ok(hasattr(grid, 'min_barrel_plate_shifts'), "No expected min_barrel_plate_shifts member")
+	test.ok(hasattr(grid, 'min_char_barrel_plate_shifts'), "No expected min_char_barrel_plate_shifts member")
+	# Ensure some floor cells are marked as dead or non-dead
+	num_dead_barrel_bits = grid.dead_barrel_bits.count()
+	test.gt(num_dead_barrel_bits, 0)
+	test.eq(num_dead_barrel_bits, grid.num_bits)
+
+def test_find_path_with_barrels():
+	grid = configure_simple_grid()
+	grid.set_barrels([(3, 3)])
+	start, target = (1, 1), (5, 5)
+	path_cells = grid.find_path(start, target, grid.barrel_cells)
+	test.not_none(path_cells)
+	# Ensure path avoids the barrel
+	test.not_in((3, 3), path_cells)
+
+def test_reverse_mode_consistency():
+	for reverse in (False, True):
+		grid = configure_simple_grid(reverse_barrel_mode=reverse)
+		grid.set_barrels([(3, 3)])
+		char, barrel = (2, 3), (3, 3)
+		can_shift = grid.can_shift(char, barrel)
+		test.is_instance(can_shift, bool)
+		if can_shift:
+			new_cells = grid.shift(char, barrel)
+			test.not_none(new_cells)
+			new_char_cell, new_barrel_cell = new_cells
+			test.ne(new_char_cell, char)
+			test.ne(new_barrel_cell, barrel)
+
+def test_bit_integrity():
+	grid = configure_simple_grid()
+	grid.set_barrels([(2, 3), (4, 3)])
+	grid.store_barrels()
+	grid.restore_barrels()
+	test.eq(grid.barrel_bits.count(), 2)
+	grid.store_reset_barrels()
+	test.eq(grid.barrel_bits.count(), 0)
+	grid.restore_barrels()
+	test.eq(grid.barrel_bits.count(), 2)
+
+def test_find_path_edge_cases():
+	grid = configure_simple_grid()
+	# identical start/target
+	start = target = (1, 1)
+	path = grid.find_path(start, target)
+	test.eq(path, ())
+	# unreachable target (enclosed by walls)
+	unreachable = (0, 0)
+	path = grid.find_path(start, unreachable)
+	test.none(path)
+
+if __name__ == "__main__":
+	args = sys.argv[1:]
+	verbose = args.count('-v') >= 2
+	test = TestSuite("Grid", '-a' in args, '-v' in args)
+	test_basic_accessibility()
+	test_distances()
+	test_find_path()
+	test_push_pull_shift()
+	test_all_valid_shifts_consistency()
+	test_store_and_restore_barrels()
+	test_large_open_area_performance()
+	test_deadlock_detection()
+	test_dead_barrel_preparation()
+	test_find_path_with_barrels()
+	test_reverse_mode_consistency()
+	test_bit_integrity()
+	test_find_path_edge_cases()
+	test.finalize()
