@@ -10,6 +10,7 @@ from room import *
 from game import game
 from flags import flags
 from time import time
+from grid import grid
 from pgzero import clock
 from random import randint, random, sample, shuffle, choice, choices
 from numpy import ndarray, arange, array_equal, ix_, argwhere, copyto
@@ -38,6 +39,7 @@ class Puzzle:
 		self.area = Area()
 		self.config = game.level.puzzle_config
 		self.load_map_special_cell_types = {CELL_SPECIAL0: 'str'}
+		grid.reset()
 		self.init()
 
 	def init(self):
