@@ -87,3 +87,6 @@ def load_tabbed_yaml(path):
 
 	return _normalize(data)
 
+def isinstance_by_name(obj, class_name):
+	return hasattr(obj, '__class__') and any(c.__name__ == class_name for c in obj.__class__.__mro__)
+
