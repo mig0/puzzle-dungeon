@@ -447,6 +447,8 @@ class GatePuzzle(Puzzle):
 		return self.attached_plate_gate_idxs
 
 	def press_cell(self, cell, button=None):
+		if button in (1, 2, 3) and cell != char.c:
+			return False
 		return self.press_plate(char.c)
 
 	def find_solution_func(self):

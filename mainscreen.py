@@ -24,7 +24,7 @@ class MainScreen(VirtualPuzzle):
 			self.main_screen_color -= step
 
 	def press_cell(self, cell, button=None):
-		if not cell in self.plate_collections:
+		if not (button == 1 and cell in self.plate_collections and cell_distance(cell, char.c) != 1):
 			return False
 		game.set_requested_new_level(self.plate_collections[cell].get_level_id())
 		return False

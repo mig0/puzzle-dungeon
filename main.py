@@ -105,6 +105,11 @@ def get_drop_on_cell(cell):
 			return drop
 	return None
 
+def is_any_drop_on_cell(cell):
+	if get_drop_on_cell(cell) or (enemy := get_actor_on_cell(cell, enemies)) and enemy.drop:
+		return True
+	return False
+
 killed_enemies = []
 
 level_title_time = 0
@@ -1342,10 +1347,37 @@ def unset_prepared_solution():
 	return False
 
 def press_cell(cell, button=None):
-	was_handled = puzzle.press_cell(cell, button)
-	if was_handled:
+	handled = puzzle.press_cell(cell, button)
+	if handled is False:
+		# default button mapping if not handled
+		if button == 1:
+			handled = "move"
+		if button == 2:
+			handled = "undo"
+		if button == 3:
+			handled = "move-path"
+	if not solution.is_active() and not solution.is_find_mode():
+		if handled == "move" and cell_distance(char.c, cell) == 1 and can_move(cell_diff(char.c, cell)):
+			process_move(cell_dir(char.c, cell))
+			handled = True
+		if handled == "undo":
+			undo_move()
+			handled = True
+		if handled == "move-path" and game.map[cell] not in CELL_CHAR_MOVE_OBSTACLES:
+			path_cells = find_path(char.c, cell, allow_enemy=True)
+			if path_cells:
+				# stop on the first drop
+				if cell := next((cell for cell in path_cells if is_any_drop_on_cell(cell)), None):
+					path_cells = path_cells[:path_cells.index(cell)]
+				solution.set([path_cells])
+				solution.set_move_delay(AUTO_MOVE_DELAY)
+				solution.set_play_mode()
+			handled = True
+	if handled and not handled is True:
+		handled = False
+	if handled:
 		unset_prepared_solution()
-	return was_handled
+	return handled
 
 def change_solution_move_delay(is_reset, is_dec, is_inc):
 	if is_reset:
@@ -1492,10 +1524,7 @@ def handle_press_key():
 			press_cell(char.c)
 
 	if keyboard.u or keyboard.z:
-		if game.undo_move():
-			puzzle.on_undo_move()
-		else:
-			play_sound('error')
+		undo_move()
 
 	cursor_was_active = cursor.is_active()
 
@@ -1809,6 +1838,10 @@ def move_char(diff):
 	old_char_pos = char.pos
 	old_char_cell = char.c
 
+	if solution.is_play_mode() and not can_move(diff):
+		play_sound("error")
+		return
+
 	# try to move forward, and prepare to cancel if the move is impossible
 	char.move(diff)
 
@@ -1957,6 +1990,12 @@ ARROW_KEY_CODE = {
 	'd': pygame.K_DOWN,
 	'u': pygame.K_UP,
 }
+
+def undo_move():
+	if game.undo_move():
+		puzzle.on_undo_move()
+	else:
+		play_sound('error')
 
 def handle_cmdargs():
 	if cmdargs.list_collections:

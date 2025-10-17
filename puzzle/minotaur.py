@@ -254,6 +254,8 @@ class MinotaurPuzzle(Puzzle):
 		self.minotaur.draw()
 
 	def press_cell(self, cell, button=None):
+		if button and button != 3 and not (button == 1 and char.c == cell):
+			return False
 		# skip move
 		self.make_minotaur_move()
 		return True

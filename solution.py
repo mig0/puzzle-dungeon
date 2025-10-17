@@ -159,6 +159,7 @@ class Solution:
 		self.find_mode = False
 		self.solution_items = [item for item in (SolutionItem(arg) for arg in args) if not item.is_done]
 		self.play_mode = False
+		self.reset_move_delay()
 		num_left_str = self.get_num_info_str()
 		set_status_message("Found solution with %s, press again to show" % num_left_str, self, 1)
 		clipboard.put(self.get_str())
