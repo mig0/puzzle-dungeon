@@ -1489,34 +1489,47 @@ def handle_press_key():
 
 	if keyboard.f1:
 		set_theme("default")
+		return
 	if keyboard.f2:
 		set_theme("classic")
+		return
 	if keyboard.f3:
 		set_theme("ancient1")
+		return
 	if keyboard.f4:
 		set_theme("ancient2")
+		return
 	if keyboard.f5:
 		set_theme("modern1")
+		return
 	if keyboard.f6:
 		set_theme("modern2")
+		return
 	if keyboard.f7:
 		set_theme("minecraft")
+		return
 	if keyboard.f8:
 		set_theme("moss"      if not keyboard.shift else "stoneage3")
+		return
 	if keyboard.f9:
 		set_theme("stoneage1" if not keyboard.shift else "stoneage4")
+		return
 	if keyboard.f10:
 		set_theme("stoneage2" if not keyboard.shift else "stoneage5")
+		return
 
 	if keyboard.f11:
 		# Currently toggle_fullscreen() caused warning on the first time, so use set_mode()
 		pygame.display.set_mode((WIDTH, HEIGHT), 0 if pygame.display.is_fullscreen() else pygame.FULLSCREEN | (0 if keyboard.shift else pygame.SCALED));
+		return
 	if keyboard.f12:
 		pygame.mouse.set_visible(not pygame.mouse.get_visible())
+		return
 
 	if keyboard.s and keyboard.ctrl:
 		global scale_to_display
 		scale_to_display = not scale_to_display
+		return
 
 	if keyboard.nomods:
 		if keyboard.l:
