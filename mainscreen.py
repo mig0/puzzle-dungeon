@@ -66,7 +66,7 @@ class MainScreen(VirtualPuzzle):
 		self.plate_icons = {}
 		for cell in self.plate_cells:
 			self.map[cell] = CELL_PLATE
-			plate_icon = CellActor(load_image('images/' + self.plate_collections[cell].icon, (CELL_W * 0.4, CELL_H * 0.4)))
+			plate_icon = CellActor(load_image(self.plate_collections[cell].icon, (CELL_W * 0.4, CELL_H * 0.4)))
 			self.plate_icons[cell] = plate_icon
 
 main_screen_level = Level()

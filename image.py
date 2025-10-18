@@ -1,3 +1,4 @@
+import os
 import pygame
 import pgzero
 from constants import DATA_DIR
@@ -14,6 +15,8 @@ __all__ = [
 def load_image(image_name, size, do_crop=False):
 	if len(image_name.rsplit('.', 1)) == 1:
 		image_name += '.png'
+	if os.path.isfile(DATA_DIR + '/images/' + image_name):
+		image_name = 'images/' + image_name
 	image = pygame.image.load(DATA_DIR + '/' + image_name).convert_alpha()
 	if do_crop:
 		# image=300x400 size=100x200 -> cropped=200x400
