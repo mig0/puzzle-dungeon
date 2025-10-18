@@ -1576,18 +1576,9 @@ def handle_press_key():
 			cursor.reset()
 
 	if keyboard.c and keyboard.alt:
-		if map_string := clipboard.get():
-			try:
-				level_configs = parse_sokoban_levels(map_string)
-				if not level_configs:
-					warn("No levels found in clipboard")
-			except:
-				warn("Failed to parse levels in clipboard")
-				level_configs = []
-			if level_configs and not game.set_custom_collection_level_configs(level_configs):
-				warn("Failed to activate levels in clipboard")
-		else:
-			warn("Clipboard is empty")
+		level_configs = parse_clipboard_levels('Alt-C', game.level.to_config())
+		if level_configs and not game.set_custom_collection_level_configs(level_configs):
+			warn("Failed to activate levels in clipboard")
 
 	if debug.lvl > 0 and cursor_was_active and not cursor.is_active():
 		set_status_message(priority=0)
@@ -2028,6 +2019,34 @@ def undo_move():
 	else:
 		play_sound('error')
 
+def parse_clipboard_levels(id_str, config={}):
+	error_prefix = "Ignoring '%s', " % id_str
+	if not (map_string := clipboard.get()):
+		warn(error_prefix + "since clipboard is empty")
+		return None
+	map_info = detect_map_file(None, map_string=map_string)
+	if not map_info:
+		warn(error_prefix + "no map in clipboard")
+		return None
+	is_sokoban_map, error, puzzle_type, size = map_info
+	if is_sokoban_map:
+		level_configs = parse_sokoban_levels(map_string, config)
+		if not level_configs:
+			warn(error_prefix + "no levels in sokoban map")
+		return level_configs
+	if error:
+		warn(error_prefix + "bad map: %s" % error)
+		return None
+	return [{
+		'puzzle-type': puzzle_type,
+		'map-size': size,
+		'map-string': map_string,
+		'name': "%s map from clipboard" % puzzle_type,
+		'bg-image': config.get('bg-image'),
+		'music': config.get('music'),
+		'theme': config.get('theme'),
+	}]
+
 def handle_cmdargs():
 	if cmdargs.list_collections:
 		numeric = cmdargs.use_numeric
@@ -2063,26 +2082,7 @@ def handle_cmdargs():
 				for level_config in collection.level_configs:
 					level_configs.append(collection.with_level_config_defaults(level_config))
 			elif arg == "clipboard:":
-				if not (map_string := clipboard.get()):
-					warn("Ignoring 'clipboard:', since clipboard is empty")
-					continue
-				map_info = detect_map_file(None, map_string=map_string)
-				if not map_info:
-					warn("Ignoring 'clipboard:', no map in clipboard")
-					continue
-				is_sokoban_map, error, puzzle_type, size = map_info
-				if is_sokoban_map:
-					level_configs.extend(parse_sokoban_levels(map_string, game.custom_collection.config))
-					continue
-				if error:
-					warn("Ignoring 'clipboard:', invalid map: %s" % error)
-					continue
-				level_configs.append({
-					'puzzle-type': puzzle_type,
-					'map-size': size,
-					'map-string': map_string,
-					'name': "%s map from clipboard" % puzzle_type,
-				})
+				level_configs.extend(parse_clipboard_levels("clipboard:", game.custom_collection.config) or [])
 			elif arg.startswith("letslogic:"):
 				if map_string := fetch_letslogic_collection(arg[10:]):
 					level_configs.extend(parse_sokoban_levels(map_string, game.custom_collection.config))

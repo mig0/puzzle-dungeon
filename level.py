@@ -5,6 +5,8 @@ from config import DEFAULT_NUM_ENEMIES
 from sizetools import DEFAULT_MAP_SIZE
 from cmdargs import cmdargs
 
+special_config_keys = ('bg-image', 'cloud-mode', 'music', 'puzzle-type', 'theme')
+
 class Level:
 	def __init__(self):
 		self.unset()
@@ -60,6 +62,8 @@ class Level:
 
 		# apply config fields
 		for key, value in config.items():
+			if value is None and key in special_config_keys:
+				continue
 			field = key.replace("-", "_")
 			if hasattr(self, field):
 				default = getattr(self, field)
@@ -73,6 +77,9 @@ class Level:
 			else:
 				warn("Ignoring unknown config %s=%s in level %s" %
 					(key, str(value), self.get_id()))
+
+	def to_config(self):
+		return {k.replace("_", "-"): v for k, v in vars(self).items() if k not in ('collection', 'index', 'config')}
 
 	def get_id(self, numeric=False):
 		if not self.is_set():
