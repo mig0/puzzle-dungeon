@@ -60,6 +60,8 @@ class Debug:
 
 		# check conditions
 		if (lvl <= self.lvl) and (not features or self.features.intersection(features)):
+			if callable(msg):
+				msg = msg()  # evaluate lazily
 			print("%s%s%s" % (
 				"[%s] " % get_current_time_str(self.time_digits) if self.show_time else "",
 				" " * depth if depth else "", msg))
