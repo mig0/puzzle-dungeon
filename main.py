@@ -1651,11 +1651,6 @@ def handle_press_key():
 				solution.set_find_mode(msg)
 				solution.set_find_func(find_func)
 
-	if keyboard.s and keyboard.alt:
-		print(clipboard.get())
-		clipboard.put("My text")
-		print(clipboard.get())
-
 def on_key_down(key):
 	handle_press_key()
 
