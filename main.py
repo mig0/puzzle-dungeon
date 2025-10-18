@@ -1257,7 +1257,7 @@ def draw_status():
 
 	draw_status_drops(drops)
 
-	draw_status_message(POS_STATUS_Y)
+	draw_status_message(WIDTH, POS_STATUS_Y)
 
 	solution.set_status_drawn()
 

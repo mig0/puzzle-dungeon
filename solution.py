@@ -119,7 +119,8 @@ class Solution:
 		self.solution_items = None
 		self.play_mode = False
 		self.is_status_drawn = False
-		set_status_message(msg, self, 1)
+		msg, spinner = msg if type(msg) == tuple else (msg, None)
+		set_status_message(msg, self, 1, spinner=spinner)
 
 	def set_status_drawn(self):
 		self.is_status_drawn = True

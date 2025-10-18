@@ -1,3 +1,4 @@
+import pygame
 from time import time
 from config import STATUS_MESSAGE_FADE_DURATION, STATUS_MESSAGE_REST_DURATION
 from game import game
@@ -13,11 +14,13 @@ DEF_PRIORITY = 5
 MAX_PRIORITY = 10
 
 class StatusMessage:
-	def __init__(self, msg, source, priority, duration):
+	def __init__(self, msg, source, priority, duration, spinner=None):
 		self.msg = msg
 		self.source = source
 		self.priority = priority
 		self.duration = duration
+		self.spinner = spinner
+		self.spinner_cnt = 0
 		self.num_shown = 0
 
 	def match(self, source, priority):
@@ -47,7 +50,7 @@ def get_fade_text_factor(current_time, fade_out_time, fade_duration=2, rest_dura
 		return (fade_out_time - current_time) / fade_duration
 	return 1
 
-def set_status_message(msg=None, source='main', priority=None, duration=None):
+def set_status_message(msg=None, source='main', priority=None, duration=None, spinner=None):
 	global current_status_message, current_status_end_time
 
 	if priority is None:
@@ -63,15 +66,16 @@ def set_status_message(msg=None, source='main', priority=None, duration=None):
 	if sm:
 		if msg is None:
 			status_messages.remove(sm)
-		elif msg != sm.msg or duration != sm.duration:
+		elif msg != sm.msg or duration != sm.duration or spinner != sm.spinner:
 			sm.msg = msg
+			sm.spinner = spinner
 			sm.duration = duration
 			if current_status_message == sm:
 				sm.num_shown -= 1
 		else:
 			was_changed = False
 	elif msg is not None:
-		status_messages.append(StatusMessage(msg, source, priority, duration))
+		status_messages.append(StatusMessage(msg, source, priority, duration, spinner))
 	else:
 		was_changed = False
 
@@ -106,7 +110,7 @@ def get_new_current_message_and_duration():
 
 	return sm, duration
 
-def draw_status_message(POS_STATUS_Y):
+def draw_status_message(WIDTH, POS_STATUS_Y):
 	global current_status_message, current_status_end_time
 
 	current_time = time()
@@ -132,6 +136,12 @@ def draw_status_message(POS_STATUS_Y):
 		current_status_end_time = current_time + duration
 
 		current_status_message.num_shown += duration // BEAT_TIME
+
+	if current_status_message.spinner:
+		current_status_message.spinner_cnt += 1
+		angle = (-current_status_message.spinner_cnt * 15) % 360
+		rotated = pygame.transform.rotate(current_status_message.spinner, angle)
+		game.screen.blit(rotated, (WIDTH - 40 - rotated.get_width() // 2, POS_STATUS_Y - rotated.get_height() // 2))
 
 	game.screen.draw.text(current_status_message.msg, midleft=(20, POS_STATUS_Y), color="#FFF0A0", gcolor="#A09060", owidth=1.2, ocolor="#303020", alpha=alpha, fontsize=26)
 
