@@ -6,6 +6,14 @@ from celltools import apply_diff, cell_diff, sort_cells
 from common import isinstance_by_name, die
 from debug import *
 
+DBG_GRID  = "grid"
+DBG_GRID2 = "grid+"
+DBG_GRID3 = "grid++"
+
+DBG_PATH  = "path"
+DBG_PATH2 = "path+"
+DBG_PATH3 = "path++"
+
 _ONE = bitarray('1')
 _ZEROBITS = bitarray('')
 SORTED_DIRS = sort_cells(DIRS)
@@ -127,8 +135,8 @@ class Grid:
 
 		self.reset_sokoban_solution()
 
-		debug(DBG_PATH, "Configured map with %d floors" % self.num_bits)
-		debug(DBG_PATH2, "- idx_cells: %s" % (self.idx_cells))
+		debug(DBG_GRID, "Configured map with %d floors" % self.num_bits)
+		debug(DBG_GRID2, "- idx_cells: %s" % (self.idx_cells))
 
 	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char_cell=None, cell_chars={}, show_dead=False, extra_cb=None):
 		if descr:
@@ -532,7 +540,7 @@ class Grid:
 
 		self.restore_barrels()
 
-		if DBG_PATH2 in debug.features:
+		if DBG_GRID2 in debug.features:
 			self.show_map("Map with dead-barrel cells", show_dead=True)
 
 	def reset_sokoban_solution(self):

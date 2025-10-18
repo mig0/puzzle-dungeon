@@ -2,10 +2,9 @@ from constants import DEFAULT_DEBUG_LVL
 from common import warn, get_current_time_str
 
 # features
-DBG_SOLV = "solv"
+DBG_SOLV  = "solv"
 DBG_SOLV2 = "solv+"
 DBG_SOLV3 = "solv++"
-DBG_PATH = "path"
 
 class Debug:
 	def __init__(self):
