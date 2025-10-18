@@ -581,6 +581,7 @@ class BarrelPuzzle(Puzzle):
 	def on_set_theme(self):
 		self.red_floor_image = load_theme_cell_image('floor')
 		self.red_floor_image.fill(MAIN_COLOR_RGB_VALUES[0], special_flags=pygame.BLEND_RGB_MULT)
+		self.barrel_spinner = load_theme_cell_image("barrel")
 
 	def on_load_map(self, special_cell_values, extra_values):
 		self.area = room
@@ -955,7 +956,7 @@ class BarrelPuzzle(Puzzle):
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
 		debug(DBG_SOLV, status_str + "; sp: %d p: %d" % (len(self.visited_super_positions), self.num_created_positions))
-		return status_str
+		return (status_str, self.barrel_spinner)
 
 	def find_solution_func(self):
 		self.budget_solution_time = time() + 1
