@@ -34,6 +34,11 @@ from mainscreen import main_screen_level
 from sokobanparser import parse_sokoban_levels
 from statusmessage import reset_status_messages, set_status_message, draw_status_message
 
+DISPLAY_WIDTH, DISPLAY_HEIGHT = pygame.display.get_desktop_sizes()[0]
+
+display_size_to_fit = None
+scale_to_display = False
+
 # set data dir and default encoding for the whole program
 pgzero.loaders.set_root(DATA_DIR)
 sys.stdout.reconfigure(encoding='utf-8')
@@ -1092,6 +1097,13 @@ def init_new_level(level_id, reload_stored=False):
 	draw_apply_sizes()
 	flags.apply_sizes()
 
+	global display_size_to_fit
+	if not DISPLAY_WIDTH or not DISPLAY_HEIGHT or DISPLAY_WIDTH > WIDTH and DISPLAY_HEIGHT > HEIGHT:
+		display_size_to_fit = None
+	else:
+		scale_factor = max(WIDTH / DISPLAY_WIDTH, HEIGHT / (abs(DISPLAY_HEIGHT - 68) or 1))
+		display_size_to_fit = (int(WIDTH / scale_factor), int(HEIGHT / scale_factor))
+
 	game.init_console()
 
 	bg_image = None
@@ -1321,6 +1333,11 @@ def draw():
 			draw_central_flash()
 		screen.draw.text(goal_line, center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#66AA00", owidth=1.2, ocolor="#404030", alpha=1, fontsize=40)
 
+	if scale_to_display and display_size_to_fit:
+		scaled = pygame.transform.smoothscale(screen.surface, display_size_to_fit)
+		screen.fill((0, 0, 0))
+		screen.blit(scaled, (0, 0))
+
 def kill_enemy_cleanup():
 	enemy = killed_enemies.pop(0)
 	enemy.reset_inplace_animation()
@@ -1494,6 +1511,10 @@ def handle_press_key():
 		pygame.display.set_mode((WIDTH, HEIGHT), 0 if pygame.display.is_fullscreen() else pygame.FULLSCREEN)
 	if keyboard.f12:
 		pygame.mouse.set_visible(not pygame.mouse.get_visible())
+
+	if keyboard.s and keyboard.ctrl:
+		global scale_to_display
+		scale_to_display = not scale_to_display
 
 	if keyboard.nomods:
 		if keyboard.l:
