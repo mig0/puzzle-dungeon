@@ -136,22 +136,24 @@ def debug_map(level=0, descr=None, full_format=False, full=True, clean=True, com
 		dual = False
 		portal_cells = []
 		print("# Dungeon %s anonymous map %dx%d" % (puzzle.__class__.__name__ if puzzle else "non-puzzle", MAP_SIZE_X, MAP_SIZE_Y))
+	def get_cell_type_with_clean_floor(cell):
+		return CELL_FLOOR if clean and game.map[cell] in CELL_FLOOR_TYPES else game.map[cell]
 	for cy in MAP_Y_RANGE if full else PLAY_Y_RANGE:
 		if not combined:
 			for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 				cell = (cx, cy)
-				print(CELL_FLOOR if clean and game.map[cell] in CELL_FLOOR_TYPES else game.map[cell], end="")
+				print(get_cell_type_with_clean_floor(cell), end="")
 			if dual and cell_chars:
 				print("    ", end="")
 				for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 					cell = (cx, cy)
-					print(cell_chars.get(cell, CELL_FLOOR if clean and game.map[cell] in CELL_FLOOR_TYPES else game.map[cell]), end="")
+					print(cell_chars.get(cell, get_cell_type_with_clean_floor(cell)), end="")
 			if dual:
 				print("    ", end="")
 		if dual or combined:
 			for cx in MAP_X_RANGE if full else PLAY_X_RANGE:
 				cell = (cx, cy)
-				cell_ch = CELL_FLOOR if clean and game.map[cell] in CELL_FLOOR_TYPES else game.map[cell]
+				cell_ch = get_cell_type_with_clean_floor(cell)
 				actor_chars = ACTOR_ON_PLATE_CHARS if cell_ch == CELL_PLATE else ACTOR_CHARS
 				if cell in cell_chars:
 					cell_ch = cell_chars[cell]
