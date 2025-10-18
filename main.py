@@ -1508,7 +1508,7 @@ def handle_press_key():
 
 	if keyboard.f11:
 		# Currently toggle_fullscreen() caused warning on the first time, so use set_mode()
-		pygame.display.set_mode((WIDTH, HEIGHT), 0 if pygame.display.is_fullscreen() else pygame.FULLSCREEN)
+		pygame.display.set_mode((WIDTH, HEIGHT), 0 if pygame.display.is_fullscreen() else pygame.FULLSCREEN | (0 if keyboard.shift else pygame.SCALED));
 	if keyboard.f12:
 		pygame.mouse.set_visible(not pygame.mouse.get_visible())
 
