@@ -2114,10 +2114,11 @@ def handle_cmdargs():
 			level_id = collection.get_level_id()
 		else:
 			warn("Ignoring unexisting level or collection '%s'" % level_or_collection_id)
-		if level_id and game.set_requested_new_level(level_id):
-			fallback_to_main_screen = False
-		else:
-			warn("Can not start with level or collection '%s'" % level_or_collection_id)
+		if level_id:
+			if game.set_requested_new_level(level_id):
+				fallback_to_main_screen = False
+			else:
+				warn("Can not start with level or collection '%s'" % level_or_collection_id)
 
 	return not fallback_to_main_screen
 
