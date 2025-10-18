@@ -1,17 +1,15 @@
 from . import *
 import bisect
 
-SHOW_DEADLOCK_MAPS = False
 MIN_SOLUTION_DEPTH = 5
 MAX_SOLUTION_DEPTH = 500
 SOLUTION_DEPTH_STEP = 5
-MAX_PREPARE_SOLUTION_TIME = 8
 MAX_FIND_SOLUTION_TIME = 25 * 60 * 60
 
 SOLUTION_TYPE_BY_SHIFTS = 1
 SOLUTION_TYPE_BY_MOVES = 2
 
-SOLUTION_ALG_IDDFS = "IDDFS"
+SOLUTION_ALG_DFS   = "DFS"
 SOLUTION_ALG_BFS   = "BFS"
 SOLUTION_ALG_PQ    = "PQ"
 SOLUTION_ALG_ASTAR = "A*"
@@ -21,15 +19,12 @@ CHAR_FLOOR_COST = -1
 WALL_COST = 100
 OBSTACLE_COST = None
 
-def append_to_solution_pairs(solution_pairs, path_cells, char_cell, barrel_cell):
-	solution_pairs.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell, flags.is_reverse_barrel, True)]])
-
 class SuperPosition:
 	def __init__(self, barrel_cells, all_proto_segments):
 		self.barrel_cells = barrel_cells
 		self.all_proto_segments = all_proto_segments
 		self._solution_cost = None  # lazy calculation
-		self.is_solved = game.puzzle.is_solved_for_barrel_cells(barrel_cells)
+		self.is_solved = grid.is_solved_for_barrels(barrel_cells)
 		self.positions = {}  # char_cell -> Position
 
 	def get_or_reparent_or_create_position(self, char_cell, parent, own_nums, segments):
@@ -70,6 +65,7 @@ class Position:
 			self.depth = 0
 			self.total_nums = (0, 0)
 			self._solution_cost = None
+			self.is_dirty = False
 		self._segments_str = None
 		self.children = []
 		self.is_expanded = False
@@ -109,18 +105,20 @@ class Position:
 		self.parent.add_child(self)
 		self.own_nums = own_nums
 		self.segments = segments
-		self.recalc_down()
-
-	def recalc_down(self):
-		self.is_fully_processed = False
-		self.calc_nums()
-		for child in self.children:
-			child.recalc_down()
+		self.mark_dirty_down()
 
 	def calc_nums(self):
 		self.depth = self.parent.depth + 1
 		self.total_nums = apply_diff(self.parent.total_nums, self.own_nums)
 		self._solution_cost = None
+		self.is_dirty = False
+		self.is_fully_processed = False
+
+	def mark_dirty_down(self):
+		self.is_dirty = True
+		self.is_fully_processed = False
+		for child in self.children:
+			child.mark_dirty_down()
 
 	def cut_down(self):
 		self.is_fully_processed = True
@@ -147,7 +145,7 @@ class Position:
 	def to_solution_pairs(self):
 		solution_pairs = self.parent.to_solution_pairs() if self.parent else []
 		for path_cells, char_cell, barrel_cell in self.segments:
-			append_to_solution_pairs(solution_pairs, path_cells, char_cell, barrel_cell)
+			solution_pairs.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell, flags.is_reverse_barrel, True)]])
 		return solution_pairs
 
 	def __str__(self):
@@ -341,9 +339,6 @@ class BarrelPuzzle(Puzzle):
 
 	def reset_solution_data(self):
 		self.visited_super_positions = {}  # super_position_id -> SuperPosition
-		self.min_char_barrel_plate_pushes = None
-		self.min_barrel_plate_pushes = None
-		self.solution = None
 		self.solution_depth = MAX_SOLUTION_DEPTH
 		self.solution_type = SOLUTION_TYPE_BY_SHIFTS
 		self.initial_position = None
@@ -355,6 +350,7 @@ class BarrelPuzzle(Puzzle):
 		self.unprocessed_positions = None
 		self.num_processed_positions = 0
 		self.sort_positions = None
+		grid.reset()
 
 	def on_enter_room(self):
 		if flags.is_reverse_barrel:
@@ -372,7 +368,6 @@ class BarrelPuzzle(Puzzle):
 		# prepare some invariant data
 		self.num_total_cells = room.size_x * room.size_y
 		self.plate_cells = self.get_room_plate_cells()
-		self.plate_cells.sort()
 		self.stock_char_cell = char.c
 		self.stock_barrel_cells = self.get_room_barrel_cells()
 		self.has_extra_barrels = len(self.plate_cells) < len(barrels)
@@ -388,154 +383,14 @@ class BarrelPuzzle(Puzzle):
 		return [ barrel for barrel in barrels if is_actor_in_room(barrel) ]
 
 	def get_room_barrel_cells(self):
-		return sorted([ barrel.c for barrel in self.get_room_barrels() ])
-
-	def store_reset_barrels(self):
-		self.orig_barrels_stack.append(barrels.copy())
-		barrels.clear()
-
-	def restore_barrels(self):
-		barrels.clear()
-		barrels.extend(self.orig_barrels_stack.pop())
-
-	def show_map(self, descr=None, level=0, char_cell=None, barrel_cells=None, cell_chars=None):
-		self.store_reset_barrels()
-		for cell in self.barrel_cells if barrel_cells is None else barrel_cells:
-			create_barrel(cell)
-		orig_char_cell = char.c
-		char.c = char_cell or self.char_cell
-		self.Globals.debug_map(level=level, descr=descr, cell_chars=cell_chars)
-		self.restore_barrels()
-		char.c = orig_char_cell
-
-	def show_deadlock_map(self, char_cell, barrel_cell, cell1, cell2, cell3, cell4):
-		if not SHOW_DEADLOCK_MAPS:
-			return
-		barrel_cells = self.barrel_cells.copy()
-		barrel_cells.remove(barrel_cell)
-		barrel_cells.append(cell1)
-		self.show_map("deadlock: %s -> %s -> %s %s %s %s" % (char_cell, barrel_cell, cell1, cell2, cell3, cell4), barrel_cell, barrel_cells)
-
-	def is_2x2_deadlock(self, cell1, cell2, cell3, cell4):
-		barrel_cells = []
-		for cell in cell2, cell3, cell4:
-			if cell in self.barrel_cells:
-				barrel_cells.append(cell)
-			elif self.is_in_room(cell) and self.map[cell] not in CELL_CHAR_MOVE_OBSTACLES:
-				return False
-
-		for barrel_cell in barrel_cells + [cell1]:
-			if self.map[barrel_cell] != CELL_PLATE:
-				return True
-		return False
-
-	def try_push(self, char_cell, barrel_cell):
-		diff = cell_diff(char_cell, barrel_cell)
-		new_barrel_cell = apply_diff(barrel_cell, diff)
-
-		if not self.is_in_room(new_barrel_cell) or self.map[new_barrel_cell] in CELL_CHAR_MOVE_OBSTACLES or new_barrel_cell in self.barrel_cells:
-			return None
-
-		if self.min_char_barrel_plate_pushes is not None and new_barrel_cell not in self.plate_cells and (char_cell, barrel_cell) not in self.min_char_barrel_plate_pushes:
-			return None
-
-		# eliminate deadlocks
-		new_barrel_f_cell = apply_diff(new_barrel_cell, diff)
-
-		new_barrel_l_cell = apply_diff(new_barrel_cell, (-1, 0) if diff in ((0, -1), (0, +1)) else (0, -1))
-		new_barrel_lf_cell = apply_diff(new_barrel_l_cell, diff)
-		if self.is_2x2_deadlock(new_barrel_cell, new_barrel_l_cell, new_barrel_lf_cell, new_barrel_f_cell):
-			self.show_deadlock_map(char_cell, barrel_cell, new_barrel_cell, new_barrel_l_cell, new_barrel_lf_cell, new_barrel_f_cell)
-			return None
-
-		new_barrel_r_cell = apply_diff(new_barrel_cell, (+1, 0) if diff in ((0, -1), (0, +1)) else (0, +1))
-		new_barrel_rf_cell = apply_diff(new_barrel_r_cell, diff)
-		if self.is_2x2_deadlock(new_barrel_cell, new_barrel_r_cell, new_barrel_rf_cell, new_barrel_f_cell):
-			self.show_deadlock_map(char_cell, barrel_cell, new_barrel_cell, new_barrel_r_cell, new_barrel_rf_cell, new_barrel_f_cell)
-			return None
-
-		return new_barrel_cell
-
-	def can_push(self, char_cell, barrel_cell):
-		return self.try_push(char_cell, barrel_cell) is not None
-
-	def push(self, char_cell, barrel_cell):
-		new_barrel_cell = self.try_push(char_cell, barrel_cell)
-		self.barrel_cells.remove(barrel_cell)
-		self.barrel_cells.append(new_barrel_cell)
-		self.barrel_cells.sort()
-		self.char_cell = barrel_cell
-		return new_barrel_cell
-
-	def try_pull(self, char_cell, barrel_cell):
-		diff = cell_diff(barrel_cell, char_cell)
-		new_char_cell = apply_diff(char_cell, diff)
-		if not self.is_in_room(new_char_cell) or self.map[new_char_cell] in CELL_CHAR_MOVE_OBSTACLES or new_char_cell in self.barrel_cells:
-			return None
-
-		return new_char_cell
-
-	def can_pull(self, char_cell, barrel_cell):
-		return self.try_pull(char_cell, barrel_cell) is not None
-
-	def pull(self, char_cell, barrel_cell):
-		new_char_cell = self.try_pull(char_cell, barrel_cell)
-		self.barrel_cells.remove(barrel_cell)
-		self.barrel_cells.append(char_cell)
-		self.barrel_cells.sort()
-		self.char_cell = new_char_cell
-		return new_char_cell
-
-	def can_shift(self, char_cell, barrel_cell):
-		return self.can_pull(char_cell, barrel_cell) if flags.is_reverse_barrel else self.can_push(char_cell, barrel_cell)
-
-	def shift(self, char_cell, barrel_cell):
-		new_cell = self.pull(char_cell, barrel_cell) if flags.is_reverse_barrel else self.push(char_cell, barrel_cell)
-		return (None, None) if not new_cell else (new_cell, char_cell) if flags.is_reverse_barrel else (barrel_cell, new_cell)
-
-	def try_opposite_shift(self, char_cell, barrel_cell):
-		new_cell = self.try_push(char_cell, barrel_cell) if flags.is_reverse_barrel else self.try_pull(char_cell, barrel_cell)
-		return (None, None) if not new_cell else (barrel_cell, new_cell) if flags.is_reverse_barrel else (new_cell, char_cell)
-
-	def opposite_shift(self, char_cell, barrel_cell):
-		new_cell = self.push(char_cell, barrel_cell) if flags.is_reverse_barrel else self.pull(char_cell, barrel_cell)
-		return (None, None) if not new_cell else (barrel_cell, new_cell) if flags.is_reverse_barrel else (new_cell, char_cell)
-
-	def get_barrel_plate_distance(self, char_cell, barrel_cell, plate_cell):
-		char_path = self.Globals.find_path(barrel_cell, plate_cell, self.barrel_cells)
-		return len(char_path) + 1 if char_path is not None else None
-
-	def get_barrel_distance_weight(self, char_cell, barrel_cell):
-		if (char_cell, barrel_cell) in self.min_char_barrel_plate_pushes:
-			return self.min_char_barrel_plate_pushes[char_cell, barrel_cell]
-
-		orig_barrel_cells = self.barrel_cells.copy()
-		orig_char_cell = self.char_cell
-
-		_, barrel_cell = self.shift(char_cell, barrel_cell)
-
-		min_num_shifts = self.num_total_cells
-		for plate_cell in self.plate_cells:
-			num_shifts = self.get_barrel_plate_distance(self.char_cell, barrel_cell, plate_cell) or self.num_total_cells
-			if num_shifts < min_num_shifts:
-				min_num_shifts = num_shifts
-
-		self.barrel_cells = orig_barrel_cells
-		self.char_cell = orig_char_cell
-
-		self.min_char_barrel_plate_pushes[char_cell, barrel_cell] = min_num_shifts
-
-		return min_num_shifts
+		return sort_cells([ barrel.c for barrel in self.get_room_barrels() ])
 
 	def get_min_solution_depth(self, barrel_cells):
-		if not self.min_char_barrel_plate_pushes:
-			return None
-
 		solution_depth = 0
 		for barrel_cell in barrel_cells:
-			num_shifts = self.min_barrel_plate_pushes[min(self.min_barrel_plate_pushes.keys(), key=lambda cell:
-				self.min_barrel_plate_pushes[cell] if cell == barrel_cell else self.num_total_cells
-			)]
+			num_shifts = grid.min_barrel_plate_shifts[min(grid.min_barrel_plate_shifts.keys(), key=lambda cell:
+				grid.min_barrel_plate_shifts[cell] if cell == barrel_cell else grid.num_bits
+			)] if grid.min_barrel_plate_shifts else grid.num_bits
 			solution_depth += num_shifts
 
 		return solution_depth
@@ -546,142 +401,28 @@ class BarrelPuzzle(Puzzle):
 
 		solution_depth = max(solution_depth, MIN_SOLUTION_DEPTH)
 
-		if self.solution_alg != SOLUTION_ALG_IDDFS:
+		if self.solution_alg != SOLUTION_ALG_DFS:
 			return solution_depth
 		return ((solution_depth - MIN_SOLUTION_DEPTH - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP + MIN_SOLUTION_DEPTH
-
-	def prepare_to_find_solution(self):
-		if self.disable_prepare_solution:
-			self.min_char_barrel_plate_pushes = {}
-			self.min_barrel_plate_pushes = {}
-			return
-		self.store_reset_barrels()
-
-		all_char_barrel_plate_pushes = {}
-		all_barrel_plate_pushes = {}
-
-		for plate_cell in self.plate_cells:
-			char_barrel_plate_pushes, barrel_plate_pushes = self.find_solvable_cells_for_plate_cells([plate_cell])
-			for pair in char_barrel_plate_pushes:
-				if pair not in all_char_barrel_plate_pushes:
-					all_char_barrel_plate_pushes[pair] = []
-				all_char_barrel_plate_pushes[pair].append(char_barrel_plate_pushes[pair])
-			for cell in barrel_plate_pushes:
-				if cell not in all_barrel_plate_pushes:
-					all_barrel_plate_pushes[cell] = []
-				all_barrel_plate_pushes[cell].append(barrel_plate_pushes[cell])
-
-		self.min_char_barrel_plate_pushes = {}
-		self.min_barrel_plate_pushes = {}
-
-		for pair in all_char_barrel_plate_pushes:
-			self.min_char_barrel_plate_pushes[pair] = min(all_char_barrel_plate_pushes[pair])
-		for cell in all_barrel_plate_pushes:
-			self.min_barrel_plate_pushes[cell] = min(all_barrel_plate_pushes[cell])
-		self.restore_barrels()
-		self.Globals.debug_map(2, "min_barrel_plate_pushes", full=True, clean=True, combined=False, dual=True, cell_chars=self.min_barrel_plate_pushes)
-#		print(self.min_barrel_plate_pushes)
-#		print(self.min_char_barrel_plate_pushes)
-
-	def find_solvable_cells_for_plate_cells(self, plate_cells):
-		start_time = time()
-		min_char_barrel_plate_pushes = {}
-		min_barrel_plate_pushes = dict(zip(plate_cells, [0] * len(plate_cells)))
-		visited_positions = []
-
-		# start from plates and make all available pulls using BFS
-		states = { 0: [[None, None, plate_cells.copy(), None]] }
-
-		stop = False
-		for depth in range(1, MAX_SOLUTION_DEPTH + 1):
-			if stop:
-				break
-			non_start = depth > 1
-			# for each (char_cell, barrel_cell) from depth-1 do all possible next pulls and save as new states
-			states[depth] = []
-			min_pushes_updated = False
-			for state in states[depth - 1]:
-				if time() - start_time > MAX_PREPARE_SOLUTION_TIME:
-					stop = True
-					break
-				last_char_cell, last_barrel_cell, last_barrel_cells, prev_state = state
-
-				if non_start:
-					if (last_char_cell, last_barrel_cells) in visited_positions:
-						continue
-					visited_positions.append((last_char_cell, last_barrel_cells))
-
-				self.barrel_cells = last_barrel_cells.copy()
-
-				if False and non_start and self.barrel_cells == self.stock_barrel_cells and self.Globals.find_path(last_char_cell, self.stock_char_cell, self.barrel_cells):
-					set_status_message("Found reverse solution", self, None, 2)
-					self.solution = []
-					orig_char_cell = self.stock_char_cell
-					while last_char_cell is not None:
-						char_path = self.Globals.find_path(orig_char_cell, last_char_cell, self.barrel_cells)
-						append_to_solution_pairs(self.solution, char_path, last_char_cell, last_barrel_cell)
-						if prev_state is None:
-							break
-						orig_char_cell = last_barrel_cell
-						last_char_cell, last_barrel_cell, self.barrel_cells, prev_state = prev_state
-					stop = True
-					break
-
-				for barrel_cell in last_barrel_cells:
-					for char_cell in self.Globals.get_accessible_neighbors(barrel_cell, self.barrel_cells):
-						if non_start and self.Globals.find_path(last_char_cell, char_cell, self.barrel_cells) is None:
-							continue
-						new_char_cell, new_barrel_cell = self.try_opposite_shift(char_cell, barrel_cell)
-						if new_char_cell is not None:
-							self.opposite_shift(char_cell, barrel_cell)
-							states[depth].append((new_char_cell, new_barrel_cell, self.barrel_cells, state))
-							self.barrel_cells = last_barrel_cells.copy()
-							if (new_char_cell, new_barrel_cell) not in min_char_barrel_plate_pushes:
-								min_char_barrel_plate_pushes[new_char_cell, new_barrel_cell] = depth
-								min_pushes_updated = True
-								if new_barrel_cell not in min_barrel_plate_pushes:
-									min_barrel_plate_pushes[new_barrel_cell] = depth
-			if not min_pushes_updated:
-				stop = True
-				break
-
-#		print("find_solvable_cells_for_plate_cells finished in %.1fs for %d plates %s" % (time() - start_time, len(plate_cells), str(plate_cells)))
-#		print("  Unique barrel cells: %d, pairs: %d" % (len(min_barrel_plate_pushes), len(min_char_barrel_plate_pushes)))
-#		print("  %s" % str(min_barrel_plate_pushes))
-#		print("  %s" % str(min_char_barrel_plate_pushes))
-
-		return min_char_barrel_plate_pushes, min_barrel_plate_pushes
-
-	def find_reverse_solution(self):
-		if self.disable_prepare_solution:
-			return
-
-		if self.has_extra_plates:
-			print("Don't know what to do when there are more plates than barrels, trying to find solution when last plates are unused")
-			for _ in range(len(self.plate_cells) - len(barrels)):
-				self.plate_cells.pop()
-
-		self.min_char_barrel_plate_pushes, self.min_barrel_plate_pushes = self.find_solvable_cells_for_plate_cells(self.plate_cells)
 
 	def find_or_create_super_position(self, char_cell, barrel_cells):
 		if self.is_zsb:
 			accessible_cells = None
 			super_position_id = (*barrel_cells,)
 		else:
-			accessible_cells = self.Globals.get_accessible_cells(char_cell, barrel_cells)
+			accessible_cells = grid.get_accessible_cells(char_cell, barrel_cells)
 			super_position_id = (frozenset(accessible_cells), *barrel_cells)
 
 		if super_position_id in self.visited_super_positions:
 			return self.visited_super_positions[super_position_id]
 
-		self.barrel_cells = barrel_cells
+		grid.set_barrels(barrel_cells)
 		if self.is_zsb:
 			accessible_cells_near_barrels = self.get_all_valid_zsb_char_barrel_moves()
 		else:
-			accessible_cells_near_barrels = [ (cell, barrel_cell) for cell in accessible_cells for barrel_cell in barrel_cells
-				if cell_distance(cell, barrel_cell) == 1 and self.can_shift(cell, barrel_cell) ]
+			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts()
 
-		accessible_cells_near_barrels.sort(key=lambda cell_pair: self.get_barrel_distance_weight(*cell_pair))
+		accessible_cells_near_barrels.sort(key=lambda two_cells: grid.min_char_barrel_plate_shifts.get(two_cells, grid.num_bits) or grid.num_bits)
 		all_proto_segments = tuple([(None, char_cell, barrel_cell)] for char_cell, barrel_cell in accessible_cells_near_barrels)
 		if self.is_zsb:
 			for proto_segments in all_proto_segments:
@@ -698,23 +439,21 @@ class BarrelPuzzle(Puzzle):
 
 	def create_child_position_or_reparent_if_better(self, position, segments):
 		num_moves, num_shifts = 0, 0
-		self.barrel_cells = position.super.barrel_cells.copy()
+		grid.set_barrels(position.super.barrel_cells)
 		for path_cells, char_cell, barrel_cell in segments:
 			self.char_cell = char_cell
-			self.shift(char_cell, barrel_cell)
+			new_char_cell, _ = grid.shift(char_cell, barrel_cell)
 			num_moves += len(path_cells) + 1
 			num_shifts += 1
-		char_cell = self.char_cell
-		barrel_cells = self.barrel_cells
 		own_nums = num_moves, num_shifts
 
 		if self.solved_position and self.solved_position.cmp(apply_diff(position.total_nums, own_nums)) <= 0:
 			debug([position.depth], DBG_SOLV2, "Not creating child that does not improve found solution")
 			return None
 
-		super_position = self.find_or_create_super_position(char_cell, barrel_cells)
+		super_position = self.find_or_create_super_position(new_char_cell, grid.barrel_cells)
 
-		child = super_position.get_or_reparent_or_create_position(char_cell, position, own_nums, segments)
+		child = super_position.get_or_reparent_or_create_position(new_char_cell, position, own_nums, segments)
 
 		return child
 
@@ -726,7 +465,7 @@ class BarrelPuzzle(Puzzle):
 		for proto_segments in position.super.all_proto_segments:
 			(_, char_cell, barrel_cell), *rest_segments = proto_segments
 			debug([position.depth], DBG_SOLV2, "Expanding %s -> %s" % (char_cell, barrel_cell))
-			char_path = self.Globals.find_path(position.char_cell, char_cell, position.super.barrel_cells)
+			char_path = grid.find_path(position.char_cell, char_cell, position.super.barrel_cells)
 			assert char_path is not None, "Bug in find_solution algorithm: no char path"
 			segments = [(char_path, char_cell, barrel_cell), *rest_segments]
 
@@ -735,6 +474,9 @@ class BarrelPuzzle(Puzzle):
 		position.is_expanded = True
 
 	def process_position(self, position):
+		if position.is_dirty:
+			position.calc_nums()
+
 		if position.is_fully_processed:
 			return True
 
@@ -768,9 +510,8 @@ class BarrelPuzzle(Puzzle):
 
 		return position.is_fully_processed
 
-	def find_solution_using_iddfs(self, position=None):
+	def find_solution_using_dfs(self, position=None):
 		if not position:
-			debug([0], DBG_SOLV, "Using IDDFS up to depth %d" % self.solution_depth)
 			position = self.initial_position
 
 		depth = position.depth
@@ -784,7 +525,7 @@ class BarrelPuzzle(Puzzle):
 
 		is_fully_processed = True
 		for child in position.children:
-			if (is_fully_processed0 := self.find_solution_using_iddfs(child)) is None:
+			if (is_fully_processed0 := self.find_solution_using_dfs(child)) is None:
 				return None
 			is_fully_processed &= is_fully_processed0
 
@@ -794,7 +535,6 @@ class BarrelPuzzle(Puzzle):
 		return is_fully_processed
 
 	def find_solution_using_bfs(self):
-		debug([0], DBG_SOLV, "Using BFS up to depth %d" % self.solution_depth)
 		unprocessed_positions = self.unprocessed_positions
 		depth_limit_positions = []
 
@@ -823,7 +563,6 @@ class BarrelPuzzle(Puzzle):
 		return not depth_limit_positions
 
 	def find_solution_using_pq(self):
-		debug([0], DBG_SOLV, "Using %s" % self.solution_alg)
 		unprocessed_positions = self.unprocessed_positions
 
 		while unprocessed_positions:
@@ -837,7 +576,6 @@ class BarrelPuzzle(Puzzle):
 			for child in position.children:
 				if not child in unprocessed_positions:
 					bisect.insort(unprocessed_positions, child, key=self.sort_positions)
-
 		return True
 
 	def on_set_theme(self):
@@ -1165,7 +903,7 @@ class BarrelPuzzle(Puzzle):
 		return game.in_level and self.is_solved_for_barrel_cells([ barrel.c for barrel in self.get_room_barrels() ])
 
 	def get_cell_image_to_draw(self, cell, cell_type):
-		if cell_type == CELL_FLOOR and self.min_barrel_plate_pushes is not None and cell not in self.min_barrel_plate_pushes:
+		if cell_type == CELL_FLOOR and grid.is_dead_barrel(cell):
 			return self.red_floor_image
 
 	def on_press_key(self, keyboard):
@@ -1175,7 +913,7 @@ class BarrelPuzzle(Puzzle):
 			if keyboard.b:
 				self.solution_alg = SOLUTION_ALG_BFS
 			if keyboard.d:
-				self.solution_alg = SOLUTION_ALG_IDDFS
+				self.solution_alg = SOLUTION_ALG_DFS
 			if keyboard.p:
 				self.solution_alg = SOLUTION_ALG_PQ
 			if keyboard.minus:
@@ -1197,20 +935,19 @@ class BarrelPuzzle(Puzzle):
 			if not solution.is_active() and not solution.is_find_mode():
 				self.solution_type = SOLUTION_TYPE_BY_MOVES if keyboard.shift else SOLUTION_TYPE_BY_SHIFTS
 
-	def get_found_solution_items(self):
+	def get_found_solution_items(self, reason):
 		solution_items = None
 		if self.solved_position:
-			self.solution = self.solved_position.to_solution_pairs()
-		if self.solution:
-			# solution found
-			solution_items = [item for pair in self.solution for item in pair]
+			solution_items = [item for pair in self.solved_position.to_solution_pairs() for item in pair]
+		debug(DBG_SOLV, "Finding solution %s, returning %s solution" % (reason, self.solved_position.nums_str if self.solved_position else "no"))
 		self.reset_solution_data()
 		return solution_items
 
 	def get_find_solution_status_str(self):
+		time_str = get_time_str(time() - self.start_solution_time)
 		status_str = "Finding %s optimal solution" % ("move" if self.solution_type == SOLUTION_TYPE_BY_MOVES else "push")
-		status_str += "; %s" % get_time_str(time() - self.start_solution_time)
-		if self.solution_alg in (SOLUTION_ALG_IDDFS, SOLUTION_ALG_BFS):
+		status_str += "; %s" % time_str
+		if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 			status_str += "; depth %d" % self.solution_depth
 		status_str += "; positions: %d" % self.num_processed_positions
 		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_PQ, SOLUTION_ALG_ASTAR):
@@ -1227,14 +964,14 @@ class BarrelPuzzle(Puzzle):
 			# preparing to find solution
 			self.start_solution_time = time()
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
-			self.prepare_to_find_solution()
-			if self.solution_alg in (SOLUTION_ALG_IDDFS, SOLUTION_ALG_BFS):
+			grid.configure(game.map, flags.is_reverse_barrel)
+			grid.prepare_sokoban_solution(self.disable_prepare_solution)
+			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()
 			game.puzzle = self
-			super_position = self.find_or_create_super_position(char.c, self.get_room_barrel_cells())
+			super_position = self.find_or_create_super_position(char.c, tuple(self.get_room_barrel_cells()))
 			self.initial_position = Position(super_position, char.c, None, None, None)
-			if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_PQ, SOLUTION_ALG_ASTAR):
-				self.unprocessed_positions = [self.initial_position]
+			self.unprocessed_positions = [self.initial_position]
 			if self.solution_alg == SOLUTION_ALG_PQ:
 				self.sort_positions = lambda position: position.total_nums
 			if self.solution_alg == SOLUTION_ALG_ASTAR:
@@ -1242,22 +979,24 @@ class BarrelPuzzle(Puzzle):
 			return None, self.get_find_solution_status_str()
 
 		if solution.stop_find or self.solution_depth > MAX_SOLUTION_DEPTH or time() > self.end_solution_time:
-			return self.get_found_solution_items(), None
+			return self.get_found_solution_items("terminated"), None
+
+		debug([0], DBG_SOLV, "Using %s%s" % (self.solution_alg, " up to depth %d" % self.solution_depth if self.solution_depth < MAX_SOLUTION_DEPTH else ""))
 
 		is_finished = (
-			self.find_solution_using_iddfs() if self.solution_alg == SOLUTION_ALG_IDDFS else
-			self.find_solution_using_bfs()   if self.solution_alg == SOLUTION_ALG_BFS   else
+			self.find_solution_using_dfs() if self.solution_alg == SOLUTION_ALG_DFS else
+			self.find_solution_using_bfs() if self.solution_alg == SOLUTION_ALG_BFS else
 			self.find_solution_using_pq()
 		)
 
 		if is_finished:
-			return self.get_found_solution_items(), None
+			return self.get_found_solution_items("finished"), None
 
 		# solution in progress
 		if is_finished is False:
 			if self.solution_alg == SOLUTION_ALG_BFS:
 				self.solution_depth += 1
-			elif self.solution_alg == SOLUTION_ALG_IDDFS:
+			elif self.solution_alg == SOLUTION_ALG_DFS:
 				self.solution_depth += SOLUTION_DEPTH_STEP
 		return None, self.get_find_solution_status_str()
 
