@@ -214,7 +214,6 @@ class CellActor(Actor):
 			self._transform()
 		else:
 			print("CellActor.image: Unsupported type: " + str(image))
-			pass
 
 	@property
 	def mirror(self):
