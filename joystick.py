@@ -1,8 +1,9 @@
+from debug import debug
 import pygame
 from pgzero.constants import keys
 
-DEBUG_PRESSES = False
-DEBUG_REGISTER = False
+DBG_JREG = "jreg"
+DBG_JPRS = "jprs"
 
 class HidPlaystationConfig:
 	# PS4: Sony Interactive Entertainment Wireless Controller
@@ -164,19 +165,16 @@ class Joystick():
 			return
 		config = next((config for config in SUPPORTED_JOYSTICK_CONFIGS if config.is_detected(joystick)), None)
 		if not config:
-			if DEBUG_REGISTER:
-				print("Unsupported joystick: %s" % joystick.get_name())
+			debug(DBG_JREG, "Unsupported joystick: %s" % joystick.get_name())
 			return
-		if DEBUG_REGISTER:
-			print("Registered joystick: %s, %s" % (joystick.get_name(), config.__name__))
+		debug(DBG_JREG, "Registered joystick: %s, %s" % (joystick.get_name(), config.__name__))
 		joystick.init()
 		joystick = Joystick(joystick, config)
 		joysticks.append(joystick)
 
 	@classmethod
 	def unregister(cls, joystick):
-		if DEBUG_REGISTER:
-			print("Unregistered joystick: %s" % joystick.get_name())
+		debug(DBG_JREG, "Unregistered joystick: %s" % joystick.get_name())
 		joystick.quit()
 		joystick = Joystick.find(joystick)
 		if joystick is not None:
@@ -296,8 +294,8 @@ def emulate_joysticks_press_key(keyboard):
 	for name in released_names:
 		keyboard._release(PRESSED_NAME_KEYS[name])
 
-	if DEBUG_PRESSES and (pressed_names or released_names):
-		print("Pressed:", pressed_names or {}, "Released:", released_names or {})
+	if pressed_names or released_names:
+		debug(DBG_JPRS, "Pressed: %s, Released: %s", (pressed_names or {}, released_names or {}))
 
 	return pressed_names or released_names
 
