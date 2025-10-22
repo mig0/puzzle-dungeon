@@ -1,4 +1,5 @@
 from debug import debug
+from common import warn
 import pygame
 from pgzero.constants import keys
 
@@ -231,7 +232,11 @@ class Joystick():
 def scan_active_joysticks():
 	dead_joysticks = [ j.joystick for j in joysticks ]
 	for i in range(pygame.joystick.get_count()):
-		joystick = pygame.joystick.Joystick(i)
+		try:
+			joystick = pygame.joystick.Joystick(i)
+		except pygame.error as e:
+			warn(e)
+			break
 		Joystick.register(joystick)
 		if joystick in dead_joysticks:
 			dead_joysticks.remove(joystick)
