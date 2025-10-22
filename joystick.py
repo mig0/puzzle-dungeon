@@ -133,7 +133,7 @@ class OldPlaystationConfig(HidPlaystationConfig):
 
 	@classmethod
 	def is_detected(cls, joystick):
-		return joystick.get_numaxes() == 6 and joystick.get_numballs() == 0 and joystick.get_numbuttons() in (14, 15) and joystick.get_numhats() == 0
+		return joystick.get_numaxes() == 6 and joystick.get_numballs() == 0 and joystick.get_numbuttons() in (14, 15, 16, 17) and joystick.get_numhats() == 0
 
 SUPPORTED_JOYSTICK_CONFIGS = (
 	HidPlaystationConfig,
