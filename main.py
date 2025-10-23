@@ -1537,23 +1537,30 @@ def handle_press_key():
 	if keyboard.nomods:
 		if keyboard.l:
 			reset_level_title_and_goal_time()
+			return
 
 		if keyboard.m:
 			if is_music_enabled:
 				disable_music()
 			else:
 				enable_music()
+			return
 
 		if keyboard.s:
 			is_sound_enabled = not is_sound_enabled
 			set_quick_status_message("Sounds are now", is_sound_enabled)
+			return
 
 		if keyboard.a:
 			is_move_animate_enabled = not is_move_animate_enabled
 			set_quick_status_message("Move animate is now", is_move_animate_enabled)
+			return
 
 		if keyboard.q:
 			quit()
+
+	if keyboard.q and keyboard.ctrl:
+		quit()
 
 	if mode == "next":
 		return
