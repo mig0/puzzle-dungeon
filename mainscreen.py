@@ -24,13 +24,15 @@ class MainScreen(VirtualPuzzle):
 			self.main_screen_color -= step
 
 	def press_cell(self, cell, button=None):
-		if not (button == 1 and cell in self.plate_collections and cell_distance(cell, char.c) != 1):
+		if not cell in self.plate_collections:
+			return False
+		if button == 1 and cell_distance(cell, char.c) == 1 or button == 2 or button == 3 and cell != char.c:
 			return False
 		game.set_requested_new_level(self.plate_collections[cell].get_level_id())
-		return False
+		return True
 
 	def on_press_key(self, keyboard):
-		if not (False
+		if keyboard._pressed and not keyboard.onlymods and not (False
 			or keyboard.right or keyboard.left or keyboard.up or keyboard.down
 			or keyboard.escape or keyboard.space or keyboard.enter
 		):

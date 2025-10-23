@@ -1429,6 +1429,7 @@ def handle_press_key():
 	keyboard.alt   = keyboard.lalt   or keyboard.ralt
 
 	keyboard.nomods = not (keyboard.shift or keyboard.ctrl or keyboard.alt)
+	keyboard.onlymods = keyboard._pressed.issubset({keys.LSHIFT, keys.RSHIFT, keys.LCTRL, keys.RCTRL, keys.LALT, keys.RALT})
 
 	reset_idle_time()
 
