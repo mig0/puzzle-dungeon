@@ -14,26 +14,33 @@ git clone <a href="https://github.com/mig0/puzzle-dungeon.git">https://github.co
 
 <h2>Dependencies</h2>
 <p>You need python3, and at least <a href="https://www.pygame.org/">pygame</a>,
-<a href="https://pygame-zero.readthedocs.io/">pgzero</a> and
-<a href="https://pypi.org/project/bitarray/">bitarray</a>.</p>
+<a href="https://pygame-zero.readthedocs.io/">pgzero</a>,
+<a href="https://pypi.org/project/bitarray/">bitarray</a> and
+<a href="https://pypi.org/project/PyYAML/">PyYAML</a>.</p>
 
-<p>On Fedora, python3-pygame-2.6.1, pgzero-1.2.1 and
-python3-bitarray-2.8.5 rpms are found to work fine. Try:</p>
+<p>On Fedora, python3-pygame-2.6.1, pgzero-1.2.1,
+python3-bitarray-2.8.5 and python3-pyyaml-6.0.1 rpms are found to work fine. Try:</p>
 
 <code>
-sudo dnf install python3-pygame pgzero python3-bitarray
+sudo dnf install python3-pygame pgzero python3-bitarray python3-pyyaml
 </code>
 
 <p>On Debian and Ubuntu, run this:</p>
 
 <code>
-sudo apt install python3-pygame python3-pgzero python3-bitarray
+sudo apt install python3-pygame python3-pgzero python3-bitarray python3-yaml
 </code>
 
-<p>On Windows or any other systems, run this:</p>
+<p>On Windows, run this:</p>
 
 <code>
-pip install pgzero bitarray
+install-deps.bat
+</code>
+
+<p>On any systems, you may instead install from pip repository using:</p>
+
+<code>
+pip install pgzero bitarray PyYAML
 </code>
 
 <h2>How to install</h2>
