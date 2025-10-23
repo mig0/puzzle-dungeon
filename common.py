@@ -37,6 +37,12 @@ def open_read(filename, descr=None):
 	except Exception as e:
 		die("Can't open %s (%s)" % (filename_descr, e))
 
+def get_caller_function_name_or_self(n=0):
+	caller = inspect.currentframe().f_back
+	for _ in range(n):
+		caller = caller.f_back
+	return caller.f_locals.get('self') or caller.f_code.co_name
+
 def get_pgzero_game_from_stack():
 	for frame_info in inspect.stack():
 		frame = frame_info.frame
