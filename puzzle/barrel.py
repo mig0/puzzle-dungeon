@@ -79,7 +79,7 @@ class Position:
 
 	@property
 	def is_solved(self):
-		return self.super.is_solved
+		return self.depth and self.super.is_solved
 
 	def cmp(self, pos2):
 		total_nums2 = pos2 if type(pos2) == tuple else pos2.total_nums
@@ -904,7 +904,7 @@ class BarrelPuzzle(Puzzle):
 			len([cell for cell in self.plate_cells if cell in barrel_cells]) == len(self.plate_cells)
 
 	def is_solved(self):
-		return game.in_level and self.is_solved_for_barrel_cells([ barrel.c for barrel in self.get_room_barrels() ])
+		return game.in_level and self.num_shifts and self.is_solved_for_barrel_cells([ barrel.c for barrel in self.get_room_barrels() ])
 
 	def get_cell_image_to_draw(self, cell, cell_type):
 		if cell_type == CELL_FLOOR and grid.is_dead_barrel(cell):
