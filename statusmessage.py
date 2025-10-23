@@ -1,6 +1,7 @@
 import pygame
 from time import time
-from config import STATUS_MESSAGE_FADE_DURATION, STATUS_MESSAGE_REST_DURATION
+from config import STATUS_MESSAGE_FADE_DURATION, STATUS_MESSAGE_REST_DURATION, QUICK_STATUS_MESSAGE_DURATION
+from common import get_caller_function_name_or_self
 from game import game
 
 BEAT_TIME = 5
@@ -87,6 +88,10 @@ def set_status_message(msg=None, source='main', priority=None, duration=None, sp
 			current_status_message.num_shown -= remaining_time // BEAT_TIME
 		current_status_message = None
 		current_status_end_time = None
+
+def set_quick_status_message(msg, flag=None):
+	msg += ' %s' % ("on" if flag else "off") if flag is not None else ''
+	set_status_message(msg, get_caller_function_name_or_self(1), 1, QUICK_STATUS_MESSAGE_DURATION)
 
 def get_new_current_message_and_duration():
 	if not status_messages:
