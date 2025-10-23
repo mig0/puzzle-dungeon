@@ -373,6 +373,9 @@ class BarrelPuzzle(Puzzle):
 		self.has_extra_barrels = len(self.plate_cells) < len(barrels)
 		self.has_extra_plates  = len(self.plate_cells) > len(barrels)
 
+		self.num_moves = 0
+		self.num_shifts = 0
+
 		self.reset_solution_data()
 		self.check_special_setups()
 
@@ -935,6 +938,13 @@ class BarrelPuzzle(Puzzle):
 				solution.reset()
 			if not solution.is_active() and not solution.is_find_mode():
 				self.solution_type = SOLUTION_TYPE_BY_MOVES if keyboard.shift else SOLUTION_TYPE_BY_SHIFTS
+
+	def on_enter_cell(self):
+		self.num_moves += 1
+		self.num_shifts += game.last_char_move.is_barrel_shift
+
+	def on_draw(self):
+		game.screen.draw.text("%d/%d" % (self.num_moves, self.num_shifts), center=(CELL_W * 1.5, CELL_H * 0.5), color="#00FFAA", gcolor="#00AA66", owidth=2, ocolor="#3C403C", alpha=1, fontsize=27)
 
 	def get_found_solution_items(self, reason):
 		solution_items = None
