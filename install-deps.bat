@@ -70,7 +70,7 @@ rem ================================================================
 :need_python_module_install
 
 echo Installing required modules...
-"!PYTHON_EXE!" -m pip install pygame pgzero bitarray
+"!PYTHON_EXE!" -m pip install pygame pgzero bitarray PyYAML
 
 if !errorlevel! neq 0 (
 	echo ERROR: Failed to install required python modules
@@ -142,9 +142,9 @@ exit /b 1
 rem ================================================================
 :check_python_modules
 
-"!PYTHON_EXE!" -c "import pygame, pgzero, bitarray" 2>nul
+"!PYTHON_EXE!" -c "import pygame, pgzero, bitarray, yaml" 2>nul
 if !errorlevel! NEQ 0 (
-	echo Required python modules ^(pygame, pgzero, bitarray^) failed
+	echo Required python modules ^(pygame, pgzero, bitarray, yaml^) failed
 	exit /b 1
 )
 
