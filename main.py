@@ -1819,12 +1819,9 @@ def enter_cell():
 
 	puzzle.on_enter_cell()
 
-last_move_diff = None
-
 def continue_move_char():
-	diff_x, diff_y = last_move_diff
-	last_move_diff = None
-	move_char(diff_x, diff_y)
+	game.last_char_move.is_continued = True
+	move_char(game.last_char_move.dir)
 
 def get_move_animate_duration(old_char_cell):
 	distance = cell_distance(old_char_cell, char.c)
@@ -1851,8 +1848,6 @@ def beat_or_kill_enemy(enemy, diff):
 		die("Called beat_or_kill_enemy in power mode")
 
 	enemy.health -= char.attack
-	# can't move if we face enemy, cancel the move
-	char.move(diff, undo=True)
 	# animate beat or kill
 	if enemy.health > 0:
 		play_sound("beat")
@@ -1867,29 +1862,24 @@ def check_should_pull():
 	return flags.is_reverse_barrel and not keyboard.shift or not flags.is_reverse_barrel and flags.is_cheat_mode and keyboard.shift
 
 def move_char(diff):
-	global last_move_diff
-
-	old_char_pos = char.pos
-	old_char_cell = char.c
-
 	if solution.is_play_mode() and not can_move(diff):
 		play_sound("error")
 		return
 
 	# try to move forward, and prepare to cancel if the move is impossible
-	char.move(diff)
+	char_move = game.begin_char_move(char, diff)
 
 	if flags.is_stopless:
 		is_jumped = False
 		while game.map[char.c] in CELL_FLOOR_TYPES and not is_cell_occupied_except_char(char.c) and can_move(diff):
-			char.move(diff)
+			char_move.move()
 			is_jumped = True
-		if is_move_animate_enabled and is_jumped and is_cell_occupied_except_char(char.c) and last_move_diff is None:
+		if is_move_animate_enabled and is_jumped and is_cell_occupied_except_char(char.c) and not char_move.is_continued:
 			# undo one step
-			char.move(diff, undo=True)
-			last_move_diff = diff
-			char.pos = old_char_pos
-			char.animate(get_move_animate_duration(old_char_cell), on_finished=continue_move_char)
+			char_move.undo_move()
+			char.pos = char_move.old_char_pos
+			game.commit_char_move(char_move)
+			char.animate(get_move_animate_duration(char_move.old_char_cell), on_finished=continue_move_char)
 			return
 
 	should_pull = check_should_pull()
@@ -1897,9 +1887,9 @@ def move_char(diff):
 	if should_pull:
 		if not is_cell_accessible(char.c):
 			# can't pull into obstacle
-			char.move(diff, undo=True)
+			game.cancel_char_move(char_move)
 			return
-		pull_barrel_cell = apply_diff(old_char_cell, diff, subtract=True)
+		pull_barrel_cell = apply_diff(char_move.old_char_cell, diff, subtract=True)
 
 	# collision with enemies
 	enemy = get_actor_on_cell(char.c, enemies)
@@ -1908,6 +1898,7 @@ def move_char(diff):
 		game.remember_extra_obj_state(enemy)
 		if char.power is None:
 			char.health -= enemy.attack
+			game.cancel_char_move(char_move)
 			beat_or_kill_enemy(enemy, diff)
 			return
 		else:
@@ -1917,7 +1908,7 @@ def move_char(diff):
 			else:
 				char.power = 0
 				# we die, cancel move
-				char.move(diff, undo=True)
+				game.cancel_char_move(char_move)
 				return
 
 	# collision with barrels
@@ -1927,7 +1918,7 @@ def move_char(diff):
 		if flags.is_reverse_barrel and not should_pull and not flags.is_cheat_mode or \
 			not is_cell_accessible(next_barrel_cell, allow_enemy=True) or is_cell_in_actors(next_barrel_cell, carts + lifts):
 			# can't push or pull, cancel the move
-			char.move(diff, undo=True)
+			game.cancel_char_move(char_move)
 			return
 		else:
 			# if enemy is in the next barrel cell, possibly don't move; beat or kill it
@@ -1936,38 +1927,44 @@ def move_char(diff):
 				if char.power is None:
 					beat_or_kill_enemy(enemy, diff)
 					activate_beat_animation(barrel, diff, 'bounce_end')
+					game.cancel_char_move(char_move)
 					return
 				else:
 					# in power mode unconditionally kill enemy using barrel
 					kill_enemy(enemy)
 
 			# can push, animate the push
+			if pull_barrel_cell:
+				char_move.is_barrel_pull = True
+			else:
+				char_move.is_barrel_push = True
 			barrel.move_animated(diff, enable_animation=is_move_animate_enabled)
 
 	# can move, process the character move: leave_cell, enter_cell
 	unset_prepared_solution()
 
 	# process lift movement if available
-	if lift_target := get_lift_target(old_char_cell, diff):
-		distance = cell_distance(old_char_cell, lift_target)
+	if lift_target := get_lift_target(char_move.old_char_cell, diff):
+		distance = cell_distance(char_move.old_char_cell, lift_target)
 		for i in range(1, distance):
 			char.move(diff)
-		lift = get_actor_on_cell(old_char_cell, lifts)
+		lift = get_actor_on_cell(char_move.old_char_cell, lifts)
 		lift.move_animated(target=lift_target, enable_animation=is_move_animate_enabled, on_finished=activate_cursor_after_lift_movement)
 
-	leave_cell(old_char_cell)
+	leave_cell(char_move.old_char_cell)
 
 	# animate the move if needed
 	if is_move_animate_enabled:
-		animate_duration = get_move_animate_duration(old_char_cell)
+		animate_duration = get_move_animate_duration(char_move.old_char_cell)
 		prepare_enter_cell(animate_duration)
-		char.pos = old_char_pos
+		char.pos = char_move.old_char_pos
 		char.animate(animate_duration, on_finished=enter_cell)
 	else:
 		prepare_enter_cell(0)
 		enter_cell()
 
 	reveal_map_near_char()
+	game.commit_char_move(char_move)
 
 def activate_cursor_after_lift_movement():
 	if not cursor.is_lift_selected():

@@ -70,6 +70,29 @@ class UndoFrame:
 		for collection, elem in self.collection_elems:
 			collection.add(elem) if type(collection) == set else collection.append(elem)
 
+class CharMove:
+	def __init__(self, char, dir):
+		self.char = char
+		self.dir = dir
+		self.is_barrel_push = False
+		self.is_barrel_pull = False
+		self.is_barrel_shift = False
+		self.is_continued = False
+
+	def store_pos(self):
+		self.old_char_cell = self.char.c
+		self.old_char_pos = self.char.pos
+
+	def move(self):
+		self.char.move(self.dir)
+
+	def undo_move(self):
+		self.char.move(self.dir, undo=True)
+
+	def finalize(self):
+		self.is_barrel_shift = self.is_barrel_push or self.is_barrel_pull
+		self.is_continued = False
+
 class Game:
 	def __init__(self):
 		self.map = None
@@ -81,11 +104,28 @@ class Game:
 		self.undo_frames = []
 		self.in_level = False
 		self.during_undo = False
+		self.last_char_move = None
 
 		self.collections = []
 		self.level = Level()
 		self._register_all_collections()
 		self._create_custom_collection()
+
+	def begin_char_move(self, char, dir):
+		char_move = self.last_char_move
+		if not (char_move and char_move.is_continued):
+			char_move = CharMove(char, dir)
+		char_move.store_pos()
+		char_move.move()
+		return char_move
+
+	def cancel_char_move(self, char_move):
+		char_move.undo_move()
+		char_move.finalize()
+
+	def commit_char_move(self, char_move):
+		char_move.finalize()
+		self.last_char_move = char_move
 
 	def init_console(self):
 		self.console = None
