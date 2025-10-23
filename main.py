@@ -32,7 +32,7 @@ from clipboard import clipboard
 from translate import _, set_lang
 from mainscreen import main_screen_level
 from sokobanparser import parse_sokoban_levels
-from statusmessage import reset_status_messages, set_status_message, draw_status_message
+from statusmessage import reset_status_messages, set_status_message, set_quick_status_message, draw_status_message
 
 DISPLAY_WIDTH, DISPLAY_HEIGHT = pygame.display.get_desktop_sizes()[0]
 
@@ -1347,21 +1347,21 @@ def kill_enemy_cleanup():
 def cancel_playing_solution():
 	if solution.is_play_mode():
 		solution.reset()
-		set_status_message("Playing solution stopped", "cancel_playing_solution", 1, 3)
+		set_quick_status_message("Playing solution stopped")
 		return True
 	return False
 
 def stop_finding_solution():
 	if solution.is_find_mode():
 		solution.stop_find = True
-		set_status_message("Requested to stop finding solution", "stop_finding_solution", 1, 3)
+		set_quick_status_message("Requested to stop finding solution")
 		return True
 	return False
 
 def unset_prepared_solution():
 	if solution.is_active() and not solution.is_play_mode():
 		solution.reset()
-		set_status_message("Prepared solution unset", "unset_prepared_solution", 1, 3)
+		set_quick_status_message("Prepared solution unset")
 		return True
 	return False
 
@@ -1470,20 +1470,22 @@ def handle_press_key():
 				reset_level_title_and_goal_time()
 			else:
 				clear_level_title_and_goal_time()
+			set_quick_status_message("Level intro is now", is_level_intro_enabled)
 
 		if keyboard.s:
 			flags.is_stopless = not flags.is_stopless
+			set_quick_status_message("The stopless mode is now", flags.is_stopless)
 
 		if keyboard.m:
 			map_stringio = io.StringIO()
 			with stdout_redirected_to(sys.stdout, map_stringio):
 				debug_map(full_format=not keyboard.ralt, clean=not keyboard.rctrl)
 			clipboard.put(map_stringio.getvalue())
-			set_status_message("The current map copied to clipboard and stdout", priority=4, duration=5)
+			set_quick_status_message("The current map copied to clipboard and stdout")
 
 		if keyboard.c:
 			flags.is_cheat_mode = not flags.is_cheat_mode
-			set_status_message("The cheat mode is now %s" % ("on" if flags.is_cheat_mode else "off"), priority=4, duration=5)
+			set_quick_status_message("The cheat mode is now", flags.is_cheat_mode)
 
 		return
 
@@ -1543,9 +1545,11 @@ def handle_press_key():
 
 		if keyboard.s:
 			is_sound_enabled = not is_sound_enabled
+			set_quick_status_message("Sounds are now", is_sound_enabled)
 
 		if keyboard.a:
 			is_move_animate_enabled = not is_move_animate_enabled
+			set_quick_status_message("Move animate is now", is_move_animate_enabled)
 
 		if keyboard.q:
 			quit()

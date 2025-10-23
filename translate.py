@@ -2,11 +2,14 @@ import os
 import re
 from unicodedata import bidirectional
 from translations import *
+from statusmessage import set_quick_status_message
 
-lang = 'en'
+lang = None
 
 def set_lang(_lang):
 	global lang
+	if lang:
+		set_quick_status_message("Language is now %s" % _lang)
 	lang = _lang
 
 def autodetect_lang():
