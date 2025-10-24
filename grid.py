@@ -253,6 +253,35 @@ class Grid:
 			debug(DBG_PATH3, "- %s" % str(self.to_cells(accessible_bits)))
 		return self.to_cells(accessible_bits)
 
+	def get_accessible_distance(self, start, target, obstacles=None):
+		start_idx = self.to_idx_or_none(start)
+		target_idx = self.to_idx_or_none(target)
+		if start_idx is None or target_idx is None:
+			return None
+		if start_idx == target_idx:
+			return 0
+		obstacle_bits = self.barrel_bits if obstacles is None else self.to_bits(obstacles)
+
+		unprocessed_bits = self.no_bits.copy()
+		unprocessed_bits[start_idx] = True
+
+		processed_bits = obstacle_bits.copy()
+		processed_bits[start_idx] = True
+		distance = 1
+		while True:
+			new_bits = self.no_bits.copy()
+			for idx in unprocessed_bits.itersearch(_ONE):
+				for neigh_idx in self.all_passable_neigh_idxs[idx]:
+					if neigh_idx == target_idx:
+						return distance
+					if not processed_bits[neigh_idx]:
+						new_bits[neigh_idx] = True
+			if not new_bits.any():
+				return None
+			processed_bits |= new_bits
+			unprocessed_bits = new_bits
+			distance += 1
+
 	def get_accessible_distances(self, start, obstacles=None):
 		start_idx = self.to_idx(start)
 		obstacle_bits = self.barrel_bits if obstacles is None else self.to_bits(obstacles)
