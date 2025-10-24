@@ -402,7 +402,7 @@ def test_last_accessible_bits_and_obstacles():
 	# set a barrel and pass it as obstacle to get_accessible_bits -> returned bits exclude that cell
 	obstacle = (3, 3)
 	grid.set_barrels([obstacle])
-	bits_with_barrel = grid.get_accessible_bits(start, obstacle_bits=grid.barrel_bits)
+	bits_with_barrel = grid.get_accessible_bits(start, obstacles=grid.barrel_bits)
 	test.lt(bits_with_barrel.count(), bits.count())
 	test.eq(grid.barrel_bits.count(), 1)
 	test.ok(not bits_with_barrel[grid.to_idx(obstacle)], "accessible_bits should exclude obstacle cell")
