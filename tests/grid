@@ -9,6 +9,7 @@ from constants import *
 from grid import Grid
 from test import TestSuite
 from celltools import cell_distance
+from teestream import stdout_redirected_to
 
 verbose = False
 def print_if_verbose(*args):
@@ -25,7 +26,7 @@ def make_simple_map():
 		"#......#",
 		"#...#..#",
 		"#......#",
-		" ######",
+		"#######",
 	]
 	# pad any non-uniform rows
 	w = max(len(r) for r in layout)
@@ -49,8 +50,10 @@ def make_simple_map():
 				map[cell] = CELL_VOID
 	return map
 
-def configure_simple_grid(reverse_barrel_mode=False):
+def configure_simple_grid(reverse_barrel_mode=False, plate_cells=None):
 	game_map = make_simple_map()
+	for plate_cell in plate_cells or []:
+		game_map[plate_cell] = CELL_PLATE
 	grid = Grid()
 	grid.configure(game_map, reverse_barrel_mode)
 	return grid
@@ -300,17 +303,6 @@ def test_deadlock_detection():
 	test.ok(not grid.is_surrounding_barrel_deadlock((3, 3), (2, 3), DIR_R), "Unexpected surrounding deadlock detected")
 	test.ok(    grid.is_surrounding_barrel_deadlock((3, 3), (3, 4), DIR_L), "Expected surrounding deadlock not detected")
 
-def test_dead_barrel_preparation():
-	grid = configure_simple_grid()
-	grid.prepare_sokoban_solution()
-	test.ok(hasattr(grid, 'dead_barrel_bits'), "No expected dead_barrel_bits member")
-	test.ok(hasattr(grid, 'min_barrel_plate_shifts'), "No expected min_barrel_plate_shifts member")
-	test.ok(hasattr(grid, 'min_char_barrel_plate_shifts'), "No expected min_char_barrel_plate_shifts member")
-	# Ensure some floor cells are marked as dead or non-dead
-	num_dead_barrel_bits = grid.dead_barrel_bits.count()
-	test.gt(num_dead_barrel_bits, 0)
-	test.eq(num_dead_barrel_bits, grid.num_bits)
-
 def test_find_path_with_barrels():
 	grid = configure_simple_grid()
 	grid.set_barrels([(3, 3)])
@@ -356,6 +348,108 @@ def test_find_path_edge_cases():
 	path = grid.find_path(start, unreachable)
 	test.none(path)
 
+def test_conversion_helpers():
+	grid = configure_simple_grid()
+	# to_bits / to_idxs / to_cells round-trip
+	cells = [(1, 1), (2, 1), (3, 1)]
+	bits = grid.to_bits(cells)
+	idxs = grid.to_idxs(bits)
+	cells2 = grid.to_cells(bits)
+	test.eq(type(bits), type(grid.no_bits))
+	test.eq(type(idxs), tuple)
+	test.eq(type(cells2), tuple)
+	test.eq(cells2, tuple(cells))
+	# to_idx_or_none for invalid cell returns None
+	test.none(grid.to_idx_or_none((-1, -1)))
+	# to_idx for an actor-like object: emulate class with .c attribute
+	class CellActor:
+		def __init__(self, c): self.c = c
+	fa = CellActor((1, 1))
+	test.eq(grid.to_idx(fa), grid.to_idx((1, 1)))
+
+def test_show_map_no_crash():
+	grid = configure_simple_grid()
+	# ensure show_map doesn't raise when there are void/wall cells
+	try:
+		streams = (sys.stdout,) if verbose else ()
+		with stdout_redirected_to(*streams):
+			grid.show_map("Smoke test show_map", show_dead=True)
+	except Exception as e:
+		test.ok(False, "show_map raised exception: %s" % (e,))
+	else:
+		test.ok(True, "show_map executed without exception")
+
+def test_set_barrels_wall_raises():
+	grid = configure_simple_grid()
+	wall_cell = (0, 0)  # corner of layout is wall or void in map
+	# set_barrels uses to_bits -> to_idx -> KeyError for wall cells: expect exception
+	try:
+		grid.set_barrels([wall_cell])
+	except KeyError:
+		test.ok(True, "Expected KeyError when setting a wall as barrel")
+	except Exception as e:
+		test.ok(False, "Expected KeyError, got %s" % (e,))
+	else:
+		test.ok(False, "Expected exception when setting a wall as barrel, but none raised")
+
+def test_last_accessible_bits_and_obstacles():
+	grid = configure_simple_grid()
+	start = (1, 1)
+	# no obstacles: accessible_bits should include many cells
+	bits = grid.get_accessible_bits(start)
+	test.eq(bits, grid.last_accessible_bits)
+	test.gt(bits.count(), 1)
+	# set a barrel and pass it as obstacle to get_accessible_bits -> returned bits exclude that cell
+	obstacle = (3, 3)
+	grid.set_barrels([obstacle])
+	bits_with_barrel = grid.get_accessible_bits(start, obstacle_bits=grid.barrel_bits)
+	test.lt(bits_with_barrel.count(), bits.count())
+	test.eq(grid.barrel_bits.count(), 1)
+	test.ok(not bits_with_barrel[grid.to_idx(obstacle)], "accessible_bits should exclude obstacle cell")
+	# calling get_accessible_cells with obstacles param
+	cells = grid.get_accessible_cells(start, obstacles=(obstacle,))
+	test.not_in(obstacle, cells)
+
+def test_try_push_pull_without_barrel():
+	grid = configure_simple_grid()
+	char_cell, barrel_cell = (2, 3), (3, 3)
+	# ensure no barrel present at barrel cell
+	grid.store_reset_barrels()
+	# try_push/try_pull should return None when there is no barrel at barrel_cell
+	test.none(grid.try_push(char_cell, barrel_cell))
+	test.none(grid.try_pull(char_cell, barrel_cell))
+	# same for try_shift (depending on reverse mode)
+	test.none(grid.try_shift(char_cell, barrel_cell))
+	grid.restore_barrels()
+
+def test_prepare_sokoban_solution_without_plates():
+	grid = configure_simple_grid()
+	grid.prepare_sokoban_solution()
+	test.has_attr(grid, 'dead_barrel_bits')
+	test.has_attr(grid, 'min_barrel_plate_shifts')
+	test.has_attr(grid, 'min_char_barrel_plate_shifts')
+	# ensure all floor cells are marked as dead without plates
+	num_dead_barrel_bits = grid.dead_barrel_bits.count()
+	test.gt(num_dead_barrel_bits, 0)
+	test.eq(num_dead_barrel_bits, grid.num_bits)
+
+def test_prepare_sokoban_solution_with_plate():
+	grid = configure_simple_grid(plate_cells=[(5, 5)])
+	grid.prepare_sokoban_solution()
+	num_dead_barrel_bits = grid.dead_barrel_bits.count()
+	test.gt(grid.dead_barrel_bits.count(), 0)
+	# now call with disable=True
+	grid.reset_sokoban_solution()
+	grid.prepare_sokoban_solution(disable=True)
+	# when disabled, dead_barrel_bits is no_bits
+	test.eq(grid.dead_barrel_bits.count(), 0)
+	# chech consistency
+	grid.reset_sokoban_solution()
+	grid.prepare_sokoban_solution()
+	test.eq(grid.dead_barrel_bits.count(), num_dead_barrel_bits)
+	if verbose:
+		grid.show_map("Map after test_prepare_sokoban_solution_with_plate")
+
 if __name__ == "__main__":
 	args = sys.argv[1:]
 	verbose = args.count('-v') >= 2
@@ -368,9 +462,15 @@ if __name__ == "__main__":
 	test_store_and_restore_barrels()
 	test_large_open_area_performance()
 	test_deadlock_detection()
-	test_dead_barrel_preparation()
 	test_find_path_with_barrels()
 	test_reverse_mode_consistency()
 	test_bit_integrity()
 	test_find_path_edge_cases()
+	test_conversion_helpers()
+	test_show_map_no_crash()
+	test_set_barrels_wall_raises()
+	test_last_accessible_bits_and_obstacles()
+	test_try_push_pull_without_barrel()
+	test_prepare_sokoban_solution_without_plates()
+	test_prepare_sokoban_solution_with_plate()
 	test.finalize()
