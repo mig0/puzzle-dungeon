@@ -522,34 +522,35 @@ class Grid:
 		return cell_pairs
 
 	# disable means to proceed to the solution without calculating minimum-shifts and dead-barrels
-	def prepare_sokoban_solution(self, disable=False):
-		plate_cells = self.to_cells(self.plate_bits)
+	def prepare_sokoban_solution(self, char=None, disable=False):
+		self.min_char_barrel_plate_shifts = min_char_shifts = {}
+		self.min_barrel_plate_shifts = min_shifts = {}
 
-		self.min_char_barrel_plate_shifts = min_char_barrel_plate_shifts = {}
-		self.min_barrel_plate_shifts = min_barrel_plate_shifts = {}
-		if not plate_cells:
+		if not self.plate_bits.any():
 			self.dead_barrel_bits = self.all_bits
 			return
 		self.dead_barrel_bits = self.no_bits
 		if disable:
 			return
 
-		self.store_reset_barrels()
+		self.barrel_bits = self.no_bits
+		char_accessible_bits = self.get_accessible_bits(char) if char else self.all_bits
 
 		# run BFS separately for each plate to compute distances from that plate
-		for plate_cell in plate_cells:
-			min_barrel_plate_shifts[plate_cell] = 0
+		for plate_idx in self.plate_bits.itersearch(_ONE):
+			if not char_accessible_bits[plate_idx]:
+				continue
+			plate_cell = self.to_cell(plate_idx)
+			depth = 0
+			min_shifts[plate_cell] = 0
 			unprocessed = [(char_cell, plate_cell) for char_cell in self.get_accessible_neigh_cells(plate_cell)]
 
-			for depth in range(1, self.num_bits + 1):
-				if not unprocessed:
-					break
-
+			while unprocessed:
+				depth += 1
 				next_unprocessed = []
-				any_new = False
 
 				for last_char_cell, barrel_cell in unprocessed:
-					self.set_barrels([barrel_cell])
+					self.barrel_bits = self.to_bit(barrel_cell)
 					accessible_bits = self.get_accessible_bits(last_char_cell)
 
 					for char_idx in self.all_passable_neigh_idxs[self.to_idx(barrel_cell)]:
@@ -560,21 +561,18 @@ class Grid:
 						if not new_cells:
 							continue
 
-						if new_cells not in min_char_barrel_plate_shifts:
-							min_char_barrel_plate_shifts[new_cells] = depth
+						if new_cells not in min_char_shifts or min_char_shifts[new_cells] > depth:
+							min_char_shifts[new_cells] = depth
 							new_char_cell, new_barrel_cell = new_cells
-							if new_barrel_cell not in min_barrel_plate_shifts:
-								min_barrel_plate_shifts[new_barrel_cell] = depth
+							if new_barrel_cell not in min_shifts or min_shifts[new_barrel_cell] > depth:
+								min_shifts[new_barrel_cell] = depth
 							next_unprocessed.append(new_cells)
 
 				unprocessed = next_unprocessed
 
-		self.dead_barrel_bits = ~self.to_bits(min_barrel_plate_shifts.keys()) & self.all_bits
-		self.min_char_barrel_plate_shifts = min_char_barrel_plate_shifts
-		self.min_barrel_plate_shifts = min_barrel_plate_shifts
+		self.barrel_bits = self.no_bits.copy()
 
-		self.restore_barrels()
-
+		self.dead_barrel_bits = ~self.to_bits(min_shifts.keys())
 		if DBG_GRID2 in debug.features:
 			self.show_map("Map with dead-barrel cells", show_dead=True)
 
