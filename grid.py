@@ -138,9 +138,12 @@ class Grid:
 		debug(DBG_GRID, "Configured map with %d floors" % self.num_bits)
 		debug(DBG_GRID2, "- idx_cells: %s" % (self.idx_cells))
 
-	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char_cell=None, cell_chars={}, show_dead=False, extra_cb=None):
+	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, show_dead=False, extra_cb=None):
 		if descr:
 			print(descr)
+		char_cell = self.to_cell(char) if char else None
+		if barrels:
+			self.store_reset_barrels(barrels)
 		def get_cell_type_with_clean_floor(cell):
 			return CELL_FLOOR if clean and self.map[cell] in CELL_FLOOR_TYPES else self.map[cell]
 		for cy in range(self.size_y):
@@ -173,6 +176,8 @@ class Grid:
 						cell_ch = actor_chars['char']
 					print(cell_ch, end="")
 			print()
+		if barrels:
+			self.restore_barrels()
 
 	def to_bit(self, idx_or_cell_or_actor):
 		bit = self.no_bits.copy()
@@ -357,9 +362,12 @@ class Grid:
 	def store_barrels(self):
 		self.orig_barrel_bits_stack.append(self.barrel_bits.copy())
 
-	def store_reset_barrels(self):
+	def store_reset_barrels(self, barrels=None):
 		self.store_barrels()
-		self.barrel_bits = self.no_bits.copy()
+		if barrels:
+			self.set_barrels(barrels)
+		else:
+			self.barrel_bits = self.no_bits.copy()
 
 	def restore_barrels(self):
 		self.barrel_bits = self.orig_barrel_bits_stack.pop()
