@@ -317,15 +317,14 @@ class Grid:
 		distances = self.get_accessible_distances(start, obstacles)
 		return {self.to_cell(idx): distance for idx, distance in enumerate(distances)}
 
-	def find_path_idxs(self, start, target, obstacle_bits=None):
+	def find_path_idxs(self, start, target, obstacles=None):
 		start_idx = self.to_idx_or_none(start)
 		target_idx = self.to_idx_or_none(target)
 		if start_idx is None or target_idx is None:
 			return None
 		if start_idx == target_idx:
 			return []
-		if obstacle_bits is None:
-			obstacle_bits = self.barrel_bits
+		obstacle_bits = self.barrel_bits if obstacles is None else self.to_bits(obstacles)
 
 		distances = self.get_accessible_distances(start_idx, obstacle_bits)
 		distance = distances[target_idx]
@@ -344,10 +343,10 @@ class Grid:
 
 		return path_idxs
 
-	def find_path(self, start, target, obstacles=()):
+	def find_path(self, start, target, obstacles=None):
 		if DBG_PATH in debug.features:
 			debug(DBG_PATH, "find_path %s -> %s" % (self.to_cell(start), self.to_cell(target)))
-		path_idxs = self.find_path_idxs(start, target, self.to_bits(obstacles))
+		path_idxs = self.find_path_idxs(start, target, obstacles)
 		if DBG_PATH in debug.features:
 			debug(DBG_PATH2, "- %s" % (
 				"%d cells" % len(path_idxs) if path_idxs is not None else "no path"
