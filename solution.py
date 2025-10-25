@@ -4,7 +4,6 @@ from config import SOLUTION_MOVE_DELAY, SOLUTION_MOVE_DELAY_RANGE, SOLUTION_MOVE
 from objects import char
 from constants import DIR_NAMES, DIRS_BY_NAME
 from celltools import apply_diff, cell_diff
-from clipboard import clipboard
 from statusmessage import set_status_message
 
 find_path    = None
@@ -163,7 +162,6 @@ class Solution:
 		self.reset_move_delay()
 		num_left_str = self.get_num_info_str()
 		set_status_message("Found solution with %s, press again to show" % num_left_str, self, 1)
-		clipboard.put(self.get_str())
 
 	def set_not_found(self):
 		self.reset()

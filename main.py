@@ -2187,6 +2187,7 @@ def update(dt):
 		solution_items, msg = solution.call_find_func()
 		if solution_items:
 			solution.set(solution_items)
+			clipboard.put(solution.get_str())
 		elif msg:
 			solution.set_find_mode(msg)
 		else:
