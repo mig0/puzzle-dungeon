@@ -28,7 +28,7 @@ for ch, ch0 in CHAR_ALIASES.items():
 
 CHAR_TRANSLATION = dict((ord(ch), (cell_type)) for ch, cell_type in CHAR_CELL_TYPES.items())
 
-def is_map_line(line):
+def is_sokoban_map_line(line):
 	is_all_floor = True
 	for ch in line:
 		if ch not in CHAR_CELL_TYPES.keys():
@@ -37,17 +37,24 @@ def is_map_line(line):
 			is_all_floor = False
 	return not is_all_floor
 
+def convert_map_line(line):
+	return line.translate(CHAR_TRANSLATION)
+
 def is_sokoban_file(file):
 	num_map_lines = 0
 	while line := file.readline():
 		line = line.rstrip()
-		if is_map_line(line):
+		if is_sokoban_map_line(line):
 			num_map_lines += 1
 		else:
 			num_map_lines = 0
 		if num_map_lines >= 3:
 			return True
 	return False
+
+def is_sokoban_map(string_or_lines):
+	string = string_or_lines if type(string_or_lines) == str else '\n'.join(string_or_lines)
+	return is_sokoban_file(io.StringIO(string))
 
 def find_map_file(filename):
 	if os.path.isabs(filename):
@@ -66,21 +73,31 @@ def open_map(filename, descr="map", strict=False):
 		return None
 	return open_read(full_filename, descr)
 
-def create_map_string(lines):
-	min_size_x = 13
-	min_size_y = 13
-
+def convert_and_pad_map_lines(lines):
 	# convert all lines to our map chars
-	lines = [line.translate(CHAR_TRANSLATION) for line in lines]
+	lines = [convert_map_line(line) for line in lines]
 
 	# calculate the actual size of lines in the given map
-	real_size_y = len(lines)
-	real_size_x = max(map(len, lines))
+	max_len = max(map(len, lines))
 
-	# fill every line to be of length real_size_x
+	# fill every line to be the same len
 	for i, line in enumerate(lines):
-		if len(line) < real_size_x:
-			lines[i] = line + CELL_FLOOR * (real_size_x - len(line))
+		if len(line) < max_len:
+			lines[i] = line + CELL_FLOOR * (max_len - len(line))
+
+	return lines
+
+def create_map_string(lines):
+	assert lines
+	lines = convert_and_pad_map_lines(lines)
+
+	# real size
+	real_size_y = len(lines)
+	real_size_x = len(lines[0])
+
+	# min size
+	min_size_x = 13
+	min_size_y = 13
 
 	# calculate intended size_x, size_y
 	size_y = max(min_size_y, real_size_y)
@@ -128,7 +145,7 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 		line = line.rstrip("\n")
 
 		old_is_in_map = is_in_map
-		is_in_map = is_map_line(line)
+		is_in_map = is_sokoban_map_line(line)
 
 		if is_eof and map_lines or map_lines and not old_is_in_map and is_in_map:
 			map_size, map_string = create_map_string(map_lines)
