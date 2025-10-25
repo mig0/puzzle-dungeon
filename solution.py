@@ -54,16 +54,16 @@ class SolutionItem:
 			current_cell_ref[0] = apply_diff(current_cell_ref[0], self.shift_dir)
 			return DIR_NAMES[self.shift_dir].upper()
 		if self.cell_to_press:
-			return 'press%s%s' % (str(self.cell_to_press), '' if self.button_to_press is None else '^%d' % self.button_to_press)
+			return '{press%s%s}' % (str(self.cell_to_press), '' if self.button_to_press is None else '^%d' % self.button_to_press)
 		if self.target_cell:
 			current_cell_ref[0] = self.target_cell
-			return 'goto%s' % str(self.target_cell)
+			return '{goto%s}' % str(self.target_cell)
 		if self.path_cells:
 			cell_directions = []
 			for cell in self.path_cells:
 				cell_directions.append(DIR_NAMES.get(cell_diff(current_cell_ref[0], cell), str(cell)))
 				current_cell_ref[0] = cell
-			return ' '.join(cell_directions)
+			return ''.join(cell_directions)
 		return '?'
 
 	def play_move(self):
@@ -153,7 +153,7 @@ class Solution:
 
 	def get_str(self):
 		current_cell_ref = [char.c]
-		return ' '.join(item.get_str(current_cell_ref) for item in self.solution_items)
+		return ''.join(item.get_str(current_cell_ref) for item in self.solution_items)
 
 	def set(self, args):
 		self.find_mode = False
