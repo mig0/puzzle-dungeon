@@ -3,7 +3,7 @@ from bitarray import bitarray
 
 from constants import *
 from celltools import apply_diff, cell_diff, sort_cells
-from common import isinstance_by_name, die
+from common import die
 from debug import *
 
 DBG_GRID  = "grid"
@@ -185,9 +185,9 @@ class Grid:
 		return bit
 
 	def to_idx(self, idx_or_cell_or_actor):
-		if isinstance(idx_or_cell_or_actor, int):
+		if type(idx_or_cell_or_actor) == int:
 			return idx_or_cell_or_actor
-		if isinstance_by_name(idx_or_cell_or_actor, 'CellActor'):
+		if hasattr(idx_or_cell_or_actor, 'c'):
 			idx_or_cell_or_actor = idx_or_cell_or_actor.c
 		return self.cell_idxs[idx_or_cell_or_actor]
 
@@ -195,7 +195,7 @@ class Grid:
 		return self.idx_cells[self.to_idx(idx_or_cell_or_actor)]
 
 	def to_bits(self, bits_or_idxs_or_cells_or_actors):
-		if isinstance(bits_or_idxs_or_cells_or_actors, bitarray):
+		if type(bits_or_idxs_or_cells_or_actors) == bitarray:
 			return bits_or_idxs_or_cells_or_actors
 		bits = self.no_bits.copy()
 		for idx_or_cell_or_actor in bits_or_idxs_or_cells_or_actors:
@@ -203,12 +203,12 @@ class Grid:
 		return bits
 
 	def to_idxs(self, bits_or_idxs_or_cells_or_actors):
-		if isinstance(bits_or_idxs_or_cells_or_actors, bitarray):
+		if type(bits_or_idxs_or_cells_or_actors) == bitarray:
 			return tuple(bits_or_idxs_or_cells_or_actors.itersearch(_ONE))
 		return tuple(self.to_idx(idx_or_cell_or_actor) for idx_or_cell_or_actor in bits_or_idxs_or_cells_or_actors)
 
 	def to_cells(self, bits_or_idxs_or_cells_or_actors):
-		if isinstance(bits_or_idxs_or_cells_or_actors, bitarray):
+		if type(bits_or_idxs_or_cells_or_actors) == bitarray:
 			return tuple(self.idx_cells[idx] for idx in bits_or_idxs_or_cells_or_actors.itersearch(_ONE))
 		return tuple(self.idx_cells[self.to_idx(idx_or_cell_or_actor)] for idx_or_cell_or_actor in bits_or_idxs_or_cells_or_actors)
 
