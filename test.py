@@ -1,7 +1,10 @@
+import inspect
+
 class TestSuite:
 	def __init__(self, name, assert_on_fail=False, verbose_on_pass=False):
 		self.reset()
 		self.name = name
+		self.last_function = None
 		self.assert_on_fail = assert_on_fail
 		self.verbose_on_pass = verbose_on_pass
 
@@ -9,14 +12,23 @@ class TestSuite:
 		self.num_total = 0
 		self.num_passed = 0
 
+	def print_function_once(self):
+		function = inspect.stack()[-2].function
+		if function != self.last_function:
+			print("# %s" % function)
+			self.last_function = function
+
 	def ok(self, is_passed, error):
+		if self.verbose_on_pass:
+			self.print_function_once()
 		self.num_total += 1
 		if is_passed:
 			self.num_passed += 1
-		if is_passed:
 			if self.verbose_on_pass:
 				print("%d - PASS" % (self.num_total))
 		else:
+			if not self.verbose_on_pass:
+				self.print_function_once()
 			print("%d - FAIL: %s" % (self.num_total, error))
 			if self.assert_on_fail:
 				assert False, error
