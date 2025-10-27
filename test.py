@@ -45,6 +45,12 @@ class TestSuite:
 	def lt(self, value1, value2):
 		self.ok(value1 < value2, "Expected %s to be lesser than %s" % (str(value1), str(value2)))
 
+	def ge(self, value1, value2):
+		self.ok(value1 >= value2, "Expected %s to be greater-equal than %s" % (str(value1), str(value2)))
+
+	def le(self, value1, value2):
+		self.ok(value1 <= value2, "Expected %s to be lesser-equal than %s" % (str(value1), str(value2)))
+
 	def is_cell(self, cell):
 		self.ok(type(cell) == tuple and len(cell) == 2 and all(type(i) == int for i in cell), "Got %s, but expected cell" % str(cell))
 
