@@ -450,10 +450,10 @@ def test_prepare_sokoban_solution_with_plate():
 	if verbose:
 		grid.show_map("Map after test_prepare_sokoban_solution_with_plate")
 
-if __name__ == "__main__":
-	args = sys.argv[1:]
-	verbose = args.count('-v') >= 2
-	test = TestSuite("Grid", '-a' in args, '-v' in args)
+args = sys.argv[1:]
+verbose = args.count('-v') >= 2
+test = TestSuite("Grid", '-a' in args, '-v' in args, '-p' in args)
+try:
 	test_basic_accessibility()
 	test_distances()
 	test_find_path()
@@ -473,4 +473,8 @@ if __name__ == "__main__":
 	test_try_push_pull_without_barrel()
 	test_prepare_sokoban_solution_without_plates()
 	test_prepare_sokoban_solution_with_plate()
+	test.finalize()
+except KeyboardInterrupt:
+	print()
+	test.ok(False, "Tests terminated by user")
 	test.finalize()
