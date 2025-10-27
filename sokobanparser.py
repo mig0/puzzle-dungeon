@@ -180,8 +180,8 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 			if line.startswith('Level ') and line[6:].isdigit():
 				is_pre_level_name = True
 				pre_level_name = line
-			if map_lines and line.startswith('Title: '):
-				level_name = line[7:]
+			if map_lines and line.startswith('Title:'):
+				level_name = line[6:].strip()
 
 	file.close()
 
