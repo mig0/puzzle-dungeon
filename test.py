@@ -1,12 +1,16 @@
 import inspect
+from profiler import profiler
 
 class TestSuite:
-	def __init__(self, name, assert_on_fail=False, verbose_on_pass=False):
+	def __init__(self, name, assert_on_fail=False, verbose_on_pass=False, run_profiler=False):
 		self.reset()
 		self.name = name
 		self.last_function = None
 		self.assert_on_fail = assert_on_fail
 		self.verbose_on_pass = verbose_on_pass
+		self.run_profiler = run_profiler
+		if self.run_profiler:
+			profiler.start()
 
 	def reset(self):
 		self.num_total = 0
@@ -90,3 +94,5 @@ class TestSuite:
 		else:
 			print("Only %d of %d %s tests passed" % (self.num_passed, self.num_total, self.name))
 		self.reset()
+		if self.run_profiler:
+			profiler.stop()
