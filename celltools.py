@@ -50,14 +50,30 @@ def sort_cells(cells):
 	return sorted(cells, key=lambda cell: (cell[1], cell[0]))
 
 class Area:
-	x1 = None
-	y1 = None
-	x2 = None
-	y2 = None
-	size_x = None
-	size_y = None
-	x_range = None
-	y_range = None
+	def __init__(self, *args):
+		if args:
+			self.set(*args)
+			return
+		self.x1 = None
+		self.y1 = None
+		self.x2 = None
+		self.y2 = None
+		self.size_x = None
+		self.size_y = None
+		self.size = None
+		self.x_range = None
+		self.y_range = None
+
+	def set(self, x1, y1, x2, y2):
+		self.x1 = x1
+		self.y1 = y1
+		self.x2 = x2
+		self.y2 = y2
+		self.size_x = self.x2 - self.x1 + 1
+		self.size_y = self.y2 - self.y1 + 1
+		self.size = (self.size_x, self.size_y)
+		self.x_range = range(self.x1, self.x2 + 1)
+		self.y_range = range(self.y1, self.y2 + 1)
 
 	@property
 	def num_cells(self):

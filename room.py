@@ -6,15 +6,7 @@ from flags import flags
 room = Area()
 
 def set_room(idx):
-	room.size = flags.ROOM_SIZE(idx)
-	room.size_x = flags.ROOM_SIZE_X[idx]
-	room.size_y = flags.ROOM_SIZE_Y[idx]
-	room.x1 = flags.ROOM_X1[idx]
-	room.x2 = flags.ROOM_X2[idx]
-	room.y1 = flags.ROOM_Y1[idx]
-	room.y2 = flags.ROOM_Y2[idx]
-	room.x_range = flags.ROOM_X_RANGE[idx]
-	room.y_range = flags.ROOM_Y_RANGE[idx]
+	room.set(flags.ROOM_X1[idx], flags.ROOM_Y1[idx], flags.ROOM_X2[idx], flags.ROOM_Y2[idx])
 	room.idx = idx
 
 def get_max_area_distance(area):

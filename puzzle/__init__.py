@@ -122,8 +122,13 @@ class Puzzle:
 	def get_room_cells(self, *cell_types):
 		return [cell for cell in room.cells if self.map[cell] in cell_types]
 
+	def _fit_room_size(self, request_odd=False):
+		def round_odd(n):
+			return (n - 1) // 2 * 2 + 1
+		return (round_odd(room.size_x), round_odd(room.size_y)) if request_odd else room.size
+
 	def set_area_from_config(self, min_size=None, default_size=None, request_odd_size=False, align_to_center=False):
-		max_size = flags.ROOM_SIZE(room.idx, request_odd_size)
+		max_size = self._fit_room_size(request_odd_size)
 		if min_size is None:
 			min_size = (3, 3) if request_odd_size else (2, 2)
 
@@ -137,19 +142,14 @@ class Puzzle:
 		if size[1] > max_size[1]:
 			size[1] = max_size[1]
 
-		self.area.size = tuple(size)
-		self.area.size_x = size[0]
-		self.area.size_y = size[1]
-		self.area.x1 = room.x1 + (room.size_x - self.area.size_x) // 2 \
-			+ ((room.size_x - self.area.size_x) % 2 * ((room.idx + 1 if room.idx is not None else 0) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
-			+ ((room.size_x - self.area.size_x) % 2 * ((room.idx + 1 if room.idx is not None else 0) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
-		self.area.x2 = self.area.x1 + self.area.size_x - 1
-		self.area.y1 = room.y1 + (room.size_y - self.area.size_y) // 2 \
-			+ ((room.size_y - self.area.size_y) % 2 * (1 - ((room.idx if room.idx is not None else 2) // 2) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
-			+ ((room.size_y - self.area.size_y) % 2 * int(1.5 - ((room.idx if room.idx is not None else 3) // 3) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
-		self.area.y2 = self.area.y1 + self.area.size_y - 1
-		self.area.x_range = range(self.area.x1, self.area.x2 + 1)
-		self.area.y_range = range(self.area.y1, self.area.y2 + 1)
+		size_x, size_y = size
+		x1 = room.x1 + (room.size_x - size_x) // 2 \
+			+ ((room.size_x - size_x) % 2 * ((room.idx + 1 if room.idx is not None else 0) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
+			+ ((room.size_x - size_x) % 2 * ((room.idx + 1 if room.idx is not None else 0) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
+		y1 = room.y1 + (room.size_y - size_y) // 2 \
+			+ ((room.size_y - size_y) % 2 * (1 - ((room.idx if room.idx is not None else 2) // 2) % 2) if align_to_center and flags.NUM_ROOMS == 4 else 0) \
+			+ ((room.size_y - size_y) % 2 * int(1.5 - ((room.idx if room.idx is not None else 3) // 3) % 3) if align_to_center and flags.NUM_ROOMS == 9 else 0)
+		self.area.set(x1, y1, x1 + size_x - 1, y1 + size_y - 1)
 
 	def is_in_area(self, cell):
 		return is_cell_in_area(cell, self.area.x_range, self.area.y_range)
