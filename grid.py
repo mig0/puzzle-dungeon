@@ -1,5 +1,5 @@
 import numpy
-from bitarray import bitarray
+from bitarray import bitarray, frozenbitarray
 
 from constants import *
 from celltools import apply_diff, cell_diff, sort_cells
@@ -14,8 +14,8 @@ DBG_PATH  = "path"
 DBG_PATH2 = "path+"
 DBG_PATH3 = "path++"
 
-_ONE = bitarray('1')
-_ZEROBITS = bitarray('')
+_ONE = frozenbitarray('1')
+_ZEROBITS = frozenbitarray('')
 SORTED_DIRS = sort_cells(DIRS)
 
 class Grid:
@@ -113,7 +113,8 @@ class Grid:
 
 		self.num_bits = len(self.idx_cells)
 		self.all_bits = bitarray('1' * self.num_bits)
-		self.no_bits = bitarray('0' * self.num_bits)
+		self.no_bits  = bitarray('0' * self.num_bits)
+		self.tmp_bits = self.no_bits.copy()
 
 		# precompute all passable neigbors per each passable cell
 		self.all_passable_neigh_idxs = []
@@ -218,6 +219,8 @@ class Grid:
 		except KeyError:
 			return None
 
+	# Support for path finding
+
 	def is_passable_neigh(self, first, second):
 		return self.to_idx(second) in self.all_passable_neigh_idxs[self.to_idx(first)]
 
@@ -237,7 +240,7 @@ class Grid:
 				for neigh_idx in self.all_passable_neigh_idxs[idx]:
 					if not accessible_bits[neigh_idx] and not obstacle_bits[neigh_idx]:
 						new_bits[neigh_idx] = True
-			if not new_bits.any():
+			if new_bits == self.no_bits:
 				break
 			accessible_bits |= new_bits
 			unprocessed_bits = new_bits
@@ -281,7 +284,7 @@ class Grid:
 						return distance
 					if not processed_bits[neigh_idx]:
 						new_bits[neigh_idx] = True
-			if not new_bits.any():
+			if new_bits == self.no_bits:
 				return None
 			processed_bits |= new_bits
 			unprocessed_bits = new_bits
@@ -304,7 +307,7 @@ class Grid:
 				for neigh_idx in self.all_passable_neigh_idxs[idx]:
 					if distances[neigh_idx] == -1 and not obstacle_bits[neigh_idx]:
 						new_bits[neigh_idx] = True
-			if not new_bits.any():
+			if new_bits == self.no_bits:
 				break
 			distance += 1
 			for idx in new_bits.itersearch(_ONE):
@@ -355,6 +358,8 @@ class Grid:
 				debug(DBG_PATH3, "- %s" % str(self.to_cells(path_idxs)))
 		return self.to_cells(path_idxs) if path_idxs is not None else None
 
+	# Support for barrel mechanics
+
 	def set_barrels(self, barrels):
 		self.barrel_bits = self.to_bits(barrels)
 
@@ -380,7 +385,7 @@ class Grid:
 		return self.to_cells(self.barrel_bits)
 
 	def is_solved_for_barrels(self, barrels=None):
-		return not (~self.plate_bits & (self.to_bits(barrels) if barrels else self.barrel_bits)).any()
+		return (~self.plate_bits & (self.to_bits(barrels) if barrels else self.barrel_bits)) == self.no_bits
 
 	def is_dead_barrel(self, barrel):
 		return bool(self.dead_barrel_bits and self.dead_barrel_bits[self.to_idx(barrel)])
@@ -505,6 +510,8 @@ class Grid:
 	def opposite_shift(self, char_cell, barrel_cell):
 		return (self.push if self.reverse_barrel_mode else self.pull)(char_cell, barrel_cell)
 
+	# Support for Sokoban solvers
+
 	# return list of all accessible (char_cell, barrel_cell) pairs valid for shift
 	# should to be called after get_accessible_cells()
 	def get_all_valid_char_barrel_shifts(self, accessible_bits=None):
@@ -526,7 +533,7 @@ class Grid:
 		self.min_char_barrel_plate_shifts = min_char_shifts = {}
 		self.min_barrel_plate_shifts = min_shifts = {}
 
-		if not self.plate_bits.any():
+		if self.plate_bits == self.no_bits:
 			self.dead_barrel_bits = self.all_bits
 			return
 		self.dead_barrel_bits = self.no_bits
