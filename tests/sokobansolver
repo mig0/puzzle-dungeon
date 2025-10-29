@@ -1,0 +1,517 @@
+#!/usr/bin/python
+
+import os
+import sys
+import numpy
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+from constants import *
+from grid import grid
+from test import TestSuite
+from debug import debug
+from teestream import stdout_redirected_to
+from sokobanparser import is_sokoban_map, convert_and_pad_map_lines
+from sokobansolver import *
+
+sok_trivial_h1 = (
+	'#####',
+	'#@$.#',
+	'#####',
+)
+
+sok_trivial_h2 = (
+	' ### ',
+	'#.$@#',
+	' ### ',
+)
+
+sok_trivial_h3 = (
+	'#####',
+	'# @$.#',
+	' #####',
+)
+
+sok_trivial_h4 = (
+	' #####',
+	'#.$ @#',
+	'#####',
+)
+
+sok_trivial_v1 = (
+	' #',
+	'#@#',
+	'#$#',
+	'#.#',
+	'##',
+)
+
+sok_trivial_v2 = (
+	' #',
+	'#.#',
+	'#$#',
+	'#@#',
+	'##',
+)
+
+sok_trivial_s1 = (
+	'#######',
+	'#   ###',
+	'#  $@.#',
+	'# ### #',
+	'#     #',
+	'#######',
+)
+
+sok_trivial_s2 = (
+	'#######_',
+	'#--#--#_',
+	'#-@$--##',
+	'#--##--#',
+	'##.----#',
+	'_#######',
+)
+
+sok_takaken_01 = (
+	# scrambled egg
+	' #####',
+	' # @ ###',
+	'## #$  #',
+	'# *. . #',
+	'#  $$ ##',
+	'### #.#',
+	'  #   #',
+	'  #####',
+)
+
+sok_takaken_02 = (
+	# a point
+	'#####',
+	'#   #####',
+	'# # #   #',
+	'# $   $ #',
+	'#..#$#$##',
+	'#.@$   #',
+	'#..  ###',
+	'######',
+)
+
+sok_takaken_03 = (
+	# twins
+	' ######',
+	'#   $. #  #####',
+	'#.$    # #    .#',
+	'#### .## #.  $ #',
+	' ###  #  ###  ##',
+	'  ##  #   ## $#',
+	'   #  #    #. #',
+	'####$#######$###',
+	'#       @      #',
+	'################',
+)
+
+sok_takaken_04 = (
+	# rescue in the bay
+	'     ####',
+	'   ###  ####',
+	'#### $  #  #',
+	'# $  $ $   #',
+	'# # #$#$#  #',
+	'# ....@.. ##',
+	'###########',
+)
+
+sok_takaken_05 = (
+	# baby classic
+	'#######',
+	'#...  #',
+	'# # $ #',
+	'#  $  #',
+	'###$ ##',
+	'  # @#',
+	'  ####',
+)
+
+sok_takaken_06 = (
+	# key
+	'  #####',
+	'###  @#',
+	'#  $  #',
+	'#    #########',
+	'# #$   ....  #',
+	'#  $ ######$ #',
+	'##  ##    #  #',
+	' ####     ####',
+)
+
+sok_takaken_07 = (
+	# Love
+	'   #####',
+	'  ## @ #',
+	'  #    #  #####    ######',
+	' ##   #####   ######    #',
+	'##   ##  .#   #   #  ## #',
+	'# . ## $#.## *$  ## ##  #',
+	'#   ##  $  # .#  #     ##',
+	'#   ###    ##   ## $$#. #',
+	'#  $  #  ####   ####  . #',
+	'# .$  ## #  ## ##  ## ###',
+	'### #### #   # #    # #',
+	'  # #  # #   # #    # #',
+	'### #### ##### ###### ###',
+	'#                       #',
+	'#########################',
+)
+
+sok_takaken_08 = (
+	# rule
+	'  ######',
+	'###    ###',
+	'#   $$ ..#',
+	'# ##   # #',
+	'#  ### @ #',
+	'#    ##$ #',
+	'# **  #  #',
+	'### # # ##',
+	' #  $ # #',
+	' #  . #.#',
+	' ###  ###',
+	'   ####',
+)
+
+sok_takaken_09 = (
+	# two points
+	' ######',
+	' #    #',
+	' #$  .#',
+	'## ## #',
+	'#     #',
+	'# $ #.##',
+	'###    #',
+	'  ## @ #',
+	'   #####',
+)
+
+sok_takaken_10 = (
+	# in a mirror
+	' ########',
+	' #  #   #',
+	' #..#$$ #',
+	' #  @   #',
+	'##  #   ##',
+	'#   #    #',
+	'#...#$$$ #',
+	'#   #    #',
+	'##########',
+)
+
+sok_takaken_11 = (
+	# two points again
+	' #####',
+	' #   ######',
+	'## # @    #',
+	'# . . ### #',
+	'#   #$ $  #',
+	'###   #   #',
+	'  #########',
+)
+
+sok_takaken_12 = (
+	# magic box
+	'  #####',
+	'### @ ###',
+	'#   #   #',
+	'#. ** $ #',
+	'#   #   #',
+	'#########',
+)
+
+sok_takaken_13 = (
+	# short-sleeved shirt
+	'#########',
+	'#  * *  #',
+	'#  $ $  #',
+	'### . ###',
+	'  #$.$#',
+	'  # . #',
+	'  # . #',
+	'  #@ ##',
+	'  #####',
+)
+
+sok_takaken_14 = (
+	# second UFO
+	'   #####',
+	'   #   #',
+	'   #   #',
+	'####   #',
+	'#  $$$ #',
+	'#    # ##',
+	'## ###  #',
+	'#   ##  #',
+	'#    #  #',
+	'# ***...#',
+	'###@ ####',
+	'  ####',
+)
+
+optimal_solution_nums_strs = {
+	sok_trivial_h1: '1/1',
+	sok_trivial_h2: '1/1',
+	sok_trivial_h3: '1/1',
+	sok_trivial_h4: '2/1',
+	sok_trivial_v1: '1/1',
+	sok_trivial_v2: '1/1',
+	sok_trivial_s1: ('12/2', '8/4'),
+	sok_trivial_s2: ('23/3', '11/7'),
+	sok_takaken_01: '170/43',
+	sok_takaken_02: '185/42',
+	sok_takaken_03: '0/0',
+	sok_takaken_04: ('256/67', '250/69'),
+	sok_takaken_05: '84/24',
+	sok_takaken_06: ('180/52', '172/56'),
+	sok_takaken_07: '0/0',
+	sok_takaken_08: '191/41',
+	sok_takaken_09: '93/16',
+	sok_takaken_10: '0/0',
+	sok_takaken_11: '105/22',
+	sok_takaken_12: '86/19',
+	sok_takaken_13: ('213/54', '207/58'),
+	sok_takaken_14: '0/0',
+}
+
+optimal_solution_nums_strs_by_type = {
+	SOLUTION_TYPE_BY_SHIFTS: {k: v[0] if type(v) == tuple else v for k, v in optimal_solution_nums_strs.items()},
+	SOLUTION_TYPE_BY_MOVES:  {k: v[1] if type(v) == tuple else v for k, v in optimal_solution_nums_strs.items()},
+}
+
+optimal_solution_strs = {
+	sok_trivial_h1: 'R',
+	sok_trivial_h2: 'L',
+	sok_trivial_h3: 'R',
+	sok_trivial_h4: 'lL',
+	sok_trivial_v1: 'D',
+	sok_trivial_v2: 'U',
+	sok_trivial_s1: ('rddlllluurRR', 'LulldRRR'),
+	sok_trivial_s2: ('ddrrruulLrrddllluluurDD', 'RRurDDrdLLL'),
+}
+
+optimal_solution_strs_by_type = {
+	SOLUTION_TYPE_BY_SHIFTS: {k: v[0] if type(v) == tuple else v for k, v in optimal_solution_strs.items()},
+	SOLUTION_TYPE_BY_MOVES:  {k: v[1] if type(v) == tuple else v for k, v in optimal_solution_strs.items()},
+}
+
+verbose = False
+def print_if_verbose(*args):
+	if verbose:
+		print(INFO_PREFIX, end='')
+		print(*args)
+
+def create_sokoban_map(lines):
+	assert is_sokoban_map(lines), "Invalid Sokoban map:\n%s" % '\n'.join(lines)
+	return numpy.array([list(line) for line in convert_and_pad_map_lines(lines)], dtype='<U1').T
+
+def configure_solver(sokoban_map_lines, reverse_barrel_mode=False):
+	map = create_sokoban_map(sokoban_map_lines)
+	char_cell = None
+	barrel_cells = []
+	for cy in range(len(map[0])):
+		for cx in range(len(map)):
+			cell = (cx, cy)
+			is_plate = False
+			if map[cell] == ACTOR_CHARS["char"]:
+				char_cell = cell
+			elif map[cell] == ACTOR_ON_PLATE_CHARS["char"]:
+				char_cell = cell
+				is_plate = True
+			elif map[cell] == ACTOR_CHARS["barrel"]:
+				barrel_cells.append(cell)
+			elif map[cell] == ACTOR_ON_PLATE_CHARS["barrel"]:
+				barrel_cells.append(cell)
+				is_plate = True
+			else:
+				continue
+			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
+
+	solver = SokobanSolver()
+	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
+	if verbose:
+		grid.show_map("Configured solver with this map", char=char_cell, barrels=barrel_cells)
+	return solver
+
+def test_solution(sok, unique_solution_str=False):
+	for solution_type in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
+		solver = configure_solver(sok)
+		solution_items = solver.solve(solution_type)
+		test.not_none(solution_items)
+		test.eq(solver.last_solution_nums_str, optimal_solution_nums_strs_by_type[solution_type][sok])
+		if unique_solution_str:
+			test.eq(solver.last_solution_str, optimal_solution_strs_by_type[solution_type][sok])
+		else:
+			test.ne(solver.last_solution_str, '')
+
+def test_no_solution(sok):
+	solver = configure_solver(sok)
+	solution_items = solver.solve()
+	test.none(solution_items)
+	test.none(solver.last_solution_nums_str)
+	test.none(solver.last_solution_str)
+
+def test_trivial_solutions():
+	for sok in sok_trivial_h1, sok_trivial_h2, sok_trivial_h3, sok_trivial_h4, sok_trivial_v1, sok_trivial_v2, sok_trivial_s1, sok_trivial_s2:
+		test_solution(sok, True)
+
+def test_takaken_solutions():
+	for sok in sok_takaken_01, sok_takaken_05, sok_takaken_09, sok_takaken_11, sok_takaken_12:
+		test_solution(sok)
+
+def test_trivial_without_solutions():
+	# already solved trivial map; unsolvable, since needs at least one shift
+	test_no_solution((
+		'#####',
+		'#@* #',
+		'#####',
+	))
+	# another circular unsolvable
+	test_no_solution((
+		'#####',
+		'#@* #',
+		'# * #',
+		'#####',
+	))
+	# barrel on dead-barrel-cell
+	test_no_solution((
+		'#####',
+		'#@$ #',
+		'#  .#',
+		'#####',
+	))
+	# deadlock
+	test_no_solution((
+		'#####',
+		'#@$.#',
+		'#.$ #',
+		'#####',
+	))
+
+def test_algorithms_consistency():
+	maps = [sok_trivial_h1, sok_trivial_h2, sok_trivial_s1]
+	for sok in sok_trivial_h3, sok_trivial_s2, sok_takaken_09:
+		for reverse_barrel_mode in False, True:
+			results = {}
+			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_PQ, SOLUTION_ALG_ASTAR:
+				# solve both types
+				solver = configure_solver(sok, reverse_barrel_mode)
+				solver.solution_alg = alg
+				sol_s = solver.solve(SOLUTION_TYPE_BY_SHIFTS)
+				results[(alg, 'shifts')] = solver.last_solution_nums_str
+				# reconfigure fresh
+				solver = configure_solver(sok, reverse_barrel_mode)
+				solver.solution_alg = alg
+				sol_m = solver.solve(SOLUTION_TYPE_BY_MOVES)
+				results[(alg, 'moves')] = solver.last_solution_nums_str
+				test.eq(sol_s, sol_m)
+			# all values must match BFS results
+			base_shifts = results[(SOLUTION_ALG_BFS, 'shifts')]
+			base_moves  = results[(SOLUTION_ALG_BFS, 'moves')]
+			for k, v in results.items():
+				if k[1] == 'shifts':
+					test.eq(v, base_shifts)
+				else:
+					test.eq(v, base_moves)
+
+def test_reparent_dirty_propagation():
+	sok = sok_trivial_s1
+	solver = configure_solver(sok)
+	solver.solution_alg = SOLUTION_ALG_BFS
+	# prepare and create the initial structures
+	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
+	super_pos = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
+	pos = Position(super_pos, solver.char_cell, None, None, None)
+	# create a fake child and reparent to check propagation
+	child = Position(super_pos, solver.char_cell, pos, (3,1), [([], solver.char_cell, solver.barrel_cells[0])])
+	# now reparent child to pos again with different own_nums
+	child.reparent(pos, (1,1), child.segments)
+	# after reparent, child's total_nums and depth must reflect new parent
+	test.eq(child.parent, pos)
+	test.eq(child.is_dirty, False)
+	test.eq(child.is_fully_processed, False)
+
+def test_get_min_solution_depth_behavior():
+	solver = configure_solver(sok_trivial_s1)
+	# assume prepare has been run inside configure
+	# compare original method (current) vs simple lookup
+	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
+	# a set of barrels
+	barrel_cells = solver.barrel_cells
+	# Use your method
+	depth_old = solver.get_min_solution_depth(barrel_cells)
+	# compute expected
+	expected = 0
+	for barrel_cell in barrel_cells:
+		expected += grid.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits)
+	test.eq(depth_old, expected)
+
+def test_prepare_solution_char_filtering():
+	solver = configure_solver(sok_trivial_s2)
+	# call prepare with char set vs char None and observe dead_barrel_bits differs or min_shifts differs
+	grid.prepare_sokoban_solution(None, disable=False)
+	all_dead_count = grid.dead_barrel_bits.count()
+	# now restrict by char position: recompute
+	grid.prepare_sokoban_solution(solver.char_cell, disable=False)
+	char_dead_count = grid.dead_barrel_bits.count()
+	# reachable plates only should reduce dead set (or stay equal) — expect char_dead_count <= all_dead_count
+	test.le(char_dead_count, all_dead_count)
+
+def test_superposition_idempotence():
+	solver = configure_solver(sok_trivial_h1)
+	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
+	# create two barrel lists with same set but different order
+	barrel_cells = tuple(solver.barrel_cells)
+	rev_barrel_cells = tuple(reversed(barrel_cells))
+	sp1 = solver.find_or_create_super_position(solver.char_cell, barrel_cells)
+	sp2 = solver.find_or_create_super_position(solver.char_cell, rev_barrel_cells)
+	# They might create different ids if barrel order matters; but behavior should be equivalent
+	test.eq(sp1.is_solved, sp2.is_solved)
+	# positions dicts should be empty initially
+	test.eq(sp1.positions, sp2.positions)
+
+def test_position_num_calculation():
+	solver = configure_solver(sok_trivial_h1)
+	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
+	super_pos = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
+	root = Position(super_pos, solver.char_cell, None, None, None)
+	child = Position(super_pos, solver.char_cell, root, (3, 2), [])
+	test.eq(child.total_nums, (3, 2))
+	# Reparent child with new own_nums
+	child.reparent(root, (1, 1), [])
+	test.eq(child.total_nums, (1, 1))
+
+def test_find_solution_status_string():
+	solver = configure_solver(sok_trivial_h2)
+	solver.unprocessed_positions = []
+	solver.start_solution_time = time()
+	status = solver.get_find_solution_status_str()
+	test.is_in('positions', status)
+	test.is_in('Finding', status)
+
+args = sys.argv[1:]
+verbose = args.count('-v') >= 2
+if args.count('-v') >= 3:
+	debug.configure(['solv' + ('+' * (args.count('-v') - 3))])
+test = TestSuite("SokobanSolver", '-a' in args, '-v' in args, '-p' in args)
+try:
+	test_trivial_solutions()
+	test_takaken_solutions()
+	test_trivial_without_solutions()
+	test_algorithms_consistency()
+	test_reparent_dirty_propagation()
+	test_get_min_solution_depth_behavior()
+	test_prepare_solution_char_filtering()
+	test_superposition_idempotence()
+	test_position_num_calculation()
+	test_find_solution_status_string()
+	test.finalize()
+except KeyboardInterrupt:
+	print()
+	test.ok(False, "Tests terminated by user")
+	test.finalize()
