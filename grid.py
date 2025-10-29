@@ -2,7 +2,7 @@ import numpy
 from bitarray import bitarray, frozenbitarray
 
 from constants import *
-from celltools import apply_diff, cell_diff, sort_cells
+from celltools import apply_diff, cell_diff, sort_cells, get_bounding_area
 from common import die
 from debug import *
 
@@ -95,7 +95,7 @@ class Grid:
 		self.plate_bits = _ZEROBITS
 		self.reset_sokoban_solution()
 
-	def configure(self, map, reverse_barrel_mode=False):
+	def configure(self, map, area=None, reverse_barrel_mode=False):
 		self.reset()
 		self.map = map
 		self.size_x, self.size_y = len(map), len(map[0])
@@ -110,6 +110,9 @@ class Grid:
 					idx = len(self.idx_cells)
 					self.idx_cells.append(cell)
 					self.cell_idxs[cell] = idx
+
+		assert self.idx_cells, "Grid without passable cells is not supported"
+		self.area = area or get_bounding_area(self.idx_cells)
 
 		self.num_bits = len(self.idx_cells)
 		self.all_bits = bitarray('1' * self.num_bits)

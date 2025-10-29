@@ -55,7 +55,7 @@ def configure_simple_grid(reverse_barrel_mode=False, plate_cells=None):
 	for plate_cell in plate_cells or []:
 		game_map[plate_cell] = CELL_PLATE
 	grid = Grid()
-	grid.configure(game_map, reverse_barrel_mode)
+	grid.configure(game_map, reverse_barrel_mode=reverse_barrel_mode)
 	return grid
 
 def test_basic_accessibility():
