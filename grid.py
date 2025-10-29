@@ -2,7 +2,7 @@ import numpy
 from bitarray import bitarray, frozenbitarray
 
 from constants import *
-from celltools import apply_diff, cell_diff, sort_cells, get_bounding_area
+from celltools import apply_diff, cell_diff, cell_dir, sort_cells, get_bounding_area
 from common import die
 from debug import *
 
@@ -13,6 +13,9 @@ DBG_GRID3 = "grid++"
 DBG_PATH  = "path"
 DBG_PATH2 = "path+"
 DBG_PATH3 = "path++"
+
+DBG_SZSB  = "szsb"
+DBG_SZSB2 = "szsb+"
 
 _ONE = frozenbitarray('1')
 _ZEROBITS = frozenbitarray('')
@@ -387,6 +390,14 @@ class Grid:
 	def barrel_cells(self):
 		return self.to_cells(self.barrel_bits)
 
+	@property
+	def plate_idxs(self):
+		return self.to_idxs(self.plate_bits)
+
+	@property
+	def plate_cells(self):
+		return self.to_cells(self.plate_bits)
+
 	def is_solved_for_barrels(self, barrels=None):
 		return (~self.plate_bits & (self.to_bits(barrels) if barrels else self.barrel_bits)) == self.no_bits
 
@@ -513,6 +524,114 @@ class Grid:
 	def opposite_shift(self, char_cell, barrel_cell):
 		return (self.push if self.reverse_barrel_mode else self.pull)(char_cell, barrel_cell)
 
+	# Support for sokoban zsb puzzles
+	# https://groups.io/g/sokoban/topic/zero_space_puzzles/113333167
+
+	def is_valid_zsb_area_size(self):
+		return self.area.size_x % 2 == 1 and self.area.size_y % 2 == 1 and self.area.size_x >= 5 and self.area.size_y >= 5
+
+	def get_zsb_size(self):
+		return ((self.area.size_x - 1) // 2, (self.area.size_y - 1) // 2)
+
+	def get_zsb_size_str(self):
+		return 'x'.join(map(str, self.get_zsb_size()))
+
+	def get_zsb_wall_cells(self):
+		return [cell for cell in self.area.cells if self.area.is_cell_oddodd(cell)]
+
+	def is_zsb_anchor_cell(self, cell):
+		return self.area.is_cell_inside(cell, 1) and (self.area.is_cell_evnodd(cell) or self.area.is_cell_oddevn(cell))
+
+	def get_all_zsb_anchor_cells(self):
+		return [cell for cell in self.area.cells if self.is_zsb_anchor_cell(cell)]
+
+	def get_zsb_anchor_move_type(self, cell):
+		return MOVE_V if self.area.is_cell_evnodd(cell) else MOVE_H if self.area.is_cell_oddevn(cell) else die("No anchor argument", True)
+
+	def is_zsb_graph_connected(self, anchor_cells):
+		wall_cells = self.get_zsb_wall_cells()
+		wall_graphs = [(wall_cell,) for wall_cell in wall_cells]
+		for anchor_cell in anchor_cells:
+			dirs = (DIR_L, DIR_R) if self.get_zsb_anchor_move_type(anchor_cell) == MOVE_V else (DIR_U, DIR_D)
+			wall1_cell = apply_diff(anchor_cell, dirs[0])
+			wall2_cell = apply_diff(anchor_cell, dirs[1])
+			wall1_graph = next(wall_graph for wall_graph in wall_graphs if wall1_cell in wall_graph)
+			wall2_graph = next(wall_graph for wall_graph in wall_graphs if wall2_cell in wall_graph)
+			if wall1_graph == wall2_graph:
+				return False
+			wall_graphs.remove(wall1_graph)
+			wall_graphs.remove(wall2_graph)
+			wall_graphs.append((*wall1_graph, *wall2_graph))
+		return True  # the same: len(wall_graphs) == 1
+
+	def is_zsb_correspondence(self, source_cells, target_cells):
+		zsb_size = self.get_zsb_size()
+		def count_anchors_in_row(anchor_cells, r):
+			return sum(1 for cell in anchor_cells if cell[0] == self.area.x1 + r * 2 + 2)
+		for r in range(zsb_size[0] - 1):
+			if count_anchors_in_row(source_cells, r) != count_anchors_in_row(target_cells, r):
+				return False
+		def count_anchors_in_col(anchor_cells, c):
+			return sum(1 for cell in anchor_cells if cell[1] == self.area.y1 + c * 2 + 2)
+		for c in range(zsb_size[1] - 1):
+			if count_anchors_in_col(source_cells, c) != count_anchors_in_col(target_cells, c):
+				return False
+		return True
+
+	def get_all_valid_zsb_barrel_moves(self, barrel_cells):
+		all_barrel_moves = []
+		for barrel_cell in barrel_cells:
+			dirs = (DIR_L, DIR_R) if self.get_zsb_anchor_move_type(barrel_cell) == MOVE_H else (DIR_U, DIR_D)
+			for dir in dirs:
+				target_cell = apply_diff(barrel_cell, dir, factor=2)
+				if target_cell in barrel_cells or self.map[target_cell] in CELL_CHAR_MOVE_OBSTACLES:
+					continue
+				if not self.is_zsb_graph_connected([cell for cell in barrel_cells if cell != barrel_cell] + [target_cell]):
+					continue
+				all_barrel_moves.append((barrel_cell, target_cell))
+		return all_barrel_moves
+
+	def get_all_valid_zsb_char_barrel_moves(self):
+		return [(apply_diff(barrel_cell, cell_dir(target_cell, barrel_cell), self.reverse_barrel_mode), barrel_cell)
+			for barrel_cell, target_cell in self.get_all_valid_zsb_barrel_moves(self.barrel_cells)]
+
+	def check_zsb(self):
+		self.is_zsb = False
+
+		if not self.is_valid_zsb_area_size():
+			debug(DBG_SZSB, "check_zsb: it's not ZSB, no valid zsb area size")
+			return
+
+		# check that walls are only on odd-odd cells and nowhere else
+		for cell in self.area.cells:
+			is_wall_cell = self.area.is_cell_oddodd(cell)
+			if is_wall_cell and self.map[cell] != CELL_WALL or not is_wall_cell and not self.map[cell] in (*CELL_FLOOR_TYPES, CELL_PLATE):
+				debug(DBG_SZSB, "check_zsb: it's not ZSB, cell %s '%s' must%s be WALL" % (cell, self.map[cell], "" if is_wall_cell else " NOT"))
+				return
+
+		# check number and connectivity of barrels and plates
+		zsb_size = self.get_zsb_size()
+		num_expected_barrels = zsb_size[0] * zsb_size[1] - 1
+		for archor_cells in (self.barrel_cells, self.plate_cells):
+			if len(archor_cells) != num_expected_barrels:
+				debug(DBG_SZSB, "check_zsb: it's not ZSB, wrong number of barrels/plates")
+				return
+			for cell in archor_cells:
+				if not self.is_zsb_anchor_cell(cell):
+					debug(DBG_SZSB, "check_zsb: it's not ZSB, barrel/plate %s misplaced" % (cell,))
+					return
+			if not self.is_zsb_graph_connected(archor_cells):
+				debug(DBG_SZSB, "check_zsb: barrels/plates are not graph-connected")
+				return
+
+		# check correspondence of barrels and plates
+		if not self.is_zsb_correspondence(self.barrel_cells, self.plate_cells):
+			debug(DBG_SZSB, "check_zsb: it's not ZSB, no barrels/plates correspondence")
+			return
+
+		debug(DBG_SZSB, "check_zsb: it's ZSB")
+		self.is_zsb = True
+
 	# Support for Sokoban solvers
 
 	# return list of all accessible (char_cell, barrel_cell) pairs valid for shift
@@ -535,6 +654,8 @@ class Grid:
 	def prepare_sokoban_solution(self, char=None, disable=False):
 		self.min_char_barrel_plate_shifts = min_char_shifts = {}
 		self.min_barrel_plate_shifts = min_shifts = {}
+
+		self.check_zsb()
 
 		if self.plate_bits == self.no_bits:
 			self.dead_barrel_bits = self.all_bits
