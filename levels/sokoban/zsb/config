@@ -41,6 +41,15 @@ levels:
 		size: [13, 13]
 		zsb: true
 -
+	name: Zero Space type B - 5x3
+	num-enemies: 0
+	theme: modern2
+	music: gaming_spirit
+	char-health: null
+	puzzle-config:
+		size: [11, 7]
+		zsb: true
+-
 	name: Reverse Zero Space type B - 4x4
 	num-enemies: 0
 	theme: moss
