@@ -337,7 +337,7 @@ def fetch_letslogic_collection(ll_coll_id):
 		ll_collections = fetch_letslogic_collections()
 		ll_coll = next((ll_coll for ll_coll in ll_collections.values() if ll_coll['title'] == ll_coll_id), None)
 		if not ll_coll:
-			warn("Unknown non-numeric title %s to fetch letslogic collection" % ll_coll_id)
+			warn("Unknown title '%s' to fetch letslogic collection" % ll_coll_id)
 			return None
 		ll_coll_id = str(ll_coll["id"])
 
