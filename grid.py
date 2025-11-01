@@ -600,6 +600,9 @@ class Grid:
 	def check_zsb(self):
 		self.is_zsb = False
 
+		if debug.has(DBG_SZSB2):
+			self.show_map()
+
 		if not self.is_valid_zsb_area_size():
 			debug(DBG_SZSB, "check_zsb: it's not ZSB, no valid zsb area size")
 			return
@@ -623,7 +626,7 @@ class Grid:
 					debug(DBG_SZSB, "check_zsb: it's not ZSB, barrel/plate %s misplaced" % (cell,))
 					return
 			if not self.is_zsb_graph_connected(archor_cells):
-				debug(DBG_SZSB, "check_zsb: barrels/plates are not graph-connected")
+				debug(DBG_SZSB, "check_zsb: it's not ZSB, barrels/plates are not graph-connected")
 				return
 
 		# check correspondence of barrels and plates
@@ -632,6 +635,7 @@ class Grid:
 			return
 
 		debug(DBG_SZSB, "check_zsb: it's ZSB")
+		debug(DBG_SZSB2, [1], {"plates": self.plate_bits, "barrels": self.barrel_bits})
 		self.is_zsb = True
 
 	# Support for Sokoban solvers

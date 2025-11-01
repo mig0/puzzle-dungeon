@@ -8,7 +8,6 @@ OBSTACLE_COST = None
 
 class BarrelPuzzle(Puzzle):
 	def init(self):
-		self.is_zsb = False
 		self.solver = SokobanSolver()
 
 	def assert_config(self):
