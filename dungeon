@@ -1,5 +1,7 @@
 #!/bin/bash
 
+if test "$OS" = Windows_NT; then exec `dirname $0`/dungeon.bat "$@"; fi
+
 cd `dirname $0` && \
 PYGAME_HIDE_SUPPORT_PROMPT=1 PYTHONDONTWRITEBYTECODE=1 CMD_ARGS=$(printf "%q " "$@") \
 pgzrun main.py 2> >(grep -v '<frozen importlib._bootstrap>' - )

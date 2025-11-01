@@ -18,8 +18,8 @@ def prepare_user_dir():
 	if USER_DIR:
 		return
 	if os.name == 'nt':  # Windows
-		base = os.environ.get('APPDATA') or os.environ.get('LOCALAPPDATA') or os.environ['USERPROFILE'].replace('\\', '/')
-		USER_DIR = base + '/Puzzle Dungeon'
+		base_dir = os.environ.get('APPDATA') or os.environ.get('LOCALAPPDATA') or os.environ.get('USERPROFILE') or '.'
+		USER_DIR = base_dir.replace('\\', '/') + '/Puzzle Dungeon'
 	elif sys.platform == 'darwin':  # macOS
 		USER_DIR = os.path.expanduser('~/Library/Application Support/Puzzle Dungeon')
 	else:  # POSIX

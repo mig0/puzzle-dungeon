@@ -3,6 +3,7 @@ setlocal EnableDelayedExpansion
 
 rem Special --check mode for external use
 if "%~1" == "--check" (
+	call :check_symlinks         >nul || exit /b 1
 	call :check_installed_python >nul || exit /b 1
 	call :check_python_modules   >nul || exit /b 1
 	echo !PGZRUN_EXE!
@@ -10,6 +11,7 @@ if "%~1" == "--check" (
 )
 
 rem Normal mode, install dependencies if needed
+call :check_symlinks                                             || exit /b 1
 call :check_installed_python || call :need_python_install        || exit /b 1
 call :check_python_modules   || call :need_python_module_install || exit /b 1
 
@@ -80,6 +82,22 @@ if !errorlevel! neq 0 (
 call :check_python_modules || exit /b 1
 
 echo Dependent python modules were successfully installed
+goto :eof
+
+rem ================================================================
+:check_symlinks
+rem Smoke test for broken symlink (file with small size)
+for %%F in ("images\default\char.png") do set "file_size=%%~zF"
+if %file_size% GTR 0 if %file_size% LSS 555 (
+	echo Seems you miss proper symbolic links.
+	echo You may possibly lose them on unzip or on git clone.
+	echo Try to unzip as Administrator.
+	echo If you use Git Bash, run it as Administrator and execute these commands:
+	echo 	export MSYS=winsymlinks:nativestrict
+	echo 	git config --local core.symlinks true
+	echo 	git checkout .
+	exit /b 1
+)
 goto :eof
 
 rem ================================================================
