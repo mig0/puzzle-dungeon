@@ -13,8 +13,11 @@ class Debug:
 		self.time_digits = 3
 		self.features = set()
 
-	def enable_feature(self, feature):
+	def enable(self, feature):
 		self.features.add(feature)
+
+	def has(self, feature):
+		return feature in self.features
 
 	def configure(self, args):
 		for item in args:
@@ -30,10 +33,10 @@ class Debug:
 			try:
 				self.lvl = int(item)
 			except ValueError:
-				self.enable_feature(item)
+				self.enable(item)
 				while item.endswith('+'):
 					item = item[0:-1]
-					self.enable_feature(item)
+					self.enable(item)
 
 	def __call__(self, *args):
 		# optimize common case
@@ -61,8 +64,11 @@ class Debug:
 		if (lvl <= self.lvl) and (not features or self.features.intersection(features)):
 			if callable(msg):
 				msg = msg()  # evaluate lazily
-			print("%s%s%s" % (
-				"[%s] " % get_current_time_str(self.time_digits) if self.show_time else "",
-				" " * depth if depth else "", msg))
+			if isinstance(msg, dict):
+				msg = ["%s=%s" % (k, v) for k, v in msg.items()]
+			for msg in msg if isinstance(msg, (list, tuple)) else [msg]:
+				print("%s%s%s" % (
+					"[%s] " % get_current_time_str(self.time_digits) if self.show_time else "",
+					" " * depth if depth else "", msg))
 
 debug = Debug()
