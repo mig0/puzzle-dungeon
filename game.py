@@ -2,6 +2,7 @@ from common import load_tabbed_yaml, get_pgzero_game_from_stack, warn, die
 from config import DATA_DIR, pgconsole_config
 from level import Collection, Level, parse_level_id
 from sokobanparser import parse_sokoban_levels
+from sizetools import set_display_size
 from room import room
 import pygame
 import copy
@@ -105,6 +106,9 @@ class Game:
 		self.in_level = False
 		self.during_undo = False
 		self.last_char_move = None
+
+		self._set_display_size()
+		self.screen_size_fitting_display = None
 
 		self.collections = []
 		self.level = Level()
@@ -239,6 +243,17 @@ class Game:
 		self.during_undo = False
 
 		return True
+
+	def _set_display_size(self):
+		display_size = pygame.display.get_desktop_sizes()[0]
+		set_display_size(display_size)
+
+	def calc_screen_size_fitting_display(self):
+		if DISPLAY_W > WIDTH and DISPLAY_H - EXTRA_DISPLAY_H > HEIGHT:
+			self.screen_size_fitting_display = None
+			return
+		scale_factor = max(WIDTH / DISPLAY_W, HEIGHT / (abs(DISPLAY_H - EXTRA_DISPLAY_H) or 1))
+		self.screen_size_fitting_display = (int(WIDTH / scale_factor), int(HEIGHT / scale_factor))
 
 	def set_requested_new_level(self, level_id=None, reload_stored=False):
 		if not level_id:

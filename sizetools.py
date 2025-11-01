@@ -3,6 +3,10 @@ import sys, inspect
 CELL_W = 64
 CELL_H = 64
 
+DISPLAY_W = None
+DISPLAY_H = None
+EXTRA_DISPLAY_H = 71
+
 MAP_POS_X1 = 0
 MAP_POS_Y1 = 0
 
@@ -40,6 +44,20 @@ ROOM_9_Y1 = None
 ROOM_9_Y2 = None
 ROOM_9_BORDERS_X = None
 ROOM_9_BORDERS_Y = None
+
+def set_display_size(display_size):
+	global DISPLAY_W, DISPLAY_H, DEFAULT_MAP_SIZE
+	DISPLAY_W, DISPLAY_H = display_size
+	map_size_y = min(13, (DISPLAY_H - EXTRA_DISPLAY_H) // CELL_H - 1)
+	map_size_x = 13 + ((11 - ((map_size_y + 1) // 2 * 2 - 1)) if map_size_y < 11 else 0)
+	assert 5 <= map_size_y <= 13 and map_size_x * CELL_W <= DISPLAY_W, f"Can't fit default map into display {display_size}"
+	DEFAULT_MAP_SIZE = (map_size_x, map_size_y)
+
+def get_display_size():
+	return (DISPLAY_W, DISPLAY_H)
+
+def get_default_map_size():
+	return DEFAULT_MAP_SIZE
 
 def set_map_size(size, has_border=True):
 	global MAP_SIZE

@@ -2,7 +2,7 @@ import os
 from copy import deepcopy
 from common import warn, die
 from config import DEFAULT_NUM_ENEMIES
-from sizetools import DEFAULT_MAP_SIZE
+from sizetools import get_default_map_size
 from cmdargs import cmdargs
 
 special_config_keys = ('bg-image', 'cloud-mode', 'music', 'puzzle-type', 'theme')
@@ -42,7 +42,7 @@ class Level:
 		self.has_finish = False
 		self.has_start = False
 		self.map_file = None
-		self.map_size = DEFAULT_MAP_SIZE
+		self.map_size = get_default_map_size()
 		self.map_string = None
 		self.music = collection.config.get('music') or "valiant_warriors"
 		self.name = None

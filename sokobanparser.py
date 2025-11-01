@@ -1,6 +1,7 @@
 import io
 import os
 from constants import *
+from sizetools import get_default_map_size
 from random import randint
 from common import die, open_read
 
@@ -96,8 +97,7 @@ def create_map_string(lines):
 	real_size_x = len(lines[0])
 
 	# min size
-	min_size_x = 13
-	min_size_y = 13
+	min_size_x, min_size_y = get_default_map_size()
 
 	# calculate intended size_x, size_y
 	size_y = max(min_size_y, real_size_y)

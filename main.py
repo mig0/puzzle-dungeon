@@ -34,9 +34,6 @@ from mainscreen import main_screen_level
 from sokobanparser import parse_sokoban_levels
 from statusmessage import reset_status_messages, set_status_message, set_quick_status_message, draw_status_message
 
-DISPLAY_WIDTH, DISPLAY_HEIGHT = pygame.display.get_desktop_sizes()[0]
-
-display_size_to_fit = None
 scale_to_display = False
 
 # set data dir and default encoding for the whole program
@@ -1099,13 +1096,7 @@ def init_new_level(level_id, reload_stored=False):
 	draw_apply_sizes()
 	flags.apply_sizes()
 
-	global display_size_to_fit
-	if not DISPLAY_WIDTH or not DISPLAY_HEIGHT or DISPLAY_WIDTH > WIDTH and DISPLAY_HEIGHT > HEIGHT:
-		display_size_to_fit = None
-	else:
-		scale_factor = max(WIDTH / DISPLAY_WIDTH, HEIGHT / (abs(DISPLAY_HEIGHT - 68) or 1))
-		display_size_to_fit = (int(WIDTH / scale_factor), int(HEIGHT / scale_factor))
-
+	game.calc_screen_size_fitting_display()
 	game.init_console()
 
 	bg_image = None
@@ -1335,8 +1326,8 @@ def draw():
 			draw_central_flash()
 		screen.draw.text(goal_line, center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#66AA00", owidth=1.2, ocolor="#404030", alpha=1, fontsize=40)
 
-	if scale_to_display and display_size_to_fit:
-		scaled = pygame.transform.smoothscale(screen.surface, display_size_to_fit)
+	if scale_to_display and game.screen_size_fitting_display:
+		scaled = pygame.transform.smoothscale(screen.surface, game.screen_size_fitting_display)
 		screen.fill((0, 0, 0))
 		screen.blit(scaled, (0, 0))
 
