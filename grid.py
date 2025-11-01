@@ -137,8 +137,10 @@ class Grid:
 		self.barrel_bits = self.no_bits.copy()
 		self.plate_bits = self.no_bits.copy()
 		for idx, cell in enumerate(self.idx_cells):
-			if map[cell] == CELL_PLATE:
+			if map[cell] == CELL_PLATE or ACTOR_AND_PLATE_BY_CHAR.get(map[cell], ("", False))[1]:
 				self.plate_bits[idx] = True
+			if map[cell] in (ACTOR_CHARS['barrel'], ACTOR_ON_PLATE_CHARS['barrel']):
+				self.barrel_bits[idx] = True
 
 		self.reset_sokoban_solution()
 
@@ -172,7 +174,7 @@ class Grid:
 					cell_ch = get_cell_type_with_clean_floor(cell)
 					if show_dead and self.map[cell] in CELL_FLOOR_TYPES and self.dead_barrel_bits[cell_idx]:
 						cell_ch = '☓'
-					actor_chars = ACTOR_ON_PLATE_CHARS if cell_ch == CELL_PLATE else ACTOR_CHARS
+					actor_chars = ACTOR_ON_PLATE_CHARS if cell_idx is not None and self.plate_bits[cell_idx] else ACTOR_CHARS
 					if cell in cell_chars:
 						cell_ch = cell_chars[cell]
 					if cell_idx is not None and self.barrel_bits[cell_idx]:
