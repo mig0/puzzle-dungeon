@@ -71,4 +71,27 @@ class Debug:
 					"[%s] " % get_current_time_str(self.time_digits) if self.show_time else "",
 					" " * depth if depth else "", msg))
 
+class ProgressLine:
+	def __init__(self, is_enabled=True, max_len=80):
+		self.is_progress_line_enabled = is_enabled
+		self.max_progress_line_len = max_len
+		self.last_progress_line = None
+
+	def put(self, line=""):
+		if not self.is_progress_line_enabled:
+			return
+		line_len = len(line)
+		if line_len > self.max_progress_line_len:
+			mid = self.max_progress_line_len // 2 - 2
+			line = line[0:mid] + ' … ' + line[line_len - self.max_progress_line_len + mid + 3:line_len]
+
+		if self.last_progress_line is not None:
+			last_line_len = len(self.last_progress_line)
+			remove_len = last_line_len - line_len if last_line_len > line_len else 0
+			print("\b \b" * remove_len, end="")
+			print("\b" * (last_line_len - remove_len), end="")
+
+		print(line, end="", flush=True)
+		self.last_progress_line = line
+
 debug = Debug()
