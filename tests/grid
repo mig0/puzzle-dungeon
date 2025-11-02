@@ -3,6 +3,7 @@
 import os
 import sys
 import numpy
+from bitarray import bitarray
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 from constants import *
@@ -17,45 +18,79 @@ def print_if_verbose(*args):
 		print(INFO_PREFIX, end='')
 		print(*args)
 
-def make_simple_map():
-	# create a uniform 7x6 layout
-	layout = [
-		" ######",
-		"#......#",
-		"#.#.#..#",
-		"#......#",
-		"#...#..#",
-		"#......#",
-		"#######",
-	]
-	# pad any non-uniform rows
-	w = max(len(r) for r in layout)
-	h = len(layout)
-	rows = []
-	for row in layout:
-		if len(row) < w:
-			row += CELL_VOID * (w - len(row))
-		rows.append(row)
+def show_map_if_verbose(grid, descr):
+	if verbose:
+		grid.show_map(descr)
 
-	# build numpy array using cell type constants
-	map = numpy.empty((w, h), dtype='<U1')
-	for cy, row in enumerate(rows):
-		for cx, ch in enumerate(row):
-			cell = (cx, cy)
-			if ch == '.':
-				map[cell] = CELL_FLOOR
-			elif ch == '#':
-				map[cell] = CELL_WALL
-			else:
-				map[cell] = CELL_VOID
+def make_empty_map(width, height):
+	return numpy.full((width, height), CELL_FLOOR)
+
+def make_empty_map_with_wall_border(width, height):
+	map = make_empty_map(width, height)
+	map[ 0,  :] = CELL_WALL
+	map[-1,  :] = CELL_WALL
+	map[ :,  0] = CELL_WALL
+	map[ :, -1] = CELL_WALL
 	return map
 
-def configure_simple_grid(reverse_barrel_mode=False, plate_cells=None):
+def make_empty_zsb_map(zsb_size_x, zsb_size_y):
+	map = make_empty_map(zsb_size_x * 2 + 1, zsb_size_y * 2 + 1)
+	for y in range(zsb_size_y):
+		for x in range(zsb_size_x):
+			map[x * 2 + 1, y * 2 + 1] = CELL_WALL
+	return map
+
+def make_empty_zsb_map_with_wall_border(zsb_size_x, zsb_size_y):
+	map = make_empty_map_with_wall_border(zsb_size_x * 2 + 3, zsb_size_y * 2 + 3)
+	for y in range(zsb_size_y):
+		for x in range(zsb_size_x):
+			map[x * 2 + 2, y * 2 + 2] = CELL_WALL
+	return map
+
+def make_simple_map():
+	lines = [
+		# sample 7x6 layout
+		"·▓▓▓▓▓▓·",
+		"▓••••••▓",
+		"▓•▓•▓••▓",
+		"▓••••••▓",
+		"▓•••▓••▓",
+		"▓••••••▓",
+		"▓▓▓▓▓▓▓·",
+	]
+	return numpy.array([list(line) for line in lines], dtype='<U1').T
+
+def make_simple_zsb_map():
+	lines = [
+		# sample zsb 3x3 layout
+		"▓▓▓▓▓▓▓▓▓",
+		"▓•••••••▓",
+		"▓•▓□▓⎵▓•▓",
+		"▓•⎵•■•□•▓",
+		"▓•▓■▓■▓•▓",
+		"▓•□•⎵•■•▓",
+		"▓•▓⎵▓□▓•▓",
+		"▓•••••••▓",
+		"▓▓▓▓▓▓▓▓▓",
+	]
+	return numpy.array([list(line) for line in lines], dtype='<U1').T
+
+def configure_simple_grid(reverse_barrel_mode=False, plate_cells=None, show_map=False):
 	game_map = make_simple_map()
 	for plate_cell in plate_cells or []:
 		game_map[plate_cell] = CELL_PLATE
 	grid = Grid()
 	grid.configure(game_map, reverse_barrel_mode=reverse_barrel_mode)
+	if show_map:
+		show_map_if_verbose(grid, "Simple grid")
+	return grid
+
+def configure_simple_zsb_grid(reverse_barrel_mode=False, show_map=False):
+	game_map = make_simple_zsb_map()
+	grid = Grid()
+	grid.configure(game_map, reverse_barrel_mode=reverse_barrel_mode)
+	if show_map:
+		show_map_if_verbose(grid, "Simple ZSB grid")
 	return grid
 
 def test_basic_accessibility():
@@ -70,8 +105,7 @@ def test_basic_accessibility():
 	test.is_in(corner_cell, accessible_cells)
 	test.not_in(wall_cell, accessible_cells)
 
-	if verbose:
-		grid.show_map("Map after test_basic_accessibility")
+	show_map_if_verbose(grid, "Map after test_basic_accessibility")
 
 def test_distances():
 	grid = configure_simple_grid()
@@ -94,8 +128,7 @@ def test_distances():
 	test.eq(cell_distances.get(start_cell), 0)
 	test.eq(cell_distances.get(floor_cell), 8)
 
-	if verbose:
-		grid.show_map("Map after test_distances")
+	show_map_if_verbose(grid, "Map after test_distances")
 
 def test_find_path():
 	grid = configure_simple_grid()
@@ -126,8 +159,7 @@ def test_find_path():
 		print_if_verbose(start_cell, target_cell, path_cells)
 		test.eq(path_cells[target_idx], 4)
 
-	if verbose:
-		grid.show_map("Map after test_find_path")
+	show_map_if_verbose(grid, "Map after test_find_path")
 
 def test_barrel_op(grid, name, char_cell, barrel_cell, expected_to_pass):
 	op = getattr(grid, name)
@@ -166,8 +198,7 @@ def test_add_barrel_and_three_ops(grid, name, char_cell, barrel_cell, expected_t
 	grid.restore_barrels()
 
 def test_add_barrel_and_all_ops(grid, name, char_cell, barrel_cell, expected_to_pass):
-	if verbose:
-		grid.show_map("Map before test_barrel_and_shift_ops %s %s -> %s %s" % (name, char_cell, barrel_cell, expected_to_pass))
+	show_map_if_verbose(grid, "Map before test_barrel_and_shift_ops %s %s -> %s %s" % (name, char_cell, barrel_cell, expected_to_pass))
 	test_add_barrel_and_three_ops(grid, name,    char_cell, barrel_cell, expected_to_pass)
 	test_add_barrel_and_three_ops(grid, "shift", char_cell, barrel_cell, expected_to_pass)
 
@@ -204,8 +235,7 @@ def test_push_pull_shift():
 	test_add_barrel_and_all_ops(grid, "pull", (5, 4), (5, 5), True)
 	test_barrel_three_ops(      grid, "pull", (5, 4), (5, 5), False)  # no barrel
 
-	if verbose:
-		grid.show_map("Map after test_push_pull_shift")
+	show_map_if_verbose(grid, "Map after test_push_pull_shift")
 
 def test_all_valid_shifts_consistency():
 	grid = configure_simple_grid()
@@ -230,8 +260,7 @@ def test_all_valid_shifts_consistency():
 		test.eq(cell_distance(char_cell, barrel_cell), 1)
 		test.eq(barrel_cell, (2, 4))
 
-	if verbose:
-		grid.show_map("Map after test_all_valid_shifts_consistency")
+	show_map_if_verbose(grid, "Map after test_all_valid_shifts_consistency")
 
 def test_store_and_restore_barrels():
 	grid = configure_simple_grid()
@@ -259,18 +288,11 @@ def test_store_and_restore_barrels():
 	# bitarray equality check: no differing bits
 	test.eq(grid.barrel_bits, barrel_bits_before)
 
-	if verbose:
-		grid.show_map("Map after test_store_and_restore_barrels")
+	show_map_if_verbose(grid, "Map after test_store_and_restore_barrels")
 
 def test_large_open_area_performance():
 	w, h = 40, 20
-	game_map = numpy.full((w, h), CELL_FLOOR, dtype='<U1')
-	# surround with walls
-	game_map[0, :] = CELL_WALL
-	game_map[-1, :] = CELL_WALL
-	game_map[:, 0] = CELL_WALL
-	game_map[:, -1] = CELL_WALL
-
+	game_map = make_empty_map_with_wall_border(w, h)
 	grid = Grid()
 	grid.configure(game_map)
 	accessible_bits = grid.get_accessible_bits((1, 1))
@@ -281,15 +303,13 @@ def test_large_open_area_performance():
 	test.not_none(path_cells)
 	test.len(path_cells, (w - 3) + (h - 3))
 
-	if verbose:
-		grid.show_map("Map after test_large_open_area_performance")
+	show_map_if_verbose(grid, "Map after test_large_open_area_performance")
 
 def test_deadlock_detection():
 	grid = configure_simple_grid()
 	# Set up a 2x2 block of barrels — should trigger 2x2 deadlock
 	grid.set_barrels([(3, 2), (3, 3), (4, 3)])
-	if verbose:
-		grid.show_map("Map before 2x2 deadlock")
+	show_map_if_verbose(grid, "Map before 2x2 deadlock")
 	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((3, 3), DIR_D), "Unexpected 2x2 deadlock detected")
 	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_R), "Expected 2x2 deadlock #1 not detected")
 	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_U), "Expected 2x2 deadlock #2 not detected")
@@ -298,8 +318,7 @@ def test_deadlock_detection():
 	# Set up a character surrounded by walls/barrels (pull mode)
 	grid = configure_simple_grid(reverse_barrel_mode=True)
 	grid.set_barrels([(3, 2), (2, 3), (3, 4)])
-	if verbose:
-		grid.show_map("Map before surrounding deadlock")
+	show_map_if_verbose(grid, "Map before surrounding deadlock")
 	test.ok(not grid.is_surrounding_barrel_deadlock((3, 3), (2, 3), DIR_R), "Unexpected surrounding deadlock detected")
 	test.ok(    grid.is_surrounding_barrel_deadlock((3, 3), (3, 4), DIR_L), "Expected surrounding deadlock not detected")
 
@@ -447,8 +466,138 @@ def test_prepare_sokoban_solution_with_plate():
 	grid.reset_sokoban_solution()
 	grid.prepare_sokoban_solution()
 	test.eq(grid.dead_barrel_bits.count(), num_dead_barrel_bits)
-	if verbose:
-		grid.show_map("Map after test_prepare_sokoban_solution_with_plate")
+	show_map_if_verbose(grid, "Map after test_prepare_sokoban_solution_with_plate")
+
+def test_zsb_area_size_validation():
+	grid = Grid()
+	grid.configure(make_empty_map(11, 11))  # 11x11 odd–odd OK
+	test.ok(grid.is_valid_zsb_area_size(), "Valid odd-odd area should pass")
+
+	grid.configure(make_empty_map(10, 11))
+	test.ok(not grid.is_valid_zsb_area_size(), "Even-sized area should fail")
+
+	grid.configure(make_empty_map(3, 5))
+	test.ok(not grid.is_valid_zsb_area_size(), "Too small should fail")
+
+	grid = configure_simple_zsb_grid()
+	test.ok(grid.is_valid_zsb_area_size(), "Valid zsb map should pass")
+
+	zsb_size = (3, 3)
+	zsb_map1 = make_empty_zsb_map(*zsb_size)
+	zsb_map2 = make_empty_zsb_map_with_wall_border(*zsb_size)
+	for map, descr in [zsb_map1, "without borders"], [zsb_map2, "with borders"]:
+		grid.configure(map)
+		show_map_if_verbose(grid, f"Empty zsb map {zsb_size} {descr}")
+		test.ok(grid.is_valid_zsb_area_size(), "Valid empty zsb map should pass")
+		test.eq(grid.get_zsb_size(), zsb_size)
+		test.eq(grid.get_zsb_size_str(), '3x3')
+
+	test.eq(zsb_map1.shape, (7, 7))
+	test.eq(zsb_map2.shape, (9, 9))
+	test.ok((zsb_map1 == zsb_map2[1:8, 1:8]).all(), "Two empty zsb maps (without and with border) should match")
+
+def test_zsb_wall_and_anchor_pattern():
+	grid = Grid()
+	# build map 7x7 with 9 zsb walls
+	grid.configure(make_empty_zsb_map_with_wall_border(3, 3))
+	wall_cells = grid.get_zsb_wall_cells()
+	for cx, cy in wall_cells:
+		test.ok(cx % 2 == 0 and cy % 2 == 0, "All walls on area odd-odd cells")
+
+	anchor_cells = grid.get_all_zsb_anchor_cells()
+	for cell in anchor_cells:
+		test.ok(grid.is_zsb_anchor_cell(cell), "Anchor cell check should be consistent")
+
+	# check move type symmetry
+	for cell in anchor_cells:
+		test.is_in(grid.get_zsb_anchor_move_type(cell), (MOVE_H, MOVE_V))
+
+def test_zsb_graph_connected_and_correspondence():
+	grid = Grid()
+	grid.configure(make_empty_zsb_map_with_wall_border(3, 3))
+	barrel_cells = grid.get_all_zsb_anchor_cells()[1 - 3 * 3:]
+	test.ok(not grid.is_zsb_graph_connected(barrel_cells), "Last 8 anchor graph should not be connected")
+
+	# break connectivity artificially
+	bad_barrel_cells = barrel_cells[:-1]
+	test.ok(not grid.is_zsb_graph_connected(bad_barrel_cells), "Missing anchors break connectivity")
+
+	# correspondence
+	test.ok(grid.is_zsb_correspondence(barrel_cells, barrel_cells), "Same anchors should correspond to each other")
+	reversed_cells = reversed(barrel_cells)
+	test.ok(not grid.is_zsb_correspondence(barrel_cells, reversed_cells), "Shuffled anchors should correspond to each other")
+
+	grid = configure_simple_zsb_grid()
+	test.ok(grid.is_zsb_graph_connected(grid.barrel_cells), "Barrels on zsb map should be connected")
+	test.ok(grid.is_zsb_graph_connected(grid.plate_cells), "Plates on zsb map should be connected")
+	test.ok(grid.is_zsb_correspondence(grid.barrel_cells, grid.plate_cells), "Barrels and plates on zsb map should correspond")
+
+def test_zsb_barrel_moves_generation():
+	grid = Grid()
+	grid.configure(make_empty_zsb_map_with_wall_border(4, 4))
+	barrel_cells = grid.get_all_zsb_anchor_cells()[:15]
+	moves = grid.get_all_valid_zsb_barrel_moves(barrel_cells)
+	test.ok(len(moves) == 0, "There should not be at legal ZSB moves")
+	moves = grid.get_all_valid_zsb_barrel_moves(barrel_cells[0:1])
+	test.ok(len(moves) != 0, "There should be at least one legal ZSB moves")
+
+	barrel_cells = ((4, 5), (5, 4))
+	grid.set_barrels(barrel_cells)  # needed just for show_map
+	show_map_if_verbose(grid, "Empty 4x4 ZSB map with border and 2 barrels")
+	moves = grid.get_all_valid_zsb_barrel_moves(barrel_cells)
+	test.eq(len(moves), 4)
+
+	# ensure all moves are spaced by 2 cells
+	for barrel_cell, target_cell in moves:
+		test.eq(cell_distance(barrel_cell, target_cell), 2)
+
+	grid = Grid()
+	grid.configure(make_empty_zsb_map(6, 4))
+	barrel_cells = grid.get_all_zsb_anchor_cells()[6:11]
+	grid.set_barrels(barrel_cells)  # needed just for show_map
+	show_map_if_verbose(grid, "Empty 6x4 ZSB map without border and 5 barrels")
+	moves = grid.get_all_valid_zsb_barrel_moves(barrel_cells)
+	test.eq(len(moves), 1)
+	barrel_cells = barrel_cells[:-1]  # remove last barrel
+	moves = grid.get_all_valid_zsb_barrel_moves(barrel_cells)
+	test.eq(len(moves), 2)
+
+def test_zsb_check_zsb_detection():
+	grid = Grid()
+	grid.configure(make_empty_zsb_map_with_wall_border(5, 3))
+	anchor_cells = grid.get_all_zsb_anchor_cells()
+
+	for plate_cells, name in ([anchor_cells[0:1], 'Single'], [anchor_cells[0:14], 'Unconnected'], [anchor_cells, 'Full']):
+		grid.plate_bits  = grid.to_bits(plate_cells)
+		grid.barrel_bits = grid.to_bits(plate_cells)
+		grid.check_zsb()
+		test.ok(not grid.is_zsb, f"{name} anchor ZSB map should not be recognized")
+
+	grid.plate_bits  = bitarray('00000000000010010010001000100111100101000001000110000000000000')
+	grid.barrel_bits = bitarray('00000000000011110000101010000000000100000101001111000000000000')
+	show_map_if_verbose(grid, "Sample 5x3 ZSB map")
+	grid.check_zsb()
+	test.ok(grid.is_zsb, f"Sample 5x3 ZSB map should be recognized")
+
+	grid = configure_simple_zsb_grid(show_map=True)
+	grid.check_zsb()
+	test.ok(grid.is_zsb, f"Simple ZSB map should be recognized")
+
+	grid.barrel_bits[0] = True  # corrupt 1-st floor with barrel
+	grid.check_zsb()
+	test.ok(not grid.is_zsb, "Extra barrel should fail ZSB check")
+
+	grid = configure_simple_zsb_grid()
+	grid.configure(grid.map[1:8, 1:8])
+	show_map_if_verbose(grid, "Simple ZSB map without border")
+	grid.check_zsb()
+	test.ok(grid.is_zsb, f"Simple ZSB map without border should be recognized")
+
+	grid.map[0, 0] = CELL_WALL  # corrupt 1-st floor with a wall
+	grid.configure(grid.map)
+	show_map_if_verbose(grid, "Corrupted simple ZSB map without border")
+	grid.check_zsb()
+	test.ok(not grid.is_zsb, "Corrupted wall should fail ZSB check")
 
 args = sys.argv[1:]
 verbose = args.count('-v') >= 2
@@ -473,6 +622,11 @@ try:
 	test_try_push_pull_without_barrel()
 	test_prepare_sokoban_solution_without_plates()
 	test_prepare_sokoban_solution_with_plate()
+	test_zsb_area_size_validation()
+	test_zsb_wall_and_anchor_pattern()
+	test_zsb_graph_connected_and_correspondence()
+	test_zsb_barrel_moves_generation()
+	test_zsb_check_zsb_detection()
 	test.finalize()
 except KeyboardInterrupt:
 	print()
