@@ -586,7 +586,7 @@ class Grid:
 			dirs = (DIR_L, DIR_R) if self.get_zsb_anchor_move_type(barrel_cell) == MOVE_H else (DIR_U, DIR_D)
 			for dir in dirs:
 				target_cell = apply_diff(barrel_cell, dir, factor=2)
-				if target_cell in barrel_cells or self.map[target_cell] in CELL_CHAR_MOVE_OBSTACLES:
+				if not self.area.is_cell_inside(target_cell) or target_cell in barrel_cells:
 					continue
 				if not self.is_zsb_graph_connected([cell for cell in barrel_cells if cell != barrel_cell] + [target_cell]):
 					continue
@@ -610,7 +610,8 @@ class Grid:
 		# check that walls are only on odd-odd cells and nowhere else
 		for cell in self.area.cells:
 			is_wall_cell = self.area.is_cell_oddodd(cell)
-			if is_wall_cell and self.map[cell] != CELL_WALL or not is_wall_cell and not self.map[cell] in (*CELL_FLOOR_TYPES, CELL_PLATE):
+			idx = self.to_idx_or_none(cell)
+			if is_wall_cell and idx is not None or not is_wall_cell and idx is None:
 				debug(DBG_SZSB, "check_zsb: it's not ZSB, cell %s '%s' must%s be WALL" % (cell, self.map[cell], "" if is_wall_cell else " NOT"))
 				return
 
