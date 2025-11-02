@@ -44,7 +44,7 @@ def convert_map_line(line):
 def is_sokoban_file(file):
 	num_map_lines = 0
 	while line := file.readline():
-		line = line.rstrip()
+		line = line.rstrip("\r\n")
 		if is_sokoban_map_line(line):
 			num_map_lines += 1
 		else:
@@ -142,7 +142,7 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 		line = file.readline()
 		is_eof = line == ''
 
-		line = line.rstrip("\n")
+		line = line.rstrip("\r\n")
 
 		old_is_in_map = is_in_map
 		is_in_map = is_sokoban_map_line(line)

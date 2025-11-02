@@ -1,7 +1,8 @@
+import os
 import pygame
 
 class Clipboard():
-	SCRAP_UTF8 = "text/plain;charset=utf-8"
+	SCRAP_TEXT = "text/plain" if os.environ.get('OS') == 'Windows_NT' else "text/plain;charset=utf-8"
 
 	def __init__(self):
 		self._initialized = False
@@ -14,11 +15,11 @@ class Clipboard():
 
 	def put(self, text):
 		self.initialize_if_needed()
-		pygame.scrap.put(self.SCRAP_UTF8, text.encode('utf-8'))
+		pygame.scrap.put(self.SCRAP_TEXT, text.encode('utf-8'))
 
 	def get(self):
 		self.initialize_if_needed()
-		data = pygame.scrap.get(self.SCRAP_UTF8)
+		data = pygame.scrap.get(self.SCRAP_TEXT)
 		return data.decode('utf-8') if data is not None else None
 
 clipboard = Clipboard()
