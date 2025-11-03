@@ -65,9 +65,9 @@ def get_all_neighbors(cell, include_self=False):
 	return neighbors
 
 is_game_won = False
-is_music_enabled = True
+is_music_enabled = not cmdargs.no_music
 is_music_started = False
-is_sound_enabled = True
+is_sound_enabled = not cmdargs.no_sound
 is_move_animate_enabled = True
 is_level_intro_enabled = True
 

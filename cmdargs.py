@@ -18,6 +18,8 @@ parser.add_argument('-m', '--music', type=str, help="use this music for custom l
 parser.add_argument('-p', '--puzzle-type', '--puzzle', type=str, help="use this puzzle type for custom levels")
 parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reverse barrel mode to custom levels", action='store_true')
 parser.add_argument('-t', '--theme', type=str, help="use this theme for custom levels")
+parser.add_argument('-M', '--no-music', help="turn music off", action='store_true')
+parser.add_argument('-S', '--no-sound', help="turn sound off", action='store_true')
 parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file for custom collection")
 
 cmdargs_str = os.environ.get("CMD_ARGS", "").strip()
