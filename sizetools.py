@@ -57,7 +57,12 @@ def set_display_size(display_size):
 def get_display_size():
 	return (DISPLAY_W, DISPLAY_H)
 
+def set_fitting_map_size(map_size):
+	global FITTING_MAP_SIZE
+	FITTING_MAP_SIZE = map_size
+
 def get_fitting_map_size():
+	assert FITTING_MAP_SIZE, "Call either set_display_size in GUI or set_fitting_map_size in non_GUI"
 	return FITTING_MAP_SIZE
 
 def set_map_size(size, has_border=True):
