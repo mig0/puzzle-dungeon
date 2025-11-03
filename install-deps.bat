@@ -1,12 +1,25 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+set "PYTHON_MODULES_NOGUI_TO_IMPORT=bitarray, yaml, numpy"
+set "PYTHON_MODULES_TO_IMPORT=pygame, pgzero, !PYTHON_MODULES_NOGUI_TO_IMPORT!"
+SET "PYTHON_MODULES_TO_INSTALL=pygame pgzero bitarray PyYAML"
+
 rem Special --check mode for external use
 if "%~1" == "--check" (
 	call :check_symlinks         >nul || exit /b 1
 	call :check_installed_python >nul || exit /b 1
 	call :check_python_modules   >nul || exit /b 1
 	echo !PGZRUN_EXE!
+	exit /b 0
+)
+
+rem Special --check-nogui mode for external use
+if "%~1" == "--check-nogui" (
+	call :check_symlinks             >nul || exit /b 1
+	call :check_installed_python     >nul || exit /b 1
+	call :check_python_modules_nogui >nul || exit /b 1
+	echo !PYTHON_EXE!
 	exit /b 0
 )
 
@@ -72,7 +85,7 @@ rem ================================================================
 :need_python_module_install
 
 echo Installing required modules...
-"!PYTHON_EXE!" -m pip install pygame pgzero bitarray PyYAML
+"!PYTHON_EXE!" -m pip install %PYTHON_MODULES_TO_INSTALL%
 
 if !errorlevel! neq 0 (
 	echo ERROR: Failed to install required python modules
@@ -170,11 +183,23 @@ set "PYTHON_EXE="
 exit /b 1
 
 rem ================================================================
+:check_python_modules_nogui
+
+"!PYTHON_EXE!" -c "import !PYTHON_MODULES_NOGUI_TO_IMPORT!" >nul 2>&1
+if !errorlevel! NEQ 0 (
+	echo Required python modules ^(!PYTHON_MODULES_NOGUI_TO_IMPORT!^) failed
+	exit /b 1
+)
+
+echo All required non-GUI python modules seem to be present
+exit /b 0
+
+rem ================================================================
 :check_python_modules
 
-"!PYTHON_EXE!" -c "import pygame, pgzero, bitarray, yaml" >nul 2>&1
+"!PYTHON_EXE!" -c "import !PYTHON_MODULES_TO_IMPORT!" >nul 2>&1
 if !errorlevel! NEQ 0 (
-	echo Required python modules ^(pygame, pgzero, bitarray, yaml^) failed
+	echo Required python modules ^(!PYTHON_MODULES_TO_IMPORT!^) failed
 	exit /b 1
 )
 
