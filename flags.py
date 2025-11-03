@@ -1,5 +1,7 @@
 from constants import *
-from sizetools import import_size_constants
+from sizetools import DEFAULT_MAP_SIZE, get_fitting_map_size, import_size_constants
+from common import die
+from load import detect_map_file
 
 class Flags:
 	def parse_level(self, level):
@@ -26,6 +28,18 @@ class Flags:
 			self.NUM_ROOMS = 1
 
 		self.MULTI_ROOMS = self.NUM_ROOMS > 1
+
+		if level.map_size is None:
+			if level.map_string or level.map_file:
+				map_info = detect_map_file(level.map_file, map_string=level.map_string)
+				if map_info is None:
+					die("Internal error: Can't detect map file")
+				is_sokoban_map, error, puzzle_type, size = map_info
+				if not size:
+					die("Internal error: Can't detect map file size")
+				level.map_size = size
+		if level.map_size is None:
+			level.map_size = DEFAULT_MAP_SIZE if self.MULTI_ROOMS else get_fitting_map_size()
 
 	def apply_sizes(self):
 		import_size_constants()

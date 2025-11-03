@@ -2,7 +2,6 @@ import os
 from copy import deepcopy
 from common import warn, die
 from config import DEFAULT_NUM_ENEMIES
-from sizetools import get_default_map_size
 from cmdargs import cmdargs
 
 special_config_keys = ('bg-image', 'cloud-mode', 'music', 'puzzle-type', 'theme')
@@ -42,7 +41,7 @@ class Level:
 		self.has_finish = False
 		self.has_start = False
 		self.map_file = None
-		self.map_size = get_default_map_size()
+		self.map_size = None
 		self.map_string = None
 		self.music = collection.config.get('music') or "valiant_warriors"
 		self.name = None
@@ -68,7 +67,7 @@ class Level:
 			if hasattr(self, field):
 				default = getattr(self, field)
 				expected_type = type(default) if default is not None or value is None else \
-					int if any(map(key.endswith, ("-power", "-limit", "-health"))) else str
+					tuple if key == 'map-size' else int if any(map(key.endswith, ("-power", "-limit", "-health"))) else str
 				if expected_type != type(value):
 					warn("Ignoring config %s=%s in level %s; expected type %s" %
 						(key, str(value), self.get_id(), expected_type.__name__))
