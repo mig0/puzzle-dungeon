@@ -1,0 +1,271 @@
+#!/usr/bin/env python3
+
+import sys
+import copy
+import numpy
+import argparse
+from load import fetch_letslogic_collections, fetch_letslogic_collection, detect_map_file, parse_map_file_signature
+from level import Collection, Level, parse_level_id
+from debug import debug, ProgressLine
+from common import die, warn, load_tabbed_yaml
+from profiler import profiler
+from sizetools import set_fitting_map_size
+from sokobanparser import *
+from sokobansolver import *
+
+sys.argv[0] = 'sokodun'
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', '--debug', metavar='SELECTOR', action='append', default=[], help='debug level or feature (repeatable)')
+parser.add_argument('-C', '--list-collections', help="list all collections", action='store_true')
+parser.add_argument('-L', '--list-ll-collections', help="list all letslogic collections", action='store_true')
+parser.add_argument('-n', '--use-numeric', help="use numeric ids to list collections", action='store_true')
+parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reverse barrel mode to custom levels", action='store_true')
+parser.add_argument('-p', '--run-profiler', help="run code with profiler", action='store_true')
+parser.add_argument('-m', '--by-moves', help="find move optimal solution, not push/pull optimal", action='store_true')
+parser.add_argument('-0', '--disable-budget', help="do not report progress every second", action='store_true')
+parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
+parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file")
+
+cmdargs = parser.parse_args()
+
+reverse_barrel_mode = cmdargs.reverse_barrel_mode
+disable_budget = cmdargs.disable_budget
+solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
+run_profiler = cmdargs.run_profiler
+quiet = cmdargs.quiet or 0
+
+debug.configure(cmdargs.debug)
+
+if run_profiler:
+	profiler.start()
+
+set_fitting_map_size((5, 5))
+
+if cmdargs.list_ll_collections:
+	collections = fetch_letslogic_collections()
+	max_id_len = max(len(c_id) for c_id in collections)
+	for c_id, c in collections.items():
+		print("%s - %s (%d)" % (c_id.ljust(max_id_len), c['title'], c['levels']))
+	exit()
+
+def find_all_collections(dir_path, id, all_collections=None):
+	if all_collections is None:
+		all_collections = []
+
+	config_path = dir_path + '/config'
+	if os.path.isfile(config_path):
+		config = load_tabbed_yaml(config_path)
+		collection = Collection(id, config)
+		collections = []
+		sokoban_map_files_by_id = {}
+		if sokoban_map_files_by_sub_id := config.get('sokoban-map-files'):
+			del config['sokoban-map-files']
+			if type(sokoban_map_files_by_sub_id) == tuple:
+				sokoban_map_files_by_sub_id_tuple = sokoban_map_files_by_sub_id
+				width = len(str(len(sokoban_map_files_by_sub_id_tuple)))
+				sokoban_map_files_by_sub_id = {}
+				for i, sokoban_map_file in enumerate(sokoban_map_files_by_sub_id_tuple):
+					sub_id = "%0*d" % (width, i + 1)
+					sokoban_map_files_by_sub_id[sub_id] = sokoban_map_file
+			for sub_id, sokoban_map_file in sokoban_map_files_by_sub_id.items():
+				c = copy.copy(collection)
+				c.id += '/%s' % sub_id
+				c.name += ' - %s' % sub_id
+				collections.append(c)
+				sokoban_map_files_by_id[c.id] = sokoban_map_file
+		elif collection.level_configs is not None or config.get('sokoban-map-file'):
+			collections.append(collection)
+		for collection in collections:
+			if sokoban_map_file := config.get('sokoban-map-file') or sokoban_map_files_by_id.get(collection.id):
+				if 'sokoban-map-file' in config:
+					del config['sokoban-map-file']
+				collection.level_configs = parse_sokoban_levels(sokoban_map_file)
+			if collection.num_levels == 0:
+				warn("Ignoring collection %s with no levels" % collection.id)
+			else:
+				all_collections.append(collection)
+		if not collections:
+			warn("Ignoring collection %s with no levels and no sokoban-map-files" % collection.id)
+
+	with os.scandir(dir_path) as entries:
+		for entry in entries:
+			if entry.is_dir():
+				entry_id = id + ('/' if id else '') + entry.name
+				find_all_collections(dir_path + '/' + entry.name, entry_id, all_collections)
+
+	return all_collections
+
+all_collections = find_all_collections(DATA_DIR + '/levels', '')
+
+if cmdargs.list_collections:
+	numeric = cmdargs.use_numeric
+	max_id_len = max(len(c.get_id(numeric)) for c in all_collections)
+	for collection in all_collections:
+		print("%s - %s levels (%d)" % (collection.get_id(numeric).ljust(max_id_len), collection.name, len(collection.level_configs)))
+	exit()
+
+if not cmdargs.args:
+	die("No args specified, try --help")
+
+def is_valid_level_id(level_id):
+	for collection in all_collections:
+		if collection.has_level_id(level_id):
+			return True
+	return False
+
+def get_collection_by_id(collection_id):
+	try:
+		return next(c for c in all_collections if c.has_id(collection_id))
+	except:
+		return None
+
+def get_collection_level_config_by_id(level_id, assert_valid=False):
+	collection_id, level_index = parse_level_id(level_id, assert_valid)
+	if not collection_id:
+		return (None, None, None)
+	collection = get_collection_by_id(collection_id)
+	if collection and 1 <= level_index <= collection.num_levels:
+		return collection, level_index, collection.level_configs[level_index - 1]
+	if assert_valid:
+		if not collection:
+			die("Unexisting collection for level_id %s" % level_id, True)
+		die("Level is out of range in collection for level_id %s" % level_id, True)
+	return (None, None, None)
+
+def create_custom_collection():
+	custom_collection_config = {
+		'icon': 'default/trap0',
+		'name': 'Custom collection',
+		'n': 0,
+	}
+	return Collection("custom", custom_collection_config)
+
+custom_collection = create_custom_collection()
+
+level_configs = []
+level_indexes = []
+for arg in cmdargs.args:
+	if arg.isdigit():
+		level_indexes.append(int(arg))
+	elif is_valid_level_id(arg):
+		collection, _, level_config = get_collection_level_config_by_id(arg)
+		level_configs.append(collection.with_level_config_defaults(level_config))
+	elif collection := get_collection_by_id(arg):
+		for level_config in collection.level_configs:
+			level_configs.append(collection.with_level_config_defaults(level_config))
+	elif arg == "clipboard:":
+		level_configs.extend(parse_clipboard_levels("clipboard:", custom_collection.config) or [])
+	elif arg.startswith("letslogic:"):
+		if map_string := fetch_letslogic_collection(arg[10:]):
+			level_configs.extend(parse_sokoban_levels(map_string, custom_collection.config))
+	elif map_info := detect_map_file(arg):
+		is_sokoban_map, error, puzzle_type, size = map_info
+		if is_sokoban_map:
+			level_configs.extend(parse_sokoban_levels(arg, custom_collection.config))
+			continue
+		if error:
+			warn("Ignoring map-file %s: Not sokoban map and %s" % (arg, error))
+			continue
+		level_configs.append({
+			'puzzle-type': puzzle_type,
+			'map-size': size,
+			'map-file': arg,
+			'name': "%s map %s" % (puzzle_type, arg),
+		})
+	else:
+		warn("Ignoring unknown argument %s" % arg)
+
+if level_indexes:
+	valid_level_idxs = []
+	invalid_level_indexes = []
+	for level_index in level_indexes:
+		if 1 <= level_index <= len(level_configs):
+			valid_level_idxs.append(level_index - 1)
+		else:
+			invalid_level_indexes.append(level_index)
+	if invalid_level_indexes:
+		warn("Requested level indexes %s are not in the given levels" % invalid_level_indexes)
+	level_configs = [level_configs[idx] for idx in valid_level_idxs]
+
+if not level_configs:
+	die("No valid levels given, try --help")
+
+level = Level()
+
+def create_sokoban_map(map_string):
+	file = io.StringIO(map_string)
+	error, puzzle_type, size = parse_map_file_signature(file)
+	assert not error, error
+	assert puzzle_type == 'Sokoban', "Unsupported puzzle-type %s" % puzzle_type
+	lines = [line.rstrip('\n') for line in file.readlines()[0:size[1]]]
+	return numpy.array([list(line) for line in lines], dtype='<U1').T
+
+def configure_solver(map_string, reverse_barrel_mode=False):
+	map = create_sokoban_map(map_string)
+	char_cell = None
+	barrel_cells = []
+	for cy in range(len(map[0])):
+		for cx in range(len(map)):
+			cell = (cx, cy)
+			is_plate = False
+			if map[cell] == ACTOR_CHARS["char"]:
+				char_cell = cell
+			elif map[cell] == ACTOR_ON_PLATE_CHARS["char"]:
+				char_cell = cell
+				is_plate = True
+			elif map[cell] == ACTOR_CHARS["barrel"]:
+				barrel_cells.append(cell)
+			elif map[cell] == ACTOR_ON_PLATE_CHARS["barrel"]:
+				barrel_cells.append(cell)
+				is_plate = True
+			else:
+				continue
+			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
+
+	solver = SokobanSolver()
+	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
+	if not quiet:
+		grid.show_map("Configured solver with map", char=char_cell, barrels=barrel_cells)
+	return solver
+
+progress_line = ProgressLine()
+
+for level_index, level_config in enumerate(level_configs):
+	level_index += 1
+	level.set_from_config(custom_collection, level_index, level_config)
+	if level.puzzle_type != 'BarrelPuzzle':
+		warn("Ignoring level %d of non BarrelPuzzle type (%s)" % (level_index, level.puzzle_type))
+		continue
+	print("Attempting to solve level %d of %d: %s" % (level_index, len(level_configs), level.name))
+	solver = configure_solver(level.map_string, reverse_barrel_mode)
+	solver.solution_type = solution_type
+	solver.disable_budget = disable_budget
+
+	try:
+		while True:
+			solution_items, msg = solver.find_solution_func()
+			if not msg:
+				break
+			if quiet <= 1 and not 'solv' in debug.features:
+				progress_line.put(msg)
+		progress_line.put()
+
+		if not solution_items:
+			print("Solution not found")
+		else:
+			print("Solution %s: %s" % (solver.last_solution_nums_str, solver.last_solution_str))
+		print()
+	except KeyboardInterrupt:
+		print()
+		print("Terminated by user. Press Enter to continue, or Ctrl-C to stop")
+		try:
+			sys.stdin.readline()
+		except KeyboardInterrupt:
+			print()
+			level_indexes = []
+			break
+
+if run_profiler:
+	profiler.stop()
+
