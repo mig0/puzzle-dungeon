@@ -102,42 +102,54 @@ goto :eof
 
 rem ================================================================
 :check_installed_python
-set "PYTHON_EXE="
+set MIN_PY_MAJOR=3
+set MIN_PY_MINOR=10
 
-rem Check if python.exe in PATH and is not broken
-for /f "delims=" %%P in ('where python 2^>nul') do (
-	set "CANDIDATE=%%P"
-	if exist "!CANDIDATE!" (
-		for %%F in ("!CANDIDATE!") do (
-			if %%~zF gtr 0 (
-				set "PYTHON_EXE=!CANDIDATE!"
-				goto :check_python_version
+set "PYTHON_IN_PATH_DIR="
+
+rem Check whether python.exe is in PATH
+for /f "delims=" %%P in ('where python.exe 2^>^nul') do (
+	set "PYTHON_IN_PATH_DIR=%%~dpP"
+	set "PYTHON_IN_PATH_DIR=!PYTHON_IN_PATH_DIR:~0,-1!"
+	rem echo Found python.exe in PATH directory !PYTHON_IN_PATH_DIR!
+	goto check_python_in_path_and_common_locations
+)
+
+echo "No python.exe in PATH"
+
+rem Check python in common install locations
+:check_python_in_path_and_common_locations
+for /d %%D in (
+	!PYTHON_IN_PATH_DIR!
+	"%UserProfile%\AppData\Roaming\Python\Python*"
+	"%LocalAppData%\Programs\Python\Python*"
+	"%ProgramFiles%\Python*"
+	"%ProgramFiles(x86)%\Python*"
+) do (
+	set "PYTHON_DIR=%%D"
+	set "PYTHON_EXE=!PYTHON_DIR!\python.exe"
+	if exist "!PYTHON_EXE!" (
+		rem echo Checking !PYTHON_EXE!
+		for %%P in ("!PYTHON_EXE!") do (
+			if %%~zP gtr 0 (
+				"!PYTHON_EXE!" -c "import sys; exit(not sys.version_info >= (!MIN_PY_MAJOR!, !MIN_PY_MINOR!))" 2>nul && (
+					goto :check_python_version
+				)
+				echo Ignoring python.exe in "!PYTHON_DIR!" failing ^>^=!MIN_PY_MAJOR!.!MIN_PY_MINOR! requirement
 			) else (
-				echo Ignoring broken python.exe stub at !CANDIDATE!
+				echo Ignoring broken python.exe stub in "!PYTHON_DIR!"
 			)
 		)
 	)
 )
 
-echo No Python in PATH, checking it in common locations
-
-rem Check common install locations
-for /d %%D in (
-	"%ProgramFiles(x86)%\Python*"
-	"%LocalAppData%\Programs\Python\Python*"
-	"%ProgramFiles%\Python*"
-) do (
-	if exist "%%D\python.exe" (
-		set "PYTHON_EXE=%%D\python.exe"
-		goto :check_python_version
-	)
-)
-
-echo No Python in common locations
+echo No good Python in PATH and in common locations
+set "PYTHON_EXE="
 exit /b 1
 
+rem Already checked, but check again for safety and a nice print
 :check_python_version
-for /f "tokens=2" %%V in ('"!PYTHON_EXE!" --version 2^>^&1') do (
+for /f "tokens=2" %%V in ('"!PYTHON_EXE!" --version 2^>^nul') do (
 	for /f "tokens=1,2 delims=." %%a in ("%%V") do (
 		set "PY_MAJOR=%%a"
 		set "PY_MINOR=%%b"
@@ -145,22 +157,22 @@ for /f "tokens=2" %%V in ('"!PYTHON_EXE!" --version 2^>^&1') do (
 )
 
 if not defined PY_MAJOR goto :bad_python_version
-
-if !PY_MAJOR! LSS 3 goto :bad_python_version
-if !PY_MAJOR! == 3 if !PY_MINOR! LSS 10 goto :bad_python_version
+if !PY_MAJOR! LSS !MIN_PY_MAJOR! goto :bad_python_version
+if !PY_MAJOR! == !MIN_PY_MAJOR! if !PY_MINOR! LSS !MIN_PY_MINOR! goto :bad_python_version
 
 echo Python !PY_MAJOR!.!PY_MINOR! is installed and meets version requirement
+echo Going to use python at !PYTHON_EXE!
 goto :eof
 
 :bad_python_version
-echo Found python %PYTHON_EXE% is old version (%PY_MAJOR%.%PY_MINOR%). Need to update
+echo "Found python !PYTHON_EXE! is old version (!PY_MAJOR!.!PY_MINOR!). Need to update"
 set "PYTHON_EXE="
 exit /b 1
 
 rem ================================================================
 :check_python_modules
 
-"!PYTHON_EXE!" -c "import pygame, pgzero, bitarray, yaml" 2>nul
+"!PYTHON_EXE!" -c "import pygame, pgzero, bitarray, yaml" >nul 2>&1
 if !errorlevel! NEQ 0 (
 	echo Required python modules ^(pygame, pgzero, bitarray, yaml^) failed
 	exit /b 1
@@ -170,15 +182,12 @@ echo All required python modules seem to be present
 
 rem Try to find pgzrun.exe
 set "PGZRUN_EXE="
-for /d %%D in (
-	"%UserProfile%\AppData\Roaming\Python\Python!PY_MAJOR!!PY_MINOR!*"
-	"%LocalAppData%\Programs\Python\Python!PY_MAJOR!!PY_MINOR!*"
-	"%ProgramFiles%\Python!PY_MAJOR!!PY_MINOR!*"
-	"%ProgramFiles(x86)%\Python!PY_MAJOR!!PY_MINOR!*"
-) do (
-	if exist "%%D\Scripts\pgzrun.exe" (
-		set PGZRUN_EXE=%%~D\Scripts\pgzrun.exe
-		echo Found pgzrun.exe at: !PGZRUN_EXE!
+for %%P in (!PYTHON_EXE!) do (
+	set "PYTHON_DIR=%%~dpP"
+	set "PYTHON_DIR=!PYTHON_DIR:~0,-1!"
+	if exist "!PYTHON_DIR!\Scripts\pgzrun.exe" (
+		set "PGZRUN_EXE=!PYTHON_DIR!\Scripts\pgzrun.exe"
+		echo Going to use pgzrun at !PGZRUN_EXE!
 		goto :eof
 	)
 )
