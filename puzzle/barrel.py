@@ -106,7 +106,6 @@ class BarrelPuzzle(Puzzle):
 					create_barrel(cell)
 
 		# prepare some invariant data
-		self.num_total_cells = room.size_x * room.size_y
 		self.plate_cells = self.get_room_plate_cells()
 		self.has_extra_barrels = len(self.plate_cells) < len(barrels)
 		self.has_extra_plates  = len(self.plate_cells) > len(barrels)
