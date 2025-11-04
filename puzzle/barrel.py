@@ -485,11 +485,18 @@ class BarrelPuzzle(Puzzle):
 				self.solver.solution_type = SOLUTION_TYPE_BY_MOVES if keyboard.shift else SOLUTION_TYPE_BY_SHIFTS
 
 	def on_enter_cell(self):
+		game.remember_obj_state(self)
 		self.num_moves += 1
 		self.num_shifts += game.last_char_move.is_barrel_shift
 
 	def on_draw(self):
 		game.screen.draw.text("%d/%d" % (self.num_moves, self.num_shifts), center=(CELL_W * 1.5, CELL_H * 0.5), color="#00FFAA", gcolor="#00AA66", owidth=1.6, ocolor="#3A4440", alpha=1, fontsize=27)
+
+	def get_state(self):
+		return (self.num_moves, self.num_shifts)
+
+	def restore_state(self, state):
+		(self.num_moves, self.num_shifts) = state
 
 	def find_solution_func(self):
 		solution_items, msg = self.solver.find_solution_func(solution.stop_find)
