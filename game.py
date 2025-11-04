@@ -173,7 +173,7 @@ class Game:
 
 	@property
 	def undo_frame(self):
-		return self.undo_frames[-1] if self.undo_frames else None
+		return self.undo_frames[-1] if self.undo_frames else die("At least one undo frame should exist in level")
 
 	def start_level(self):
 		self.undo_frames.clear()
@@ -235,14 +235,18 @@ class Game:
 
 		self.remove_empty_undo_frames()
 
+		is_done = False
+		if self.undo_frames:
+			self.during_undo = True
+			self.undo_frames.pop().restore_all_changes()
+			self.during_undo = False
+			is_done = True
+
 		if not self.undo_frames:
-			return False
+			# always have undo_frame in level
+			self.undo_frames.append(UndoFrame())
 
-		self.during_undo = True
-		self.undo_frames.pop().restore_all_changes()
-		self.during_undo = False
-
-		return True
+		return is_done
 
 	def _set_display_size(self):
 		display_size = pygame.display.get_desktop_sizes()[0]
