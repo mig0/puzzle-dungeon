@@ -1,5 +1,5 @@
 from common import load_tabbed_yaml, get_pgzero_game_from_stack, warn, die
-from config import DATA_DIR, pgconsole_config
+from config import CHAR_ANIMATION_SMOOTH_CUT, DATA_DIR, pgconsole_config
 from level import Collection, Level, parse_level_id
 from sokobanparser import parse_sokoban_levels
 from sizetools import set_display_size
@@ -82,7 +82,7 @@ class CharMove:
 
 	def store_pos(self):
 		self.old_char_cell = self.char.c
-		self.old_char_pos = self.char.pos
+		self.old_char_pos = self.char.pos if CHAR_ANIMATION_SMOOTH_CUT else self.char.get_pos()
 
 	def move(self):
 		self.char.move(self.dir)
