@@ -2035,7 +2035,7 @@ def parse_clipboard_levels(id_str, config={}):
 			warn(error_prefix + "no levels in sokoban map")
 		return level_configs
 	if error:
-		warn(error_prefix + "bad map: %s" % error)
+		warn(error_prefix + "Not a sokoban map and %s" % error)
 		return None
 	return [{
 		'puzzle-type': puzzle_type,
@@ -2092,7 +2092,7 @@ def handle_cmdargs():
 					level_configs.extend(parse_sokoban_levels(arg, game.custom_collection.config))
 					continue
 				if error:
-					warn("Ignoring map-file %s: %s" % (arg, error))
+					warn("Ignoring map-file %s: Not a sokoban map and %s" % (arg, error))
 					continue
 				level_configs.append({
 					'puzzle-type': puzzle_type,

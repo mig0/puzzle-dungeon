@@ -165,7 +165,7 @@ for arg in cmdargs.args:
 			level_configs.extend(parse_sokoban_levels(arg, custom_collection.config))
 			continue
 		if error:
-			warn("Ignoring map-file %s: Not sokoban map and %s" % (arg, error))
+			warn("Ignoring map-file %s: Not a sokoban map and %s" % (arg, error))
 			continue
 		level_configs.append({
 			'puzzle-type': puzzle_type,
