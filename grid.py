@@ -172,7 +172,7 @@ class Grid:
 					cell = (cx, cy)
 					cell_idx = self.cell_idxs.get(cell)
 					cell_ch = get_cell_type_with_clean_floor(cell)
-					if show_dead and self.map[cell] in CELL_FLOOR_TYPES and self.dead_barrel_bits[cell_idx]:
+					if show_dead and cell_idx is not None and self.dead_barrel_bits[cell_idx]:
 						cell_ch = '☓'
 					actor_chars = ACTOR_ON_PLATE_CHARS if cell_idx is not None and self.plate_bits[cell_idx] else ACTOR_CHARS
 					if cell in cell_chars:

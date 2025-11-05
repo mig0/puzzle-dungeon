@@ -24,6 +24,7 @@ parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reve
 parser.add_argument('-p', '--run-profiler', help="run code with profiler", action='store_true')
 parser.add_argument('-m', '--by-moves', help="find move optimal solution, not push/pull optimal", action='store_true')
 parser.add_argument('-0', '--disable-budget', help="do not report progress every second", action='store_true')
+parser.add_argument('-D', '--show-dead', help="show dead-barrel cells on map", action='store_true')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
 parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file")
 
@@ -33,6 +34,7 @@ reverse_barrel_mode = cmdargs.reverse_barrel_mode
 disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
 run_profiler = cmdargs.run_profiler
+show_dead = cmdargs.show_dead
 quiet = cmdargs.quiet or 0
 
 debug.configure(cmdargs.debug)
@@ -225,8 +227,10 @@ def configure_solver(map_string, reverse_barrel_mode=False):
 
 	solver = SokobanSolver()
 	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
+	if show_dead:
+		grid.prepare_sokoban_solution(char_cell)
 	if not quiet:
-		grid.show_map("Configured solver with map", char=char_cell, barrels=barrel_cells)
+		grid.show_map("Configured solver with map", char=char_cell, barrels=barrel_cells, show_dead=show_dead)
 	return solver
 
 progress_line = ProgressLine()
