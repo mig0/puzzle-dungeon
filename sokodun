@@ -233,13 +233,17 @@ def configure_solver(map_string, reverse_barrel_mode=False):
 		grid.show_map("Configured solver with map", char=char_cell, barrels=barrel_cells, show_dead=show_dead)
 	return solver
 
-progress_line = ProgressLine()
+show_progress = quiet <= 1 and not debug.has('solv')
+progress_line = ProgressLine(show_progress)
 
 for level_index, level_config in enumerate(level_configs):
 	level_index += 1
 	level.set_from_config(custom_collection, level_index, level_config)
 	if level.puzzle_type != 'BarrelPuzzle':
 		warn("Ignoring level %d of non BarrelPuzzle type (%s)" % (level_index, level.puzzle_type))
+		continue
+	if level.map_string is None:
+		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		continue
 	print("Attempting to solve level %d of %d: %s" % (level_index, len(level_configs), level.name))
 	solver = configure_solver(level.map_string, reverse_barrel_mode)
@@ -251,8 +255,7 @@ for level_index, level_config in enumerate(level_configs):
 			solution_items, msg = solver.find_solution_func()
 			if not msg:
 				break
-			if quiet <= 1 and not 'solv' in debug.features:
-				progress_line.put(msg)
+			progress_line.put(msg)
 		progress_line.put()
 
 		if not solution_items:
@@ -267,7 +270,6 @@ for level_index, level_config in enumerate(level_configs):
 			sys.stdin.readline()
 		except KeyboardInterrupt:
 			print()
-			level_indexes = []
 			break
 
 if run_profiler:
