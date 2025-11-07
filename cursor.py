@@ -12,12 +12,14 @@ class Cursor(CellActor):
 		self.hidden = False
 		self.selected_actor.selected = False
 		self.selected_actor = self
+		self.status_message = None
 
 	def set_actor(self, actor, selected):
 		self.hidden = True
 		self.selected_actor.selected = False
 		self.selected_actor = actor
 		self.selected_actor.selected = selected
+		self.status_message = None
 
 	def reset(self):
 		self.set_actor(char, False)
@@ -30,6 +32,12 @@ class Cursor(CellActor):
 
 	def is_lift_selected(self):
 		return not self.is_active() and not self.is_char_selected()
+
+	def has_status_message(self):
+		return self.status_message is not None
+
+	def get_status_message(self, default=""):
+		return self.status_message if self.has_status_message() else default
 
 	def toggle(self):
 		if not self.is_active():

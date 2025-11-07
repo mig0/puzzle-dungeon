@@ -1578,10 +1578,12 @@ def handle_press_key():
 		undo_move()
 
 	cursor_was_active = cursor.is_active()
+	cursor_had_status_message = cursor.has_status_message()
 
 	if keyboard.enter:
 		if not cursor.is_active():
 			cursor.toggle()
+			puzzle.on_cursor_enter_cell()
 		else:
 			if not press_cell(cursor.c):
 				cursor.toggle()
@@ -1595,7 +1597,7 @@ def handle_press_key():
 		if level_configs and not game.set_custom_collection_level_configs(level_configs):
 			warn("Failed to activate levels in clipboard")
 
-	if debug.lvl > 0 and cursor_was_active and not cursor.is_active():
+	if cursor_was_active and (cursor_had_status_message or debug.lvl > 0) and not cursor.is_active():
 		set_status_message(priority=0)
 
 	if keyboard.home:
@@ -1985,6 +1987,7 @@ def move_selected_lift(diff):
 def process_move(diff):
 	if cursor.is_active():
 		cursor.move_animated(diff, enable_animation=is_move_animate_enabled)
+		puzzle.on_cursor_enter_cell()
 	else:
 		game.start_move()
 		if cursor.is_lift_selected():
@@ -2198,8 +2201,8 @@ def update(dt):
 
 	check_victory()
 
-	if debug.lvl > 0 and cursor.is_active():
-		set_status_message(str(cursor.c), priority=0)
+	if cursor.is_active() and (cursor.has_status_message() or debug.lvl > 0):
+		set_status_message(cursor.get_status_message(str(cursor.c)), priority=0)
 
 	if char.is_animated() or mode == "next" or game.is_console_enabled():
 		return

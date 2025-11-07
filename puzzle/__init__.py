@@ -283,6 +283,9 @@ class Puzzle:
 	def on_enter_cell(self):
 		pass
 
+	def on_cursor_enter_cell(self):
+		pass
+
 	def finish(self):
 		pass
 

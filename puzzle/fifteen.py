@@ -139,6 +139,10 @@ class FifteenPuzzle(Puzzle):
 		self.move(cell, empty_cell, FIFTEEN_PUZZLE_MOVE_NEIGHBOUR_ONLY)
 		return True
 
+	def on_cursor_enter_cell(self):
+		can_shift = self.fifteen_map[cursor.c] != FIFTEEN_PUZZLE_VALUE_OUTSIDE and self.get_cells_on_one_line_between_two_cells(cursor.c, self.get_empty_cell())
+		cursor.status_message = "Press Enter to shift pieces" if can_shift else ""
+
 	def on_press_key(self, keyboard):
 		self.draw_solved_mode = keyboard.kp_enter and not self.draw_solved_mode
 

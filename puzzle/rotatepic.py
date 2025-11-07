@@ -89,6 +89,9 @@ class RotatePicPuzzle(Puzzle):
 	def press_cell(self, cell, button=None):
 		return self.rotate_cell(cell, CLOCKWISE if button in (None, 3, 5) else UPSIDEDOWN if button == 2 else COUNTERCLOCKWISE)
 
+	def on_cursor_enter_cell(self):
+		cursor.status_message = "" if self.rotatepic_map[cursor.c] == ROTATEPIC_PUZZLE_VALUE_OUTSIDE else "Press Enter, Insert, PgUp, PgDown to rotate"
+
 	def on_press_key(self, keyboard):
 		if keyboard.backspace:
 			self.scramble()

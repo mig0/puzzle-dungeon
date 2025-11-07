@@ -167,6 +167,9 @@ class MemoryPuzzle(Puzzle):
 			return self.cell_images[0]
 		return None
 
+	def on_cursor_enter_cell(self):
+		cursor.status_message = "" if self.memory_map[cursor.c] == MEMORY_PUZZLE_VALUE_OUTSIDE else "Press Enter to open"
+
 	def on_press_key(self, keyboard):
 		if keyboard.kp_enter:
 			self.reveal_time = self.level_time + 5

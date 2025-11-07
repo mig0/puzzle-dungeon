@@ -56,6 +56,12 @@ class MainScreen(VirtualPuzzle):
 		else:
 			set_status_message("Press Tab to play levels in order")
 
+	def on_cursor_enter_cell(self):
+		if self.map[cursor.c] == CELL_PLATE:
+			cursor.status_message = "Press Enter to play %s" % self.plate_collections[cursor.c].name
+		else:
+			cursor.status_message = "Press Tab to play levels in order"
+
 	def on_generate_map(self):
 		char_cell = next(cell for cell in room.cells if self.Globals.is_cell_accessible(cell, place=True))
 		accessible_cell_distances = self.Globals.get_accessible_cell_distances(char_cell, allow_enemy=True)
