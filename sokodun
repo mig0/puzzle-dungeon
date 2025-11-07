@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
+import io
 import sys
 import copy
 import numpy
 import argparse
-from load import fetch_letslogic_collections, fetch_letslogic_collection, detect_map_file, parse_map_file_signature
-from level import Collection, Level, parse_level_id
+from load import parse_map_file_signature
+from level import Level
 from debug import debug, ProgressLine
-from common import die, warn, load_tabbed_yaml
-from profiler import profiler
+from common import die, warn
 from sizetools import set_fitting_map_size
-from sokobanparser import *
 from sokobansolver import *
+from processcmdargs import process_cmdargs
 
 sys.argv[0] = 'sokodun'
 
@@ -37,158 +37,12 @@ run_profiler = cmdargs.run_profiler
 show_dead = cmdargs.show_dead
 quiet = cmdargs.quiet or 0
 
-debug.configure(cmdargs.debug)
-
-if run_profiler:
-	profiler.start()
-
-set_fitting_map_size((5, 5))
-
-if cmdargs.list_ll_collections:
-	collections = fetch_letslogic_collections()
-	max_id_len = max(len(c_id) for c_id in collections)
-	for c_id, c in collections.items():
-		print("%s - %s (%d)" % (c_id.ljust(max_id_len), c['title'], c['levels']))
-	exit()
-
-def find_all_collections(dir_path, id, all_collections=None):
-	if all_collections is None:
-		all_collections = []
-
-	config_path = dir_path + '/config'
-	if os.path.isfile(config_path):
-		config = load_tabbed_yaml(config_path)
-		collection = Collection(id, config)
-		collections = []
-		sokoban_map_files_by_id = {}
-		if sokoban_map_files_by_sub_id := config.get('sokoban-map-files'):
-			del config['sokoban-map-files']
-			if type(sokoban_map_files_by_sub_id) == tuple:
-				sokoban_map_files_by_sub_id_tuple = sokoban_map_files_by_sub_id
-				width = len(str(len(sokoban_map_files_by_sub_id_tuple)))
-				sokoban_map_files_by_sub_id = {}
-				for i, sokoban_map_file in enumerate(sokoban_map_files_by_sub_id_tuple):
-					sub_id = "%0*d" % (width, i + 1)
-					sokoban_map_files_by_sub_id[sub_id] = sokoban_map_file
-			for sub_id, sokoban_map_file in sokoban_map_files_by_sub_id.items():
-				c = copy.copy(collection)
-				c.id += '/%s' % sub_id
-				c.name += ' - %s' % sub_id
-				collections.append(c)
-				sokoban_map_files_by_id[c.id] = sokoban_map_file
-		elif collection.level_configs is not None or config.get('sokoban-map-file'):
-			collections.append(collection)
-		for collection in collections:
-			if sokoban_map_file := config.get('sokoban-map-file') or sokoban_map_files_by_id.get(collection.id):
-				if 'sokoban-map-file' in config:
-					del config['sokoban-map-file']
-				collection.level_configs = parse_sokoban_levels(sokoban_map_file)
-			if collection.num_levels == 0:
-				warn("Ignoring collection %s with no levels" % collection.id)
-			else:
-				all_collections.append(collection)
-		if not collections:
-			warn("Ignoring collection %s with no levels and no sokoban-map-files" % collection.id)
-
-	with os.scandir(dir_path) as entries:
-		for entry in entries:
-			if entry.is_dir():
-				entry_id = id + ('/' if id else '') + entry.name
-				find_all_collections(dir_path + '/' + entry.name, entry_id, all_collections)
-
-	return all_collections
-
-all_collections = find_all_collections(DATA_DIR + '/levels', '')
-
-if cmdargs.list_collections:
-	numeric = cmdargs.use_numeric
-	max_id_len = max(len(c.get_id(numeric)) for c in all_collections)
-	for collection in all_collections:
-		print("%s - %s levels (%d)" % (collection.get_id(numeric).ljust(max_id_len), collection.name, len(collection.level_configs)))
-	exit()
-
 if not cmdargs.args:
 	die("No args specified, try --help")
 
-def is_valid_level_id(level_id):
-	for collection in all_collections:
-		if collection.has_level_id(level_id):
-			return True
-	return False
+set_fitting_map_size((5, 5))
 
-def get_collection_by_id(collection_id):
-	try:
-		return next(c for c in all_collections if c.has_id(collection_id))
-	except:
-		return None
-
-def get_collection_level_config_by_id(level_id, assert_valid=False):
-	collection_id, level_index = parse_level_id(level_id, assert_valid)
-	if not collection_id:
-		return (None, None, None)
-	collection = get_collection_by_id(collection_id)
-	if collection and 1 <= level_index <= collection.num_levels:
-		return collection, level_index, collection.level_configs[level_index - 1]
-	if assert_valid:
-		if not collection:
-			die("Unexisting collection for level_id %s" % level_id, True)
-		die("Level is out of range in collection for level_id %s" % level_id, True)
-	return (None, None, None)
-
-def create_custom_collection():
-	custom_collection_config = {
-		'icon': 'default/trap0',
-		'name': 'Custom collection',
-		'n': 0,
-	}
-	return Collection("custom", custom_collection_config)
-
-custom_collection = create_custom_collection()
-
-level_configs = []
-level_indexes = []
-for arg in cmdargs.args:
-	if arg.isdigit():
-		level_indexes.append(int(arg))
-	elif is_valid_level_id(arg):
-		collection, _, level_config = get_collection_level_config_by_id(arg)
-		level_configs.append(collection.with_level_config_defaults(level_config))
-	elif collection := get_collection_by_id(arg):
-		for level_config in collection.level_configs:
-			level_configs.append(collection.with_level_config_defaults(level_config))
-	elif arg == "clipboard:":
-		level_configs.extend(parse_clipboard_levels("clipboard:", custom_collection.config) or [])
-	elif arg.startswith("letslogic:"):
-		if map_string := fetch_letslogic_collection(arg[10:]):
-			level_configs.extend(parse_sokoban_levels(map_string, custom_collection.config))
-	elif map_info := detect_map_file(arg):
-		is_sokoban_map, error, puzzle_type, size = map_info
-		if is_sokoban_map:
-			level_configs.extend(parse_sokoban_levels(arg, custom_collection.config))
-			continue
-		if error:
-			warn("Ignoring map-file %s: Not a sokoban map and %s" % (arg, error))
-			continue
-		level_configs.append({
-			'puzzle-type': puzzle_type,
-			'map-size': size,
-			'map-file': arg,
-			'name': "%s map %s" % (puzzle_type, arg),
-		})
-	else:
-		warn("Ignoring unknown argument %s" % arg)
-
-if level_indexes:
-	valid_level_idxs = []
-	invalid_level_indexes = []
-	for level_index in level_indexes:
-		if 1 <= level_index <= len(level_configs):
-			valid_level_idxs.append(level_index - 1)
-		else:
-			invalid_level_indexes.append(level_index)
-	if invalid_level_indexes:
-		warn("Requested level indexes %s are not in the given levels" % invalid_level_indexes)
-	level_configs = [level_configs[idx] for idx in valid_level_idxs]
+level_configs, custom_collection = process_cmdargs(cmdargs)
 
 if not level_configs:
 	die("No valid levels given, try --help")
@@ -270,8 +124,4 @@ for level_index, level_config in enumerate(level_configs):
 			sys.stdin.readline()
 		except KeyboardInterrupt:
 			print()
-			break
-
-if run_profiler:
-	profiler.stop()
-
+			exit(1)
