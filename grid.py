@@ -21,6 +21,9 @@ _ONE = frozenbitarray('1')
 _ZEROBITS = frozenbitarray('')
 SORTED_DIRS = sort_cells(DIRS)
 
+# support bitarray prior to 2.9.x, replace search with more efficient itersearch
+search_bits = bitarray.itersearch if hasattr(bitarray, 'itersearch') else bitarray.search
+
 class Grid:
 	"""
 	High-performance map & path abstraction for puzzles.
@@ -213,12 +216,12 @@ class Grid:
 
 	def to_idxs(self, bits_or_idxs_or_cells_or_actors):
 		if type(bits_or_idxs_or_cells_or_actors) == bitarray:
-			return tuple(bits_or_idxs_or_cells_or_actors.search(_ONE))
+			return tuple(search_bits(bits_or_idxs_or_cells_or_actors, _ONE))
 		return tuple(self.to_idx(idx_or_cell_or_actor) for idx_or_cell_or_actor in bits_or_idxs_or_cells_or_actors)
 
 	def to_cells(self, bits_or_idxs_or_cells_or_actors):
 		if type(bits_or_idxs_or_cells_or_actors) == bitarray:
-			return tuple(self.idx_cells[idx] for idx in bits_or_idxs_or_cells_or_actors.search(_ONE))
+			return tuple(self.idx_cells[idx] for idx in search_bits(bits_or_idxs_or_cells_or_actors, _ONE))
 		return tuple(self.idx_cells[self.to_idx(idx_or_cell_or_actor)] for idx_or_cell_or_actor in bits_or_idxs_or_cells_or_actors)
 
 	def to_idx_or_none(self, idx_or_cell_or_actor):
@@ -244,7 +247,7 @@ class Grid:
 		while True:
 			new_bits = self.no_bits.copy()
 
-			for idx in unprocessed_bits.search(_ONE):
+			for idx in search_bits(unprocessed_bits, _ONE):
 				for neigh_idx in self.all_passable_neigh_idxs[idx]:
 					if not accessible_bits[neigh_idx] and not obstacle_bits[neigh_idx]:
 						new_bits[neigh_idx] = True
@@ -286,7 +289,7 @@ class Grid:
 		distance = 1
 		while True:
 			new_bits = self.no_bits.copy()
-			for idx in unprocessed_bits.search(_ONE):
+			for idx in search_bits(unprocessed_bits, _ONE):
 				for neigh_idx in self.all_passable_neigh_idxs[idx]:
 					if neigh_idx == target_idx:
 						return distance
@@ -311,14 +314,14 @@ class Grid:
 		distance = 0
 		while True:
 			new_bits = self.no_bits.copy()
-			for idx in unprocessed_bits.search(_ONE):
+			for idx in search_bits(unprocessed_bits, _ONE):
 				for neigh_idx in self.all_passable_neigh_idxs[idx]:
 					if distances[neigh_idx] == -1 and not obstacle_bits[neigh_idx]:
 						new_bits[neigh_idx] = True
 			if new_bits == self.no_bits:
 				break
 			distance += 1
-			for idx in new_bits.search(_ONE):
+			for idx in search_bits(new_bits, _ONE):
 				distances[idx] = distance
 			unprocessed_bits = new_bits
 
@@ -647,7 +650,7 @@ class Grid:
 		if accessible_bits is None:
 			accessible_bits = self.last_accessible_bits
 		cell_pairs = []
-		for barrel_idx in self.barrel_bits.search(_ONE):
+		for barrel_idx in search_bits(self.barrel_bits, _ONE):
 			for char_idx in self.all_passable_neigh_idxs[barrel_idx]:
 				if not accessible_bits[char_idx]:
 					continue
@@ -675,7 +678,7 @@ class Grid:
 		char_accessible_bits = self.get_accessible_bits(char) if char else self.all_bits
 
 		# run BFS separately for each plate to compute distances from that plate
-		for plate_idx in self.plate_bits.search(_ONE):
+		for plate_idx in search_bits(self.plate_bits, _ONE):
 			if not char_accessible_bits[plate_idx]:
 				continue
 			plate_cell = self.to_cell(plate_idx)
