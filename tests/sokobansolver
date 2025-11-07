@@ -310,37 +310,13 @@ def create_sokoban_map(lines):
 	assert is_sokoban_map(lines), "Invalid Sokoban map:\n%s" % '\n'.join(lines)
 	return numpy.array([list(line) for line in convert_and_pad_map_lines(lines)], dtype='<U1').T
 
-def configure_solver(sokoban_map_lines, reverse_barrel_mode=False):
+def create_solver(sokoban_map_lines, reverse_barrel_mode=False):
 	map = create_sokoban_map(sokoban_map_lines)
-	char_cell = None
-	barrel_cells = []
-	for cy in range(len(map[0])):
-		for cx in range(len(map)):
-			cell = (cx, cy)
-			is_plate = False
-			if map[cell] == ACTOR_CHARS["char"]:
-				char_cell = cell
-			elif map[cell] == ACTOR_ON_PLATE_CHARS["char"]:
-				char_cell = cell
-				is_plate = True
-			elif map[cell] == ACTOR_CHARS["barrel"]:
-				barrel_cells.append(cell)
-			elif map[cell] == ACTOR_ON_PLATE_CHARS["barrel"]:
-				barrel_cells.append(cell)
-				is_plate = True
-			else:
-				continue
-			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
-
-	solver = SokobanSolver()
-	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
-	if verbose:
-		grid.show_map("Configured solver with this map", char=char_cell, barrels=barrel_cells)
-	return solver
+	return create_sokoban_solver(map, reverse_barrel_mode, verbose)
 
 def test_solution(sok, unique_solution_str=False):
 	for solution_type in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
-		solver = configure_solver(sok)
+		solver = create_solver(sok)
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
 		test.eq(solver.last_solution_nums_str, optimal_solution_nums_strs_by_type[solution_type][sok])
@@ -350,7 +326,7 @@ def test_solution(sok, unique_solution_str=False):
 			test.ne(solver.last_solution_str, '')
 
 def test_no_solution(sok):
-	solver = configure_solver(sok)
+	solver = create_solver(sok)
 	solution_items = solver.solve()
 	test.none(solution_items)
 	test.none(solver.last_solution_nums_str)
@@ -400,12 +376,12 @@ def test_algorithms_consistency():
 			results = {}
 			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_PQ, SOLUTION_ALG_ASTAR:
 				# solve both types
-				solver = configure_solver(sok, reverse_barrel_mode)
+				solver = create_solver(sok, reverse_barrel_mode)
 				solver.solution_alg = alg
 				sol_s = solver.solve(SOLUTION_TYPE_BY_SHIFTS)
 				results[(alg, 'shifts')] = solver.last_solution_nums_str
 				# reconfigure fresh
-				solver = configure_solver(sok, reverse_barrel_mode)
+				solver = create_solver(sok, reverse_barrel_mode)
 				solver.solution_alg = alg
 				sol_m = solver.solve(SOLUTION_TYPE_BY_MOVES)
 				results[(alg, 'moves')] = solver.last_solution_nums_str
@@ -421,7 +397,7 @@ def test_algorithms_consistency():
 
 def test_reparent_dirty_propagation():
 	sok = sok_trivial_s1
-	solver = configure_solver(sok)
+	solver = create_solver(sok)
 	solver.solution_alg = SOLUTION_ALG_BFS
 	# prepare and create the initial structures
 	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
@@ -437,7 +413,7 @@ def test_reparent_dirty_propagation():
 	test.eq(child.is_fully_processed, False)
 
 def test_get_min_solution_depth_behavior():
-	solver = configure_solver(sok_trivial_s1)
+	solver = create_solver(sok_trivial_s1)
 	# assume prepare has been run inside configure
 	# compare original method (current) vs simple lookup
 	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
@@ -452,7 +428,7 @@ def test_get_min_solution_depth_behavior():
 	test.eq(depth_old, expected)
 
 def test_prepare_solution_char_filtering():
-	solver = configure_solver(sok_trivial_s2)
+	solver = create_solver(sok_trivial_s2)
 	# call prepare with char set vs char None and observe dead_barrel_bits differs or min_shifts differs
 	grid.prepare_sokoban_solution(None, disable=False)
 	all_dead_count = grid.dead_barrel_bits.count()
@@ -463,7 +439,7 @@ def test_prepare_solution_char_filtering():
 	test.le(char_dead_count, all_dead_count)
 
 def test_superposition_idempotence():
-	solver = configure_solver(sok_trivial_h1)
+	solver = create_solver(sok_trivial_h1)
 	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
 	# create two barrel lists with same set but different order
 	barrel_cells = tuple(solver.barrel_cells)
@@ -476,7 +452,7 @@ def test_superposition_idempotence():
 	test.eq(sp1.positions, sp2.positions)
 
 def test_position_num_calculation():
-	solver = configure_solver(sok_trivial_h1)
+	solver = create_solver(sok_trivial_h1)
 	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
 	super_pos = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
 	root = Position(super_pos, solver.char_cell, None, None, None)
@@ -487,7 +463,7 @@ def test_position_num_calculation():
 	test.eq(child.total_nums, (1, 1))
 
 def test_find_solution_status_string():
-	solver = configure_solver(sok_trivial_h2)
+	solver = create_solver(sok_trivial_h2)
 	solver.unprocessed_positions = []
 	solver.start_solution_time = time()
 	status = solver.get_find_solution_status_str()

@@ -501,3 +501,32 @@ class SokobanSolver():
 		global solver
 		solver = self
 
+def create_sokoban_solver(map, reverse_barrel_mode=False, show_map=False, show_dead=False):
+	char_cell = None
+	barrel_cells = []
+	for cy in range(len(map[0])):
+		for cx in range(len(map)):
+			cell = (cx, cy)
+			is_plate = False
+			if map[cell] == ACTOR_CHARS["char"]:
+				char_cell = cell
+			elif map[cell] == ACTOR_ON_PLATE_CHARS["char"]:
+				char_cell = cell
+				is_plate = True
+			elif map[cell] == ACTOR_CHARS["barrel"]:
+				barrel_cells.append(cell)
+			elif map[cell] == ACTOR_ON_PLATE_CHARS["barrel"]:
+				barrel_cells.append(cell)
+				is_plate = True
+			else:
+				continue
+			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
+
+	solver = SokobanSolver()
+	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
+	if show_dead:
+		grid.prepare_sokoban_solution(char_cell)
+	if show_map:
+		grid.show_map("Created solver for map", char=char_cell, barrels=barrel_cells, show_dead=show_dead)
+	return solver
+

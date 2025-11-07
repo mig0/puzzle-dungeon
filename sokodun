@@ -57,35 +57,9 @@ def create_sokoban_map(map_string):
 	lines = [line.rstrip('\n') for line in file.readlines()[0:size[1]]]
 	return numpy.array([list(line) for line in lines], dtype='<U1').T
 
-def configure_solver(map_string, reverse_barrel_mode=False):
+def create_solver(map_string, reverse_barrel_mode=False):
 	map = create_sokoban_map(map_string)
-	char_cell = None
-	barrel_cells = []
-	for cy in range(len(map[0])):
-		for cx in range(len(map)):
-			cell = (cx, cy)
-			is_plate = False
-			if map[cell] == ACTOR_CHARS["char"]:
-				char_cell = cell
-			elif map[cell] == ACTOR_ON_PLATE_CHARS["char"]:
-				char_cell = cell
-				is_plate = True
-			elif map[cell] == ACTOR_CHARS["barrel"]:
-				barrel_cells.append(cell)
-			elif map[cell] == ACTOR_ON_PLATE_CHARS["barrel"]:
-				barrel_cells.append(cell)
-				is_plate = True
-			else:
-				continue
-			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
-
-	solver = SokobanSolver()
-	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
-	if show_dead:
-		grid.prepare_sokoban_solution(char_cell)
-	if not quiet:
-		grid.show_map("Configured solver with map", char=char_cell, barrels=barrel_cells, show_dead=show_dead)
-	return solver
+	return create_sokoban_solver(map, reverse_barrel_mode, not quiet, show_dead)
 
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
@@ -100,7 +74,7 @@ for level_index, level_config in enumerate(level_configs):
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		continue
 	print("Attempting to solve level %d of %d: %s" % (level_index, len(level_configs), level.name))
-	solver = configure_solver(level.map_string, reverse_barrel_mode)
+	solver = create_solver(level.map_string, reverse_barrel_mode)
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
 
