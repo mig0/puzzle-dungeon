@@ -71,6 +71,134 @@ sok_trivial_s2 = (
 	'_#######',
 )
 
+# 11 maps from 4x4s and 3 maps from 4x5s
+sok_obvious_01 = (
+	'__####',
+	'__#@-#',
+	'###--#',
+	'#--*-#',
+	'#--*-#',
+	'######',
+)
+
+sok_obvious_02 = (
+	'####__',
+	'#-@###',
+	'#-*--#',
+	'#-*--#',
+	'###--#',
+	'__####',
+)
+
+sok_obvious_03 = (
+	'__####',
+	'__#-@#',
+	'###--#',
+	'#-*--#',
+	'#---##',
+	'#####_',
+)
+
+sok_obvious_04 = (
+	'#####_',
+	'#---##',
+	'#*-*-#',
+	'#@#--#',
+	'#----#',
+	'######',
+)
+
+sok_obvious_05 = (
+	'######',
+	'#----#',
+	'#-$.-#',
+	'##$.-#',
+	'_#@-##',
+	'_####_',
+)
+
+sok_obvious_06 = (
+	'_#####',
+	'_#.-.#',
+	'###-$#',
+	'#@-$-#',
+	'#----#',
+	'######',
+)
+
+sok_obvious_07 = (
+	'######',
+	'#.---#',
+	'#--$-#',
+	'#-#$##',
+	'#.-@#_',
+	'#####_',
+)
+
+sok_obvious_08 = (
+	'#####_',
+	'#---##',
+	'#--$-#',
+	'##$--#',
+	'_#@..#',
+	'_#####',
+)
+
+sok_obvious_09 = (
+	'#####_',
+	'#---##',
+	'#..$-#',
+	'#@$--#',
+	'###--#',
+	'__####',
+)
+
+sok_obvious_10 = (
+	'######',
+	'#----#',
+	'#-#--#',
+	'#@*$.#',
+	'##---#',
+	'_#####',
+)
+
+sok_obvious_11 = (
+	'######',
+	'#@*--#',
+	'#-$-*#',
+	'#-#--#',
+	'#.---#',
+	'######',
+)
+
+sok_obvious_12 = (
+	'####__',
+	'#-@#__',
+	'#.-#__',
+	'#--###',
+	'#-$$-#',
+	'#---.#',
+	'######',
+)
+
+sok_obvious_13 = (
+	'######_',
+	'#-..@#_',
+	'#--#$##',
+	'#---$-#',
+	'##----#',
+	'_######',
+)
+
+sok_obvious_14 = (
+	'_######',
+	'_#@--.#',
+	'##$#-##',
+	'#-----#',
+	'#-$-.-#',
+	'#######',
+)
+
 sok_takaken_01 = (
 	# scrambled egg
 	' #####',
@@ -263,6 +391,20 @@ optimal_solution_nums_strs = {
 	sok_trivial_v2: '1/1',
 	sok_trivial_s1: ('12/2', '8/4'),
 	sok_trivial_s2: ('23/3', '11/7'),
+	sok_obvious_01: '17/4',
+	sok_obvious_02: '18/4',
+	sok_obvious_03: '19/4',
+	sok_obvious_04: '24/6',
+	sok_obvious_05: '28/4',
+	sok_obvious_06: '30/8',
+	sok_obvious_07: '32/8',
+	sok_obvious_08: '33/9',
+	sok_obvious_09: '35/7',
+	sok_obvious_10: '42/7',
+	sok_obvious_11: '43/7',
+	sok_obvious_12: '39/11',
+	sok_obvious_13: '45/10',
+	sok_obvious_14: '64/12',
 	sok_takaken_01: '170/43',
 	sok_takaken_02: '185/42',
 	sok_takaken_03: '0/0',
@@ -293,6 +435,20 @@ optimal_solution_strs = {
 	sok_trivial_v2: 'U',
 	sok_trivial_s1: ('rddlllluurRR', 'LulldRRR'),
 	sok_trivial_s2: ('ddrrruulLrrddllluluurDD', 'RRurDDrdLLL'),
+	sok_obvious_01: 'rdddLUlldRurruulD',
+	sok_obvious_02: 'lddRluurDrrddlUruL',
+	sok_obvious_03: 'ldddlluRdrUruulDrdL',
+	sok_obvious_04: 'drruruLullDRurDrddlUdllU',
+	sok_obvious_05: 'ruuulldRurrddldlUrruulDulldR',
+	sok_obvious_06: 'rdrruLuurDlddlluRdrUUruLdddrUU',
+	sok_obvious_07: 'lluuurrrdLulldddrrUULulDDurrruLL',
+	sok_obvious_08: 'ruruLulldRurDrddllURuulldRurDDurD',
+	sok_obvious_09: 'uurrDrddlUruLullddRluurrdLrrddlUruL',
+	sok_obvious_10: 'uurrrdddlUruulllddRRlluurrDullddrdrrULuurD',
+	sok_obvious_11: 'dddrruuurDlddlluuuRldddrruuLulDDurrruLdddrU',
+	sok_obvious_12: 'lddddrUUddrruLdlluurDuluurDDlddRRuLdlUU',
+	sok_obvious_13: 'llddrdrruLLdlUluurrrDulllddrUluRddrdrruLLdlUU',
+	sok_obvious_14: 'rrddllldRRuruullDurrddldlluRuurrddrdLLruuullddRdrUUdllldRRuluurR',
 }
 
 optimal_solution_strs_by_type = {
@@ -334,6 +490,10 @@ def test_no_solution(sok):
 
 def test_trivial_solutions():
 	for sok in sok_trivial_h1, sok_trivial_h2, sok_trivial_h3, sok_trivial_h4, sok_trivial_v1, sok_trivial_v2, sok_trivial_s1, sok_trivial_s2:
+		test_solution(sok, True)
+
+def test_obvious_solutions():
+	for sok in sok_obvious_01, sok_obvious_02, sok_obvious_03, sok_obvious_04, sok_obvious_05, sok_obvious_06, sok_obvious_07, sok_obvious_08, sok_obvious_09, sok_obvious_10, sok_obvious_11, sok_obvious_12, sok_obvious_13, sok_obvious_14:
 		test_solution(sok, True)
 
 def test_takaken_solutions():
@@ -477,6 +637,7 @@ if args.count('-v') >= 3:
 test = TestSuite("SokobanSolver", '-a' in args, '-v' in args, '-p' in args)
 try:
 	test_trivial_solutions()
+	test_obvious_solutions()
 	test_takaken_solutions()
 	test_trivial_without_solutions()
 	test_algorithms_consistency()
