@@ -442,9 +442,9 @@ class CellActor(Actor):
 			pos = self.get_pos()
 		# find old actor animation if any, and ensure its on_finished is called
 		running_animation = next((animation for animation in Animation.animations if animation.object == self), None)
-		if running_animation and running_animation.on_finished:
-			running_animation.on_finished()
+		if running_animation and (on_finished := running_animation.on_finished):
 			running_animation.on_finished = None
+			on_finished()
 		self.animation = animate(self, tween=tween, duration=duration, pos=pos, on_finished=lambda: self._finish_animation(on_finished))
 
 	def is_animated_external(self):
