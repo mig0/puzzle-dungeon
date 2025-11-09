@@ -1381,6 +1381,7 @@ def press_cell(cell, button=None):
 					path_cells = path_cells[:path_cells.index(cell)]
 				solution.set([path_cells])
 				solution.set_move_delay(AUTO_MOVE_DELAY)
+				game.start_move()
 				solution.set_play_mode()
 			handled = True
 	if handled and not handled is True:
@@ -1651,6 +1652,7 @@ def handle_press_key():
 
 	if keyboard.kp_enter:
 		if solution.is_active():
+			game.start_move()
 			solution.set_play_mode()
 		elif not solution.is_find_mode():
 			find_solution_info = puzzle.prepare_solution()
