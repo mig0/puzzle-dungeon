@@ -126,7 +126,7 @@ def create_map_string(lines):
 			num_cols_after = size_x - real_size_x - num_cols_before
 			lines[i] = CELL_FLOOR * num_cols_before + lines[i] + CELL_FLOOR * num_cols_after
 
-	sig_line = "# Dungeon Sokoban auto-generated map %dx%d" % (size_x, size_y)
+	sig_line = "# Dungeon BarrelPuzzle preloaded Sokoban map %dx%d" % (size_x, size_y)
 
 	return (size_x, size_y), '\n'.join([sig_line] + lines) + '\n'
 

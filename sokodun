@@ -56,7 +56,7 @@ def create_sokoban_map(map_string):
 	file = io.StringIO(map_string)
 	error, puzzle_type, size = parse_map_file_signature(file)
 	assert not error, error
-	assert puzzle_type == 'Sokoban', "Unsupported puzzle-type %s" % puzzle_type
+	assert puzzle_type == 'BarrelPuzzle', "Unsupported puzzle-type %s" % puzzle_type
 	lines = [line.rstrip('\n') for line in file.readlines()[0:size[1]]]
 	return numpy.array([list(line) for line in lines], dtype='<U1').T
 
