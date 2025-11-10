@@ -15,6 +15,8 @@ CHAR_CELL_TYPES = {
 	' ': CELL_FLOOR,
 }
 
+BACK_TRANSLATION = dict((ord(cell_type), (ch)) for ch, cell_type in CHAR_CELL_TYPES.items())
+
 CHAR_ALIASES = {
 	'p': '@',
 	'P': '+',
@@ -28,6 +30,13 @@ for ch, ch0 in CHAR_ALIASES.items():
 	CHAR_CELL_TYPES[ch] = CHAR_CELL_TYPES[ch0]
 
 CHAR_TRANSLATION = dict((ord(ch), (cell_type)) for ch, cell_type in CHAR_CELL_TYPES.items())
+
+def create_sok_map(map):
+	sok_map = ""
+	for row in map.T:
+		sok_line = ''.join(row.tolist()).translate(BACK_TRANSLATION)
+		sok_map += sok_line + "\n"
+	return sok_map
 
 def is_sokoban_map_line(line):
 	is_all_floor = True

@@ -11,6 +11,7 @@ from debug import debug, ProgressLine
 from common import die, warn
 from sizetools import set_fitting_map_size
 from sokobansolver import *
+from sokobanparser import create_sok_map
 from processcmdargs import process_cmdargs
 
 sys.argv[0] = 'sokodun'
@@ -22,6 +23,7 @@ parser.add_argument('-L', '--list-ll-collections', help="list all letslogic coll
 parser.add_argument('-n', '--use-numeric', help="use numeric ids to list collections", action='store_true')
 parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reverse barrel mode to custom levels", action='store_true')
 parser.add_argument('-p', '--run-profiler', help="run code with profiler", action='store_true')
+parser.add_argument('-s', '--show-sok', help="show map in sok format rather than internal", action='store_true')
 parser.add_argument('-m', '--by-moves', help="find move optimal solution, not push/pull optimal", action='store_true')
 parser.add_argument('-0', '--disable-budget', help="do not report progress every second", action='store_true')
 parser.add_argument('-D', '--show-dead', help="show dead-barrel cells on map", action='store_true')
@@ -35,6 +37,7 @@ disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
 run_profiler = cmdargs.run_profiler
 show_dead = cmdargs.show_dead
+show_sok = cmdargs.show_sok
 quiet = cmdargs.quiet or 0
 
 if not cmdargs.args:
@@ -59,7 +62,9 @@ def create_sokoban_map(map_string):
 
 def create_solver(map_string, reverse_barrel_mode=False):
 	map = create_sokoban_map(map_string)
-	return create_sokoban_solver(map, reverse_barrel_mode, not quiet, show_dead)
+	if not quiet and show_sok:
+		print(create_sok_map(map), end='')
+	return create_sokoban_solver(map, reverse_barrel_mode, not quiet and not show_sok, show_dead)
 
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
