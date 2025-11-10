@@ -468,7 +468,7 @@ def create_sokoban_map(lines):
 
 def create_solver(sokoban_map_lines, reverse_barrel_mode=False):
 	map = create_sokoban_map(sokoban_map_lines)
-	return create_sokoban_solver(map, reverse_barrel_mode, verbose)
+	return create_sokoban_solver(map, reverse_barrel_mode, "Created solver for map" if verbose else False)
 
 def test_solution(sok, unique_solution_str=False):
 	for solution_type in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:

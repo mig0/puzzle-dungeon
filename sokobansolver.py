@@ -527,6 +527,7 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, show_map=False, show_d
 	if show_dead:
 		grid.prepare_sokoban_solution(char_cell)
 	if show_map:
-		grid.show_map("Created solver for map", char=char_cell, barrels=barrel_cells, show_dead=show_dead)
+		descr = None if show_map is True else show_map
+		grid.show_map(descr, char=char_cell, barrels=barrel_cells, show_dead=show_dead)
 	return solver
 
