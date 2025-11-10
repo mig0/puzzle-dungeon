@@ -101,42 +101,33 @@ class Grid:
 		self.plate_bits = _ZEROBITS
 		self.reset_sokoban_solution()
 
-	def configure(self, map, area=None, reverse_barrel_mode=False):
+	def configure(self, map, area=None, reverse_barrel_mode=False, cut_outer_floors=False):
 		self.reset()
 		self.map = map
-		self.size_x, self.size_y = len(map), len(map[0])
+		self.size_x, self.size_y = map.shape
 
-		# build index of passable cells
-		self.idx_cells = []
-		self.cell_idxs = {}
-		for cy in range(self.size_y):
-			for cx in range(self.size_x):
-				cell = (cx, cy)
-				if map[cell] not in CELL_CHAR_MOVE_OBSTACLES:
-					idx = len(self.idx_cells)
-					self.idx_cells.append(cell)
-					self.cell_idxs[cell] = idx
+		self._build_passable_cells_and_neighs()
 
-		assert self.idx_cells, "Grid without passable cells is not supported"
+		if cut_outer_floors:
+			cut_bits = self.no_bits.copy()
+			for cy in range(self.size_y):
+				for cx in range(self.size_x):
+					if 0 < cx < self.size_x - 1 and 0 < cy < self.size_y - 1:
+						continue
+					cell = cx, cy
+					idx = self.cell_idxs.get(cell)
+					if self.map[cell] in CELL_FLOOR_TYPES and not cut_bits[idx]:
+						cut_bits |= self.get_accessible_bits(idx, self.no_bits)
+			if cut_bits != self.no_bits:
+				for idx in search_bits(cut_bits, _ONE):
+					self.map[self.idx_cells[idx]] = CELL_VOID
+				self._build_passable_cells_and_neighs()
+
 		self.area = area or get_bounding_area(self.idx_cells)
-
-		self.num_bits = len(self.idx_cells)
-		self.all_bits = bitarray('1' * self.num_bits)
-		self.no_bits  = bitarray('0' * self.num_bits)
-		self.tmp_bits = self.no_bits.copy()
-
-		# precompute all passable neigbors per each passable cell
-		self.all_passable_neigh_idxs = []
-		for idx, cell in enumerate(self.idx_cells):
-			passable_neigh_idxs = []
-			for dir in SORTED_DIRS:
-				neigh_cell = apply_diff(cell, dir)
-				neigh_idx = self.cell_idxs.get(neigh_cell)
-				if neigh_idx is not None:
-					passable_neigh_idxs.append(neigh_idx)
-			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
+		self.all_bits = ~self.no_bits
 
 		self.reverse_barrel_mode = reverse_barrel_mode
+		self.cut_outer_floors = cut_outer_floors
 		self.barrel_bits = self.no_bits.copy()
 		self.plate_bits = self.no_bits.copy()
 		for idx, cell in enumerate(self.idx_cells):
@@ -149,6 +140,37 @@ class Grid:
 
 		debug(DBG_GRID, "Configured map with %d floors" % self.num_bits)
 		debug(DBG_GRID2, "- idx_cells: %s" % (self.idx_cells))
+
+	def reconfigure(self):
+		self.configure(self.map, self.area, self.reverse_barrel_mode, self.cut_outer_floors)
+
+	def _build_passable_cells_and_neighs(self):
+		# build index of passable cells
+		self.idx_cells = []
+		self.cell_idxs = {}
+		for cy in range(self.size_y):
+			for cx in range(self.size_x):
+				cell = (cx, cy)
+				if self.map[cell] not in CELL_CHAR_MOVE_OBSTACLES:
+					idx = len(self.idx_cells)
+					self.idx_cells.append(cell)
+					self.cell_idxs[cell] = idx
+
+		assert self.idx_cells, "Grid without passable cells is not supported"
+
+		self.num_bits = len(self.idx_cells)
+		self.no_bits  = bitarray('0' * self.num_bits)
+
+		# precompute all passable neigbors per each passable cell
+		self.all_passable_neigh_idxs = []
+		for idx, cell in enumerate(self.idx_cells):
+			passable_neigh_idxs = []
+			for dir in SORTED_DIRS:
+				neigh_cell = apply_diff(cell, dir)
+				neigh_idx = self.cell_idxs.get(neigh_cell)
+				if neigh_idx is not None:
+					passable_neigh_idxs.append(neigh_idx)
+			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
 
 	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, show_dead=False, extra_cb=None):
 		if descr:

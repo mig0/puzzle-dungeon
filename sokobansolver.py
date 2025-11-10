@@ -495,7 +495,7 @@ class SokobanSolver():
 		return solution_items
 
 	def configure(self, map, reverse_barrel_mode, char_cell, barrel_cells):
-		grid.configure(map, reverse_barrel_mode=reverse_barrel_mode)
+		grid.configure(map, reverse_barrel_mode=reverse_barrel_mode, cut_outer_floors=True)
 		self.char_cell = char_cell
 		self.barrel_cells = barrel_cells
 		global solver
