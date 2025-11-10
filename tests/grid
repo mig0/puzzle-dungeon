@@ -310,10 +310,45 @@ def test_deadlock_detection():
 	# Set up a 2x2 block of barrels — should trigger 2x2 deadlock
 	grid.set_barrels([(3, 2), (3, 3), (4, 3)])
 	show_map_if_verbose(grid, "Map before 2x2 deadlock")
-	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((3, 3), DIR_D), "Unexpected 2x2 deadlock detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((5, 2), DIR_U), "Unexpected 2x2 deadlock #1 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((3, 3), DIR_D), "Unexpected 2x2 deadlock #2 detected")
 	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_R), "Expected 2x2 deadlock #1 not detected")
 	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_U), "Expected 2x2 deadlock #2 not detected")
 	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((2, 3), DIR_U), "Expected 2x2 deadlock #3 not detected")
+
+	for plate_cell, res in [(3, 4), True], [(3, 3), True], [(4, 3), False]:
+		grid.plate_bits[grid.to_idx(plate_cell)] = True
+		test.ok(grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_R) is res, f"Unexpected 2x2 deadlock with plate {plate_cell} detected")
+
+	# Set up barrel on plate for the next 3 reconfigure
+	grid.map[(1, 3)] = ACTOR_ON_PLATE_CHARS['barrel']
+
+	grid.map[(1, 2)] = CELL_WALL
+	grid.reconfigure()
+	show_map_if_verbose(grid, "Map before X1 +wall 2x2 deadlock")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((5, 2), DIR_U), "X1: Unexpected 2x2 deadlock #1 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_R), "X1: Unexpected 2x2 deadlock #2 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((1, 3), DIR_U), "X1: Unexpected 2x2 deadlock #3 detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((2, 3), DIR_U), "X1: Expected 2x2 deadlock #1 not detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((1, 1), DIR_L), "X1: Expected 2x2 deadlock #2 not detected")
+
+	grid.map[(3, 3)] = CELL_WALL
+	grid.reconfigure()
+	show_map_if_verbose(grid, "Map before X2 +wall 2x2 deadlock")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((5, 2), DIR_U), "X2: Unexpected 2x2 deadlock #1 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_R), "X2: Unexpected 2x2 deadlock #2 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((1, 3), DIR_U), "X2: Unexpected 2x2 deadlock #3 detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((2, 3), DIR_U), "X2: Expected 2x2 deadlock #1 not detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((1, 1), DIR_L), "X2: Expected 2x2 deadlock #2 not detected")
+
+	grid.map[(2, 3)] = CELL_PLATE
+	grid.reconfigure()
+	show_map_if_verbose(grid, "Map before X3 +plate 2x2 deadlock")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((5, 2), DIR_U), "X3: Unexpected 2x2 deadlock #1 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((3, 4), DIR_R), "X3: Unexpected 2x2 deadlock #2 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((1, 3), DIR_U), "X3: Unexpected 2x2 deadlock #3 detected")
+	test.ok(not grid.is_r_or_l_2x2_barrel_deadlock((2, 3), DIR_U), "X3: Unexpected 2x2 deadlock #4 detected")
+	test.ok(    grid.is_r_or_l_2x2_barrel_deadlock((1, 1), DIR_L), "X3: Expected 2x2 deadlock #1 not detected")
 
 	# Set up a character surrounded by walls/barrels (pull mode)
 	grid = configure_simple_grid(reverse_barrel_mode=True)

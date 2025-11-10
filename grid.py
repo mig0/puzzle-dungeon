@@ -433,18 +433,15 @@ class Grid:
 		return bool(self.dead_barrel_bits and self.dead_barrel_bits[self.to_idx(barrel)])
 
 	def is_four_barrel_deadlock(self, cell1, cell2, cell3, cell4):
-		barrel_cells = []
+		is_deadlock = False
 		for cell in (cell2, cell3, cell4):
 			idx = self.cell_idxs.get(cell)
 			if idx is not None:
-				if self.barrel_bits[idx]:
-					barrel_cells.append(cell)
-				else:
+				if not self.barrel_bits[idx]:
 					return False
-		for barrel_cell in barrel_cells + [cell1]:
-			if not self.plate_bits[self.cell_idxs[barrel_cell]]:
-				return True
-		return False
+				if not self.plate_bits[idx]:
+					is_deadlock = True
+		return is_deadlock or not self.plate_bits[self.cell_idxs[cell1]]
 
 	def is_r_or_l_2x2_barrel_deadlock(self, barrel_cell, dir):
 		barrel_f_cell = apply_diff(barrel_cell, dir)
