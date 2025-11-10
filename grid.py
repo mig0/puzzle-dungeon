@@ -196,10 +196,11 @@ class Grid:
 				for cx in range(self.size_x):
 					cell = (cx, cy)
 					cell_idx = self.cell_idxs.get(cell)
-					cell_ch = get_cell_type_with_clean_floor(cell)
+					is_plate = cell_idx is not None and self.plate_bits[cell_idx]
+					cell_ch = CELL_PLATE if is_plate else get_cell_type_with_clean_floor(cell)
 					if show_dead and cell_idx is not None and self.dead_barrel_bits[cell_idx]:
 						cell_ch = '☓'
-					actor_chars = ACTOR_ON_PLATE_CHARS if cell_idx is not None and self.plate_bits[cell_idx] else ACTOR_CHARS
+					actor_chars = ACTOR_ON_PLATE_CHARS if is_plate else ACTOR_CHARS
 					if cell in cell_chars:
 						cell_ch = cell_chars[cell]
 					if cell_idx is not None and self.barrel_bits[cell_idx]:
