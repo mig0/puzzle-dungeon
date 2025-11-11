@@ -283,6 +283,9 @@ class Grid:
 
 		return accessible_bits
 
+	def get_min_last_accessible_idx(self):
+		return next(search_bits(self.last_accessible_bits, _ONE))
+
 	def get_accessible_neigh_cells(self, cell):
 		return self.to_cells(self.all_passable_neigh_idxs[self.to_idx(cell)])
 

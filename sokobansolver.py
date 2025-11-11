@@ -201,16 +201,14 @@ class SokobanSolver():
 
 	def find_or_create_super_position(self, char_cell, barrel_cells):
 		if grid.is_zsb:
-			accessible_cells = None
-			super_position_id = (*barrel_cells,)
+			super_position_id = grid.barrel_idxs
 		else:
-			accessible_cells = grid.get_accessible_cells(char_cell, barrel_cells)
-			super_position_id = (frozenset(accessible_cells), *barrel_cells)
+			grid.get_accessible_bits(char_cell)
+			super_position_id = (grid.get_min_last_accessible_idx(), *grid.barrel_idxs)
 
 		if super_position_id in self.visited_super_positions:
 			return self.visited_super_positions[super_position_id]
 
-		grid.set_barrels(barrel_cells)
 		if grid.is_zsb:
 			accessible_cells_near_barrels = grid.get_all_valid_zsb_char_barrel_moves()
 		else:
@@ -445,6 +443,7 @@ class SokobanSolver():
 			self.start_solution_time = time()
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
 			grid.prepare_sokoban_solution(self.char_cell, self.disable_prepare)
+			grid.set_barrels(self.barrel_cells)
 			super_position = self.find_or_create_super_position(self.char_cell, self.barrel_cells)
 			self.initial_position = Position(super_position, self.char_cell, None, None, None)
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
