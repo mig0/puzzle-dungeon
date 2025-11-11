@@ -45,8 +45,10 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 		elif collection := get_collection_by_id(arg):
 			for level_config in collection.level_configs:
 				level_configs.append(collection.with_level_config_defaults(level_config))
+		elif arg == "stdin:" or arg == "-":
+			level_configs.extend(parse_stdin_levels(arg, custom_collection.config) or [])
 		elif arg == "clipboard:":
-			level_configs.extend(parse_clipboard_levels("clipboard:", custom_collection.config) or [])
+			level_configs.extend(parse_clipboard_levels(arg, custom_collection.config) or [])
 		elif arg.startswith("letslogic:"):
 			if map_string := fetch_letslogic_collection(arg[10:]):
 				level_configs.extend(parse_sokoban_levels(map_string, custom_collection.config))
@@ -80,3 +82,39 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 		level_configs = [level_configs[idx] for idx in valid_level_idxs]
 
 	return level_configs, custom_collection
+
+def parse_map_string_levels(map_string, input_id_str, content_id_str, config={}):
+	error_prefix = f"Ignoring '{input_id_str}', "
+	if not map_string:
+		warn(error_prefix + f"since {content_id_str} is empty")
+		return None
+	map_info = detect_map_file(None, map_string=map_string)
+	if not map_info:
+		warn(error_prefix + f"no map in {content_id_str}")
+		return None
+	is_sokoban_map, error, puzzle_type, size = map_info
+	if is_sokoban_map:
+		level_configs = parse_sokoban_levels(map_string, config)
+		if not level_configs:
+			warn(error_prefix + "no levels in sokoban map")
+		return level_configs
+	if error:
+		warn(error_prefix + "Not a sokoban map and %s" % error)
+		return None
+	return [{
+		'puzzle-type': puzzle_type,
+		'map-size': size,
+		'map-string': map_string,
+		'name': f"%s map from {content_id_str}" % puzzle_type,
+		'bg-image': config.get('bg-image'),
+		'music': config.get('music'),
+		'theme': config.get('theme'),
+	}]
+
+def parse_stdin_levels(input_id_str, config={}):
+	from sys import stdin
+	return parse_map_string_levels("".join(stdin.readlines()), input_id_str, 'stdin', config)
+
+def parse_clipboard_levels(input_id_str, config={}):
+	from clipboard import clipboard
+	return parse_map_string_levels(clipboard.get(), input_id_str, 'clipboard', config)
