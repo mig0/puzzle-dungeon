@@ -505,7 +505,7 @@ class SokobanSolver():
 		global solver
 		solver = self
 
-def create_sokoban_solver(map, reverse_barrel_mode=False, show_map=False, show_dead=False):
+def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False):
 	char_cell = None
 	barrel_cells = []
 	for cy in range(len(map[0])):
@@ -527,6 +527,8 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, show_map=False, show_d
 			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
 
 	solver = SokobanSolver()
+	solver.solution_alg = solution_alg
+	solver.return_first = return_first
 	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
 	if show_dead:
 		grid.prepare_sokoban_solution(char_cell)

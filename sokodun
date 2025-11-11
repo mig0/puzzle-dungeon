@@ -66,7 +66,7 @@ def create_solver(map_string, reverse_barrel_mode=False):
 	map = create_sokoban_map(map_string)
 	if not quiet and show_sok:
 		print(create_sok_map(map), end='')
-	return create_sokoban_solver(map, reverse_barrel_mode, not quiet and not show_sok, show_dead)
+	return create_sokoban_solver(map, reverse_barrel_mode, None, return_first, not quiet and not show_sok, show_dead)
 
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
@@ -82,7 +82,6 @@ for level_index, level_config in enumerate(level_configs):
 		continue
 	print("Solving level %d of %d: %s" % (level_index, len(level_configs), level.name))
 	solver = create_solver(level.map_string, reverse_barrel_mode)
-	solver.return_first = return_first
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
 

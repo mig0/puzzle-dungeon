@@ -491,17 +491,13 @@ def create_sokoban_map(lines):
 	assert is_sokoban_map(lines), "Invalid Sokoban map:\n%s" % '\n'.join(lines)
 	return numpy.array([list(line) for line in convert_and_pad_map_lines(lines)], dtype='<U1').T
 
-def create_solver(sokoban_map_lines, reverse_barrel_mode=False):
+def create_solver(sokoban_map_lines, reverse_barrel_mode=False, solution_alg=None, return_first=False):
 	map = create_sokoban_map(sokoban_map_lines)
-	return create_sokoban_solver(map, reverse_barrel_mode, "Created solver for map" if verbose else False)
+	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, "Created solver for map" if verbose else False)
 
 def test_solution(sok, unique_solution_str=False, solution_alg=None, return_first=False):
 	for solution_type in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
-		solver = create_solver(sok)
-		if solution_alg:
-			solver.solution_alg = solution_alg
-		if return_first:
-			solver.return_first = return_first
+		solver = create_solver(sok, False, solution_alg, return_first)
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
 		test.eq(solver.last_solution_nums_str, optimal_solution_nums_strs_by_type[solution_type][sok])
