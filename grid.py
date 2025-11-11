@@ -685,8 +685,6 @@ class Grid:
 		self.min_char_barrel_plate_shifts = min_char_shifts = {}
 		self.min_barrel_plate_shifts = min_shifts = {}
 
-		self.check_zsb()
-
 		if self.plate_bits == self.no_bits:
 			self.dead_barrel_bits = self.all_bits
 			return

@@ -156,7 +156,7 @@ class Position:
 
 class SokobanSolver():
 	def __init__(self):
-		self.solution_alg = SOLUTION_ALG_BFS
+		self.solution_alg = None
 		self.return_first = False
 		self.disable_budget = False
 		self.disable_prepare = False
@@ -444,7 +444,6 @@ class SokobanSolver():
 			# preparing to find solution
 			self.start_solution_time = time()
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
-			grid.set_barrels(self.barrel_cells)
 			grid.prepare_sokoban_solution(self.char_cell, self.disable_prepare)
 			super_position = self.find_or_create_super_position(self.char_cell, self.barrel_cells)
 			self.initial_position = Position(super_position, self.char_cell, None, None, None)
@@ -497,6 +496,10 @@ class SokobanSolver():
 
 	def configure(self, map, reverse_barrel_mode, char_cell, barrel_cells):
 		grid.configure(map, reverse_barrel_mode=reverse_barrel_mode, cut_outer_floors=True)
+		grid.set_barrels(barrel_cells)
+		grid.check_zsb()
+		if self.solution_alg is None:
+			self.solution_alg = SOLUTION_ALG_ASTAR if grid.is_zsb or self.return_first else SOLUTION_ALG_BFS
 		self.char_cell = char_cell
 		self.barrel_cells = barrel_cells
 		global solver

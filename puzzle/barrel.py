@@ -86,10 +86,8 @@ class BarrelPuzzle(Puzzle):
 		reverse_str = " reverse" if flags.is_reverse_barrel else ""
 		if grid.is_zsb:
 			msg = "This is Zero Space type-B %s%s puzzle!" % (grid.get_zsb_size_str(), reverse_str)
-			self.solver.solution_alg = SOLUTION_ALG_ASTAR
 		else:
 			msg = "This is Sokoban%s puzzle" % reverse_str
-			self.solver.solution_alg = SOLUTION_ALG_BFS
 		set_status_message(msg, self)
 
 	def on_enter_room(self):
