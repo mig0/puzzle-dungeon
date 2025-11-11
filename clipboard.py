@@ -10,6 +10,11 @@ class Clipboard():
 	def initialize_if_needed(self):
 		if self._initialized:
 			return
+		if not pygame.display.get_init():
+			# bogus init for non-GUI to make the first clipboard operation work
+			pygame.display.set_mode((1, 1))
+			pygame.time.Clock().tick(40)
+			pygame.event.get()
 		pygame.scrap.init()
 		self._initialized = True
 
