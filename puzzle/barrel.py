@@ -468,7 +468,11 @@ class BarrelPuzzle(Puzzle):
 				self.solver.disable_prepare = not self.solver.disable_prepare
 			if keyboard.k_0:
 				self.solver.disable_budget = not self.solver.disable_budget
-			msg = "Going to use solution algorithm %s; budget of 1s is %s; prepare is %s" % (self.solver.solution_alg,
+			if keyboard.k_1:
+				self.solver.return_first = not self.solver.return_first
+			msg = "Configured solution algorithm: %s; return: %s; budget-of-1s: %s; prepare: %s" % (
+				self.solver.solution_alg or "default",
+				("first" if self.solver.return_first else "optimal"),
 				("disabled" if self.solver.disable_budget else "enabled"),
 				("disabled" if self.solver.disable_prepare else "enabled"),
 			)

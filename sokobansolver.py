@@ -157,6 +157,7 @@ class Position:
 class SokobanSolver():
 	def __init__(self):
 		self.solution_alg = SOLUTION_ALG_BFS
+		self.return_first = False
 		self.disable_budget = False
 		self.disable_prepare = False
 		self.reset_solution_data()
@@ -294,7 +295,7 @@ class SokobanSolver():
 			self.solved_position = position
 			debug([depth], DBG_SOLV, "Found solution %s in %.1fs" % (position.nums_str, time() - self.start_solution_time))
 			position.cut_down()
-			return True
+			return None if self.return_first else True
 
 		self.expand_position(position)
 
@@ -467,7 +468,7 @@ class SokobanSolver():
 			self.find_solution_using_pq()
 		)
 
-		if is_finished:
+		if is_finished or self.return_first and self.solved_position:
 			return self.get_found_solution_items("finished"), None
 
 		# solution in progress
