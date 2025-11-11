@@ -382,6 +382,27 @@ sok_takaken_14 = (
 	'  ####',
 )
 
+sok_complex_01 = (
+	# YASTGen #11 Chaos
+	'--#####',
+	'###@ .#',
+	'# $ #.#',
+	'#  $$ #',
+	'#.  # #',
+	'#   $.#',
+	'#######',
+)
+
+sok_complex_02 = (
+	# MICROCOSMOS 02
+	'#################',
+	'#  #  #  #  #   #',
+	'#.$   #  #.$    #',
+	'#  #.$ .$   #   #',
+	'# @#  #  #  #   #',
+	'#################',
+)
+
 optimal_solution_nums_strs = {
 	sok_trivial_h1: '1/1',
 	sok_trivial_h2: '1/1',
@@ -419,6 +440,8 @@ optimal_solution_nums_strs = {
 	sok_takaken_12: '86/19',
 	sok_takaken_13: ('213/54', '207/58'),
 	sok_takaken_14: '0/0',
+	sok_complex_01: '144/38',
+	sok_complex_02: '211/82',
 }
 
 optimal_solution_nums_strs_by_type = {
@@ -449,6 +472,8 @@ optimal_solution_strs = {
 	sok_obvious_12: 'lddddrUUddrruLdlluurDuluurDDlddRRuLdlUU',
 	sok_obvious_13: 'llddrdrruLLdlUluurrrDulllddrUluRddrdrruLLdlUU',
 	sok_obvious_14: 'rrddllldRRuruullDurrddldlluRuurrddrdLLruuullddRdrUUdllldRRuluurR',
+	sok_complex_01: 'dDuurrddLLrrddLLUlluuRDRddrruuLLrruullDlldddRRuULrrruullDldRddlUruuurrddddLLuuRlddrruUUdlldlldRRuuulDrddlluRurrrddLLUluRRlddrruUllldldRRRluuullD',
+	sok_complex_02: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
 }
 
 optimal_solution_strs_by_type = {
@@ -470,9 +495,13 @@ def create_solver(sokoban_map_lines, reverse_barrel_mode=False):
 	map = create_sokoban_map(sokoban_map_lines)
 	return create_sokoban_solver(map, reverse_barrel_mode, "Created solver for map" if verbose else False)
 
-def test_solution(sok, unique_solution_str=False):
+def test_solution(sok, unique_solution_str=False, solution_alg=None, return_first=False):
 	for solution_type in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
 		solver = create_solver(sok)
+		if solution_alg:
+			solver.solution_alg = solution_alg
+		if return_first:
+			solver.return_first = return_first
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
 		test.eq(solver.last_solution_nums_str, optimal_solution_nums_strs_by_type[solution_type][sok])
@@ -499,6 +528,10 @@ def test_obvious_solutions():
 def test_takaken_solutions():
 	for sok in sok_takaken_01, sok_takaken_05, sok_takaken_09, sok_takaken_11, sok_takaken_12:
 		test_solution(sok)
+
+def test_complex_solutions():
+	for sok in sok_complex_01, sok_complex_02:
+		test_solution(sok, False, SOLUTION_ALG_ASTAR, True)
 
 def test_trivial_without_solutions():
 	# already solved trivial map; unsolvable, since needs at least one shift
@@ -639,6 +672,7 @@ try:
 	test_trivial_solutions()
 	test_obvious_solutions()
 	test_takaken_solutions()
+	test_complex_solutions()
 	test_trivial_without_solutions()
 	test_algorithms_consistency()
 	test_reparent_dirty_propagation()
