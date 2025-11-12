@@ -398,15 +398,14 @@ class SokobanSolver():
 		return True
 
 	def get_found_solution_items(self, reason):
+		# store the solution nums for users
 		solution_items = None
-		if self.solved_position:
-			solution_items = [item for pair in self.solved_position.to_solution_pairs() for item in pair]
-		debug(DBG_SOLV, "Finding solution %s, returning %s solution" % (reason, self.solved_position.nums_str if self.solved_position else "no"))
-
-		# store the solution nums_str and str if there is solution
+		self.last_solution_time_str = None
 		self.last_solution_nums_str = None
 		self.last_solution_str = None
 		if self.solved_position is not None:
+			solution_items = [item for pair in self.solved_position.to_solution_pairs() for item in pair]
+			self.last_solution_time_str = get_time_str(time() - self.start_solution_time)
 			self.last_solution_nums_str = self.solved_position.nums_str
 			self.last_solution_str = ''
 			char_cell = self.char_cell
@@ -417,6 +416,7 @@ class SokobanSolver():
 				self.last_solution_str += shift_direction.upper()
 				char_cell = apply_diff(char_cell, DIRS_BY_NAME[shift_direction])
 
+		debug(DBG_SOLV, "Finding solution %s, returning %s solution" % (reason, self.last_solution_nums_str or "no"))
 		self.reset_solution_data()
 		return solution_items
 

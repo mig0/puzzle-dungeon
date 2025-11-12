@@ -28,6 +28,7 @@ parser.add_argument('-m', '--by-moves', help="find move optimal solution, not pu
 parser.add_argument('-0', '--disable-budget', help="do not report progress every second", action='store_true')
 parser.add_argument('-1', '--return-first', help="return first found solution (not optimal)", action='store_true')
 parser.add_argument('-D', '--show-dead', help="show dead-barrel cells on map", action='store_true')
+parser.add_argument('-t', '--show-time', help="show solution time in seconds", action='store_true')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
 parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file")
 
@@ -37,7 +38,7 @@ reverse_barrel_mode = cmdargs.reverse_barrel_mode
 disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
 return_first = cmdargs.return_first
-run_profiler = cmdargs.run_profiler
+show_time = cmdargs.show_time
 show_dead = cmdargs.show_dead
 show_sok = cmdargs.show_sok
 quiet = cmdargs.quiet or 0
@@ -85,6 +86,14 @@ for level_index, level_config in enumerate(level_configs):
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
 
+	def show_solution(solution_items):
+		if show_time:
+			print("Time: %s" % solver.last_solution_time_str)
+		if not solution_items:
+			print("Solution not found")
+		else:
+			print("Solution %s: %s" % (solver.last_solution_nums_str, solver.last_solution_str))
+
 	try:
 		while True:
 			solution_items, msg = solver.find_solution_func()
@@ -93,16 +102,13 @@ for level_index, level_config in enumerate(level_configs):
 			progress_line.put(msg)
 		progress_line.put()
 
-		if not solution_items:
-			print("Solution not found")
-		else:
-			print("Solution %s: %s" % (solver.last_solution_nums_str, solver.last_solution_str))
+		show_solution(solution_items)
 		print()
 	except KeyboardInterrupt:
 		print()
 		if solver.solved_position:
 			solution_items = solver.get_found_solution_items("terminated")
-			print("Solution %s: %s" % (solver.last_solution_nums_str, solver.last_solution_str))
+			show_solution(solution_items)
 		print("Terminated by user. Press Enter to continue, or Ctrl-C to stop")
 		try:
 			sys.stdin.readline()
