@@ -366,7 +366,7 @@ def fetch_letslogic_collection(ll_coll_id):
 		sokoban_coll_string = ""
 		for ll_level_config in ll_level_configs:
 			sokoban_level_string = get_ll_sokoban_level_string(ll_level_config, ll_coll_title)
-			ll_level_filename = "maps/sokoban/letslogic/levels/%s.txt" % ll_level_config['id']
+			ll_level_filename = get_letslogic_level_filename(ll_level_config['id'])
 			save_user_file(ll_level_filename, sokoban_level_string)
 			sokoban_coll_string += sokoban_level_string + "\n"
 		save_user_file(ll_coll_filename, sokoban_coll_string)
@@ -374,6 +374,20 @@ def fetch_letslogic_collection(ll_coll_id):
 		warn("Can't fetch letslogic collection, check url, key or internet")
 
 	return sokoban_coll_string
+
+def get_letslogic_level_filename(ll_level_id):
+	return "maps/sokoban/letslogic/levels/%s.txt" % ll_level_id
+
+def load_letslogic_level(ll_level_id):
+	if not type(ll_level_id) == str:
+		die("String parameter required to fetch letslogic level")
+
+	ll_level_filename = get_letslogic_level_filename(ll_level_id)
+	if exists_user_file(ll_level_filename):
+		return load_user_file(ll_level_filename)
+
+	warn("Unknown letslogic level id %s; fetch its collection first" % ll_level_id)
+	return None
 
 def fetch_letslogic_collections():
 	ll_colls_filename = "letslogic-collections.yaml"

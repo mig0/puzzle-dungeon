@@ -2,7 +2,7 @@ import atexit
 from common import warn
 from debug import debug
 from profiler import profiler
-from load import fetch_letslogic_collections, fetch_letslogic_collection, detect_map_file
+from load import fetch_letslogic_collections, fetch_letslogic_collection, load_letslogic_level, detect_map_file
 from sokobanparser import parse_sokoban_levels
 
 # Process common options and args.
@@ -52,7 +52,7 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 		elif arg == "clipboard:":
 			level_configs.extend(parse_clipboard_levels(arg, custom_collection.config) or [])
 		elif arg.startswith("letslogic:"):
-			if map_string := fetch_letslogic_collection(arg[10:]):
+			if map_string := load_letslogic_level(arg[11:]) if arg[10] == "/" else fetch_letslogic_collection(arg[10:]):
 				level_configs.extend(parse_sokoban_levels(map_string, custom_collection.config))
 		elif map_info := detect_map_file(arg):
 			is_sokoban_map, error, puzzle_type, size = map_info
