@@ -39,6 +39,8 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 	for arg in cmdargs.args:
 		if arg.isdigit():
 			level_indexes.append(int(arg))
+		elif "-" in arg and (sep_idx := arg.index("-")) and arg[:sep_idx].isdigit() and arg[sep_idx + 1:].isdigit():
+			level_indexes.extend(range(int(arg[:sep_idx]), int(arg[sep_idx + 1:]) + 1))
 		elif is_valid_level_id(arg):
 			collection, _, level_config = get_collection_level_config_by_id(arg)
 			level_configs.append(collection.with_level_config_defaults(level_config))
