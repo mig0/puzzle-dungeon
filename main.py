@@ -1569,6 +1569,18 @@ def handle_press_key():
 	if mode == "next":
 		return
 
+	# if any key is pressed while playing solution, stop it
+	if cancel_playing_solution():
+		return
+
+	# if any key is pressed while finding solution, mark it as stop-find
+	if stop_finding_solution():
+		return
+
+	# unset solution explicitely with Backspace
+	if keyboard.backspace and unset_prepared_solution():
+		return
+
 	if keyboard.space and not cursor.is_active():
 		if game.map[char.c] == CELL_PORTAL:
 			teleport_char()
@@ -1598,6 +1610,12 @@ def handle_press_key():
 		if level_configs and not game.set_custom_collection_level_configs(level_configs):
 			warn("Failed to activate levels in clipboard")
 
+	if keyboard.s and keyboard.alt:
+		solution_str = clipboard.get()
+		if solution.is_active() and solution.get_str() == solution_str:
+			keyboard.kp_enter = True
+		solution.set_str(solution_str)
+
 	if cursor_was_active and (cursor_had_status_message or debug.lvl > 0) and not cursor.is_active():
 		set_status_message(priority=0)
 
@@ -1619,18 +1637,6 @@ def handle_press_key():
 		return
 
 	if not game.level.is_set():
-		return
-
-	# if any key is pressed while playing solution, stop it
-	if cancel_playing_solution():
-		return
-
-	# if any key is pressed while finding solution, mark it as stop-find
-	if stop_finding_solution():
-		return
-
-	# unset solution explicitely with Backspace
-	if keyboard.backspace and unset_prepared_solution():
 		return
 
 	if keyboard.p:

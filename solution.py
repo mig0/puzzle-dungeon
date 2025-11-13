@@ -161,6 +161,22 @@ class Solution:
 		current_cell_ref = [char.c]
 		return ''.join(item.get_str(current_cell_ref) for item in self.solution_items)
 
+	def set_str(self, solution_str):
+		args = []
+		for ch in solution_str:
+			if ch.isspace():
+				continue
+			if ch in DIRECTIONS or ch in SHIFT_DIRECTIONS:
+				args.append(ch)
+			else:
+				warn("Unsupported char (%s) is solution string")
+				return False
+		if not args:
+			warn("Ignored empty solution string")
+			return False
+		self.set(args)
+		return True
+
 	def set(self, args):
 		self.find_mode = False
 		self.solution_items = [item for item in (SolutionItem(arg) for arg in args) if not item.is_done]
