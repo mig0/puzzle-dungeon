@@ -2,7 +2,7 @@ from time import time
 from flags import flags
 from config import SOLUTION_MOVE_DELAY, SOLUTION_MOVE_DELAY_RANGE, SOLUTION_MOVE_DELAY_CHANGE
 from objects import char
-from constants import DIR_NAMES, DIRS_BY_NAME
+from constants import DIR_NAMES, DIRS_BY_NAME, DIRECTIONS
 from celltools import apply_diff, cell_diff
 from statusmessage import set_status_message
 
@@ -10,6 +10,8 @@ find_path    = None
 move_char    = None
 press_cell   = None
 prepare_move = None
+
+SHIFT_DIRECTIONS = list(''.join(DIRECTIONS).upper())
 
 def is_cell(cell):
 	return type(cell) == tuple and len(cell) == 2 and all(type(i) == int for i in cell)
@@ -28,17 +30,18 @@ class SolutionItem:
 		if is_cell_button_tuple(arg):
 			self.cell_to_press = arg[0]
 			self.button_to_press = arg[1]
-		self.shift_dir = DIRS_BY_NAME[arg] if type(arg) == str and arg in DIRS_BY_NAME else None
+		self.move_dir = DIRS_BY_NAME[arg] if type(arg) == str and arg in DIRECTIONS else None
+		self.shift_dir = DIRS_BY_NAME[arg.lower()] if type(arg) == str and arg in SHIFT_DIRECTIONS else None
 		self.target_cell = list(arg)[0] if type(arg) == set and is_cell(list(arg)[0]) else None
 		self.path_cells = list(arg) if is_cell_list(arg) else None
 
-		if not self.target_cell and self.path_cells is None and not self.shift_dir and not self.cell_to_press:
-			raise TypeError("Unsupported arg %s in constuctor" % str(arg))
+		if not (self.target_cell or self.path_cells is not None or self.move_dir or self.shift_dir or self.cell_to_press):
+			raise TypeError("Unsupported arg (%s) in constuctor" % str(arg))
 
 		self.is_done = True if self.path_cells is not None and not self.path_cells else False
 
 	def get_num_moves(self):
-		return len(self.path_cells) if self.path_cells is not None else 0
+		return len(self.path_cells) if self.path_cells is not None else 1 if self.move_dir else 0
 
 	def get_num_shifts(self):
 		return 1 if self.shift_dir else 0
@@ -50,6 +53,9 @@ class SolutionItem:
 		return 1 if self.target_cell else 0
 
 	def get_str(self, current_cell_ref):
+		if self.move_dir:
+			current_cell_ref[0] = apply_diff(current_cell_ref[0], self.move_dir)
+			return DIR_NAMES[self.move_dir]
 		if self.shift_dir:
 			current_cell_ref[0] = apply_diff(current_cell_ref[0], self.shift_dir)
 			return DIR_NAMES[self.shift_dir].upper()
@@ -81,10 +87,10 @@ class SolutionItem:
 		if self.cell_to_press:
 			press_cell(self.cell_to_press, self.button_to_press)
 			self.is_done = True
-		elif self.shift_dir:
+		elif self.move_dir or self.shift_dir:
 			old_cell = char.c
-			move_char(self.shift_dir)
-			# allow repeating the same push or pull until a potentional enemy is killed
+			move_char(self.move_dir or self.shift_dir)
+			# allow repeating the same move, push or pull until a potentional enemy is killed
 			self.is_done = char.c != old_cell
 		else:
 			new_cell = self.path_cells[0]

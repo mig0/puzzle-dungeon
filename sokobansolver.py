@@ -403,8 +403,8 @@ class SokobanSolver():
 		self.last_solution_time_str = None
 		self.last_solution_nums_str = None
 		self.last_solution_str = None
-		if self.solved_position is not None:
-			solution_items = [item for pair in self.solved_position.to_solution_pairs() for item in pair]
+		is_solved = self.solved_position is not None
+		if is_solved:
 			self.last_solution_time_str = get_time_str(time() - self.start_solution_time)
 			self.last_solution_nums_str = self.solved_position.nums_str
 			self.last_solution_str = ''
@@ -418,7 +418,7 @@ class SokobanSolver():
 
 		debug(DBG_SOLV, "Finding solution %s, returning %s solution" % (reason, self.last_solution_nums_str or "no"))
 		self.reset_solution_data()
-		return solution_items
+		return list(self.last_solution_str) if is_solved else None
 
 	def get_find_solution_status_str(self):
 		time_str = get_time_str(time() - self.start_solution_time)
