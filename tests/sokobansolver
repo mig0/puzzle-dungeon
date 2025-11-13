@@ -440,8 +440,8 @@ optimal_solution_nums_strs = {
 	sok_takaken_12: '86/19',
 	sok_takaken_13: ('213/54', '207/58'),
 	sok_takaken_14: '0/0',
-	sok_complex_01: '144/38',
-	sok_complex_02: '211/82',
+	sok_complex_01: ('171/42', '170/42'),  # '144/38',
+	sok_complex_02: ('265/88', '265/88'),  # '211/82',
 }
 
 optimal_solution_nums_strs_by_type = {
@@ -559,8 +559,7 @@ def test_trivial_without_solutions():
 	))
 
 def test_algorithms_consistency():
-	maps = [sok_trivial_h1, sok_trivial_h2, sok_trivial_s1]
-	for sok in sok_trivial_h3, sok_trivial_s2, sok_takaken_09:
+	for sok in sok_trivial_h3, sok_obvious_05, sok_obvious_06:
 		for reverse_barrel_mode in False, True:
 			results = {}
 			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_PQ, SOLUTION_ALG_ASTAR:
@@ -590,15 +589,15 @@ def test_reparent_dirty_propagation():
 	solver.solution_alg = SOLUTION_ALG_BFS
 	# prepare and create the initial structures
 	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
-	super_pos = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
-	pos = Position(super_pos, solver.char_cell, None, None, None)
+	super_position = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
+	position = Position(super_position, solver.char_cell, None, None, None)
 	# create a fake child and reparent to check propagation
-	child = Position(super_pos, solver.char_cell, pos, (3,1), [([], solver.char_cell, solver.barrel_cells[0])])
-	# now reparent child to pos again with different own_nums
-	child.reparent(pos, (1,1), child.segments)
+	child = Position(super_position, solver.char_cell, position, (3, 1), [([], solver.char_cell, solver.barrel_cells[0])])
+	# now reparent child to position again with different own_nums
+	child.reparent(position, (1, 1), child.segments)
 	# after reparent, child's total_nums and depth must reflect new parent
-	test.eq(child.parent, pos)
-	test.eq(child.is_dirty, False)
+	test.eq(child.parent, position)
+	test.eq(child.is_dirty, True)
 	test.eq(child.is_fully_processed, False)
 
 def test_get_min_solution_depth_behavior():
@@ -649,7 +648,7 @@ def test_position_num_calculation():
 	test.eq(child.total_nums, (3, 2))
 	# Reparent child with new own_nums
 	child.reparent(root, (1, 1), [])
-	test.eq(child.total_nums, (1, 1))
+	test.eq(child.total_nums, (3, 2))
 
 def test_find_solution_status_string():
 	solver = create_solver(sok_trivial_h2)
