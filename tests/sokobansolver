@@ -562,7 +562,7 @@ def test_algorithms_consistency():
 	for sok in sok_trivial_h3, sok_obvious_05, sok_obvious_06:
 		for reverse_barrel_mode in False, True:
 			results = {}
-			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_PQ, SOLUTION_ALG_ASTAR:
+			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR:
 				# solve both types
 				solver = create_solver(sok, reverse_barrel_mode)
 				solver.solution_alg = alg

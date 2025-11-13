@@ -16,7 +16,7 @@ SOLUTION_TYPE_BY_MOVES = 2
 
 SOLUTION_ALG_DFS   = "DFS"
 SOLUTION_ALG_BFS   = "BFS"
-SOLUTION_ALG_PQ    = "PQ"
+SOLUTION_ALG_GREED = "Greedy"
 SOLUTION_ALG_ASTAR = "A*"
 
 solver = None
@@ -427,7 +427,7 @@ class SokobanSolver():
 		if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 			status_str += "; depth %d" % self.solution_depth
 		status_str += "; positions: %d" % self.num_processed_positions
-		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_PQ, SOLUTION_ALG_ASTAR):
+		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
 			status_str += " + %d" % len(self.unprocessed_positions)
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
@@ -449,7 +449,7 @@ class SokobanSolver():
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()
 			self.unprocessed_positions = [self.initial_position]
-			if self.solution_alg == SOLUTION_ALG_PQ:
+			if self.solution_alg == SOLUTION_ALG_GREED:
 				self.sort_positions = lambda position: position.total_nums
 			if self.solution_alg == SOLUTION_ALG_ASTAR:
 				self.sort_positions = lambda position: position.solution_cost
