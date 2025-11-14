@@ -588,7 +588,7 @@ def test_reparent_dirty_propagation():
 	solver = create_solver(sok)
 	solver.solution_alg = SOLUTION_ALG_BFS
 	# prepare and create the initial structures
-	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
+	solver.prepare_solution(solver.char_cell)
 	super_position = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
 	position = Position(super_position, solver.char_cell, None, None, None)
 	# create a fake child and reparent to check propagation
@@ -600,35 +600,54 @@ def test_reparent_dirty_propagation():
 	test.eq(child.is_dirty, True)
 	test.eq(child.is_fully_processed, False)
 
+def test_prepare_solution_without_plates():
+	sok = ('#######', '# @ $ #', '#######')
+	solver = create_solver(sok)
+	solver.prepare_solution()
+	test.has_attr(grid, 'dead_barrel_bits')
+	test.has_attr(solver, 'min_barrel_plate_shifts')
+	test.has_attr(solver, 'min_char_barrel_plate_shifts')
+	# ensure all floor cells are marked as dead without plates
+	num_dead_barrel_bits = grid.dead_barrel_bits.count()
+	test.gt(num_dead_barrel_bits, 0)
+	test.eq(num_dead_barrel_bits, grid.num_bits)
+
+def test_prepare_solution_with_plate():
+	solver = create_solver(sok_obvious_10)
+	solver.prepare_solution()
+	dead_barrel_bits = grid.dead_barrel_bits
+	test.gt(dead_barrel_bits.count(), 0)
+	# now call with disable_prepare=True
+	solver.disable_prepare = True
+	solver.prepare_solution()
+	# when disabled, dead_barrel_bits is no_bits
+	test.eq(grid.dead_barrel_bits.count(), 0)
+	# chech consistency
+	solver.disable_prepare = False
+	solver.prepare_solution()
+	test.eq(grid.dead_barrel_bits, dead_barrel_bits)
+
 def test_get_min_solution_depth_behavior():
 	solver = create_solver(sok_trivial_s1)
-	# assume prepare has been run inside configure
-	# compare original method (current) vs simple lookup
-	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
-	# a set of barrels
-	barrel_cells = solver.barrel_cells
-	# Use your method
-	depth_old = solver.get_min_solution_depth(barrel_cells)
-	# compute expected
-	expected = 0
-	for barrel_cell in barrel_cells:
-		expected += grid.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits)
-	test.eq(depth_old, expected)
+	solver.prepare_solution(solver.char_cell)
+	depth = solver.get_min_solution_depth(solver.barrel_cells)
+	expected = sum(solver.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits) for barrel_cell in solver.barrel_cells)
+	test.eq(depth, expected)
 
 def test_prepare_solution_char_filtering():
 	solver = create_solver(sok_trivial_s2)
 	# call prepare with char set vs char None and observe dead_barrel_bits differs or min_shifts differs
-	grid.prepare_sokoban_solution(None, disable=False)
+	solver.prepare_solution(None)
 	all_dead_count = grid.dead_barrel_bits.count()
 	# now restrict by char position: recompute
-	grid.prepare_sokoban_solution(solver.char_cell, disable=False)
+	solver.prepare_solution(solver.char_cell)
 	char_dead_count = grid.dead_barrel_bits.count()
 	# reachable plates only should reduce dead set (or stay equal) — expect char_dead_count <= all_dead_count
 	test.le(char_dead_count, all_dead_count)
 
 def test_superposition_idempotence():
 	solver = create_solver(sok_trivial_h1)
-	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
+	solver.prepare_solution(solver.char_cell)
 	# create two barrel lists with same set but different order
 	barrel_cells = tuple(solver.barrel_cells)
 	rev_barrel_cells = tuple(reversed(barrel_cells))
@@ -641,7 +660,7 @@ def test_superposition_idempotence():
 
 def test_position_num_calculation():
 	solver = create_solver(sok_trivial_h1)
-	grid.prepare_sokoban_solution(solver.char_cell, solver.disable_prepare)
+	solver.prepare_solution(solver.char_cell)
 	super_pos = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
 	root = Position(super_pos, solver.char_cell, None, None, None)
 	child = Position(super_pos, solver.char_cell, root, (3, 2), [])
@@ -671,6 +690,8 @@ try:
 	test_trivial_without_solutions()
 	test_algorithms_consistency()
 	test_reparent_dirty_propagation()
+	test_prepare_solution_without_plates()
+	test_prepare_solution_with_plate()
 	test_get_min_solution_depth_behavior()
 	test_prepare_solution_char_filtering()
 	test_superposition_idempotence()

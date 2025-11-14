@@ -2,7 +2,7 @@ from constants import *
 from celltools import *
 from common import get_time_str
 from debug import *
-from grid import grid
+from grid import grid, search_bits, _ONE
 from time import time
 import bisect
 
@@ -182,9 +182,9 @@ class SokobanSolver():
 	def get_min_solution_depth(self, barrel_cells):
 		solution_depth = 0
 		for barrel_cell in barrel_cells:
-			num_shifts = grid.min_barrel_plate_shifts[min(grid.min_barrel_plate_shifts.keys(), key=lambda cell:
-				grid.min_barrel_plate_shifts[cell] if cell == barrel_cell else grid.num_bits
-			)] if grid.min_barrel_plate_shifts else grid.num_bits
+			num_shifts = self.min_barrel_plate_shifts[min(self.min_barrel_plate_shifts.keys(), key=lambda cell:
+				self.min_barrel_plate_shifts[cell] if cell == barrel_cell else grid.num_bits
+			)] if self.min_barrel_plate_shifts else grid.num_bits
 			solution_depth += num_shifts
 
 		return solution_depth
@@ -214,7 +214,7 @@ class SokobanSolver():
 		else:
 			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts()
 
-		accessible_cells_near_barrels.sort(key=lambda two_cells: grid.min_char_barrel_plate_shifts.get(two_cells, grid.num_bits) or grid.num_bits)
+		accessible_cells_near_barrels.sort(key=lambda two_cells: self.min_char_barrel_plate_shifts.get(two_cells, grid.num_bits) or grid.num_bits)
 		all_proto_segments = tuple([(None, char_cell, barrel_cell)] for char_cell, barrel_cell in accessible_cells_near_barrels)
 		if grid.is_zsb:
 			for proto_segments in all_proto_segments:
@@ -397,6 +397,61 @@ class SokobanSolver():
 					bisect.insort(unprocessed_positions, child, key=self.sort_positions)
 		return True
 
+	def prepare_solution(self, char=None):
+		self.min_char_barrel_plate_shifts = min_char_shifts = {}
+		self.min_barrel_plate_shifts = min_shifts = {}
+
+		if grid.plate_bits == grid.no_bits:
+			grid.dead_barrel_bits = grid.all_bits
+			return
+		grid.dead_barrel_bits = grid.no_bits
+		# disable means to proceed with the solution without calculating minimal-costs and dead-barrels
+		if self.disable_prepare:
+			return
+
+		grid.barrel_bits = grid.no_bits
+		char_accessible_bits = grid.get_accessible_bits(char) if char else grid.all_bits
+
+		# run BFS separately for each plate to compute distances from that plate
+		for plate_idx in search_bits(grid.plate_bits, _ONE):
+			if not char_accessible_bits[plate_idx]:
+				continue
+			plate_cell = grid.to_cell(plate_idx)
+			depth = 0
+			min_shifts[plate_cell] = 0
+			unprocessed = [(char_cell, plate_cell) for char_cell in grid.get_accessible_neigh_cells(plate_cell)]
+
+			while unprocessed:
+				depth += 1
+				next_unprocessed = []
+
+				for last_char_cell, barrel_cell in unprocessed:
+					grid.barrel_bits = grid.to_bit(barrel_cell)
+					accessible_bits = grid.get_accessible_bits(last_char_cell)
+
+					for char_idx in grid.all_passable_neigh_idxs[grid.to_idx(barrel_cell)]:
+						if not accessible_bits[char_idx]:
+							continue
+
+						new_cells = grid.try_opposite_shift(grid.idx_cells[char_idx], barrel_cell)
+						if not new_cells:
+							continue
+
+						if new_cells not in min_char_shifts or min_char_shifts[new_cells] > depth:
+							min_char_shifts[new_cells] = depth
+							new_char_cell, new_barrel_cell = new_cells
+							if new_barrel_cell not in min_shifts or min_shifts[new_barrel_cell] > depth:
+								min_shifts[new_barrel_cell] = depth
+							next_unprocessed.append(new_cells)
+
+				unprocessed = next_unprocessed
+
+		grid.barrel_bits = grid.no_bits.copy()
+
+		grid.dead_barrel_bits = ~grid.to_bits(min_shifts.keys())
+		if debug.has(DBG_SOLV3):
+			grid.show_map("Map with dead-barrel cells", show_dead=True)
+
 	def get_found_solution_items(self, reason):
 		# store the solution nums for users
 		solution_items = None
@@ -442,7 +497,7 @@ class SokobanSolver():
 			# preparing to find solution
 			self.start_solution_time = time()
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
-			grid.prepare_sokoban_solution(self.char_cell, self.disable_prepare)
+			self.prepare_solution(self.char_cell)
 			grid.set_barrels(self.barrel_cells)
 			super_position = self.find_or_create_super_position(self.char_cell, self.barrel_cells)
 			self.initial_position = Position(super_position, self.char_cell, None, None, None)
@@ -530,7 +585,7 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 	solver.return_first = return_first
 	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
 	if show_dead:
-		grid.prepare_sokoban_solution(char_cell)
+		self.prepare_solution(char_cell)
 	if show_map:
 		descr = None if show_map is True else show_map
 		grid.show_map(descr, char=char_cell, barrels=barrel_cells, show_dead=show_dead)

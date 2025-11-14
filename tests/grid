@@ -476,33 +476,6 @@ def test_try_push_pull_without_barrel():
 	test.none(grid.try_shift(char_cell, barrel_cell))
 	grid.restore_barrels()
 
-def test_prepare_sokoban_solution_without_plates():
-	grid = configure_simple_grid()
-	grid.prepare_sokoban_solution()
-	test.has_attr(grid, 'dead_barrel_bits')
-	test.has_attr(grid, 'min_barrel_plate_shifts')
-	test.has_attr(grid, 'min_char_barrel_plate_shifts')
-	# ensure all floor cells are marked as dead without plates
-	num_dead_barrel_bits = grid.dead_barrel_bits.count()
-	test.gt(num_dead_barrel_bits, 0)
-	test.eq(num_dead_barrel_bits, grid.num_bits)
-
-def test_prepare_sokoban_solution_with_plate():
-	grid = configure_simple_grid(plate_cells=[(5, 5)])
-	grid.prepare_sokoban_solution()
-	num_dead_barrel_bits = grid.dead_barrel_bits.count()
-	test.gt(grid.dead_barrel_bits.count(), 0)
-	# now call with disable=True
-	grid.reset_sokoban_solution()
-	grid.prepare_sokoban_solution(disable=True)
-	# when disabled, dead_barrel_bits is no_bits
-	test.eq(grid.dead_barrel_bits.count(), 0)
-	# chech consistency
-	grid.reset_sokoban_solution()
-	grid.prepare_sokoban_solution()
-	test.eq(grid.dead_barrel_bits.count(), num_dead_barrel_bits)
-	show_map_if_verbose(grid, "Map after test_prepare_sokoban_solution_with_plate")
-
 def test_zsb_area_size_validation():
 	grid = Grid()
 	grid.configure(make_empty_map(11, 11))  # 11x11 odd–odd OK
@@ -655,8 +628,6 @@ try:
 	test_set_barrels_wall_raises()
 	test_last_accessible_bits_and_obstacles()
 	test_try_push_pull_without_barrel()
-	test_prepare_sokoban_solution_without_plates()
-	test_prepare_sokoban_solution_with_plate()
 	test_zsb_area_size_validation()
 	test_zsb_wall_and_anchor_pattern()
 	test_zsb_graph_connected_and_correspondence()

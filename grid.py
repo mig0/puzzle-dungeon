@@ -99,7 +99,7 @@ class Grid:
 		self.barrel_bits = _ZEROBITS
 		self.orig_barrel_bits_stack = []
 		self.plate_bits = _ZEROBITS
-		self.reset_sokoban_solution()
+		self.dead_barrel_bits = _ZEROBITS
 
 	def configure(self, map, area=None, reverse_barrel_mode=False, cut_outer_floors=False):
 		self.reset()
@@ -136,7 +136,7 @@ class Grid:
 			if map[cell] in (ACTOR_CHARS['barrel'], ACTOR_ON_PLATE_CHARS['barrel']):
 				self.barrel_bits[idx] = True
 
-		self.reset_sokoban_solution()
+		self.dead_barrel_bits = self.no_bits
 
 		debug(DBG_GRID, "Configured map with %d floors" % self.num_bits)
 		debug(DBG_GRID2, "- idx_cells: %s" % (self.idx_cells))
@@ -672,10 +672,10 @@ class Grid:
 		debug(DBG_SZSB2, [1], {"plates": self.plate_bits, "barrels": self.barrel_bits})
 		self.is_zsb = True
 
-	# Support for Sokoban solvers
+	# Support for sokoban solvers
 
 	# return list of all accessible (char_cell, barrel_cell) pairs valid for shift
-	# should to be called after get_accessible_cells()
+	# should to be called after get_accessible_bits()
 	def get_all_valid_char_barrel_shifts(self, accessible_bits=None):
 		if accessible_bits is None:
 			accessible_bits = self.last_accessible_bits
@@ -689,65 +689,5 @@ class Grid:
 				if self.can_shift(char_cell, barrel_cell):
 					cell_pairs.append((char_cell, barrel_cell))
 		return cell_pairs
-
-	# disable means to proceed to the solution without calculating minimum-shifts and dead-barrels
-	def prepare_sokoban_solution(self, char=None, disable=False):
-		self.min_char_barrel_plate_shifts = min_char_shifts = {}
-		self.min_barrel_plate_shifts = min_shifts = {}
-
-		if self.plate_bits == self.no_bits:
-			self.dead_barrel_bits = self.all_bits
-			return
-		self.dead_barrel_bits = self.no_bits
-		if disable:
-			return
-
-		self.barrel_bits = self.no_bits
-		char_accessible_bits = self.get_accessible_bits(char) if char else self.all_bits
-
-		# run BFS separately for each plate to compute distances from that plate
-		for plate_idx in search_bits(self.plate_bits, _ONE):
-			if not char_accessible_bits[plate_idx]:
-				continue
-			plate_cell = self.to_cell(plate_idx)
-			depth = 0
-			min_shifts[plate_cell] = 0
-			unprocessed = [(char_cell, plate_cell) for char_cell in self.get_accessible_neigh_cells(plate_cell)]
-
-			while unprocessed:
-				depth += 1
-				next_unprocessed = []
-
-				for last_char_cell, barrel_cell in unprocessed:
-					self.barrel_bits = self.to_bit(barrel_cell)
-					accessible_bits = self.get_accessible_bits(last_char_cell)
-
-					for char_idx in self.all_passable_neigh_idxs[self.to_idx(barrel_cell)]:
-						if not accessible_bits[char_idx]:
-							continue
-
-						new_cells = self.try_opposite_shift(self.idx_cells[char_idx], barrel_cell)
-						if not new_cells:
-							continue
-
-						if new_cells not in min_char_shifts or min_char_shifts[new_cells] > depth:
-							min_char_shifts[new_cells] = depth
-							new_char_cell, new_barrel_cell = new_cells
-							if new_barrel_cell not in min_shifts or min_shifts[new_barrel_cell] > depth:
-								min_shifts[new_barrel_cell] = depth
-							next_unprocessed.append(new_cells)
-
-				unprocessed = next_unprocessed
-
-		self.barrel_bits = self.no_bits.copy()
-
-		self.dead_barrel_bits = ~self.to_bits(min_shifts.keys())
-		if DBG_GRID2 in debug.features:
-			self.show_map("Map with dead-barrel cells", show_dead=True)
-
-	def reset_sokoban_solution(self):
-		self.dead_barrel_bits = self.no_bits
-		self.min_barrel_plate_shifts = None
-		self.min_char_barrel_plate_shifts = None
 
 grid = Grid()
