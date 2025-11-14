@@ -180,14 +180,7 @@ class SokobanSolver():
 		grid.reset()
 
 	def get_min_solution_depth(self, barrel_cells):
-		solution_depth = 0
-		for barrel_cell in barrel_cells:
-			num_shifts = self.min_barrel_plate_shifts[min(self.min_barrel_plate_shifts.keys(), key=lambda cell:
-				self.min_barrel_plate_shifts[cell] if cell == barrel_cell else grid.num_bits
-			)] if self.min_barrel_plate_shifts else grid.num_bits
-			solution_depth += num_shifts
-
-		return solution_depth
+		return sum(self.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits) for barrel_cell in barrel_cells)
 
 	def estimate_solution_depth(self):
 		if (solution_depth := self.get_min_solution_depth(self.barrel_cells)) is None:
