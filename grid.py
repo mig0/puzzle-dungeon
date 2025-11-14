@@ -163,6 +163,7 @@ class Grid:
 
 		# precompute all passable neigbors per each passable cell
 		self.all_passable_neigh_idxs = []
+		self.all_passable_neigh_bits = []
 		for idx, cell in enumerate(self.idx_cells):
 			passable_neigh_idxs = []
 			for dir in SORTED_DIRS:
@@ -170,6 +171,7 @@ class Grid:
 				neigh_idx = self.cell_idxs.get(neigh_cell)
 				if neigh_idx is not None:
 					passable_neigh_idxs.append(neigh_idx)
+			self.all_passable_neigh_bits.append(self.to_bits(passable_neigh_idxs))
 			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
 
 	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, show_dead=False, extra_cb=None):
@@ -266,17 +268,19 @@ class Grid:
 		accessible_bits[start_idx] = True
 		unprocessed_bits = self.no_bits.copy()
 		unprocessed_bits[start_idx] = True
+		processed_bits = obstacle_bits.copy()
+		processed_bits[start_idx] = True
 
 		while True:
 			new_bits = self.no_bits.copy()
 
 			for idx in search_bits(unprocessed_bits, _ONE):
-				for neigh_idx in self.all_passable_neigh_idxs[idx]:
-					if not accessible_bits[neigh_idx] and not obstacle_bits[neigh_idx]:
-						new_bits[neigh_idx] = True
+				new_bits |= self.all_passable_neigh_bits[idx]
+			new_bits &= ~processed_bits
 			if new_bits == self.no_bits:
 				break
 			accessible_bits |= new_bits
+			processed_bits |= new_bits
 			unprocessed_bits = new_bits
 
 		self.last_accessible_bits = accessible_bits
@@ -306,21 +310,22 @@ class Grid:
 		if start_idx == target_idx:
 			return 0
 		obstacle_bits = self.barrel_bits if obstacles is None else self.to_bits(obstacles)
+		if obstacle_bits[target_idx]:
+			return None
 
 		unprocessed_bits = self.no_bits.copy()
 		unprocessed_bits[start_idx] = True
-
 		processed_bits = obstacle_bits.copy()
 		processed_bits[start_idx] = True
+
 		distance = 1
 		while True:
 			new_bits = self.no_bits.copy()
 			for idx in search_bits(unprocessed_bits, _ONE):
-				for neigh_idx in self.all_passable_neigh_idxs[idx]:
-					if neigh_idx == target_idx:
-						return distance
-					if not processed_bits[neigh_idx]:
-						new_bits[neigh_idx] = True
+				new_bits |= self.all_passable_neigh_bits[idx]
+				if new_bits[target_idx]:
+					return distance
+			new_bits &= ~processed_bits
 			if new_bits == self.no_bits:
 				return None
 			processed_bits |= new_bits
@@ -336,20 +341,22 @@ class Grid:
 
 		unprocessed_bits = self.no_bits.copy()
 		unprocessed_bits[start_idx] = True
+		processed_bits = obstacle_bits.copy()
+		processed_bits[start_idx] = True
 
-		distance = 0
+		distance = 1
 		while True:
 			new_bits = self.no_bits.copy()
 			for idx in search_bits(unprocessed_bits, _ONE):
-				for neigh_idx in self.all_passable_neigh_idxs[idx]:
-					if distances[neigh_idx] == -1 and not obstacle_bits[neigh_idx]:
-						new_bits[neigh_idx] = True
+				new_bits |= self.all_passable_neigh_bits[idx]
+			new_bits &= ~processed_bits
 			if new_bits == self.no_bits:
 				break
-			distance += 1
 			for idx in search_bits(new_bits, _ONE):
 				distances[idx] = distance
+			processed_bits |= new_bits
 			unprocessed_bits = new_bits
+			distance += 1
 
 		return distances
 
