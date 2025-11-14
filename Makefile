@@ -97,3 +97,6 @@ dist: check-dependencies
 rpm:
 	@echo "This functionality is not implemented yet"
 
+test:
+	@tests/all
+
