@@ -76,14 +76,16 @@ class ProgressLine:
 		self.is_progress_line_enabled = is_enabled
 		self.max_progress_line_len = max_len
 		self.last_progress_line = None
+		self.ELLIPSES = '…'  # or: ' … '
 
 	def put(self, line=""):
 		if not self.is_progress_line_enabled:
 			return
 		line_len = len(line)
 		if line_len > self.max_progress_line_len:
-			mid = self.max_progress_line_len // 2 - 2
-			line = line[0:mid] + ' … ' + line[line_len - self.max_progress_line_len + mid + 3:line_len]
+			e_len = len(self.ELLIPSES)
+			mid = (self.max_progress_line_len - e_len) // 2
+			line = line[0:mid] + self.ELLIPSES + line[line_len - self.max_progress_line_len + mid + e_len:line_len]
 
 		if self.last_progress_line is not None:
 			last_line_len = len(self.last_progress_line)
