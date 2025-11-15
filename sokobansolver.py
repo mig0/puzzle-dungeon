@@ -73,6 +73,8 @@ class Position:
 		self.is_expanded = False
 		self.is_fully_processed = False
 		solver.num_created_positions += 1
+		solver.last_created_position = self
+		solver.max_created_depth = max(solver.max_created_depth, self.depth)
 		debug([self.depth], DBG_SOLV2, "Created %s" % self)
 
 	@property
@@ -174,6 +176,8 @@ class SokobanSolver():
 		self.end_solution_time = 99999999999
 		self.budget_solution_time = None
 		self.num_created_positions = 0
+		self.last_created_position = None
+		self.max_created_depth = 0
 		self.unprocessed_positions = None
 		self.num_processed_positions = 0
 		self.sort_positions = None
@@ -472,8 +476,13 @@ class SokobanSolver():
 		time_str = get_time_str(time() - self.start_solution_time)
 		status_str = "Finding %s optimal solution" % ("move" if self.solution_type == SOLUTION_TYPE_BY_MOVES else "push")
 		status_str += "; %s" % time_str
-		if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
-			status_str += "; depth %d" % self.solution_depth
+		max_depth = self.max_created_depth
+		if self.solution_alg == SOLUTION_ALG_DFS:
+			status_str += "; limit %d" % self.solution_depth
+		elif self.solution_alg == SOLUTION_ALG_BFS:
+			status_str += "; depth %s" % max_depth
+		else:
+			status_str += "; %s deepest %d" % (self.solution_alg[0:2], max_depth)
 		status_str += "; positions: %d" % self.num_processed_positions
 		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
 			status_str += " + %d" % len(self.unprocessed_positions)
