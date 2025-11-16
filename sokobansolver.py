@@ -4,7 +4,8 @@ from common import get_time_str
 from debug import *
 from grid import grid, search_bits, _ONE
 from time import time
-import bisect
+import heapq
+import itertools
 
 MIN_SOLUTION_DEPTH = 5
 MAX_SOLUTION_DEPTH = 500
@@ -22,6 +23,9 @@ SOLUTION_ALG_ASTAR = "A*"
 INF = 10 ** 9
 
 solver = None
+
+def cost_to_key(cost):
+	return cost if solver.solution_type == SOLUTION_TYPE_BY_MOVES else (cost[1], cost[0])
 
 def cmp_costs(cost1, cost2):
 	(m1, s1), (m2, s2) = cost1, cost2
@@ -114,6 +118,7 @@ class Position:
 		self.own_nums = own_nums
 		self.segments = segments
 		self.mark_dirty_down()
+		solver.pq_push(self)
 
 	def calc_nums(self):
 		self.depth = self.parent.depth + 1
@@ -183,7 +188,37 @@ class SokobanSolver():
 		self.unprocessed_positions = None
 		self.num_processed_positions = 0
 		self.sort_positions = None
+		self._pq_counter = None
+		self._best_position_keys = {}  # position -> key used in heap
 		grid.reset()
+
+	def pq_push(self, position):
+		if self.sort_positions is None:
+			return
+
+		key = cost_to_key(self.sort_positions(position))
+		prev_key = self._best_position_keys.get(position)
+		if prev_key is not None and prev_key <= key:
+			return
+
+		# tie-break by counter, stable ordering
+		entry = (key, next(self._pq_counter), position)
+		heapq.heappush(self.unprocessed_positions, entry)
+		self._best_position_keys[position] = key
+
+	def pq_pop(self):
+		# pop until we get a non-stale tuple or heap is empty
+		while self.unprocessed_positions:
+			key, _, position = heapq.heappop(self.unprocessed_positions)
+			best_key = self._best_position_keys.get(position)
+			if best_key is None or best_key != key:
+				# skip stale entry
+				continue
+			# remove entry now - will reinsert if it gets updated
+			del self._best_position_keys[position]
+			return key, position
+		return None, None
+
 
 	# greedy lower-bound cost (moves, shifts) for the given barrels
 	def get_min_solution_cost(self, barrels):
@@ -429,20 +464,20 @@ class SokobanSolver():
 		return not depth_limit_positions
 
 	def find_solution_using_pq(self):
-		unprocessed_positions = self.unprocessed_positions
-
-		while unprocessed_positions:
-			position = unprocessed_positions[0]
+		while True:
+			key, position = self.pq_pop()
+			if position is None:
+				# heap is empty, finished
+				return True
 			is_fully_processed = self.process_position(position)
 			if is_fully_processed is None:
+				self.pq_push(position)
 				return None
-			unprocessed_positions.pop(0)
 			if is_fully_processed:
 				continue
+			# push all children (their keys are computed inside pq_push)
 			for child in position.children:
-				if not child in unprocessed_positions:
-					bisect.insort(unprocessed_positions, child, key=self.sort_positions)
-		return True
+				self.pq_push(child)
 
 	def prepare_solution(self, char=None):
 		self.min_char_barrel_plate_shifts = min_char_shifts = {}
@@ -579,13 +614,20 @@ class SokobanSolver():
 			grid.set_barrels(self.barrel_cells)
 			super_position = self.find_or_create_super_position(self.char_cell, self.barrel_cells)
 			self.initial_position = Position(super_position, self.char_cell, None, None, None)
+
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()
-			self.unprocessed_positions = [self.initial_position]
 			if self.solution_alg == SOLUTION_ALG_GREED:
 				self.sort_positions = lambda position: position.total_nums
 			if self.solution_alg == SOLUTION_ALG_ASTAR:
 				self.sort_positions = lambda position: position.solution_cost
+			if self.solution_alg in (SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+				self.unprocessed_positions = []
+				self._best_position_keys = {}
+				self._pq_counter = itertools.count()
+				self.pq_push(self.initial_position)
+			else:
+				self.unprocessed_positions = [self.initial_position]
 			return None, self.get_find_solution_status_str()
 
 		if stop or self.solution_depth > MAX_SOLUTION_DEPTH or time() > self.end_solution_time:
