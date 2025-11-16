@@ -587,7 +587,7 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 	solver.return_first = return_first
 	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
 	if show_dead:
-		self.prepare_solution(char_cell)
+		solver.prepare_solution(char_cell)
 	if show_map:
 		descr = None if show_map is True else show_map
 		grid.show_map(descr, char=char_cell, barrels=barrel_cells, show_dead=show_dead)
