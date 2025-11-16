@@ -72,28 +72,33 @@ class Debug:
 					" " * depth if depth else "", msg))
 
 class ProgressLine:
-	def __init__(self, is_enabled=True, max_len=80):
-		self.is_progress_line_enabled = is_enabled
-		self.max_progress_line_len = max_len
+	def __init__(self, is_enabled=True, same_line=True, max_len=None):
+		if max_len is None:
+			import shutil
+			max_len = shutil.get_terminal_size().columns
+		self.is_enabled = is_enabled
+		self.max_len = max_len
 		self.last_progress_line = None
+		self.same_line = same_line
+		self.endl = "" if same_line else "\n"
 		self.ELLIPSES = '…'  # or: ' … '
 
 	def put(self, line=""):
-		if not self.is_progress_line_enabled:
+		if not self.is_enabled:
 			return
 		line_len = len(line)
-		if line_len > self.max_progress_line_len:
+		if line_len > self.max_len:
 			e_len = len(self.ELLIPSES)
-			mid = (self.max_progress_line_len - e_len) // 2
-			line = line[0:mid] + self.ELLIPSES + line[line_len - self.max_progress_line_len + mid + e_len:line_len]
+			mid = (self.max_len - e_len) // 2
+			line = line[0:mid] + self.ELLIPSES + line[line_len - self.max_len + mid + e_len:line_len]
 
-		if self.last_progress_line is not None:
+		if self.last_progress_line is not None and self.same_line:
 			last_line_len = len(self.last_progress_line)
 			remove_len = last_line_len - line_len if last_line_len > line_len else 0
 			print("\b \b" * remove_len, end="")
 			print("\b" * (last_line_len - remove_len), end="")
 
-		print(line, end="", flush=True)
+		print(line, end=self.endl, flush=True)
 		self.last_progress_line = line
 
 debug = Debug()
