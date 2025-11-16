@@ -16,16 +16,19 @@ def product(x_range, y_range, run_by_y=False):
 				yield (x, y)
 
 def apply_diff(orig, diff, subtract=False, factor=1):
+	if not subtract and factor == 1:
+		return (orig[0] + diff[0], orig[1] + diff[1])
+	factor1, factor2 = factor if type(factor) == tuple else (1, factor)
 	if subtract:
-		factor = -factor
-	return (orig[0] + diff[0] * factor, orig[1] + diff[1] * factor)
+		factor2 = -factor2
+	return (orig[0] * factor1 + diff[0] * factor2, orig[1] * factor1 + diff[1] * factor2)
 
 def cell_diff(cell1, cell2, reverse=False, assert_adjacent=False):
 	diff = (cell2[0] - cell1[0], cell2[1] - cell1[1])
 	if reverse:
 		diff = (-diff[0], -diff[1])
 	if assert_adjacent and diff not in DIR_NAMES:
-		die("Cells %s and %s are not adjacent", True)
+		die("Cells %s and %s are not adjacent" % (cell1, cell2), True)
 	return diff
 
 def cell_dir(cell1, cell2):
