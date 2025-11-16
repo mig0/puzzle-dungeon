@@ -48,9 +48,6 @@ show_dead = cmdargs.show_dead
 show_sok = cmdargs.show_sok
 quiet = cmdargs.quiet or 0
 
-if not cmdargs.args:
-	die("No args specified, try --help")
-
 set_fitting_map_size((5, 5))
 
 level_configs, custom_collection = process_cmdargs(cmdargs)
