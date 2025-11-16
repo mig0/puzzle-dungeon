@@ -1,0 +1,182 @@
+#!/usr/bin/python
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+
+from test import TestSuite
+from celltools import *
+
+# ------------------------------------------------------------
+# cmp
+# ------------------------------------------------------------
+
+def test_cmp():
+	test.eq(cmp(1, 0), 1)
+	test.eq(cmp(1, 1), 0)
+	test.eq(cmp(0, 1), -1)
+
+# ------------------------------------------------------------
+# product
+# ------------------------------------------------------------
+
+def test_product_x_major():
+	r = list(product(range(2), range(3), run_by_y=False))
+	# product generates (x, y)
+	expected = [(x, y) for y in range(3) for x in range(2)]
+	test.eq(r, expected)
+
+def test_product_y_major():
+	r = list(product(range(2), range(3), run_by_y=True))
+	expected = [(x, y) for x in range(2) for y in range(3)]
+	test.eq(r, expected)
+
+# ------------------------------------------------------------
+# apply_diff
+# ------------------------------------------------------------
+
+def test_apply_diff_simple():
+	test.eq(apply_diff((3, 4), (1, 2)), (4, 6))
+
+def test_apply_diff_subtract():
+	test.eq(apply_diff((3, 4), (1, 2), subtract=True), (2, 2))
+
+def test_apply_diff_factor():
+	test.eq(apply_diff((3, 4), (1, 2), factor=2), (3 + 2, 4 + 4))  # orig + diff * 2
+	test.eq(apply_diff((3, 4), (1, 2), factor=(2, 3)), (3 * 2 + 1 * 3, 4 * 2 + 2 * 3))
+
+# ------------------------------------------------------------
+# cell_diff
+# ------------------------------------------------------------
+
+def test_cell_diff_basic():
+	test.eq(cell_diff((1, 1), (3, 2)), (2, 1))
+
+def test_cell_diff_reverse():
+	test.eq(cell_diff((3, 2), (1, 1), reverse=True), (2, 1))
+
+def test_cell_diff_assert_ok():
+	# these adjacent cells should be ok
+	test.no_catch(lambda: cell_diff((1, 1), (2, 1), assert_adjacent=True))
+	test.no_catch(lambda: cell_diff((1, 1), (1, 2), assert_adjacent=True))
+
+def test_cell_diff_assert_fail():
+	# these are not adjacent cells
+	test.catch(lambda: cell_diff((1, 1), (3, 3), assert_adjacent=True))
+	test.catch(lambda: cell_diff((1, 2), (2, 1), assert_adjacent=True))
+
+# ------------------------------------------------------------
+# cell_dir
+# ------------------------------------------------------------
+
+def test_cell_dir():
+	test.eq(cell_dir((1, 1), (2, 1)), (1, 0))
+	test.eq(cell_dir((1, 1), (1, 3)), (0, 1))
+	test.eq(cell_dir((5, 5), (3, 1)), (-1, -1))
+
+# ------------------------------------------------------------
+# pos/cell conversions
+# ------------------------------------------------------------
+
+def test_cell_pos_conversions():
+	w, h = CELL_W, CELL_H
+
+	test.eq(cell_to_pos_00((2, 3)), (w * 2, h * 3))
+	test.eq(cell_to_pos((2, 3)), (w * 2.5, h * 3.5))
+	test.eq(pos_to_cell((27, 65)), (27 // w, 65 // h))
+
+# ------------------------------------------------------------
+# cell_distance
+# ------------------------------------------------------------
+
+def test_cell_distance():
+	test.eq(cell_distance((1, 1), (4, 5)), 7)
+
+# ------------------------------------------------------------
+# sort_cells
+# ------------------------------------------------------------
+
+def test_sort_cells():
+	cells = [(3, 1),(1, 0),(2, 0),(0, 1)]
+	test.eq(
+		sort_cells(cells),
+		[(1, 0), (2, 0), (0, 1), (3, 1)],
+	)
+
+# ------------------------------------------------------------
+# Area tests
+# ------------------------------------------------------------
+
+def test_area_properties():
+	a = Area(2, 3, 4, 5)
+	test.eq(a.size_x, 3)
+	test.eq(a.size_y, 3)
+	test.eq(a.num_cells, 9)
+	test.eq(a.cell11, (2, 3))
+	test.eq(a.cell12, (2, 5))
+	test.eq(a.cell21, (4, 3))
+	test.eq(a.cell22, (4, 5))
+
+def test_area_even_odd():
+	a = Area(10, 20, 13, 23)
+	test.ok(a.is_cell_evnevn((10, 20)))
+	test.ok(a.is_cell_evnodd((10, 21)))
+	test.ok(a.is_cell_oddevn((11, 20)))
+	test.ok(a.is_cell_oddodd((11, 21)))
+
+def test_area_inside_margin():
+	a = Area(0, 0, 4, 4)
+	test.ok(a.is_cell_inside((2, 2)))
+	test.ok(a.is_cell_inside((1, 1), margin=1))
+	test.ok(not a.is_cell_inside((0, 0), margin=1))
+
+def test_area_on_margin():
+	a = Area(0, 0, 4, 4)
+	test.ok(a.is_cell_on_margin((1, 0), margin=1))   # outside inner area
+	test.ok(a.is_cell_on_margin((0, 1), margin=1))
+	test.ok(not a.is_cell_on_margin((2, 2), margin=1))
+	test.ok(not a.is_cell_on_margin((0, 0), margin=0))  # margin=0 always False
+
+def test_area_cells():
+	a = Area(1, 2, 2, 3)
+	cells = list(a.cells)
+	test.eq(cells, [(1, 2),(2, 2),(1, 3),(2, 3)])
+
+# ------------------------------------------------------------
+# get_bounding_area
+# ------------------------------------------------------------
+
+def test_bounding_area():
+	c = [(5, 9), (4, 1), (7, 3)]
+	a = get_bounding_area(c)
+	test.eq(a.x1, 4)
+	test.eq(a.y1, 1)
+	test.eq(a.x2, 7)
+	test.eq(a.y2, 9)
+
+# ------------------------------------------------------------
+
+test = TestSuite("celltools")
+
+test_cmp()
+test_product_x_major()
+test_product_y_major()
+test_apply_diff_simple()
+test_apply_diff_subtract()
+test_apply_diff_factor()
+test_cell_diff_basic()
+test_cell_diff_reverse()
+test_cell_diff_assert_ok()
+test_cell_diff_assert_fail()
+test_cell_dir()
+test_cell_pos_conversions()
+test_cell_distance()
+test_sort_cells()
+test_area_properties()
+test_area_even_odd()
+test_area_inside_margin()
+test_area_on_margin()
+test_area_cells()
+test_bounding_area()
+
+test.finalize()
