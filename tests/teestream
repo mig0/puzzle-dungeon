@@ -1,0 +1,50 @@
+#!/usr/bin/python
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+
+import io
+from teestream import TeeStream, stdout_redirected_to
+from test import TestSuite
+
+def test_teestream_basic():
+	a = io.StringIO()
+	b = io.StringIO()
+	tsm = TeeStream(a, b)
+	tsm.write("Hello")
+	test.eq(a.getvalue(), "Hello")
+	test.eq(b.getvalue(), "Hello")
+
+def test_teestream_flush():
+	a = io.StringIO()
+	b = io.StringIO()
+	tee = TeeStream(a, b)
+	tee.write("X")
+	tee.flush()
+	test.eq(a.getvalue(), "X")
+	test.eq(b.getvalue(), "X")
+
+def test_stdout_redirect():
+	# redirect print() output to StringIO
+	buf = io.StringIO()
+	with stdout_redirected_to(buf):
+		print("abc")
+	test.eq(buf.getvalue(), "abc\n")
+
+def test_stdout_redirect_two_streams():
+	a = io.StringIO()
+	b = io.StringIO()
+	with stdout_redirected_to(a, b):
+		print("xyz")
+	test.eq(a.getvalue(), "xyz\n")
+	test.eq(b.getvalue(), "xyz\n")
+
+test = TestSuite("TeeStream")
+
+test_teestream_basic()
+test_teestream_flush()
+test_stdout_redirect()
+test_stdout_redirect_two_streams()
+
+test.finalize()

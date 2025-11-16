@@ -2,3 +2,4 @@
 
 tests/grid
 tests/sokobansolver
+tests/teestream
