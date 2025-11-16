@@ -1,0 +1,113 @@
+#!/usr/bin/python
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+
+import io
+from debug import ProgressLine
+from teestream import stdout_redirected_to
+from test import TestSuite
+
+def test_basic_print():
+	pl = ProgressLine(is_enabled=True, max_len=50)
+	buffer = io.StringIO()
+	with stdout_redirected_to(buffer):
+		pl.put("Hello")
+	test.eq(buffer.getvalue(), "Hello")
+
+def test_update_shorter():
+	pl = ProgressLine(max_len=50)
+	buffer = io.StringIO()
+	with stdout_redirected_to(buffer):
+		pl.put("abcdef")
+		pl.put("abc")
+	out = buffer.getvalue()
+	# first prints "abcdef", second clears 3 last chars and overwrites 3 more
+	test.ok("abcdef" in out, "Missing initial text")
+	test.ok("abc" in out, "Missing updated text")
+	test.is_in("\b \b", out)
+
+def test_update_longer():
+	pl = ProgressLine(max_len=50)
+	buffer = io.StringIO()
+	with stdout_redirected_to(buffer):
+		pl.put("abc")
+		pl.put("abcdef")
+	out = buffer.getvalue()
+	# first prints "abc", second overwrites 3 last chars
+	test.ok("abc" in out, "Missing initial text")
+	test.ok("abcdef" in out, "Missing extended text")
+	test.not_in("\b \b", out)
+
+def test_truncate():
+	pl = ProgressLine(max_len=10)
+	buffer = io.StringIO()
+	with stdout_redirected_to(buffer):
+		pl.put("12345678901234567890")  # much longer than 10
+	out = buffer.getvalue()
+	test.ok(len(out) <= 10, "Output not truncated")
+	test.ok("…" in out, "Missing ellipses")
+
+def test_middle_cut_even():
+	pl = ProgressLine(max_len=10)
+	s = "ABCDEFGHIJKL"
+	buf = io.StringIO()
+	with stdout_redirected_to(buf):
+		pl.put(s)
+	expected = "ABCD…HIJKL"
+	test.eq(buf.getvalue(), expected)
+
+def test_middle_cut_odd():
+	pl = ProgressLine(max_len=11)
+	s = "ABCDEFGHIJKLMNOP"
+	buf = io.StringIO()
+	with stdout_redirected_to(buf):
+		pl.put(s)
+	expected = "ABCDE…LMNOP"
+	test.eq(buf.getvalue(), expected)
+
+def test_keep_same_line():
+	# should erase previous line (contains backspaces)
+	pl = ProgressLine(same_line=True)
+	buf = io.StringIO()
+	with stdout_redirected_to(buf):
+		pl.put("AAA")
+		pl.put("BBB")
+	out = buf.getvalue()
+	test.ok("\b" in out, "Expected backspaces when same_line=True")
+
+def test_keep_multi_lines():
+	# NO erasing, NO backspaces, each line printed separately
+	pl = ProgressLine(same_line=False)
+	buf = io.StringIO()
+	with stdout_redirected_to(buf):
+		pl.put("AAA")
+		pl.put("BBB")
+	out = buf.getvalue()
+	test.ok("\b" not in out, "No backspaces expected when same_line=False")
+	test.ok("AAA\nBBB\n" == out, "Expected printed lines with newlines")
+
+def test_finish_clears_last_line():
+	# Only clears last line when same_line=True
+	pl = ProgressLine(is_enabled=True, same_line=True, max_len=10)
+	buf = io.StringIO()
+	with stdout_redirected_to(buf):
+		pl.put("HELLO")
+		pl.put("")   # erase line
+	out = buf.getvalue()
+	test.ok("\b" in out, "Backspaces must appear when clearing last line")
+
+test = TestSuite("ProgressLine")
+
+test_basic_print()
+test_update_shorter()
+test_update_longer()
+test_truncate()
+test_middle_cut_even()
+test_middle_cut_odd()
+test_keep_same_line()
+test_keep_multi_lines()
+test_finish_clears_last_line()
+
+test.finalize()
