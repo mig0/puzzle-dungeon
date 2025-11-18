@@ -84,7 +84,8 @@ class Position:
 		self.is_fully_processed = False
 		solver.num_created_positions += 1
 		solver.last_created_position = self
-		solver.max_created_depth = max(solver.max_created_depth, self.depth)
+		if self.depth > solver.max_created_depth:
+			solver.max_created_depth = self.depth
 		debug([self.depth], DBG_SOLV3, "Created %s" % self)
 
 	@property
@@ -225,19 +226,16 @@ class SokobanSolver():
 		barrel_idxs = grid.to_idxs(barrels)
 		plate_idxs = grid.plate_idxs
 
-		total_cost = (0, 0)
-		if not plate_idxs:
-			return total_cost
-
 		# build cost matrix: cost[b][p] = per_plate_min_barrel_costs[p].get(b, (INF, INF))
 		barrel_plate_costs = {}
 		for barrel_idx in barrel_idxs:
 			barrel_plate_costs[barrel_idx] = {}
 			for plate_idx in plate_idxs:
 				plate_min_barrel_costs = self.per_plate_min_barrel_costs.get(plate_idx, {})
-				barrel_plate_costs[barrel_idx][plate_idx] = plate_min_barrel_costs.get(barrel_idx, (INF, INF))
+				barrel_plate_costs[barrel_idx][plate_idx] = plate_min_barrel_costs.get(barrel_idx)
 
 		# greedy matching: for each barrel pick plate with best cost
+		total_cost = (0, 0)
 		assigned_plates = set()
 
 		remaining_barrels = set(barrel_idxs)
@@ -248,6 +246,8 @@ class SokobanSolver():
 					if plate_idx in assigned_plates:
 						continue
 					cost = barrel_plate_costs[barrel_idx][plate_idx]
+					if cost is None:
+						continue
 					if best is None or cmp_costs(cost, best[0]) < 0:
 						best = (cost, barrel_idx, plate_idx)
 			if best is None:
