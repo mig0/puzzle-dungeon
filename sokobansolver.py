@@ -226,12 +226,12 @@ class SokobanSolver():
 		barrel_idxs = grid.to_idxs(barrels)
 		plate_idxs = grid.plate_idxs
 
-		# build cost matrix: cost[b][p] = per_plate_min_barrel_costs[p].get(b, (INF, INF))
+		# build cost matrix: cost[b][p] = min_plate_barrel_costs[p].get(b, (INF, INF))
 		barrel_plate_costs = {}
 		for barrel_idx in barrel_idxs:
 			barrel_plate_costs[barrel_idx] = {}
 			for plate_idx in plate_idxs:
-				plate_min_barrel_costs = self.per_plate_min_barrel_costs.get(plate_idx, {})
+				plate_min_barrel_costs = self.min_plate_barrel_costs.get(plate_idx, {})
 				barrel_plate_costs[barrel_idx][plate_idx] = plate_min_barrel_costs.get(barrel_idx)
 
 		# greedy matching: for each barrel pick plate with best cost
@@ -482,8 +482,8 @@ class SokobanSolver():
 	def prepare_solution(self, char=None):
 		self.min_char_barrel_plate_shifts = min_char_shifts = {}
 		self.min_barrel_plate_shifts = min_shifts = {}
-		self.per_plate_min_char_barrel_costs = {}
-		self.per_plate_min_barrel_costs = {}
+		self.min_plate_char_barrel_costs = {}
+		self.min_plate_barrel_costs = {}
 
 		if grid.plate_bits == grid.no_bits:
 			grid.dead_barrel_bits = grid.all_bits
@@ -502,12 +502,12 @@ class SokobanSolver():
 			if not char_accessible_bits[plate_idx]:
 				continue
 			plate_cell = grid.to_cell(plate_idx)
-			self.per_plate_min_barrel_costs[plate_idx] = plate_min_costs = {}
-			self.per_plate_min_char_barrel_costs[plate_idx] = plate_min_char_costs = {}
+			self.min_plate_barrel_costs[plate_idx] = min_plate_costs = {}
+			self.min_plate_char_barrel_costs[plate_idx] = min_plate_char_costs = {}
 
 			depth = 0
 			min_shifts[plate_cell] = 0
-			plate_min_costs[plate_idx] = (0, 0)
+			min_plate_costs[plate_idx] = (0, 0)
 			unprocessed = [(char_idx, plate_idx, 0) for char_idx in grid.all_passable_neigh_idxs[plate_idx]]
 
 			while unprocessed:
@@ -538,11 +538,11 @@ class SokobanSolver():
 							if new_barrel_cell not in min_shifts or min_shifts[new_barrel_cell] > depth:
 								min_shifts[new_barrel_cell] = depth
 							was_improved = True
-						if new_idxs not in plate_min_char_costs or cmp_costs(plate_min_char_costs[new_idxs], cost) > 0:
-							plate_min_char_costs[new_idxs] = cost
+						if new_idxs not in min_plate_char_costs or cmp_costs(min_plate_char_costs[new_idxs], cost) > 0:
+							min_plate_char_costs[new_idxs] = cost
 							new_char_idx, new_barrel_idx = new_idxs
-							if new_barrel_idx not in plate_min_costs or cmp_costs(plate_min_costs[new_barrel_idx], cost) > 0:
-								plate_min_costs[new_barrel_idx] = cost
+							if new_barrel_idx not in min_plate_costs or cmp_costs(min_plate_costs[new_barrel_idx], cost) > 0:
+								min_plate_costs[new_barrel_idx] = cost
 							was_improved = True
 						if was_improved:
 							next_unprocessed.append(new_idxs + (new_dist,))
@@ -550,9 +550,9 @@ class SokobanSolver():
 				unprocessed = next_unprocessed
 
 		if debug.has("precosts"):
-			plate_idx, plate_min_costs = sorted(self.per_plate_min_barrel_costs.items())[0]
-			debug("per_plate_min_barrel_costs for the 1-st plate idx=%d" % plate_idx)
-			debug([2], str(dict(sorted(plate_min_costs.items()))))
+			plate_idx, min_plate_costs = sorted(self.min_plate_barrel_costs.items())[0]
+			debug("min_plate_barrel_costs for the 1-st plate idx=%d" % plate_idx)
+			debug([2], str(dict(sorted(min_plate_costs.items()))))
 
 		grid.barrel_bits = grid.no_bits.copy()
 
