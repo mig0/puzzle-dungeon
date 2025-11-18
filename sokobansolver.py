@@ -21,6 +21,8 @@ SOLUTION_ALG_UCS   = "Uniform"
 SOLUTION_ALG_GREED = "Greedy"
 SOLUTION_ALG_ASTAR = "A*"
 
+DBG_PRUN = "prun"
+
 INF = 10 ** 9
 
 solver = None
@@ -189,6 +191,12 @@ class SokobanSolver():
 		self.max_created_depth = 0
 		self.unprocessed_positions = None
 		self.num_processed_positions = 0
+		if debug.has(DBG_PRUN):
+			self.num_non_created_costy_positions = 0
+			self.num_non_created_dead_positions = 0
+			self.num_costy_than_solved_positions = 0
+			self.num_found_solved_positions = 0
+			self.num_costy_solved_bound_positions = 0
 		self.past_vus_cost_factor = 1  # 1 is for A*
 		self.sort_positions = None
 		self._pq_counter = None
@@ -339,12 +347,16 @@ class SokobanSolver():
 		own_nums = num_moves, num_shifts
 
 		if self.solved_position and self.solved_position.cmp(apply_diff(position.total_nums, own_nums)) <= 0:
+			if debug.has(DBG_PRUN):
+				self.num_non_created_costy_positions += 1
 			debug([position.depth], DBG_SOLV3, "Not creating child that does not improve found solution")
 			return None
 
 		super_position = self.find_or_create_super_position(new_char_cell, grid.barrel_cells)
 
 		if super_position.is_dead:
+			if debug.has(DBG_PRUN):
+				self.num_non_created_dead_positions += 1
 			debug([position.depth], DBG_SOLV3, "Not creating child in deadlocked super-position")
 			return None
 
@@ -389,12 +401,16 @@ class SokobanSolver():
 			return True
 
 		if self.solved_position and position.cmp(self.solved_position) >= 0:
+			if debug.has(DBG_PRUN):
+				self.num_costy_than_solved_positions += 1
 			debug([depth], DBG_SOLV2, "Position does not improve the found solution")
 			position.cut_down()
 			return True
 
 		if position.is_solved:
 			self.solved_position = position
+			if debug.has(DBG_PRUN):
+				self.num_found_solved_positions += 1
 			debug([depth], DBG_SOLV2, "Found solution %s in %.1fs" % (position.nums_str, time() - self.start_solution_time))
 			position.cut_down()
 			return None if self.return_first else True
@@ -402,6 +418,8 @@ class SokobanSolver():
 		if self.solved_position:
 			min_cost = self.get_min_solution_cost(position.super.barrel_cells)
 			if self.solved_position.cmp(apply_diff(position.total_nums, min_cost)) <= 0:
+				if debug.has(DBG_PRUN):
+					self.num_costy_solved_bound_positions += 1
 				debug([depth], DBG_SOLV2, "Pruning position by solution lower bound")
 				position.cut_down()
 				return True
@@ -647,6 +665,8 @@ class SokobanSolver():
 			status_str += " + %d" % len(self.unprocessed_positions)
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
+		if debug.has(DBG_PRUN):
+			status_str += "; ncc %d ncd %d sol %d cts %d csb %d" % (self.num_non_created_costy_positions, self.num_non_created_dead_positions, self.num_found_solved_positions, self.num_costy_than_solved_positions, self.num_costy_solved_bound_positions)
 		debug(DBG_SOLV, status_str + "; sp: %d p: %d" % (len(self.visited_super_positions), self.num_created_positions))
 		return status_str
 
