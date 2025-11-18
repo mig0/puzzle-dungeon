@@ -481,6 +481,17 @@ class SokobanSolver():
 			for child in position.children:
 				self.pq_push(child)
 
+	def check_solvability(self):
+		barrel_idxs = grid.to_idxs(self.barrel_cells)
+		# these are static constrants, should never appear during find-solution
+		if grid.cell_idxs.get(self.char_cell) is None:
+			return False
+		if grid.num_plates < len(barrel_idxs):
+			return False
+		if grid.to_bits(barrel_idxs) & grid.dead_barrel_bits != grid.no_bits:
+			return False
+		return True
+
 	def prepare_solution(self, char=None):
 		self.min_char_barrel_plate_shifts = min_char_shifts = {}
 		self.min_barrel_plate_shifts = min_shifts = {}
@@ -612,7 +623,11 @@ class SokobanSolver():
 			# preparing to find solution
 			self.start_solution_time = time()
 			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
+
 			self.prepare_solution(self.char_cell)
+			if not self.check_solvability():
+				return None, None
+
 			grid.set_barrels(self.barrel_cells)
 			super_position = self.find_or_create_super_position(self.char_cell, self.barrel_cells)
 			self.initial_position = Position(super_position, self.char_cell, None, None, None)
