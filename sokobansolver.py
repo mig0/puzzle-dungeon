@@ -17,6 +17,7 @@ SOLUTION_TYPE_BY_MOVES = 2
 
 SOLUTION_ALG_DFS   = "DFS"
 SOLUTION_ALG_BFS   = "BFS"
+SOLUTION_ALG_UCS   = "Uniform"
 SOLUTION_ALG_GREED = "Greedy"
 SOLUTION_ALG_ASTAR = "A*"
 
@@ -151,7 +152,7 @@ class Position:
 	@property
 	def solution_cost(self):
 		if self._solution_cost is None:
-			self._solution_cost = apply_diff(self.total_nums, self.super.solution_cost, factor=1)
+			self._solution_cost = apply_diff(self.total_nums, self.super.solution_cost, factor=solver.past_vus_cost_factor)
 		return self._solution_cost
 
 	def to_solution_pairs(self):
@@ -188,6 +189,7 @@ class SokobanSolver():
 		self.max_created_depth = 0
 		self.unprocessed_positions = None
 		self.num_processed_positions = 0
+		self.past_vus_cost_factor = 1  # 1 is for A*
 		self.sort_positions = None
 		self._pq_counter = None
 		self._best_position_keys = {}  # position -> key used in heap
@@ -595,7 +597,7 @@ class SokobanSolver():
 		else:
 			status_str += "; %s deepest %d" % (self.solution_alg[0:2], max_depth)
 		status_str += "; positions: %d" % self.num_processed_positions
-		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
 			status_str += " + %d" % len(self.unprocessed_positions)
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
@@ -617,11 +619,14 @@ class SokobanSolver():
 
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()
-			if self.solution_alg == SOLUTION_ALG_GREED:
+			if self.solution_alg == SOLUTION_ALG_UCS:
 				self.sort_positions = lambda position: position.total_nums
+			if self.solution_alg == SOLUTION_ALG_GREED:
+				self.past_vus_cost_factor = (0.82, 1.22)
+				self.sort_positions = lambda position: position.solution_cost
 			if self.solution_alg == SOLUTION_ALG_ASTAR:
 				self.sort_positions = lambda position: position.solution_cost
-			if self.solution_alg in (SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
 				self.unprocessed_positions = []
 				self._best_position_keys = {}
 				self._pq_counter = itertools.count()

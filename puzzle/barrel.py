@@ -462,6 +462,8 @@ class BarrelPuzzle(Puzzle):
 				self.solver.solution_alg = SOLUTION_ALG_DFS
 			if keyboard.g:
 				self.solver.solution_alg = SOLUTION_ALG_GREED
+			if keyboard.u:
+				self.solver.solution_alg = SOLUTION_ALG_UCS
 			if keyboard.minus:
 				self.solver.disable_prepare = not self.solver.disable_prepare
 			if keyboard.k_0:
