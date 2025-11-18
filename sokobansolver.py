@@ -222,6 +222,26 @@ class SokobanSolver():
 			return key, position
 		return None, None
 
+	def is_barrel_matching_found(self, barrel_idxs):
+		if not self.is_barrel_mismatch_possible:
+			return True
+
+		plate_matches = {plate_idx: None for plate_idx in grid.plate_idxs}
+		def dfs(barrel_idx, seen_plates):
+			for plate_idx in self.accessible_barrel_plate_idxs.get(barrel_idx, ()):
+				if plate_idx in seen_plates:
+					continue
+				seen_plates.add(plate_idx)
+				if plate_matches[plate_idx] is None or dfs(plate_matches[plate_idx], seen_plates):
+					plate_matches[plate_idx] = barrel_idx
+					return True
+			return False
+
+		for barrel_idx in barrel_idxs:
+			if not dfs(barrel_idx, set()):
+				return False
+
+		return True
 
 	# greedy lower-bound cost (moves, shifts) for the given barrels
 	def get_min_solution_cost(self, barrels):
@@ -304,6 +324,9 @@ class SokobanSolver():
 
 		super_position = SuperPosition(barrel_cells, all_proto_segments)
 		self.visited_super_positions[super_position_id] = super_position
+
+		super_position.is_dead = not self.is_barrel_matching_found(grid.barrel_idxs)
+
 		return super_position
 
 	def create_child_position_or_reparent_if_better(self, position, segments):
@@ -320,6 +343,10 @@ class SokobanSolver():
 			return None
 
 		super_position = self.find_or_create_super_position(new_char_cell, grid.barrel_cells)
+
+		if super_position.is_dead:
+			debug([position.depth], DBG_SOLV3, "Not creating child in deadlocked super-position")
+			return None
 
 		child = super_position.get_or_reparent_or_create_position(new_char_cell, position, own_nums, segments)
 
@@ -572,6 +599,14 @@ class SokobanSolver():
 		grid.dead_barrel_bits = ~grid.to_bits(min_shifts.keys())
 		if debug.has(DBG_SOLV3):
 			grid.show_map("Map with dead-barrel cells", show_dead=True)
+
+		# build optimistic barrel -> reachable plates adjacency
+		self.accessible_barrel_plate_idxs = {}
+		self.is_barrel_mismatch_possible = False
+		for barrel_idx in search_bits(~grid.dead_barrel_bits, _ONE):
+			accessible_plate_idxs = [plate_idx for plate_idx in grid.plate_idxs if barrel_idx in self.min_plate_barrel_costs.get(plate_idx, {})]
+			self.accessible_barrel_plate_idxs[barrel_idx] = accessible_plate_idxs
+			self.is_barrel_mismatch_possible |= len(accessible_plate_idxs) < grid.num_plates
 
 	def get_found_solution_items(self, reason):
 		# store the solution nums for users
