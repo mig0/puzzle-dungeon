@@ -98,6 +98,7 @@ class Grid:
 		self.reverse_barrel_mode = False
 		self.barrel_bits = _ZEROBITS
 		self.orig_barrel_bits_stack = []
+		self.num_plates = 0
 		self.plate_bits = _ZEROBITS
 		self.dead_barrel_bits = _ZEROBITS
 
@@ -133,6 +134,7 @@ class Grid:
 		for idx, cell in enumerate(self.idx_cells):
 			if map[cell] == CELL_PLATE or ACTOR_AND_PLATE_BY_CHAR.get(map[cell], ("", False))[1]:
 				self.plate_bits[idx] = True
+				self.num_plates += 1
 			if map[cell] in (ACTOR_CHARS['barrel'], ACTOR_ON_PLATE_CHARS['barrel']):
 				self.barrel_bits[idx] = True
 
@@ -427,6 +429,10 @@ class Grid:
 	@property
 	def barrel_cells(self):
 		return self.to_cells(self.barrel_bits)
+
+	@property
+	def num_barrels(self):
+		return len(self.barrel_idxs)
 
 	@property
 	def plate_idxs(self):
