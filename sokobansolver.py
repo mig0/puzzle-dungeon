@@ -45,13 +45,13 @@ class SuperPosition:
 			position = Position(self, char_cell, parent, own_nums, segments)
 			self.positions[char_cell] = position
 		else:
-			debug([position.depth], DBG_SOLV2, position)
+			debug([position.depth], DBG_SOLV3, position)
 			new_total_nums = apply_diff(parent.total_nums, own_nums) if parent else (0, 0)
 			if position.cmp(new_total_nums) > 0:
 				position.reparent(parent, own_nums, segments)
-				debug([position.depth], DBG_SOLV2, "Position already seen, but new path is better")
+				debug([position.depth], DBG_SOLV3, "Position already seen, but new path is better")
 			else:
-				debug([position.depth], DBG_SOLV2, "Position already seen, and no improvement")
+				debug([position.depth], DBG_SOLV3, "Position already seen, and no improvement")
 
 		return position
 
@@ -85,7 +85,7 @@ class Position:
 		solver.num_created_positions += 1
 		solver.last_created_position = self
 		solver.max_created_depth = max(solver.max_created_depth, self.depth)
-		debug([self.depth], DBG_SOLV2, "Created %s" % self)
+		debug([self.depth], DBG_SOLV3, "Created %s" % self)
 
 	@property
 	def nums_str(self):
@@ -314,7 +314,7 @@ class SokobanSolver():
 		own_nums = num_moves, num_shifts
 
 		if self.solved_position and self.solved_position.cmp(apply_diff(position.total_nums, own_nums)) <= 0:
-			debug([position.depth], DBG_SOLV2, "Not creating child that does not improve found solution")
+			debug([position.depth], DBG_SOLV3, "Not creating child that does not improve found solution")
 			return None
 
 		super_position = self.find_or_create_super_position(new_char_cell, grid.barrel_cells)
@@ -327,10 +327,10 @@ class SokobanSolver():
 		if position.is_expanded:
 			return
 
-		debug([position.depth], DBG_SOLV, "%s" % position.segments_str)
+		debug([position.depth], DBG_SOLV2, "%s" % position.segments_str)
 		for proto_segments in position.super.all_proto_segments:
 			(_, char_cell, barrel_cell), *rest_segments = proto_segments
-			debug([position.depth], DBG_SOLV2, "Expanding %s -> %s" % (char_cell, barrel_cell))
+			debug([position.depth], DBG_SOLV3, "Expanding %s -> %s" % (char_cell, barrel_cell))
 			char_path = grid.find_path(position.char_cell, char_cell, position.super.barrel_cells)
 			assert char_path is not None, "Bug in find_solution algorithm: no char path"
 			segments = [(char_path, char_cell, barrel_cell), *rest_segments]
@@ -349,31 +349,31 @@ class SokobanSolver():
 		depth = position.depth
 
 		if not self.disable_budget and time() > self.budget_solution_time:
-			debug([depth], DBG_SOLV, "Returning control after budget time of 1s")
+			debug([depth], DBG_SOLV2, "Returning control after budget time of 1s")
 			return None
 
 		self.num_processed_positions += 1
 
 		if time() > self.end_solution_time:
-			debug([depth], DBG_SOLV, "Solution time limit %ds reached" % MAX_FIND_SOLUTION_TIME)
+			debug([depth], DBG_SOLV2, "Solution time limit %ds reached" % MAX_FIND_SOLUTION_TIME)
 			position.cut_down()
 			return True
 
 		if self.solved_position and position.cmp(self.solved_position) >= 0:
-			debug([depth], DBG_SOLV, "Position does not improve the found solution")
+			debug([depth], DBG_SOLV2, "Position does not improve the found solution")
 			position.cut_down()
 			return True
 
 		if position.is_solved:
 			self.solved_position = position
-			debug([depth], DBG_SOLV, "Found solution %s in %.1fs" % (position.nums_str, time() - self.start_solution_time))
+			debug([depth], DBG_SOLV2, "Found solution %s in %.1fs" % (position.nums_str, time() - self.start_solution_time))
 			position.cut_down()
 			return None if self.return_first else True
 
 		if self.solved_position:
 			min_cost = self.get_min_solution_cost(position.super.barrel_cells)
 			if self.solved_position.cmp(apply_diff(position.total_nums, min_cost)) <= 0:
-				debug([depth], DBG_SOLV, "Pruning position by solution lower bound")
+				debug([depth], DBG_SOLV2, "Pruning position by solution lower bound")
 				position.cut_down()
 				return True
 
@@ -390,7 +390,7 @@ class SokobanSolver():
 		depth = position.depth
 
 		if depth >= self.solution_depth:
-			debug([depth], DBG_SOLV, "Solution depth limit %d reached" % self.solution_depth)
+			debug([depth], DBG_SOLV2, "Solution depth limit %d reached" % self.solution_depth)
 			return False
 
 		if (is_fully_processed := self.process_position(position)) is not False:
@@ -417,7 +417,7 @@ class SokobanSolver():
 			if position.depth >= self.solution_depth:
 				unprocessed_positions.pop()
 				depth_limit_positions.append(position)
-				debug([position.depth], DBG_SOLV, "Solution depth limit %d reached" % self.solution_depth)
+				debug([position.depth], DBG_SOLV2, "Solution depth limit %d reached" % self.solution_depth)
 				continue
 
 			is_fully_processed = self.process_position(position)
@@ -445,7 +445,7 @@ class SokobanSolver():
 			if position.depth >= self.solution_depth:
 				unprocessed_positions.pop(0)
 				depth_limit_positions.append(position)
-				debug([position.depth], DBG_SOLV, "Solution depth limit %d reached" % self.solution_depth)
+				debug([position.depth], DBG_SOLV2, "Solution depth limit %d reached" % self.solution_depth)
 				continue
 
 			is_fully_processed = self.process_position(position)
