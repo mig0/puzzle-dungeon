@@ -533,7 +533,12 @@ class SokobanSolver():
 			return False
 		if grid.num_plates < len(barrel_idxs):
 			return False
-		if grid.to_bits(barrel_idxs) & grid.dead_barrel_bits != grid.no_bits:
+		barrel_bits = grid.to_bits(barrel_idxs)
+		fixed_solved_barrel_bits = barrel_bits & grid.plate_bits & grid.dead_barrel_bits
+		if fixed_solved_barrel_bits != grid.no_bits:
+			barrel_bits &= ~fixed_solved_barrel_bits
+			self.barrel_cells = grid.to_cells(barrel_bits)
+		if barrel_bits & grid.dead_barrel_bits != grid.no_bits:
 			return False
 		return True
 
