@@ -257,6 +257,11 @@ class Grid:
 		except KeyError:
 			return None
 
+	def to_idxs_or_none(self, bits_or_idxs_or_cells_or_actors):
+		if type(bits_or_idxs_or_cells_or_actors) == bitarray:
+			return tuple(search_bits(bits_or_idxs_or_cells_or_actors, _ONE))
+		return tuple(self.to_idx_or_none(idx_or_cell_or_actor) for idx_or_cell_or_actor in bits_or_idxs_or_cells_or_actors)
+
 	# Support for path finding
 
 	def is_passable_neigh(self, first, second):
