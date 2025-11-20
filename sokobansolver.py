@@ -146,8 +146,8 @@ class Position:
 	def segments_str(self):
 		if self._segments_str is None:
 			segment_strs = []
-			for path_cells, char_cell, barrel_cell in self.segments:
-				segment_strs.append("+%d %s -> %s" % (len(path_cells), char_cell, barrel_cell))
+			for distance, char_cell, barrel_cell in self.segments:
+				segment_strs.append("+%d %s -> %s" % (distance, char_cell, barrel_cell))
 			self._segments_str = ' '.join(segment_strs) or 'root'
 		return self._segments_str
 
@@ -159,7 +159,9 @@ class Position:
 
 	def to_solution_pairs(self):
 		solution_pairs = self.parent.to_solution_pairs() if self.parent else []
-		for path_cells, char_cell, barrel_cell in self.segments:
+		for _, char_cell, barrel_cell in self.segments:
+			path_cells = grid.find_path(self.parent.char_cell, char_cell, self.parent.super.barrel_cells)
+			assert path_cells is not None, "Bug: Failed to reconstruct char path in solution"
 			solution_pairs.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell, grid.reverse_barrel_mode, True)]])
 		return solution_pairs
 
@@ -328,7 +330,7 @@ class SokobanSolver():
 					new_char_cell, new_barrel_cell = apply_diff(char_cell, cell_diff(barrel_cell, char_cell)), char_cell
 				else:
 					new_char_cell, new_barrel_cell = barrel_cell, apply_diff(barrel_cell, cell_diff(char_cell, barrel_cell))
-				proto_segments.append(([], new_char_cell, new_barrel_cell))
+				proto_segments.append((0, new_char_cell, new_barrel_cell))
 
 		super_position = SuperPosition(barrel_cells, all_proto_segments)
 		self.visited_super_positions[super_position_id] = super_position
@@ -340,9 +342,9 @@ class SokobanSolver():
 	def create_child_position_or_reparent_if_better(self, position, segments):
 		num_moves, num_shifts = 0, 0
 		grid.set_barrels(position.super.barrel_cells)
-		for path_cells, char_cell, barrel_cell in segments:
+		for distance, char_cell, barrel_cell in segments:
 			new_char_cell, _ = grid.shift(char_cell, barrel_cell)
-			num_moves += len(path_cells) + 1
+			num_moves += distance + 1
 			num_shifts += 1
 		own_nums = num_moves, num_shifts
 
@@ -372,9 +374,9 @@ class SokobanSolver():
 		for proto_segments in position.super.all_proto_segments:
 			(_, char_cell, barrel_cell), *rest_segments = proto_segments
 			debug([position.depth], DBG_SOLV3, "Expanding %s -> %s" % (char_cell, barrel_cell))
-			char_path = grid.find_path(position.char_cell, char_cell, position.super.barrel_cells)
-			assert char_path is not None, "Bug in find_solution algorithm: no char path"
-			segments = [(char_path, char_cell, barrel_cell), *rest_segments]
+			distance = grid.get_accessible_distance(position.char_cell, char_cell, position.super.barrel_cells)
+			assert distance is not None, "Bug in find_solution algorithm: no char path"
+			segments = [(distance, char_cell, barrel_cell), *rest_segments]
 
 			self.create_child_position_or_reparent_if_better(position, segments)
 
