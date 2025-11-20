@@ -179,6 +179,7 @@ class SokobanSolver():
 	def reset_solution_data(self):
 		global solver
 		solver = None
+		self.limit_time = MAX_FIND_SOLUTION_TIME
 		self.visited_super_positions = {}  # super_position_id -> SuperPosition
 		self.solution_depth = MAX_SOLUTION_DEPTH
 		self.solution_type = SOLUTION_TYPE_BY_SHIFTS
@@ -772,7 +773,7 @@ class SokobanSolver():
 		if not self.start_solution_time:
 			# preparing to find solution
 			self.start_solution_time = time()
-			self.end_solution_time = time() + MAX_FIND_SOLUTION_TIME
+			self.end_solution_time = time() + self.limit_time
 
 			self.prepare_solution(self.char_cell)
 			if not self.check_solvability():
@@ -849,7 +850,7 @@ class SokobanSolver():
 		global solver
 		solver = self
 
-def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False):
+def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False, limit_time=None):
 	char_cell = None
 	barrel_cells = []
 	for cy in range(len(map[0])):
@@ -871,6 +872,8 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
 
 	solver = SokobanSolver()
+	if limit_time:
+		solver.limit_time = limit_time
 	solver.solution_alg = solution_alg
 	solver.return_first = return_first
 	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))

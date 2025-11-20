@@ -34,6 +34,7 @@ parser.add_argument('-0', '--disable-budget', help="do not report progress every
 parser.add_argument('-1', '--return-first', help="return first found solution (not optimal)", action='store_true')
 parser.add_argument('-x', '--show-dead', help="show dead-barrel cells on map", action='store_true')
 parser.add_argument('-t', '--show-time', help="show solution time in seconds", action='store_true')
+parser.add_argument('-T', '--limit-time', help="limit solution time to given seconds", metavar='SEC', action='store')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
 parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file")
 
@@ -44,6 +45,7 @@ disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
 solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmdargs.bfs else SOLUTION_ALG_DFS if cmdargs.dfs else SOLUTION_ALG_GREED if cmdargs.greed else SOLUTION_ALG_UCS if cmdargs.ucs else None
 return_first = cmdargs.return_first
+limit_time = int(cmdargs.limit_time) if cmdargs.limit_time and cmdargs.limit_time.isdigit() else None
 show_time = cmdargs.show_time
 show_dead = cmdargs.show_dead
 show_sok = cmdargs.show_sok
@@ -70,7 +72,7 @@ def create_solver(map_string, reverse_barrel_mode=False):
 	map = create_sokoban_map(map_string)
 	if not quiet and show_sok:
 		print(create_sok_map(map), end='')
-	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, not quiet and not show_sok, show_dead)
+	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, not quiet and not show_sok, show_dead, limit_time)
 
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
