@@ -23,8 +23,6 @@ SOLUTION_ALG_ASTAR = "A*"
 
 DBG_PRUN = "prun"
 
-INF = 10 ** 9
-
 solver = None
 
 def cost_to_key(cost):
@@ -254,44 +252,123 @@ class SokobanSolver():
 
 		return True
 
-	# greedy lower-bound cost (moves, shifts) for the given barrels
-	def get_min_solution_cost(self, barrels):
-		barrel_idxs = grid.to_idxs(barrels)
+	# greedy lower-bound cost (moves, shifts) with backtracking for the given barrels
+	# return None only if is_barrel_matching_found(barrel_idxs) is False
+	def get_min_solution_cost(self, barrel_idxs):
+		if not self.is_barrel_matching_found(barrel_idxs):
+			return None
+
 		plate_idxs = grid.plate_idxs
 
-		# build cost matrix: cost[b][p] = min_plate_barrel_costs[p].get(b, (INF, INF))
-		barrel_plate_costs = {}
+		# collect cost matrix indexed by barrel_idx and then plate_idx
+		costs = {}
 		for barrel_idx in barrel_idxs:
-			barrel_plate_costs[barrel_idx] = {}
+			row = {}
 			for plate_idx in plate_idxs:
-				plate_min_barrel_costs = self.min_plate_barrel_costs.get(plate_idx, {})
-				barrel_plate_costs[barrel_idx][plate_idx] = plate_min_barrel_costs.get(barrel_idx)
+				cost = self.min_plate_barrel_costs.get(plate_idx, {}).get(barrel_idx)
+				if cost is not None:
+					row[plate_idx] = cost
+			costs[barrel_idx] = row
 
-		# greedy matching: for each barrel pick plate with best cost
-		total_cost = (0, 0)
-		assigned_plates = set()
-
+		# --- greedy attempt (fast) ---
 		remaining_barrels = set(barrel_idxs)
+		remaining_plates = set(plate_idxs)
+		total_cost = (0, 0)
+
 		while remaining_barrels:
 			best = None
 			for barrel_idx in remaining_barrels:
-				for plate_idx in plate_idxs:
-					if plate_idx in assigned_plates:
-						continue
-					cost = barrel_plate_costs[barrel_idx][plate_idx]
+				for plate_idx in remaining_plates:
+					cost = costs[barrel_idx].get(plate_idx)
 					if cost is None:
 						continue
 					if best is None or cmp_costs(cost, best[0]) < 0:
 						best = (cost, barrel_idx, plate_idx)
+
 			if best is None:
-				# unreachable barrel (dead), return huge
-				return (INF, INF)
+				# greedy failed: fall back to full search
+				break
+
 			best_cost, barrel_idx, plate_idx = best
 			total_cost = apply_diff(total_cost, best_cost)
-			assigned_plates.add(plate_idx)
 			remaining_barrels.remove(barrel_idx)
+			remaining_plates.remove(plate_idx)
 
-		return total_cost
+		if not remaining_barrels:
+			return total_cost
+
+		# --- fallback: full DFS over ALL barrels (allow reassigning greedy choices) ---
+		# Use greedy result as an initial upper bound if it produced any assignment
+		upper_bound = None
+		# If greedy produced a (partial) total_cost but incomplete, we can attempt
+		# to produce a complete greedy-based upper bound by completing greedily from scratch:
+		try_upper = True
+		if try_upper:
+			tb_barrels = set(barrel_idxs)
+			tb_plates  = set(plate_idxs)
+			tb_cost = (0, 0)
+			ok = True
+			while tb_barrels:
+				bst = None
+				for b in tb_barrels:
+					for p in tb_plates:
+						c = costs[b].get(p)
+						if c is None:
+							continue
+						if bst is None or cmp_costs(c, bst[0]) < 0:
+							bst = (c, b, p)
+				if bst is None:
+					ok = False
+					break
+				cbst, bb, pp = bst
+				tb_cost = apply_diff(tb_cost, cbst)
+				tb_barrels.remove(bb)
+				tb_plates.remove(pp)
+			if ok:
+				upper_bound = tb_cost
+
+		# choose ordering of barrels for search: MRV (fewest candidate plates first)
+		barrel_idxs = sorted(barrel_idxs, key=lambda b: len(costs[b]) if b in costs else 0)
+		best_cost = upper_bound  # None or (moves,shifts)
+
+		# Pre-sort candidate plates for each barrel by increasing cost (keyed)
+		sorted_barrel_plates = {}
+		for barrel_idx in barrel_idxs:
+			cps = [(costs[barrel_idx][plate_idx], plate_idx) for plate_idx in plate_idxs if plate_idx in costs[barrel_idx]]
+			cps.sort(key=lambda cp: cost_to_key(cp[0]))
+			sorted_barrel_plates[barrel_idx] = [plate_idx for _, plate_idx in cps]
+
+		# Depth-first search over full set of barrels; prune by best_cost
+		max_depth = len(barrel_idxs)
+
+		def dfs(i, used_plates, cur_cost):
+			nonlocal best_cost
+			# terminal: assigned all barrels
+			if i == max_depth:
+				if best_cost is None or cmp_costs(cur_cost, best_cost) < 0:
+					best_cost = cur_cost
+				return
+
+			barrel_idx = barrel_idxs[i]
+			assert sorted_barrel_plates.get(barrel_idx), "Barrel has no candidates at all, but match must exist"
+
+			for plate_idx in sorted_barrel_plates[barrel_idx]:
+				if plate_idx in used_plates:
+					continue
+				new_cost = apply_diff(cur_cost, costs[barrel_idx][plate_idx])
+
+				# prune if already not better than best_cost
+				if best_cost is not None and cmp_costs(new_cost, best_cost) >= 0:
+					continue
+
+				used_plates.add(plate_idx)
+				dfs(i + 1, used_plates, new_cost)
+				used_plates.remove(plate_idx)
+
+		dfs(0, set(), (0, 0))
+		assert best_cost is not None, "Bug: No match after is_barrel_matching_found"
+
+		return best_cost
 
 	def get_min_solution_depth(self, barrel_cells):
 		return sum(self.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits) for barrel_cell in barrel_cells)
