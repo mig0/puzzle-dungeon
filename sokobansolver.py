@@ -530,8 +530,10 @@ class SokobanSolver():
 		barrel_idxs = grid.to_idxs(self.barrel_cells)
 		# these are static constrants, should never appear during find-solution
 		if grid.cell_idxs.get(self.char_cell) is None:
+			debug(DBG_SOLV, "Char is not on floor - unsolvable")
 			return False
 		if grid.num_plates < len(barrel_idxs):
+			debug(DBG_SOLV, "Number of plates smaller that barrels - unsolvable")
 			return False
 		barrel_bits = grid.to_bits(barrel_idxs)
 		fixed_solved_barrel_bits = barrel_bits & grid.plate_bits & grid.dead_barrel_bits
@@ -539,6 +541,7 @@ class SokobanSolver():
 			barrel_bits &= ~fixed_solved_barrel_bits
 			self.barrel_cells = grid.to_cells(barrel_bits)
 		if barrel_bits & grid.dead_barrel_bits != grid.no_bits:
+			debug(DBG_SOLV, "Some barrels are on dead barrel cells - unsolvable")
 			return False
 		return True
 
@@ -634,12 +637,11 @@ class SokobanSolver():
 	def get_found_solution_items(self, reason):
 		# store the solution nums for users
 		solution_items = None
-		self.last_solution_time_str = None
+		self.last_solution_time_str = get_time_str(time() - self.start_solution_time)
 		self.last_solution_nums_str = None
 		self.last_solution_str = None
 		is_solved = self.solved_position is not None
 		if is_solved:
-			self.last_solution_time_str = get_time_str(time() - self.start_solution_time)
 			self.last_solution_nums_str = self.solved_position.nums_str
 			self.last_solution_str = ''
 			char_cell = self.char_cell
@@ -686,7 +688,7 @@ class SokobanSolver():
 
 			self.prepare_solution(self.char_cell)
 			if not self.check_solvability():
-				return None, None
+				return self.get_found_solution_items("unsolvable"), None
 
 			grid.set_barrels(self.barrel_cells)
 			super_position = self.find_or_create_super_position(self.char_cell, self.barrel_cells)
