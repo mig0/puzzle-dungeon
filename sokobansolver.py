@@ -35,18 +35,18 @@ def cmp_costs(cost1, cost2):
 	return cmp((m1, s1), (m2, s2)) if solver.solution_type == SOLUTION_TYPE_BY_MOVES else cmp((s1, m1), (s2, m2))
 
 class SuperPosition:
-	def __init__(self, barrel_cells, all_proto_segments):
-		self.barrel_cells = barrel_cells
+	def __init__(self, barrel_idxs, all_proto_segments):
+		self.barrel_idxs = barrel_idxs
 		self.all_proto_segments = all_proto_segments
 		self._solution_cost = None  # lazy calculation
-		self.is_solved = grid.is_solved_for_barrels(barrel_cells)
-		self.positions = {}  # char_cell -> Position
+		self.is_solved = grid.is_solved_for_barrels(barrel_idxs)
+		self.positions = {}  # char_idx -> Position
 
-	def get_or_reparent_or_create_position(self, char_cell, parent, own_nums, segments):
-		position = self.positions.get(char_cell)
+	def get_or_reparent_or_create_position(self, char_idx, parent, own_nums, segments):
+		position = self.positions.get(char_idx)
 		if position is None:
-			position = Position(self, char_cell, parent, own_nums, segments)
-			self.positions[char_cell] = position
+			position = Position(self, char_idx, parent, own_nums, segments)
+			self.positions[char_idx] = position
 		else:
 			debug([position.depth], DBG_SOLV3, position)
 			new_total_nums = apply_diff(parent.total_nums, own_nums) if parent else (0, 0)
@@ -61,13 +61,13 @@ class SuperPosition:
 	@property
 	def solution_cost(self):
 		if self._solution_cost is None:
-			self._solution_cost = solver.get_min_solution_cost(self.barrel_cells)
+			self._solution_cost = solver.get_min_solution_cost(self.barrel_idxs)
 		return self._solution_cost
 
 class Position:
-	def __init__(self, super, char_cell, parent, own_nums, segments):
+	def __init__(self, super, char_idx, parent, own_nums, segments):
 		self.super = super
-		self.char_cell = char_cell
+		self.char_idx = char_idx
 		self.parent = parent
 		if parent:
 			parent.add_child(self)
@@ -146,8 +146,8 @@ class Position:
 	def segments_str(self):
 		if self._segments_str is None:
 			segment_strs = []
-			for distance, char_cell, barrel_cell in self.segments:
-				segment_strs.append("+%d %s -> %s" % (distance, char_cell, barrel_cell))
+			for distance, char_idx, barrel_idx in self.segments:
+				segment_strs.append("+%d %s -> %s" % (distance, char_idx, barrel_idx))
 			self._segments_str = ' '.join(segment_strs) or 'root'
 		return self._segments_str
 
@@ -159,15 +159,16 @@ class Position:
 
 	def to_solution_pairs(self):
 		solution_pairs = self.parent.to_solution_pairs() if self.parent else []
-		for _, char_cell, barrel_cell in self.segments:
-			path_cells = grid.find_path(self.parent.char_cell, char_cell, self.parent.super.barrel_cells)
+		for _, char_idx, barrel_idx in self.segments:
+			path_cells = grid.find_path(self.parent.char_idx, char_idx, self.parent.super.barrel_idxs)
 			assert path_cells is not None, "Bug: Failed to reconstruct char path in solution"
+			char_cell, barrel_cell = grid.to_cells((char_idx, barrel_idx))
 			solution_pairs.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell, grid.reverse_barrel_mode, True)]])
 		return solution_pairs
 
 	def __str__(self):
 		return "{◰[%d] %s ☻%s ■%s}" % \
-			(self.depth, self.nums_str, self.char_cell, ' '.join(map(str, self.super.barrel_cells)))
+			(self.depth, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
 
 class SokobanSolver():
 	def __init__(self):
@@ -296,21 +297,22 @@ class SokobanSolver():
 		return sum(self.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits) for barrel_cell in barrel_cells)
 
 	def estimate_solution_depth(self):
-		_, solution_depth = self.get_min_solution_cost(self.barrel_cells)
-		if solution_depth is None or solution_depth == INF:
+		cost = self.get_min_solution_cost(self.barrel_idxs)
+		if cost is None:
+			warn("get_min_solution_cost returned None")
 			return MIN_SOLUTION_DEPTH
 
-		solution_depth = max(solution_depth, MIN_SOLUTION_DEPTH)
+		solution_depth = max(cost[1], MIN_SOLUTION_DEPTH)
 
 		if self.solution_alg != SOLUTION_ALG_DFS:
 			return solution_depth
 		return ((solution_depth - MIN_SOLUTION_DEPTH - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP + MIN_SOLUTION_DEPTH
 
-	def find_or_create_super_position(self, char_cell, barrel_cells):
+	def find_or_create_super_position(self, char_idx):
 		if grid.is_zsb:
 			super_position_id = grid.barrel_idxs
 		else:
-			grid.get_accessible_bits(char_cell)
+			grid.get_accessible_bits(char_idx)
 			super_position_id = (grid.get_min_last_accessible_idx(), *grid.barrel_idxs)
 
 		if super_position_id in self.visited_super_positions:
@@ -322,17 +324,19 @@ class SokobanSolver():
 			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts()
 
 		accessible_cells_near_barrels.sort(key=lambda two_cells: self.min_char_barrel_plate_shifts.get(two_cells, grid.num_bits) or grid.num_bits)
-		all_proto_segments = tuple([(None, char_cell, barrel_cell)] for char_cell, barrel_cell in accessible_cells_near_barrels)
+		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_cells_near_barrels)
 		if grid.is_zsb:
 			for proto_segments in all_proto_segments:
-				_, char_cell, barrel_cell = proto_segments[0]
+				_, char_idx, barrel_idx = proto_segments[0]
+				char_cell, barrel_cell = grid.to_cells((char_idx, barrel_idx))
 				if grid.reverse_barrel_mode:
-					new_char_cell, new_barrel_cell = apply_diff(char_cell, cell_diff(barrel_cell, char_cell)), char_cell
+					new_cells = apply_diff(char_cell, cell_diff(barrel_cell, char_cell)), char_cell
 				else:
-					new_char_cell, new_barrel_cell = barrel_cell, apply_diff(barrel_cell, cell_diff(char_cell, barrel_cell))
-				proto_segments.append((0, new_char_cell, new_barrel_cell))
+					new_cells = barrel_cell, apply_diff(barrel_cell, cell_diff(char_cell, barrel_cell))
+				new_char_idx, new_barrel_idx = grid.to_idxs(new_cells)
+				proto_segments.append((0, new_char_idx, new_barrel_idx))
 
-		super_position = SuperPosition(barrel_cells, all_proto_segments)
+		super_position = SuperPosition(grid.barrel_idxs, all_proto_segments)
 		self.visited_super_positions[super_position_id] = super_position
 
 		super_position.is_dead = not self.is_barrel_matching_found(grid.barrel_idxs)
@@ -341,9 +345,9 @@ class SokobanSolver():
 
 	def create_child_position_or_reparent_if_better(self, position, segments):
 		num_moves, num_shifts = 0, 0
-		grid.set_barrels(position.super.barrel_cells)
-		for distance, char_cell, barrel_cell in segments:
-			new_char_cell, _ = grid.shift(char_cell, barrel_cell)
+		grid.set_barrels(position.super.barrel_idxs)
+		for distance, char_idx, barrel_idx in segments:
+			new_char_cell, _ = grid.shift(grid.idx_cells[char_idx], grid.idx_cells[barrel_idx])
 			num_moves += distance + 1
 			num_shifts += 1
 		own_nums = num_moves, num_shifts
@@ -354,7 +358,8 @@ class SokobanSolver():
 			debug([position.depth], DBG_SOLV3, "Not creating child that does not improve found solution")
 			return None
 
-		super_position = self.find_or_create_super_position(new_char_cell, grid.barrel_cells)
+		new_char_idx = grid.cell_idxs[new_char_cell]
+		super_position = self.find_or_create_super_position(new_char_idx)
 
 		if super_position.is_dead:
 			if debug.has(DBG_PRUN):
@@ -362,7 +367,7 @@ class SokobanSolver():
 			debug([position.depth], DBG_SOLV3, "Not creating child in deadlocked super-position")
 			return None
 
-		child = super_position.get_or_reparent_or_create_position(new_char_cell, position, own_nums, segments)
+		child = super_position.get_or_reparent_or_create_position(new_char_idx, position, own_nums, segments)
 
 		return child
 
@@ -372,11 +377,11 @@ class SokobanSolver():
 
 		debug([position.depth], DBG_SOLV2, "%s" % position.segments_str)
 		for proto_segments in position.super.all_proto_segments:
-			(_, char_cell, barrel_cell), *rest_segments = proto_segments
-			debug([position.depth], DBG_SOLV3, "Expanding %s -> %s" % (char_cell, barrel_cell))
-			distance = grid.get_accessible_distance(position.char_cell, char_cell, position.super.barrel_cells)
+			(_, char_idx, barrel_idx), *rest_segments = proto_segments
+			debug([position.depth], DBG_SOLV3, "Expanding %s -> %s" % (char_idx, barrel_idx))
+			distance = grid.get_accessible_distance(position.char_idx, char_idx, position.super.barrel_idxs)
 			assert distance is not None, "Bug in find_solution algorithm: no char path"
-			segments = [(distance, char_cell, barrel_cell), *rest_segments]
+			segments = [(distance, char_idx, barrel_idx), *rest_segments]
 
 			self.create_child_position_or_reparent_if_better(position, segments)
 
@@ -418,7 +423,7 @@ class SokobanSolver():
 			return None if self.return_first else True
 
 		if self.solved_position:
-			min_cost = self.get_min_solution_cost(position.super.barrel_cells)
+			min_cost = self.get_min_solution_cost(position.super.barrel_idxs)
 			if self.solved_position.cmp(apply_diff(position.total_nums, min_cost)) <= 0:
 				if debug.has(DBG_PRUN):
 					self.num_costy_solved_bound_positions += 1
@@ -529,19 +534,23 @@ class SokobanSolver():
 				self.pq_push(child)
 
 	def check_solvability(self):
-		barrel_idxs = grid.to_idxs(self.barrel_cells)
 		# these are static constrants, should never appear during find-solution
-		if grid.cell_idxs.get(self.char_cell) is None:
+		self.char_idx = grid.cell_idxs.get(self.char_cell)
+		self.barrel_idxs = grid.to_idxs_or_none(self.barrel_cells)
+		if self.char_idx is None:
 			debug(DBG_SOLV, "Char is not on floor - unsolvable")
 			return False
-		if grid.num_plates < len(barrel_idxs):
+		if None in self.barrel_idxs:
+			debug(DBG_SOLV, "Some barrels are not on floor - unsolvable")
+			return False
+		if grid.num_plates < len(self.barrel_idxs):
 			debug(DBG_SOLV, "Number of plates smaller that barrels - unsolvable")
 			return False
-		barrel_bits = grid.to_bits(barrel_idxs)
+		barrel_bits = grid.to_bits(self.barrel_idxs)
 		fixed_solved_barrel_bits = barrel_bits & grid.plate_bits & grid.dead_barrel_bits
 		if fixed_solved_barrel_bits != grid.no_bits:
 			barrel_bits &= ~fixed_solved_barrel_bits
-			self.barrel_cells = grid.to_cells(barrel_bits)
+			self.barrel_idxs = grid.to_idxs(barrel_bits)
 		if barrel_bits & grid.dead_barrel_bits != grid.no_bits:
 			debug(DBG_SOLV, "Some barrels are on dead barrel cells - unsolvable")
 			return False
@@ -693,8 +702,8 @@ class SokobanSolver():
 				return self.get_found_solution_items("unsolvable"), None
 
 			grid.set_barrels(self.barrel_cells)
-			super_position = self.find_or_create_super_position(self.char_cell, self.barrel_cells)
-			self.initial_position = Position(super_position, self.char_cell, None, None, None)
+			super_position = self.find_or_create_super_position(self.char_idx)
+			self.initial_position = Position(super_position, self.char_idx, None, None, None)
 
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()

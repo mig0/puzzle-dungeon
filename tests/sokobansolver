@@ -589,7 +589,8 @@ def test_reparent_dirty_propagation():
 	solver.solution_alg = SOLUTION_ALG_BFS
 	# prepare and create the initial structures
 	solver.prepare_solution(solver.char_cell)
-	super_position = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
+	grid.set_barrels(solver.barrel_cells)
+	super_position = solver.find_or_create_super_position(grid.to_idx(solver.char_cell))
 	position = Position(super_position, solver.char_cell, None, None, None)
 	# create a fake child and reparent to check propagation
 	child = Position(super_position, solver.char_cell, position, (3, 1), [([], solver.char_cell, solver.barrel_cells[0])])
@@ -650,20 +651,20 @@ def test_superposition_idempotence():
 	solver.prepare_solution(solver.char_cell)
 	# create two barrel lists with same set but different order
 	barrel_cells = tuple(solver.barrel_cells)
-	rev_barrel_cells = tuple(reversed(barrel_cells))
-	sp1 = solver.find_or_create_super_position(solver.char_cell, barrel_cells)
-	sp2 = solver.find_or_create_super_position(solver.char_cell, rev_barrel_cells)
-	# They might create different ids if barrel order matters; but behavior should be equivalent
-	test.eq(sp1.is_solved, sp2.is_solved)
-	# positions dicts should be empty initially
-	test.eq(sp1.positions, sp2.positions)
+	grid.set_barrels(barrel_cells)
+	sp1 = solver.find_or_create_super_position(solver.char_cell)
+	grid.set_barrels(reversed(barrel_cells))
+	sp2 = solver.find_or_create_super_position(solver.char_cell)
+	test.eq(sp1, sp2)
 
 def test_position_num_calculation():
 	solver = create_solver(sok_trivial_h1)
 	solver.prepare_solution(solver.char_cell)
-	super_pos = solver.find_or_create_super_position(solver.char_cell, solver.barrel_cells)
-	root = Position(super_pos, solver.char_cell, None, None, None)
-	child = Position(super_pos, solver.char_cell, root, (3, 2), [])
+	grid.set_barrels(solver.barrel_cells)
+	char_idx = grid.to_idx(solver.char_cell)
+	super_pos = solver.find_or_create_super_position(char_idx)
+	root = Position(super_pos, char_idx, None, None, None)
+	child = Position(super_pos, char_idx, root, (3, 2), [])
 	test.eq(child.total_nums, (3, 2))
 	# Reparent child with new own_nums
 	child.reparent(root, (1, 1), [])
