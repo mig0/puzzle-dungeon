@@ -119,6 +119,21 @@ on GNU/Linux, Windows, and other operating systems.
 |PageUp|  Simulate mouse button 4
 |PageDown|Simulate mouse button 5
 |Ctrl-Escape|Display Pygame Console if available
+|Alt-E|Reload with toggled reverse-barrel-mode
+|Alt-C|Load custom collection levels from clipboard
+|Alt-S|Load solution from clipboard
+
+## Controls for BarrelPuzzle (Sokoban) solver
+
+|key|action
+|--|--
+|RAlt-1|Toggle return-first solution
+|RAlt-A|Use A* algorithm
+|RAlt-B|Use BFS algorithm
+|RAlt-D|Use DFS algorithm
+|RAlt-G|Use Greedy algorithm
+|RAlt-U|Use USC (Uniform) algorithm
+|Shift-KP-Enter|Find move optimal (not push optimal) solution
 
 ## Controls for MirrorPuzzle
 
