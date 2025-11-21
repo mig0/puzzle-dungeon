@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 import io
-from debug import ProgressLine
+from progressline import ProgressLine
 from teestream import stdout_redirected_to
 from test import TestSuite
 

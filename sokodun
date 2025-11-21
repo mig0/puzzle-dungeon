@@ -7,9 +7,10 @@ import numpy
 import argparse
 from load import parse_map_file_signature
 from level import Level
-from debug import debug, ProgressLine
+from debug import debug
 from common import die, warn
 from sizetools import set_fitting_map_size
+from progressline import ProgressLine
 from sokobansolver import *
 from sokobanparser import create_sok_map
 from processcmdargs import process_cmdargs
