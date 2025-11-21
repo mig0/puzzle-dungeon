@@ -249,6 +249,7 @@ class SokobanSolver():
 
 		for barrel_idx in barrel_idxs:
 			if not dfs(barrel_idx, set()):
+				debug(DBG_SOLV3, "No matching for barrel %d found - deadlock" % barrel_idx)
 				return False
 
 		return True
@@ -779,7 +780,7 @@ class SokobanSolver():
 			if not self.check_solvability():
 				return self.get_found_solution_items("unsolvable"), None
 
-			grid.set_barrels(self.barrel_cells)
+			grid.set_barrels(self.barrel_idxs)
 			super_position = self.find_or_create_super_position(self.char_idx)
 			self.initial_position = Position(super_position, self.char_idx, None, None, None)
 
