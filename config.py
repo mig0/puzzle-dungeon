@@ -4,7 +4,7 @@ TITLE = "Puzzle Dungeon"
 FPS = 30
 
 CHEAT_MODE = False
-DEFAULT_DEBUG_LVL = 1  # 0 means no debug at all, 2 means more verbose
+DEFAULT_DEBUG_LVL = 0  # 0 means no debug at all, 2 means more verbose
 MIN_ENEMY_HEALTH = 5
 MAX_ENEMY_HEALTH = 15
 MIN_ENEMY_ATTACK = 5

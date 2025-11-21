@@ -12,6 +12,10 @@ class Debug:
 		self.show_time = False
 		self.time_digits = 3
 		self.features = set()
+		self._set_has_any()
+
+	def _set_has_any(self):
+		self.has_any = self.lvl > 0 or self.features
 
 	def enable(self, feature):
 		self.features.add(feature)
@@ -21,6 +25,11 @@ class Debug:
 
 	def configure(self, args):
 		for item in args:
+			if isinstance(item, int):
+				item = str(item)
+			if type(item) != str:
+				warn("Ignoring non string item (%s) in configure" % str(item))
+				continue
 			if item.startswith("time"):
 				if len(item) == 4:
 					self.show_time = True
@@ -37,8 +46,11 @@ class Debug:
 				while item.endswith('+'):
 					item = item[0:-1]
 					self.enable(item)
+		self._set_has_any()
 
 	def __call__(self, *args):
+		if not self.has_any:
+			return
 		# optimize common case
 		if len(args) >= 2 and isinstance(args[0], int) and self.lvl < args[0]:
 			return
