@@ -533,7 +533,7 @@ class Grid:
 			return None
 
 		# eliminate locked-char deadlock
-		if self.is_surrounding_barrel_deadlock(new_char_cell, new_barrel_cell, dir):
+		if False and self.is_surrounding_barrel_deadlock(new_char_cell, new_barrel_cell, dir):
 			return None
 
 		return new_char_cell, new_barrel_cell
