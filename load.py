@@ -308,7 +308,7 @@ def fetch_letslogic(action):
 	if key.startswith('_'):
 		key = codecs.decode(key[1:][::-1], 'rot13')
 	try:
-		with urlopen(url, data=bytes('key=' + key, 'utf-8')) as res:
+		with urlopen(url, data=bytes('key=' + key, 'utf-8'), timeout=URLOPEN_TIMEOUT) as res:
 			if res.status != 200:
 				warn("Got HTTP status %d on %s" % (res.status, url))
 				return None

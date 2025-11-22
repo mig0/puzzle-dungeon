@@ -126,5 +126,6 @@ pgconsole_config = {
 	}
 }
 
+URLOPEN_TIMEOUT = 20
 LETSLOGIC_API_URL = 'https://letslogic.com/api/v1/'
 LETSLOGIC_API_KEY = '_n2p9882po92s78rp6rnq9rsnn8q5q6r4p797245qo375s105psq38n19rs03sqo0'
