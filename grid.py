@@ -183,6 +183,11 @@ class Grid:
 		char_cell = self.to_cell(char) if char else None
 		if barrels:
 			self.store_reset_barrels(barrels)
+		if show_dead == 'auto':
+			show_dead = 'color' if USE_COLORS else True
+		if show_dead == 'color':
+			cell_colors = (cell_colors or {}) | {cell: COLOR_RED for cell in self.to_cells(self.dead_barrel_bits)}
+			show_dead = False
 		def get_cell_type_with_clean_floor(cell):
 			return CELL_FLOOR if clean and self.map[cell] in CELL_FLOOR_TYPES else self.map[cell]
 		for cy in range(self.size_y):

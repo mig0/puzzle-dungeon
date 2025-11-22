@@ -48,7 +48,7 @@ solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmda
 return_first = cmdargs.return_first
 limit_time = int(cmdargs.limit_time) if cmdargs.limit_time and cmdargs.limit_time.isdigit() else None
 show_time = cmdargs.show_time
-show_dead = cmdargs.show_dead
+show_dead = cmdargs.show_dead and 'auto'
 show_sok = cmdargs.show_sok
 quiet = cmdargs.quiet or 0
 
