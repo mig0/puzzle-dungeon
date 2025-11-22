@@ -3,6 +3,7 @@ from bitarray import bitarray, frozenbitarray
 
 from constants import *
 from celltools import apply_diff, cell_diff, cell_dir, sort_cells, get_bounding_area
+from colorize import *
 from common import die
 from debug import *
 
@@ -176,7 +177,7 @@ class Grid:
 			self.all_passable_neigh_bits.append(self.to_bits(passable_neigh_idxs))
 			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
 
-	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, show_dead=False, extra_cb=None):
+	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, show_dead=False, extra_cb=None):
 		if descr:
 			print(descr)
 		char_cell = self.to_cell(char) if char else None
@@ -213,6 +214,8 @@ class Grid:
 						cell_ch = ch
 					if cell == char_cell:
 						cell_ch = actor_chars['char']
+					if cell_colors and cell in cell_colors:
+						cell_ch = colorize(cell_ch, cell_colors[cell])
 					print(cell_ch, end="")
 			print()
 		if barrels:
