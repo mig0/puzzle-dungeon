@@ -1,4 +1,5 @@
 import atexit
+import signal
 from common import warn
 from debug import debug
 from profiler import profiler
@@ -33,6 +34,9 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 
 	custom_collection = create_custom_collection(extra_custom_collection_config)
 	custom_collection.config["reverse-barrel-mode"] = cmdargs.reverse_barrel_mode
+
+	orig_sigint_handler = signal.getsignal(signal.SIGINT)
+	signal.signal(signal.SIGINT, lambda signum, frame: print("Interrupted") or exit())
 
 	level_configs = []
 	level_indexes = []
@@ -70,6 +74,8 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 			})
 		else:
 			warn("Ignoring unknown argument %s" % arg)
+
+	signal.signal(signal.SIGINT, orig_sigint_handler)
 
 	if level_indexes:
 		valid_level_idxs = []
