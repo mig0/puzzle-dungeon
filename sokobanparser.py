@@ -2,7 +2,7 @@ import io
 import os
 from constants import *
 from sizetools import get_fitting_map_size
-from random import randint
+from random import choice
 from common import die, open_read
 
 CHAR_CELL_TYPES = {
@@ -161,8 +161,8 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 			levels.append({
 				"name": level_name or "No Name",
 				"bg-image": config.get('bg-image') or "bg/starry-sky.webp",
-				"theme": config.get('theme') or ("stoneage1", "stoneage2", "stoneage3", "stoneage4", "stoneage5", "default", "modern1", "moss")[randint(0, 7)],
-				"music": config.get('music') or ("playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures")[randint(0, 4)] + ".mp3",
+				"theme": config.get('theme') or choice(["jewel", "stoneage1", "stoneage2", "stoneage3", "stoneage4", "stoneage5", "default", "modern1", "moss"]),
+				"music": config.get('music') or choice(["playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures"]) + ".mp3",
 				"map-size": map_size,
 				"map-string": map_string,
 				"num-enemies": 0,

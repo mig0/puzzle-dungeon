@@ -26,7 +26,7 @@ on GNU/Linux, Windows, and other operating systems.
   feature enemy encounters.
 
 - **Customizable Themes**:
-  The game includes 13 themes, well suited for different puzzle types.
+  The game includes 14 themes, well suited for different puzzle types.
 
 - **Multilingual Support**:
   The game is primarily in English, with partial translations available
@@ -46,6 +46,7 @@ on GNU/Linux, Windows, and other operating systems.
 * modern1, modern2
 * minecraft
 * moss
+* jewel
 * stoneage1, stoneage2, stoneage3, stoneage4, stoneage5
 
 ## Static cells

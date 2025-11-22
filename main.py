@@ -1489,16 +1489,16 @@ def handle_press_key():
 		set_theme("classic")
 		return
 	if keyboard.f3:
-		set_theme("ancient1")
+		set_theme("ancient1"  if not keyboard.shift else "ancient2")
 		return
 	if keyboard.f4:
-		set_theme("ancient2")
+		set_theme("modern1"   if not keyboard.shift else "modern2")
 		return
 	if keyboard.f5:
-		set_theme("modern1")
+		set_theme("jewel")
 		return
 	if keyboard.f6:
-		set_theme("modern2")
+		set_theme("jewel")
 		return
 	if keyboard.f7:
 		set_theme("minecraft")
