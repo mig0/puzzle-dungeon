@@ -1,0 +1,150 @@
+#!/usr/bin/python
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+
+import colorize
+from test import TestSuite
+
+# force colors OFF by default during tests
+colorize.USE_COLORS = False
+
+def test_split_top_level():
+	s = "a:(1,2), b:(3,4,5), c:6"
+	parts = colorize._split_top_level(s, ",")
+	test.eq(parts, ["a:(1,2)", " b:(3,4,5)", " c:6"])
+
+	s = "(1,2),(3,(4,5)),6"
+	parts = colorize._split_top_level(s, ",")
+	test.eq(parts, ["(1,2)", "(3,(4,5))", "6"])
+
+def test_is_dict_like_true():
+	test.ok(colorize._is_dict_like("a:1, b:2"))
+	test.ok(colorize._is_dict_like("x:(1,2), y:3/4"))
+	test.ok(colorize._is_dict_like("A: (10, 20), B: (3,4,5)"))
+	test.ok(colorize._is_dict_like("(1,2): 3/4"))
+
+def test_is_dict_like_false():
+	test.ok(not colorize._is_dict_like("a"))
+	test.ok(not colorize._is_dict_like("1,2,3"))
+	test.ok(not colorize._is_dict_like("a:1, b: 2 3"))
+
+def test_colorize_auto_dict_like_no_colors():
+	s = "a:1, b:2"
+	out = colorize.colorize_auto(s)
+	test.eq(out, s)
+
+	s = "(12,5): (1,2), x:3/4"
+	out = colorize.colorize_auto(s)
+	test.eq(out, s)
+
+def test_colorize_auto_numbers_no_colors():
+	s = "Time 12:34, value 200, ratio 3.14"
+	out = colorize.colorize_auto(s)
+	test.eq(out, s)  # no colors → identical
+
+	s = "At 09:18:22 running, load=7"
+	out = colorize.colorize_auto(s)
+	test.eq(out, s)
+
+def test_colorize_auto_non_string():
+	out = colorize.colorize_auto(12345)
+	test.eq(out, "12345")
+
+	out = colorize.colorize_auto((1,2))
+	test.eq(out, "(1, 2)")
+
+def test_colorize_auto_not_dict_like_falls_back_to_number_mode():
+	s = "speed 12 km, time 09:12"
+	out = colorize.colorize_auto(s)
+	test.eq(out, s)  # no colors, but detection path runs fine
+
+def test_colorize_auto_dict_like_with_colors():
+	# force colors ON
+	colorize.USE_COLORS = True
+
+	s = "a:1, b:2"
+	out = colorize.colorize_auto(s)
+
+	# key 'a' must be cyan → \033[36m
+	# val '1' must be yellow → \033[33m
+	test.ok("\033[36ma\033[0m: \033[33m1\033[0m" in out)
+	test.ok("\033[36mb\033[0m: \033[33m2\033[0m" in out)
+
+	# restore OFF for later tests
+	colorize.USE_COLORS = False
+
+def test_colorize_auto_numbers_with_colors():
+	colorize.USE_COLORS = True
+
+	s = "Time 12:34 load=7"
+	out = colorize.colorize_auto(s)
+
+	# 12:34 → bold: \033[1m
+	test.ok("\033[1m12:34\033[0m" in out)
+
+	# 7 → cyan: \033[36m
+	test.ok("\033[36m7\033[0m" in out)
+
+	colorize.USE_COLORS = False
+
+def test_pathological_dict_like():
+	# deeply nested inside value
+	s = "k1:(1,(2,(3,(4,5)))), k2:6"
+	test.ok(colorize._is_dict_like(s))
+	out = colorize.colorize_auto(s)
+	test.eq(out, s)
+
+	# tuple key + multi-tuple value
+	s = "(1,2):((3,4),(5,6)), x:(7,(8,9))"
+	test.ok(colorize._is_dict_like(s))
+	test.eq(colorize.colorize_auto(s), s)
+
+	# tuple key + multi-tuple value, with spaces
+	s = "(1, 2): ((3, 4), (5, 6)), x: (7, (8, 9))"
+	test.ok(colorize._is_dict_like(s))
+	test.eq(colorize.colorize_auto(s), s)
+
+	# key or value containing inner commas inside parentheses
+	s = "A:(1, 2, 3, 4), B:( (5,6) , (7, (8,9)) )"
+	test.ok(colorize._is_dict_like(s))
+	test.eq(colorize.colorize_auto(s), s)
+
+	# keys containing quoted spaces should not break parsing
+	s = '"a b":1, c: 2'
+	test.ok(colorize._is_dict_like(s))
+
+	# values containing quoted commas must not break parsing
+	s = "a:'x, y', b:'(ignore, these, brackets}'"
+	test.ok(colorize._is_dict_like(s))
+	test.eq(colorize.colorize_auto(s), s)
+
+def test_pathological_numeric_colorize():
+	colorize.USE_COLORS = True
+
+	# numeric patterns with tricky formatting
+	s = "a=00123 b=45.6000 time=07:08:09"
+	out = colorize.colorize_auto(s)
+
+	test.ok("\033[1m07:08:09\033[0m" in out)  # HH:MM:SS
+	test.ok("\033[36m00123\033[0m" in out)
+	test.ok("\033[36m45.6000\033[0m" in out)
+
+	colorize.USE_COLORS = False
+
+test = TestSuite("colorize")
+
+test_split_top_level()
+test_is_dict_like_true()
+test_is_dict_like_false()
+test_colorize_auto_dict_like_no_colors()
+test_colorize_auto_numbers_no_colors()
+test_colorize_auto_non_string()
+test_colorize_auto_not_dict_like_falls_back_to_number_mode()
+test_pathological_dict_like()
+test_colorize_auto_dict_like_with_colors()
+test_colorize_auto_numbers_with_colors()
+test_pathological_numeric_colorize()
+
+test.finalize()

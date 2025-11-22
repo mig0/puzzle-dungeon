@@ -1,6 +1,7 @@
 #!/bin/sh
 
 tests/celltools
+tests/colorize
 tests/grid
 tests/progressline
 tests/sokobansolver
