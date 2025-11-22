@@ -372,13 +372,10 @@ class SokobanSolver():
 
 		return best_cost
 
-	def get_min_solution_depth(self, barrel_cells):
-		return sum(self.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits) for barrel_cell in barrel_cells)
-
 	def estimate_solution_depth(self):
 		cost = self.get_min_solution_cost(self.barrel_idxs)
 		if cost is None:
-			warn("get_min_solution_cost returned None")
+			debug(DBG_SOLV3, "get_min_solution_cost returned None on estimate_solution_depth")
 			return MIN_SOLUTION_DEPTH
 
 		solution_depth = max(cost[1], MIN_SOLUTION_DEPTH)
@@ -402,7 +399,7 @@ class SokobanSolver():
 		else:
 			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts()
 
-		accessible_cells_near_barrels.sort(key=lambda two_cells: self.min_char_barrel_plate_shifts.get(two_cells, grid.num_bits) or grid.num_bits)
+		accessible_cells_near_barrels.sort(key=lambda two_cells: self.min_char_barrel_costs.get(grid.to_idxs(two_cells), (grid.num_bits,) * 2))
 		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_cells_near_barrels)
 		if grid.is_zsb:
 			for proto_segments in all_proto_segments:
@@ -636,8 +633,8 @@ class SokobanSolver():
 		return True
 
 	def prepare_solution(self, char=None):
-		self.min_char_barrel_plate_shifts = min_char_shifts = {}
-		self.min_barrel_plate_shifts = min_shifts = {}
+		self.min_char_barrel_costs = min_char_costs = {}
+		self.min_barrel_costs = min_costs = {}
 		self.min_plate_char_barrel_costs = {}
 		self.min_plate_barrel_costs = {}
 
@@ -662,7 +659,7 @@ class SokobanSolver():
 			self.min_plate_char_barrel_costs[plate_idx] = min_plate_char_costs = {}
 
 			depth = 0
-			min_shifts[plate_cell] = 0
+			min_costs[plate_idx] = (0, 0)
 			min_plate_costs[plate_idx] = (0, 0)
 			unprocessed = [(char_idx, plate_idx, 0) for char_idx in grid.all_passable_neigh_idxs[plate_idx]]
 
@@ -686,17 +683,16 @@ class SokobanSolver():
 						own_dist = grid.get_accessible_distance(char_idx, last_char_idx)
 						new_dist = last_dist + own_dist + 1
 						cost = (new_dist, depth)
+						new_barrel_idx = new_idxs[1]
 
 						was_improved = False
-						if new_cells not in min_char_shifts or min_char_shifts[new_cells] > depth:
-							min_char_shifts[new_cells] = depth
-							new_char_cell, new_barrel_cell = new_cells
-							if new_barrel_cell not in min_shifts or min_shifts[new_barrel_cell] > depth:
-								min_shifts[new_barrel_cell] = depth
+						if new_idxs not in min_char_costs or cmp_costs(min_char_costs[new_idxs], cost) > 0:
+							min_char_costs[new_idxs] = cost
+							if new_barrel_idx not in min_costs or cmp_costs(min_costs[new_barrel_idx], cost) > 0:
+								min_costs[new_barrel_idx] = cost
 							was_improved = True
 						if new_idxs not in min_plate_char_costs or cmp_costs(min_plate_char_costs[new_idxs], cost) > 0:
 							min_plate_char_costs[new_idxs] = cost
-							new_char_idx, new_barrel_idx = new_idxs
 							if new_barrel_idx not in min_plate_costs or cmp_costs(min_plate_costs[new_barrel_idx], cost) > 0:
 								min_plate_costs[new_barrel_idx] = cost
 							was_improved = True
@@ -706,13 +702,17 @@ class SokobanSolver():
 				unprocessed = next_unprocessed
 
 		if debug.has("precosts"):
+			def idx_costs_to_str(d):
+				return ', '.join(['%d: %d/%d' % (idx, *cost) for idx, cost in d.items()])
+			debug("min_barrel_costs")
+			debug([2], idx_costs_to_str(dict(sorted(self.min_barrel_costs.items()))))
 			plate_idx, min_plate_costs = sorted(self.min_plate_barrel_costs.items())[0]
 			debug("min_plate_barrel_costs for the 1-st plate idx=%d" % plate_idx)
-			debug([2], str(dict(sorted(min_plate_costs.items()))))
+			debug([2], idx_costs_to_str(dict(sorted(min_plate_costs.items()))))
 
 		grid.barrel_bits = grid.no_bits.copy()
 
-		grid.dead_barrel_bits = ~grid.to_bits(min_shifts.keys())
+		grid.dead_barrel_bits = ~grid.to_bits(min_costs.keys())
 		if debug.has(DBG_SOLV3):
 			grid.show_map("Map with dead-barrel cells", show_dead=True)
 
@@ -780,6 +780,7 @@ class SokobanSolver():
 			if not self.check_solvability():
 				return self.get_found_solution_items("unsolvable"), None
 
+			debug(DBG_SOLV2, "Solving for barrels: %s" % (self.barrel_idxs,))
 			grid.set_barrels(self.barrel_idxs)
 			super_position = self.find_or_create_super_position(self.char_idx)
 			self.initial_position = Position(super_position, self.char_idx, None, None, None)
@@ -805,7 +806,7 @@ class SokobanSolver():
 		if stop or self.solution_depth > MAX_SOLUTION_DEPTH or time() > self.end_solution_time:
 			return self.get_found_solution_items("terminated"), None
 
-		debug([0], DBG_SOLV, "Using %s%s" % (self.solution_alg, " up to depth %d" % self.solution_depth if self.solution_depth < MAX_SOLUTION_DEPTH else ""))
+		debug(DBG_SOLV2, "Using %s%s" % (self.solution_alg, " up to depth %d" % self.solution_depth if self.solution_depth < MAX_SOLUTION_DEPTH else ""))
 
 		is_finished = (
 			self.find_solution_using_dfs() if self.solution_alg == SOLUTION_ALG_DFS else

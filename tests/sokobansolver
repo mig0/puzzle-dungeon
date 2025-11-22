@@ -606,8 +606,10 @@ def test_prepare_solution_without_plates():
 	solver = create_solver(sok)
 	solver.prepare_solution()
 	test.has_attr(grid, 'dead_barrel_bits')
-	test.has_attr(solver, 'min_barrel_plate_shifts')
-	test.has_attr(solver, 'min_char_barrel_plate_shifts')
+	test.has_attr(solver, 'min_barrel_costs')
+	test.has_attr(solver, 'min_char_barrel_costs')
+	test.has_attr(solver, 'min_plate_barrel_costs')
+	test.has_attr(solver, 'min_plate_char_barrel_costs')
 	# ensure all floor cells are marked as dead without plates
 	num_dead_barrel_bits = grid.dead_barrel_bits.count()
 	test.gt(num_dead_barrel_bits, 0)
@@ -627,13 +629,6 @@ def test_prepare_solution_with_plate():
 	solver.disable_prepare = False
 	solver.prepare_solution()
 	test.eq(grid.dead_barrel_bits, dead_barrel_bits)
-
-def test_get_min_solution_depth_behavior():
-	solver = create_solver(sok_trivial_s1)
-	solver.prepare_solution(solver.char_cell)
-	depth = solver.get_min_solution_depth(solver.barrel_cells)
-	expected = sum(solver.min_barrel_plate_shifts.get(barrel_cell, grid.num_bits) for barrel_cell in solver.barrel_cells)
-	test.eq(depth, expected)
 
 def test_prepare_solution_char_filtering():
 	solver = create_solver(sok_trivial_s2)
@@ -693,7 +688,6 @@ try:
 	test_reparent_dirty_propagation()
 	test_prepare_solution_without_plates()
 	test_prepare_solution_with_plate()
-	test_get_min_solution_depth_behavior()
 	test_prepare_solution_char_filtering()
 	test_superposition_idempotence()
 	test_position_num_calculation()
