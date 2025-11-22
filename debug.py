@@ -1,5 +1,6 @@
 from constants import DEFAULT_DEBUG_LVL
 from common import warn, get_current_time_str
+from colorize import colorize_auto
 
 # features
 DBG_SOLV  = "solv"
@@ -81,6 +82,6 @@ class Debug:
 			for msg in msg if isinstance(msg, (list, tuple)) else [msg]:
 				print("%s%s%s" % (
 					"[%s] " % get_current_time_str(self.time_digits) if self.show_time else "",
-					" " * depth if depth else "", msg))
+					" " * depth if depth else "", colorize_auto(msg)))
 
 debug = Debug()
