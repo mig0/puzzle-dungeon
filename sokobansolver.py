@@ -519,8 +519,8 @@ class SokobanSolver():
 
 		depth = position.depth
 
-		if depth >= self.solution_depth:
-			debug([depth], DBG_SOLV2, "Solution depth limit %d reached" % self.solution_depth)
+		if depth > self.solution_depth:
+			debug([depth], DBG_SOLV2, "Solution depth limit %d exceeded" % self.solution_depth)
 			return False
 
 		if (is_fully_processed := self.process_position(position)) is not False:
@@ -544,10 +544,10 @@ class SokobanSolver():
 		while unprocessed_positions:
 			position = unprocessed_positions[-1]
 
-			if position.depth >= self.solution_depth:
+			if position.depth > self.solution_depth:
 				unprocessed_positions.pop()
 				depth_limit_positions.append(position)
-				debug([position.depth], DBG_SOLV2, "Solution depth limit %d reached" % self.solution_depth)
+				debug([position.depth], DBG_SOLV2, "Solution depth limit %d exceeded" % self.solution_depth)
 				continue
 
 			is_fully_processed = self.process_position(position)
@@ -572,10 +572,10 @@ class SokobanSolver():
 		while unprocessed_positions:
 			position = unprocessed_positions[0]
 
-			if position.depth >= self.solution_depth:
+			if position.depth > self.solution_depth:
 				unprocessed_positions.pop(0)
 				depth_limit_positions.append(position)
-				debug([position.depth], DBG_SOLV2, "Solution depth limit %d reached" % self.solution_depth)
+				debug([position.depth], DBG_SOLV2, "Solution depth limit %d exceeded" % self.solution_depth)
 				continue
 
 			is_fully_processed = self.process_position(position)
