@@ -455,6 +455,12 @@ class Grid:
 	def is_solved_for_barrels(self, barrels=None):
 		return (~self.plate_bits & (self.to_bits(barrels) if barrels else self.barrel_bits)) == self.no_bits
 
+	def is_wall(self, cell):
+		return not cell in self.cell_idxs
+
+	def is_barrel(self, cell):
+		return cell in self.cell_idxs and self.barrel_bits[self.cell_idxs[cell]]
+
 	def is_dead_barrel(self, barrel):
 		return bool(self.dead_barrel_bits and self.dead_barrel_bits[self.to_idx(barrel)])
 
@@ -470,6 +476,9 @@ class Grid:
 		return is_deadlock or not self.plate_bits[self.cell_idxs[cell1]]
 
 	def is_r_or_l_2x2_barrel_deadlock(self, barrel_cell, dir):
+		# support these kinds of static deadlocks (0..3 walls, 3..0 barrels)
+		#  ??  @$?
+		# @$?   ??
 		barrel_f_cell = apply_diff(barrel_cell, dir)
 		barrel_l_cell = apply_diff(barrel_cell, DIR_L if dir in (DIR_U, DIR_D) else DIR_U)
 		barrel_lf_cell = apply_diff(barrel_l_cell, dir)
@@ -478,6 +487,25 @@ class Grid:
 		barrel_r_cell = apply_diff(barrel_cell, DIR_R if dir in (DIR_U, DIR_D) else DIR_D)
 		barrel_rf_cell = apply_diff(barrel_r_cell, dir)
 		if self.is_four_barrel_deadlock(barrel_cell, barrel_r_cell, barrel_rf_cell, barrel_f_cell):
+			return True
+		# unfortunately the following zigzag deadlocks are more costy than beneficial, so skip them
+		return False
+
+		# support these kinds of static deadlocks too (2 walls, 2 barrels)
+		#  #     #   #  #
+		# @$$  @$$  $$  $$
+		#   #   #   #@  @#
+		def is_unsolved_barrel(barrel2_cell):
+			return self.is_barrel(barrel2_cell) and (self.to_bits([barrel_cell, barrel2_cell]) & ~self.plate_bits) != self.no_bits
+		if self.is_wall(barrel_l_cell) and self.is_wall(barrel_rf_cell) and is_unsolved_barrel(barrel_f_cell):
+			return True
+		if self.is_wall(barrel_r_cell) and self.is_wall(barrel_lf_cell) and is_unsolved_barrel(barrel_f_cell):
+			return True
+		char_l_cell = apply_diff(barrel_lf_cell, dir, subtract=True)
+		if self.is_wall(char_l_cell) and self.is_wall(barrel_f_cell) and is_unsolved_barrel(barrel_l_cell):
+			return True
+		char_r_cell = apply_diff(barrel_rf_cell, dir, subtract=True)
+		if self.is_wall(char_r_cell) and self.is_wall(barrel_f_cell) and is_unsolved_barrel(barrel_r_cell):
 			return True
 		return False
 
@@ -508,6 +536,7 @@ class Grid:
 
 		# eliminate 2x2 deadlocks
 		if self.is_r_or_l_2x2_barrel_deadlock(new_barrel_cell, dir):
+#			self.show_map(" ", char=char_cell, cell_colors={barrel_cell: COLOR_BRED, char_cell: COLOR_BYELLOW, new_barrel_cell: COLOR_BCYAN}, show_dead='color')
 			return None
 
 		return new_char_cell, new_barrel_cell
