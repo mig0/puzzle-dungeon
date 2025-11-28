@@ -7,6 +7,11 @@ DBG_SOLV  = "solv"
 DBG_SOLV2 = "solv+"
 DBG_SOLV3 = "solv++"
 
+def sort_dict_keys(d):
+	if not isinstance(d, dict):
+		return d
+	return {k: sort_dict_keys(v) for k, v in sorted(d.items())}
+
 class Debug:
 	def __init__(self):
 		self.lvl = DEFAULT_DEBUG_LVL
@@ -78,7 +83,7 @@ class Debug:
 			if callable(msg):
 				msg = msg()  # evaluate lazily
 			if isinstance(msg, dict):
-				msg = ["%s=%s" % (k, v) for k, v in msg.items()]
+				msg = ["%s: %s" % (k, sort_dict_keys(v)) for k, v in msg.items()]
 			for msg in msg if isinstance(msg, (list, tuple)) else [msg]:
 				print("%s%s%s" % (
 					"[%s] " % get_current_time_str(self.time_digits) if self.show_time else "",
