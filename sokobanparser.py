@@ -13,6 +13,7 @@ CHAR_CELL_TYPES = {
 	'$': ACTOR_CHARS["barrel"],
 	'*': ACTOR_ON_PLATE_CHARS["barrel"],
 	' ': CELL_FLOOR,
+	'_': CELL_VOID,
 }
 
 BACK_TRANSLATION = dict((ord(cell_type), (ch)) for ch, cell_type in CHAR_CELL_TYPES.items())
