@@ -352,7 +352,10 @@ class SokobanSolver():
 				return
 
 			barrel_idx = barrel_idxs[i]
-			assert sorted_barrel_plates.get(barrel_idx), "Barrel has no candidates at all, but match must exist"
+			if not sorted_barrel_plates.get(barrel_idx):
+				from colorize import COLOR_BYELLOW
+				grid.show_map(cell_colors={grid.to_cell(barrel_idx): COLOR_BYELLOW}, char=char_idx)
+				assert False, "Barrel has no candidates at all, but match must exist"
 
 			for plate_idx in sorted_barrel_plates[barrel_idx]:
 				if plate_idx in used_plates:
@@ -385,11 +388,12 @@ class SokobanSolver():
 		return ((solution_depth - MIN_SOLUTION_DEPTH - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP + MIN_SOLUTION_DEPTH
 
 	def find_or_create_super_position(self, char_idx):
+		barrel_idxs = grid.barrel_idxs
 		if grid.is_zsb:
-			super_position_id = grid.barrel_idxs
+			super_position_id = barrel_idxs
 		else:
 			grid.get_accessible_bits(char_idx)
-			super_position_id = (grid.get_min_last_accessible_idx(), *grid.barrel_idxs)
+			super_position_id = (grid.get_min_last_accessible_idx(), *barrel_idxs)
 
 		if super_position_id in self.visited_super_positions:
 			return self.visited_super_positions[super_position_id]
@@ -412,10 +416,10 @@ class SokobanSolver():
 				new_char_idx, new_barrel_idx = grid.to_idxs(new_cells)
 				proto_segments.append((0, new_char_idx, new_barrel_idx))
 
-		super_position = SuperPosition(grid.barrel_idxs, all_proto_segments)
+		super_position = SuperPosition(barrel_idxs, all_proto_segments)
 		self.visited_super_positions[super_position_id] = super_position
 
-		super_position.is_dead = not self.is_barrel_matching_found(grid.barrel_idxs)
+		super_position.is_dead = not self.is_barrel_matching_found(barrel_idxs)
 
 		return super_position
 
@@ -661,7 +665,11 @@ class SokobanSolver():
 			depth = 0
 			min_costs[plate_idx] = (0, 0)
 			min_plate_costs[plate_idx] = (0, 0)
-			unprocessed = [(char_idx, plate_idx, 0) for char_idx in grid.all_passable_neigh_idxs[plate_idx]]
+			unprocessed = []
+			for char_idx in grid.all_passable_neigh_idxs[plate_idx]:
+				min_char_costs[(char_idx, plate_idx)] = (0, 0)
+				min_plate_char_costs[(char_idx, plate_idx)] = (0, 0)
+				unprocessed.append((char_idx, plate_idx, 0))
 
 			while unprocessed:
 				depth += 1
@@ -701,15 +709,6 @@ class SokobanSolver():
 
 				unprocessed = next_unprocessed
 
-		if debug.has("precosts"):
-			def idx_costs_to_str(d):
-				return ', '.join(['%d: %d/%d' % (idx, *cost) for idx, cost in d.items()])
-			debug("min_barrel_costs")
-			debug([2], idx_costs_to_str(dict(sorted(self.min_barrel_costs.items()))))
-			plate_idx, min_plate_costs = sorted(self.min_plate_barrel_costs.items())[0]
-			debug("min_plate_barrel_costs for the 1-st plate idx=%d" % plate_idx)
-			debug([2], idx_costs_to_str(dict(sorted(min_plate_costs.items()))))
-
 		grid.barrel_bits = grid.no_bits.copy()
 
 		grid.dead_barrel_bits = ~grid.to_bits(min_costs.keys())
@@ -723,6 +722,24 @@ class SokobanSolver():
 			accessible_plate_idxs = [plate_idx for plate_idx in grid.plate_idxs if barrel_idx in self.min_plate_barrel_costs.get(plate_idx, {})]
 			self.accessible_barrel_plate_idxs[barrel_idx] = accessible_plate_idxs
 			self.is_barrel_mismatch_possible |= len(accessible_plate_idxs) < grid.num_plates
+
+		if debug.has("precosts"):
+			def idx_costs_to_str(d):
+				return ', '.join(['%d: %d/%d' % (idx, *cost) for idx, cost in d.items()])
+			debug("min_barrel_costs")
+			debug([2], idx_costs_to_str(dict(sorted(self.min_barrel_costs.items()))))
+			plate_idx, min_plate_costs = sorted(self.min_plate_barrel_costs.items())[0]
+			debug("min_plate_barrel_costs for the 1-st plate idx=%d" % plate_idx)
+			debug([2], idx_costs_to_str(dict(sorted(min_plate_costs.items()))))
+
+			if debug.has("precosts+"):
+				debug("Precalculated data:")
+				debug([2], {
+					"min_barrel_costs": self.min_barrel_costs,
+					"min_char_barrel_costs": self.min_char_barrel_costs,
+					"min_plate_barrel_costs": self.min_plate_barrel_costs,
+					"min_plate_char_barrel_costs": self.min_plate_char_barrel_costs,
+				})
 
 	def get_found_solution_items(self, reason):
 		# store the solution nums for users
