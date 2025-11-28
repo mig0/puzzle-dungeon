@@ -428,20 +428,20 @@ optimal_solution_nums_strs = {
 	sok_obvious_14: '64/12',
 	sok_takaken_01: '170/43',
 	sok_takaken_02: '185/42',
-	sok_takaken_03: '0/0',
+	sok_takaken_03: '144/47',
 	sok_takaken_04: ('256/67', '250/69'),
 	sok_takaken_05: '84/24',
-	sok_takaken_06: ('180/52', '172/56'),
-	sok_takaken_07: '0/0',
-	sok_takaken_08: '191/41',
+	sok_takaken_06: ('180/52', '170/56'),
+	sok_takaken_07: ('373/58', '369/60'),  # ('365/58', '361/60')
+	sok_takaken_08: '185/41',
 	sok_takaken_09: '93/16',
-	sok_takaken_10: '0/0',
+	sok_takaken_10: ('148/52', '146/54'),
 	sok_takaken_11: '105/22',
 	sok_takaken_12: '86/19',
 	sok_takaken_13: ('213/54', '207/58'),
-	sok_takaken_14: '0/0',
-	sok_complex_01: ('171/42', '170/42'),  # '144/38',
-	sok_complex_02: ('265/88', '265/88'),  # '211/82',
+	sok_takaken_14: ('266/73', '247/75'),
+	sok_complex_01: ('146/38', '146/38'),  # '144/38',
+	sok_complex_02: ('221/82', '217/82'),  # '211/82',
 }
 
 optimal_solution_nums_strs_by_type = {
@@ -559,29 +559,22 @@ def test_trivial_without_solutions():
 	))
 
 def test_algorithms_consistency():
-	for sok in sok_trivial_h3, sok_obvious_05, sok_obvious_06:
+	for sok in sok_trivial_h3, sok_obvious_03, sok_obvious_06:
 		for reverse_barrel_mode in False, True:
 			results = {}
-			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR:
+			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR:
 				# solve both types
-				solver = create_solver(sok, reverse_barrel_mode)
-				solver.solution_alg = alg
-				sol_s = solver.solve(SOLUTION_TYPE_BY_SHIFTS)
-				results[(alg, 'shifts')] = solver.last_solution_nums_str
-				# reconfigure fresh
-				solver = create_solver(sok, reverse_barrel_mode)
-				solver.solution_alg = alg
-				sol_m = solver.solve(SOLUTION_TYPE_BY_MOVES)
-				results[(alg, 'moves')] = solver.last_solution_nums_str
-				test.eq(sol_s, sol_m)
-			# all values must match BFS results
-			base_shifts = results[(SOLUTION_ALG_BFS, 'shifts')]
-			base_moves  = results[(SOLUTION_ALG_BFS, 'moves')]
-			for k, v in results.items():
-				if k[1] == 'shifts':
-					test.eq(v, base_shifts)
-				else:
-					test.eq(v, base_moves)
+				for typ in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
+					solver = create_solver(sok, reverse_barrel_mode)
+					solver.solution_alg = alg
+					sol = solver.solve(typ)
+					results[alg, typ] = solver.last_solution_nums_str
+				test.eq(results[alg, SOLUTION_TYPE_BY_SHIFTS], results[alg, SOLUTION_TYPE_BY_MOVES])
+			def create_key(a, r, v):
+				return ','.join([a, str(r), str(v)])
+			# compare all results to BFS results
+			for (alg, typ), v in results.items():
+				test.eq(create_key(alg, reverse_barrel_mode, v), create_key(alg, reverse_barrel_mode, results[SOLUTION_ALG_BFS, typ]))
 
 def test_reparent_dirty_propagation():
 	sok = sok_trivial_s1
@@ -676,7 +669,7 @@ def test_find_solution_status_string():
 args = sys.argv[1:]
 verbose = args.count('-v') >= 2
 if args.count('-v') >= 3:
-	debug.configure(['solv' + ('+' * (args.count('-v') - 3))])
+	debug.configure([feature + ('+' * (args.count('-v') - 3)) for feature in ('solv', 'precosts')])
 test = TestSuite("SokobanSolver", '-a' in args, '-v' in args, '-p' in args)
 try:
 	test_trivial_solutions()
