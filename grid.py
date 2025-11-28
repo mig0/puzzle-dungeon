@@ -139,6 +139,7 @@ class Grid:
 			if map[cell] in (ACTOR_CHARS['barrel'], ACTOR_ON_PLATE_CHARS['barrel']):
 				self.barrel_bits[idx] = True
 
+		self.plate_idxs = self.to_idxs(self.plate_bits)
 		self.dead_barrel_bits = self.no_bits
 
 		debug(DBG_GRID, "Configured map with %d floors" % self.num_bits)
@@ -446,10 +447,6 @@ class Grid:
 	@property
 	def num_barrels(self):
 		return len(self.barrel_idxs)
-
-	@property
-	def plate_idxs(self):
-		return self.to_idxs(self.plate_bits)
 
 	@property
 	def plate_cells(self):
