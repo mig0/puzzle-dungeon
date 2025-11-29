@@ -157,11 +157,21 @@ class Position:
 
 	def to_solution_pairs(self):
 		solution_pairs = self.parent.to_solution_pairs() if self.parent else []
-		for _, char_idx, barrel_idx in self.segments:
-			path_cells = grid.find_path(self.parent.char_idx, char_idx, self.parent.super.barrel_idxs)
-			assert path_cells is not None, "Bug: Failed to reconstruct char path in solution"
-			char_cell, barrel_cell = grid.to_cells((char_idx, barrel_idx))
-			solution_pairs.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell, grid.reverse_barrel_mode, True)]])
+		if self.parent:
+			grid.set_barrels(self.parent.super.barrel_idxs)
+			prev_char_cell = grid.to_cell(self.parent.char_idx)
+			for char_path_len, char_idx, barrel_idx in self.segments:
+				char_cell, barrel_cell = grid.to_cells((char_idx, barrel_idx))
+				path_cells = grid.find_path(prev_char_cell, char_cell, self.parent.super.barrel_idxs)
+				if path_cells is None:
+					grid.show_map(descr=f"{prev_char_cell} -> {char_cell}", char=char_idx, cell_colors={prev_char_cell: 1, barrel_cell: 31})
+				assert path_cells is not None, "Bug: Failed to reconstruct char path in solution"
+				assert len(path_cells) == char_path_len, f"Bug: Char path {path_cells} is not as expected (len {char_path_len})"
+				solution_pairs.append([path_cells, DIR_NAMES[cell_diff(char_cell, barrel_cell, grid.reverse_barrel_mode, True)]])
+				if len(self.segments) == 1:  # optimize for common case
+					break
+				new_char_cell, new_barrel_cell = grid.shift(char_cell, barrel_cell)
+				prev_char_cell = new_char_cell
 		return solution_pairs
 
 	def __str__(self):
@@ -863,7 +873,7 @@ class SokobanSolver():
 		grid.set_barrels(barrel_cells)
 		grid.check_zsb()
 		if self.solution_alg is None:
-			self.solution_alg = SOLUTION_ALG_ASTAR if grid.is_zsb or self.return_first else SOLUTION_ALG_BFS
+			self.solution_alg = SOLUTION_ALG_GREED if grid.is_zsb or self.return_first else SOLUTION_ALG_BFS
 		self.char_cell = char_cell
 		self.barrel_cells = barrel_cells
 		global solver
