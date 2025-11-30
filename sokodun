@@ -9,6 +9,8 @@ from load import parse_map_file_signature
 from level import Level
 from debug import debug
 from common import die, warn
+from records import CollectionRecords
+from colorize import *
 from sizetools import set_fitting_map_size
 from progressline import ProgressLine
 from sokobansolver import *
@@ -36,12 +38,14 @@ parser.add_argument('-1', '--return-first', help="return first found solution (n
 parser.add_argument('-x', '--show-dead', help="show dead-barrel cells on map", action='store_true')
 parser.add_argument('-t', '--show-time', help="show solution time in seconds", action='store_true')
 parser.add_argument('-T', '--limit-time', help="limit solution time to given seconds", metavar='SEC', action='store')
+parser.add_argument('-R', '--record-file', help="compare to record file", metavar='FILE', action='store')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
 parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file")
 
 cmdargs = parser.parse_args()
 
 reverse_barrel_mode = cmdargs.reverse_barrel_mode
+record_filename = cmdargs.record_file
 disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
 solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmdargs.bfs else SOLUTION_ALG_DFS if cmdargs.dfs else SOLUTION_ALG_GREED if cmdargs.greed else SOLUTION_ALG_UCS if cmdargs.ucs else None
@@ -78,6 +82,8 @@ def create_solver(map_string, reverse_barrel_mode=False):
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
 
+coll_records = CollectionRecords(record_filename, cmdargs.by_moves) if record_filename else None
+
 for level_index, level_config in enumerate(level_configs):
 	level_index += 1
 	level.set_from_config(custom_collection, level_index, level_config)
@@ -99,6 +105,10 @@ for level_index, level_config in enumerate(level_configs):
 			print("Solution not found")
 		else:
 			print("Solution %s: %s" % (solver.last_solution_nums_str, solver.last_solution_str))
+		if coll_records:
+			record_str = colorize_auto(coll_records.record_str_at_result)
+			c = coll_records.cmp_level_result(solver.last_solution_nums_str)
+			print("Record %s: %s" % (record_str, colorize_auto('N/A' if c is None else 'OK' if c == 0 else 'WORSE' if c == 1 else 'NEW RECORD')))
 
 	try:
 		while True:

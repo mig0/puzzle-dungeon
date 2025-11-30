@@ -92,7 +92,15 @@ def colorize_auto(s):
 		s = str(s)
 	if not USE_COLORS:
 		return s
-	if _is_dict_like(s):
+	if s == 'OK':
+		return colorize(s, COLOR_GREEN)
+	elif s == 'NEW RECORD':
+		return colorize(s, COLOR_BGREEN)
+	elif s == 'WORSE':
+		return colorize(s, COLOR_RED)
+	elif s == 'N/A':
+		return colorize(s, COLOR_YELLOW)
+	elif _is_dict_like(s):
 		colored_items = []
 		for item in _split_top_level(s, ","):
 			item = item.strip()
