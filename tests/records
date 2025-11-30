@@ -1,0 +1,219 @@
+#!/usr/bin/python
+
+import os
+import sys
+import atexit
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+
+from test import TestSuite
+from records import CollectionRecords, RecordsParseError
+
+TEST_FILE = "tests/tmp-test-records.txt"
+atexit.register(lambda: os.path.isfile(TEST_FILE) and os.unlink(TEST_FILE))
+
+def write_file(lines):
+	with open(TEST_FILE, "w", encoding="utf-8") as f:
+		f.write("\n".join(lines) + "\n")
+
+# -----------------------------------------------------
+# Parsing tests
+# -----------------------------------------------------
+
+def test_parse_single_costs():
+	write_file([
+		"1\t48/16",
+		"2\t10/5",
+		"3\t99/33"
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=False)
+
+	test.eq(r.push_records, [(48, 16), (10, 5), (99, 33)])
+	test.eq(r.move_records, [(48, 16), (10, 5), (99, 33)])
+	test.eq(r.level_ids, ["1", "2", "3"])
+
+def test_parse_dual_costs():
+	write_file([
+		"48/16  47/17",
+		"20/10  19/9"
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=False)
+
+	test.eq(r.push_records, [(48, 16), (20, 10)])
+	test.eq(r.move_records, [(47, 17), (19, 9)])
+	test.eq(r.level_ids, ["Level 1", "Level 2"])
+
+def test_parse_invalid_line():
+	write_file([
+		"1\t48/16 47/17 99/33"
+	])
+	test.catch(lambda: CollectionRecords(TEST_FILE))
+
+def test_parse_missing_file():
+	bad_file = "tests/no_such_records.txt"
+	test.catch(lambda: CollectionRecords(bad_file))
+
+# -----------------------------------------------------
+# cmp_level_result tests
+# -----------------------------------------------------
+
+def test_cmp_level_result_single_costs():
+	write_file([
+		"1\t20/10",
+		"2\t30/15",
+		"3\t40/20",
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=False)
+	test.eq(r.cmp_level_result("18/10"), -1)  # better moves
+	test.eq(r.cmp_level_result("30/15"), 0)   # equal
+	test.eq(r.cmp_level_result("21/21"), 1)   # worse
+	test.none(r.cmp_level_result("21/21"))    # N/A
+	test.none(r.cmp_level_result(None))       # N/A
+
+	r = CollectionRecords(TEST_FILE, by_moves=True)
+	test.eq(r.cmp_level_result("18/11"), -1)  # better moves
+	test.eq(r.cmp_level_result("30/15"), 0)   # equal
+	test.eq(r.cmp_level_result("41/9"), 1)    # worse
+	test.none(r.cmp_level_result("21/21"))    # N/A
+	test.none(r.cmp_level_result(None))       # N/A
+
+def test_cmp_level_result_dual_costs():
+	write_file([
+		"1\t11/5 10/6",
+		"1\t13/3 12/7",
+	])
+
+	r = CollectionRecords(TEST_FILE, by_moves=False)
+	test.eq(r.cmp_level_result("12/4"), -1)
+	test.eq(r.cmp_level_result("12/4"), 1)
+	test.none(r.cmp_level_result("12/4"))  # N/A
+
+	r = CollectionRecords(TEST_FILE, by_moves=True)
+	test.eq(r.cmp_level_result("12/4"), 1)
+	test.eq(r.cmp_level_result("12/4"), -1)
+	test.none(r.cmp_level_result("12/4"))  # N/A
+
+	r = CollectionRecords(TEST_FILE)
+	test.eq(r.cmp_level_result("11/5"), 0)
+	test.none(r.cmp_level_result(None))    # N/A
+	test.none(r.cmp_level_result("12/4"))  # N/A
+
+def test_cmp_sequential_updates_indices():
+	write_file([
+		"1\t10/5",
+		"2\t30/10",
+		"3\t40/20"
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=False)
+
+	test.eq(r.next_result_idx, 0)
+	test.eq(r.cmp_level_result("9/5"), -1)
+	test.eq(r.next_result_idx, 1)
+	test.eq(r.cmp_level_result("30/10"), 0)
+	test.eq(r.next_result_idx, 2)
+	test.eq(r.cmp_level_result("50/20"), 1)
+	test.eq(r.next_result_idx, 3)
+	test.eq(r.cmp_level_result("1/1"), None)
+
+# -----------------------------------------------------
+# update_file tests
+# -----------------------------------------------------
+
+def test_update_file_push_mode_no_update():
+	write_file([
+		"1\t10/5",
+		"2\t30/10"
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=False)
+
+	res = ["11/5", "35/10"]  # all worse
+	test.eq(r.update_file(res), False)
+
+	# File should be unchanged
+	r2 = CollectionRecords(TEST_FILE)
+	test.eq(r2.push_records, [(10, 5), (30, 10)])
+
+def test_update_file_push_mode_with_update():
+	write_file([
+		"1\t10/5",
+		"2\t30/10",
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=False)
+
+	test.eq(r.push_records, [(10, 5), (30, 10)])
+	test.eq(r.move_records, [(10, 5), (30, 10)])
+	res = ["9/5", "31/10"]   # only one is better
+	test.ok(r.update_file(res), "Expected to sync file")
+
+	r2 = CollectionRecords(TEST_FILE, by_moves=False)
+	test.eq(r2.push_records, [(9, 5), (30, 10)])
+	test.eq(r2.move_records, [(10, 5), (30, 10)])
+
+def test_update_file_move_mode_with_update():
+	write_file([
+		"1\t10/5  8/4",
+		"2\t30/8 29/9",
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=True)
+
+	# better or identical for push, but both worse for move → no update
+	res = ["9/4", "30/10"]
+	test.eq(r.update_file(res), False)
+
+	# now give better and worse move results
+	res2 = ["7/6", "29/10"]
+	test.eq(r.update_file(res2), True)
+
+	r2 = CollectionRecords(TEST_FILE, by_moves=True)
+	test.eq(r2.move_records, [(7, 6), (29, 9)])
+
+def test_update_file_partial_update():
+	write_file([
+		"1\t10/5  8/5",
+		"2\t30/10 29/9",
+		"3\t40/20 35/10",
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=True)
+
+	# better, worse, better
+	res = ["7/5", "30/10", "34/20"]
+	test.eq(r.update_file(res), True)
+
+	r2 = CollectionRecords(TEST_FILE, by_moves=True)
+	test.eq(r2.move_records, [(7, 5), (29, 9), (34, 20)])
+
+# -----------------------------------------------------
+# record_strs and result_strs tests
+# -----------------------------------------------------
+
+def test_record_strs_and_result_strs():
+	write_file([
+		"1\t10/5  9/5",
+		"2\t20/10",
+	])
+	r = CollectionRecords(TEST_FILE)
+
+	test.eq(r.record_strs, ["10/5", "20/10"])  # push mode
+	test.eq(r.cmp_level_result("9/5"), -1)
+	test.eq(r.result_strs, ["9/5"])
+
+# -----------------------------------------------------
+# Run tests
+# -----------------------------------------------------
+
+test = TestSuite("records")
+
+test_parse_single_costs()
+test_parse_dual_costs()
+test_parse_invalid_line()
+test_parse_missing_file()
+test_cmp_level_result_single_costs()
+test_cmp_level_result_dual_costs()
+test_cmp_sequential_updates_indices()
+test_update_file_push_mode_no_update()
+test_update_file_push_mode_with_update()
+test_update_file_move_mode_with_update()
+test_update_file_partial_update()
+test_record_strs_and_result_strs()
+
+test.finalize()

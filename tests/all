@@ -4,5 +4,6 @@ tests/celltools
 tests/colorize
 tests/grid
 tests/progressline
+tests/records
 tests/sokobansolver
 tests/teestream
