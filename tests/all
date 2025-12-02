@@ -3,6 +3,7 @@
 tests/celltools
 tests/colorize
 tests/grid
+tests/hungarian
 tests/progressline
 tests/records
 tests/sokobansolver
