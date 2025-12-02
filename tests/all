@@ -7,3 +7,4 @@ tests/progressline
 tests/records
 tests/sokobansolver
 tests/teestream
+tests/testsuite

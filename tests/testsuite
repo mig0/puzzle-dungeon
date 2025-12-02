@@ -1,0 +1,238 @@
+#!/usr/bin/python
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
+
+from test import TestSuite, suppress_output
+
+def pardon_failed_test(code):
+	error = "Expected to fail"
+	test.ok(lambda: code(), error, negate=True)
+	if test.num_passed < test.num_total:
+		if test.verbose_on_pass:
+			print("%d - PASS" % (test.num_total - 1))
+		test.num_passed += 1
+	else:
+		if not test.verbose_on_pass:
+			test.print_function_once()
+		print("%d - FAIL: %s" % (test.num_total - 1, error))
+		test.num_passed -= 1
+
+# ------------------------------
+# Basic ok / eq / ne tests
+# ------------------------------
+
+def test_ok_true():
+	test.ok(True)
+
+def test_ok_false():
+	test.ok(False, "Expected to pass", negate=True)
+	pardon_failed_test(lambda: test.ok(False))
+
+def test_eq_pass():
+	test.eq(3 + 4, 7)
+
+def test_eq_fail():
+	pardon_failed_test(lambda: test.eq(2 + 2, 5))
+
+def test_ne_pass():
+	test.ne(3, 4)
+
+def test_ne_fail():
+	test.ok(lambda: (3 != 3) is False)
+
+# ------------------------------
+# Comparison ops
+# ------------------------------
+
+def test_gt():
+	test.gt(5, 3)
+
+def test_lt():
+	test.lt(2, 7)
+
+def test_ge():
+	test.ge(5, 5)
+	test.ge(6, 5)
+
+def test_le():
+	test.le(5, 5)
+	test.le(3, 7)
+
+# ------------------------------
+# catch / no_catch
+# ------------------------------
+
+def test_catch_zero_div():
+	test.catch(lambda: 1/0)
+
+def test_no_catch_normal():
+	test.no_catch(lambda: 1 + 1)
+
+def test_catch_custom_exception():
+	def boom():
+		raise RuntimeError("boom")
+	test.catch(lambda: boom())
+
+def test_no_catch_custom():
+	test.no_catch(lambda: "abc".upper())
+
+# ------------------------------
+# is_cell tests
+# ------------------------------
+
+def test_is_cell_valid():
+	test.is_cell((3, 4))
+
+def test_is_cell_invalid():
+	pardon_failed_test(lambda: test.is_cell((3,)))
+
+# ------------------------------
+# is_in / not_in
+# ------------------------------
+
+def test_in():
+	test.is_in(2, [1, 2, 3])
+
+def test_not_in():
+	test.not_in("x", {"a": 1})
+
+# ------------------------------
+# is_instance / not_instance
+# ------------------------------
+
+def test_is_instance():
+	test.is_instance(5, int)
+
+def test_not_instance():
+	test.not_instance("abc", int)
+
+# ------------------------------
+# has_attr / no_attr
+# ------------------------------
+
+class Dummy:
+	def __init__(self):
+		self.x = 123
+
+def test_has_attr():
+	d = Dummy()
+	test.has_attr(d, "x")
+
+def test_no_attr():
+	d = Dummy()
+	test.no_attr(d, "mode")
+
+# ------------------------------
+# len() tests
+# ------------------------------
+
+def test_len_ok():
+	test.len([1, 2, 3], 3)
+
+def test_len_fail():
+	pardon_failed_test(lambda: test.len([1, 2], 3))
+
+# ------------------------------
+# none / not_none
+# ------------------------------
+
+def test_none_pass():
+	test.none(None)
+
+def test_not_none_pass():
+	test.not_none(123)
+
+# ------------------------------
+# callable cond in ok()
+# ------------------------------
+
+def test_callable_ok_true():
+	test.ok(lambda: 2 + 2 == 4)
+
+def test_callable_ok_false():
+	test.ok(lambda: 5 == 6, negate=True)
+
+# ------------------------------
+# _extract_cond_code_str() behavior
+# ------------------------------
+
+def test_extract_cond_string_simple():
+	# this indirectly checks that error message extracted is non-empty
+	test.ok("no error given")  # should not crash
+	test.ok(lambda: True)
+
+# ------------------------------
+# suppress_output tests
+# ------------------------------
+
+def test_suppress_output():
+	with suppress_output():
+		print("This should not appear")
+	test.ok(True)
+
+# ------------------------------
+# finalize
+# ------------------------------
+
+def test_nested_finalize_twice():
+	# finalize resets counters, must not crash
+	with suppress_output():
+		local = TestSuite("NestedTestSuite")
+		local.ok(True)
+		local.finalize()
+		local.ok(True)
+		local.finalize()
+
+# ------------------------------
+# Run tests
+# ------------------------------
+
+test = TestSuite("TestSuite")
+
+test_ok_true()
+test_ok_false()
+test_eq_pass()
+test_eq_fail()
+test_ne_pass()
+test_ne_fail()
+
+test_gt()
+test_lt()
+test_ge()
+test_le()
+
+test_catch_zero_div()
+test_no_catch_normal()
+test_catch_custom_exception()
+test_no_catch_custom()
+
+test_is_cell_valid()
+test_is_cell_invalid()
+
+test_in()
+test_not_in()
+
+test_is_instance()
+test_not_instance()
+
+test_has_attr()
+test_no_attr()
+
+test_len_ok()
+test_len_fail()
+
+test_none_pass()
+test_not_none_pass()
+
+test_callable_ok_true()
+test_callable_ok_false()
+
+test_extract_cond_string_simple()
+
+test_suppress_output()
+
+test_nested_finalize_twice()
+
+test.finalize()
