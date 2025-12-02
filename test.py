@@ -40,7 +40,7 @@ class TestSuite:
 			print("# %s" % function)
 			self.last_function = function
 
-	def ok(self, cond, error=None):
+	def ok(self, cond, error=None, negate=False):
 		if self.verbose_on_pass:
 			self.print_function_once()
 
@@ -49,6 +49,9 @@ class TestSuite:
 			error = self._extract_cond_code_str()
 		if callable(cond):
 			cond, error = self._call(cond, error)
+
+		if negate:
+			cond = not cond
 
 		if cond:
 			self.num_passed += 1
