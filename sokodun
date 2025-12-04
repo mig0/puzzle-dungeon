@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import io
+import os
 import sys
 import copy
 import numpy
@@ -130,3 +131,7 @@ for level_index, level_config in enumerate(level_configs):
 		except KeyboardInterrupt:
 			print()
 			exit(1)
+
+if coll_records and os.environ.get("UPDATE_RECORDS", False):
+	updated = coll_records.update_file()
+	print(f"Records file {coll_records.filename} is {'' if updated else 'not '}updated")
