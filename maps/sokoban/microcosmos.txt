@@ -1,5 +1,8 @@
 Microcosmos Levels
 
+Updated 2025-11-30
+Make small updates to Level 39 to match the "Micro Cosmos" collection (id 30) on LetsLogic.
+
 Added Dec 6, 2000
 Microcosmos Levels, created by Aymeric du Peloux.
 It's amazing how much difficulty Amyeric packs into such small levels. At first glance, the levels look very easy. Then you try one, and it seems impossible. Eventually you figure out the trick and solve the level.
@@ -453,9 +456,9 @@ Level 39
   #####
 ###   ##
 # $$.. #
-# . @# #
+#  .@# #
 ## #   #
- # *$ ##
+ # $* ##
  ###  #
    ####
 
