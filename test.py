@@ -3,6 +3,7 @@ import inspect
 import sys
 import io
 from profiler import profiler
+from colorize import *
 
 @contextlib.contextmanager
 def suppress_output():
@@ -37,7 +38,7 @@ class TestSuite:
 	def print_function_once(self):
 		function = inspect.stack()[-2].function
 		if function != self.last_function:
-			print("# %s" % function)
+			print("# %s" % colorize(function, COLOR_CYAN))
 			self.last_function = function
 
 	def ok(self, cond, error=None, negate=False):
@@ -56,11 +57,11 @@ class TestSuite:
 		if cond:
 			self.num_passed += 1
 			if self.verbose_on_pass:
-				print("%d - PASS" % self.num_total)
+				print("%d - %s" % (self.num_total, colorize("PASS", COLOR_GREEN)))
 		else:
 			if not self.verbose_on_pass:
 				self.print_function_once()
-			print("%d - FAIL: %s" % (self.num_total, error))
+			print("%d - %s: %s" % (self.num_total, colorize("FAIL", COLOR_RED), error))
 			if self.assert_on_fail:
 				assert False, error
 
@@ -129,9 +130,9 @@ class TestSuite:
 
 	def finalize(self):
 		if self.num_total == self.num_passed:
-			print("All %d %s tests passed" % (self.num_total, self.name))
+			print("All %s %s tests passed" % (colorize(self.num_total, COLOR_GREEN), self.name))
 		else:
-			print("Only %d of %d %s tests passed" % (self.num_passed, self.num_total, self.name))
+			print("Only %s of %d %s tests passed" % (colorize(self.num_passed, COLOR_YELLOW if self.num_passed else COLOR_RED), self.num_total, self.name))
 		self.reset()
 		if self.run_profiler:
 			profiler.stop()
