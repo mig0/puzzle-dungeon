@@ -6,6 +6,8 @@ class RecordsParseError(Exception):
 
 def _parse_cost_str(cost_str):
 	# cost_str must be 'NUM/NUM'
+	if cost_str is None or cost_str == "":
+		return None
 	if "/" not in cost_str:
 		raise RecordsParseError(f"Invalid cost str: {cost_str}")
 	a, b = cost_str.split("/", 1)
@@ -58,11 +60,19 @@ class CollectionRecords:
 	def records(self):
 		return self.move_records if self.by_moves else self.push_records
 
-	def _append_record(self, cost1, cost2=None):
+	def _append_record(self, level_id, cost1, cost2=None):
+		self.level_ids.append(level_id if level_id is not None else f"Level {len(self.level_ids) + 1}" if self.def_level_ids else None)
 		if cost2 is None:
 			cost2 = cost1
 		self.push_records.append(cost1)
 		self.move_records.append(cost2)
+
+	def _update_record(self, i, result):
+		records = self.move_records if self.by_moves else self.push_records
+		if result and (not records[i] or result < records[i]):
+			records[i] = result
+			return True
+		return False
 
 	def _read_file(self):
 		if not os.path.exists(self.filename):
@@ -72,26 +82,23 @@ class CollectionRecords:
 			for ln, line in enumerate(file):
 				line_no = ln + 1
 				line = line.strip()
-				if not line:
-					continue
 
 				if "\t" in line:
 					level_id, cost_str = line.split("\t", 1)
 				else:
-					level_id, cost_str = f"Level {line_no}" if self.def_level_ids else None, line
-				self.level_ids.append(level_id)
+					level_id, cost_str = None, line
 
 				# cost_str may be "A/B" or "A/B C/D"
 				parts = cost_str.split()
 				if len(parts) == 1:
-					self._append_record(_parse_cost_str(parts[0]))
+					self._append_record(level_id, _parse_cost_str(parts[0]))
 				elif len(parts) == 2:
-					self._append_record(_parse_cost_str(parts[0]), _parse_cost_str(parts[1]))
+					self._append_record(level_id, _parse_cost_str(parts[0]), _parse_cost_str(parts[1]))
 				else:
 					raise RecordsParseError(f"Invalid cost format at line {line_no}: {cost_str}")
 
 	def get_cost_strs(self, costs):
-		return [f"{a}/{b}" for (a, b) in costs]
+		return [f"{cost[0]}/{cost[1]}" if cost else None for cost in costs]
 
 	@property
 	def push_record_strs(self):
@@ -120,23 +127,20 @@ class CollectionRecords:
 
 	def cmp_level_result(self, result_str):
 		"""
-		Assume next sequential level.
+		Compare result_str with next sequential level record.
 
-		On out-of-range → return None.
+		On out-of-range → return None or -1.
 		"""
 
 		level_idx = self.next_result_idx
 
-		if level_idx < 0 or level_idx >= len(self.records):
-			return None
-
-		result = _parse_cost_str(result_str) if result_str else None
-		record = self.records[level_idx]
+		result = _parse_cost_str(result_str)
+		record = self.records[level_idx] if level_idx < len(self.records) else None
 
 		self.results.append(result)
 		self.next_result_idx += 1
 
-		return self.cmp_costs(result, record) if result else None
+		return self.cmp_costs(result, record) if result and record else -1 if result and not record else None
 
 	def update_file(self, result_strs=None):
 		"""
@@ -151,22 +155,13 @@ class CollectionRecords:
 		updated = False
 
 		for i, result_str in enumerate(result_strs):
-			if i >= len(self.records):
-				break
-
 			result = _parse_cost_str(result_str)
 
 			if i >= len(self.move_records):
-				self._append_record(result)
+				self._append_record(None, result)
 				updated = True
-			elif self.by_moves:
-				if result < self.move_records[i]:
-					self.move_records[i] = result
-					updated = True
 			else:
-				if result < self.push_records[i]:
-					self.push_records[i] = result
-					updated = True
+				updated |= self._update_record(i, result)
 
 		if updated:
 			self._rewrite_file()
@@ -182,7 +177,9 @@ class CollectionRecords:
 
 		lines = []
 		for level_id, cost1, cost2 in zip(self.level_ids, self.push_records, self.move_records):
-			if cost1 == cost2:
+			if cost1 is None:
+				cost_str = "1000000/1000000"
+			elif cost1 == cost2:
 				cost_str = f"{cost1[0]}/{cost1[1]}"
 			else:
 				cost_str = f"{cost1[0]}/{cost1[1]} {cost2[0]}/{cost2[1]}"
