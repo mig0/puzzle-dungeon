@@ -608,31 +608,38 @@ class SokobanSolver():
 		return not depth_limit_positions
 
 	def find_solution_using_bfs(self):
-		unprocessed_positions = self.unprocessed_positions
+		curr_level_positions = self.unprocessed_positions
+		curr_queued = set(curr_level_positions)
 		depth_limit_positions = []
 
-		while unprocessed_positions:
-			position = unprocessed_positions[0]
+		while curr_level_positions:
+			next_level_positions = []
+			next_queued = set()
 
-			if position.depth > self.solution_depth:
-				unprocessed_positions.pop(0)
-				depth_limit_positions.append(position)
-				debug([position.depth], DBG_SOLV2, "Solution depth limit %d exceeded" % self.solution_depth)
-				continue
+			for position in curr_level_positions:
+				if position.depth > self.solution_depth:
+					depth_limit_positions.append(position)
+					debug([position.depth], DBG_SOLV2, "Solution depth limit %d exceeded" % self.solution_depth)
+					continue
 
-			is_fully_processed = self.process_position(position)
-			if is_fully_processed is None:
-				unprocessed_positions.extend(depth_limit_positions)
-				return None
-			unprocessed_positions.pop(0)
-			if is_fully_processed:
-				continue
-			for child in position.children:
-				if not child in unprocessed_positions:
-					unprocessed_positions.append(child)
+				is_fully_processed = self.process_position(position)
+				if is_fully_processed is None:
+					self.unprocessed_positions = curr_level_positions[curr_level_positions.index(position):] + next_level_positions + depth_limit_positions
+					return None
+				if is_fully_processed:
+					continue
+
+				for child in position.children:
+					if child in curr_queued or child in next_queued:
+						continue
+					next_level_positions.append(child)
+					next_queued.add(child)
+
+			# move to next level
+			curr_level_positions = next_level_positions
+			curr_queued = next_queued
 
 		self.unprocessed_positions = depth_limit_positions
-
 		return not depth_limit_positions
 
 	def find_solution_using_pq(self):
