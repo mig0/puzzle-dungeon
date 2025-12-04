@@ -41,9 +41,10 @@ class CollectionRecords:
 	  - update_file([...])       → write improved results back to file
 	"""
 
-	def __init__(self, filename, by_moves=False):
+	def __init__(self, filename, by_moves=False, def_level_ids=False):
 		self.filename = filename
 		self.by_moves = by_moves
+		self.def_level_ids = def_level_ids
 
 		self.push_records = []  # list of (moves, pushes)
 		self.move_records = []  # list of (moves, pushes)
@@ -77,7 +78,7 @@ class CollectionRecords:
 				if "\t" in line:
 					level_id, cost_str = line.split("\t", 1)
 				else:
-					level_id, cost_str = f"Level {line_no}", line
+					level_id, cost_str = f"Level {line_no}" if self.def_level_ids else None, line
 				self.level_ids.append(level_id)
 
 				# cost_str may be "A/B" or "A/B C/D"
@@ -185,7 +186,13 @@ class CollectionRecords:
 				cost_str = f"{cost1[0]}/{cost1[1]}"
 			else:
 				cost_str = f"{cost1[0]}/{cost1[1]} {cost2[0]}/{cost2[1]}"
-			lines.append(f"{level_id}\t{cost_str}")
+			lines.append(f"{level_id}\t{cost_str}" if level_id else cost_str)
 
 		with open(self.filename, "w", encoding="utf-8") as f:
 			f.write("\n".join(lines) + "\n")
+
+if __name__ == "__main__":
+	import sys
+	assert len(sys.argv) == 2, "Usage: python records.py filename-to-rewrite"
+	records = CollectionRecords(sys.argv[1])
+	records._rewrite_file()
