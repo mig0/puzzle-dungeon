@@ -18,7 +18,7 @@ def suppress_output():
 		sys.stderr = _saved_err
 
 class TestSuite:
-	def __init__(self, name, assert_on_fail=None, verbose_on_pass=None, run_profiler=None):
+	def __init__(self, name, assert_on_fail=None, verbose_on_pass=None, run_profiler=None, show_code=None):
 		# default to the command line flags, but keep explicit values
 		args = sys.argv[1:]
 
@@ -28,6 +28,7 @@ class TestSuite:
 		self.assert_on_fail  = '-a' in args if assert_on_fail  is None else assert_on_fail
 		self.verbose_on_pass = '-v' in args if verbose_on_pass is None else verbose_on_pass
 		self.run_profiler    = '-p' in args if run_profiler    is None else run_profiler
+		self.show_code       = '-c' in args if show_code       is None else show_code
 		if self.run_profiler:
 			profiler.start()
 
@@ -40,6 +41,11 @@ class TestSuite:
 		if function != self.last_function:
 			print("# %s" % colorize(function, COLOR_CYAN))
 			self.last_function = function
+
+	def print_cond_code_str(self):
+		if not self.show_code:
+			return
+		print("→ %s" % colorize(self._extract_cond_code_str(1), COLOR_DIM))
 
 	def ok(self, cond, error=None, negate=False):
 		if self.verbose_on_pass:
@@ -57,10 +63,12 @@ class TestSuite:
 		if cond:
 			self.num_passed += 1
 			if self.verbose_on_pass:
+				self.print_cond_code_str()
 				print("%d - %s" % (self.num_total, colorize("PASS", COLOR_GREEN)))
 		else:
 			if not self.verbose_on_pass:
 				self.print_function_once()
+			self.print_cond_code_str()
 			print("%d - %s: %s" % (self.num_total, colorize("FAIL", COLOR_RED), error))
 			if self.assert_on_fail:
 				assert False, error
@@ -154,8 +162,10 @@ class TestSuite:
 			error = f"{error}; also {exc_str} is thrown"
 		return cond, error or exc_str
 
-	def _extract_cond_code_str(self):
+	def _extract_cond_code_str(self, n_extra_frames=0):
 		frame = inspect.currentframe().f_back.f_back
+		for _ in range(n_extra_frames):
+			frame = frame.f_back
 		filename = frame.f_code.co_filename
 		lineno = frame.f_lineno
 
