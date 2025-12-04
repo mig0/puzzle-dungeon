@@ -122,9 +122,8 @@ for level_index, level_config in enumerate(level_configs):
 		print()
 	except KeyboardInterrupt:
 		print()
-		if solver.solved_position:
-			solution_items = solver.get_found_solution_items("terminated")
-			show_solution(solution_items)
+		solution_items = solver.get_found_solution_items("terminated")
+		show_solution(solution_items)
 		print("Terminated by user. Press Enter to continue, or Ctrl-C to stop")
 		try:
 			sys.stdin.readline()
