@@ -8,6 +8,7 @@ import colorize
 from test import TestSuite
 
 # force colors OFF by default during tests
+ORIG_USE_COLORS = colorize.USE_COLORS
 colorize.USE_COLORS = False
 
 def test_split_top_level():
@@ -146,5 +147,7 @@ test_pathological_dict_like()
 test_colorize_auto_dict_like_with_colors()
 test_colorize_auto_numbers_with_colors()
 test_pathological_numeric_colorize()
+
+colorize.USE_COLORS = ORIG_USE_COLORS
 
 test.finalize()
