@@ -4,6 +4,7 @@ from common import get_time_str
 from debug import *
 from grid import grid, search_bits, _ONE
 from time import time
+from hungarian import Hungarian, INF
 import heapq
 import itertools
 
@@ -266,7 +267,7 @@ class SokobanSolver():
 
 	# greedy lower-bound cost (moves, shifts) with backtracking for the given barrels
 	# return None only if is_barrel_matching_found(barrel_idxs) is False
-	def get_min_solution_cost(self, barrel_idxs):
+	def old_get_min_solution_cost(self, barrel_idxs):
 		if not self.is_barrel_matching_found(barrel_idxs):
 			return None
 
@@ -384,6 +385,33 @@ class SokobanSolver():
 		assert best_cost is not None, "Bug: No match after is_barrel_matching_found"
 
 		return best_cost
+
+	def get_min_solution_cost(self, barrel_idxs):
+		if not self.is_barrel_matching_found(barrel_idxs):
+			return None
+
+		n = len(barrel_idxs)
+		assert n == self.hungarian.n
+		costs = self.hungarian.costs
+
+		# prepare scalar packed-cost matrix
+		for j in range(n):
+			plate_idx = grid.plate_idxs[j]
+			plate_costs = self.min_plate_barrel_costs.get(plate_idx, {})
+			for i in range(n):
+				barrel_idx = barrel_idxs[i]
+				cost = plate_costs.get(barrel_idx)
+
+				if cost is None:
+					# unreachable -> give huge cost
+					costs[i][j] = INF
+				else:
+					key = cost_to_key(cost)
+					costs[i][j] = key[0] * grid.num_bits + key[1]
+
+		packed_cost = self.hungarian.assign()
+
+		return cost_to_key((packed_cost // grid.num_bits, packed_cost % grid.num_bits))
 
 	def estimate_solution_depth(self):
 		cost = self.get_min_solution_cost(self.barrel_idxs)
@@ -644,6 +672,7 @@ class SokobanSolver():
 		if barrel_bits & grid.dead_barrel_bits != grid.no_bits:
 			debug(DBG_SOLV, "Some barrels are on dead barrel cells - unsolvable")
 			return False
+		self.hungarian = Hungarian(grid.num_plates)
 		return True
 
 	def prepare_solution(self, char=None):
