@@ -721,13 +721,15 @@ class Grid:
 
 	# return list of all accessible (char_cell, barrel_cell) pairs valid for shift
 	# should to be called after get_accessible_bits()
-	def get_all_valid_char_barrel_shifts(self, accessible_bits=None):
+	def get_all_valid_char_barrel_shifts(self, accessible_bits=None, valid_pairs=None):
 		if accessible_bits is None:
 			accessible_bits = self.last_accessible_bits
 		cell_pairs = []
 		for barrel_idx in search_bits(self.barrel_bits, _ONE):
 			for char_idx in self.all_passable_neigh_idxs[barrel_idx]:
 				if not accessible_bits[char_idx]:
+					continue
+				if valid_pairs and (char_idx, barrel_idx) not in valid_pairs:
 					continue
 				char_cell = self.idx_cells[char_idx]
 				barrel_cell = self.idx_cells[barrel_idx]

@@ -452,7 +452,7 @@ class SokobanSolver():
 		if grid.is_zsb:
 			accessible_cells_near_barrels = grid.get_all_valid_zsb_char_barrel_moves()
 		else:
-			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts()
+			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts(valid_pairs=self.valid_shift_pairs)
 
 		accessible_cells_near_barrels.sort(key=lambda two_cells: cost_to_key(self.min_char_barrel_costs[grid.to_idxs(two_cells)]))
 		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_cells_near_barrels)
@@ -700,6 +700,7 @@ class SokobanSolver():
 		self.min_barrel_costs = min_costs = {}
 		self.min_plate_char_barrel_costs = {}
 		self.min_plate_barrel_costs = {}
+		self.valid_shift_pairs = None
 
 		if grid.plate_bits == grid.no_bits:
 			grid.dead_barrel_bits = grid.all_bits
@@ -767,6 +768,8 @@ class SokobanSolver():
 							next_unprocessed.append(new_idxs + (new_dist,))
 
 				unprocessed = next_unprocessed
+
+		self.valid_shift_pairs = set(min_char_costs.keys())
 
 		grid.barrel_bits = grid.no_bits.copy()
 
