@@ -441,7 +441,7 @@ class SokobanSolver():
 		else:
 			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts()
 
-		accessible_cells_near_barrels.sort(key=lambda two_cells: self.min_char_barrel_costs.get(grid.to_idxs(two_cells), (grid.num_bits,) * 2))
+		accessible_cells_near_barrels.sort(key=lambda two_cells: cost_to_key(self.min_char_barrel_costs[grid.to_idxs(two_cells)]))
 		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_cells_near_barrels)
 		if grid.is_zsb:
 			for proto_segments in all_proto_segments:
