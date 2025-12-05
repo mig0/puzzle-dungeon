@@ -84,6 +84,7 @@ class Position:
 		self.children = []
 		self.is_expanded = False
 		self.is_fully_processed = False
+		self.best_key = None  # used in heap
 		solver.num_created_positions += 1
 		solver.last_created_position = self
 		if self.depth > solver.max_created_depth:
@@ -120,8 +121,7 @@ class Position:
 		self.parent.add_child(self)
 		self.own_nums = own_nums
 		self.segments = segments
-		self.mark_dirty_down()
-		solver.pq_push(self)
+		self.recalc_nums_down()
 
 	def calc_nums(self):
 		self.depth = self.parent.depth + 1
@@ -129,6 +129,15 @@ class Position:
 		self._solution_cost = None
 		self.is_dirty = False
 		self.is_fully_processed = False
+
+	def recalc_nums_down(self):
+		descendant_positions = [self]
+		while descendant_positions:
+			position = descendant_positions.pop()
+			position.calc_nums()
+			if position.best_key is not None:
+				solver.pq_push(position)
+			descendant_positions.extend(position.children)
 
 	def mark_dirty_down(self):
 		self.is_dirty = True
@@ -213,7 +222,6 @@ class SokobanSolver():
 		self.past_vus_cost_factor = 1  # 1 is for A*
 		self.sort_positions = None
 		self._pq_counter = None
-		self._best_position_keys = {}  # position -> key used in heap
 		grid.reset()
 
 	def pq_push(self, position):
@@ -221,26 +229,31 @@ class SokobanSolver():
 			return
 
 		key = cost_to_key(self.sort_positions(position))
-		prev_key = self._best_position_keys.get(position)
-		if prev_key is not None and prev_key <= key:
-			return
 
-		# tie-break by counter, stable ordering
+		# verify that there is no better key in heap already
+		if key == position.best_key:
+			return
+		assert position.best_key is None or position.best_key > key
+
+		# tie-break by counter for stable ordering
 		entry = (key, next(self._pq_counter), position)
 		heapq.heappush(self.unprocessed_positions, entry)
-		self._best_position_keys[position] = key
+
+		position.best_key = key
 
 	def pq_pop(self):
 		# pop until we get a non-stale tuple or heap is empty
 		while self.unprocessed_positions:
 			key, _, position = heapq.heappop(self.unprocessed_positions)
-			best_key = self._best_position_keys.get(position)
-			if best_key is None or best_key != key:
-				# skip stale entry
+
+			# discard stale entry if position key improved after push to heap
+			assert position.best_key is None or position.best_key <= key
+			if position.best_key != key:
 				continue
-			# remove entry now - will reinsert if it gets updated
-			del self._best_position_keys[position]
+
+			assert not position.is_fully_processed
 			return key, position
+
 		return None, None
 
 	def is_barrel_matching_found(self, barrel_idxs):
@@ -859,7 +872,6 @@ class SokobanSolver():
 				self.sort_positions = lambda position: position.solution_cost
 			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
 				self.unprocessed_positions = []
-				self._best_position_keys = {}
 				self._pq_counter = itertools.count()
 				self.pq_push(self.initial_position)
 			else:
