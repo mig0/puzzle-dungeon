@@ -79,7 +79,6 @@ class Position:
 			self.depth = 0
 			self.total_nums = (0, 0)
 			self._solution_cost = None
-			self.is_dirty = False
 		self._segments_str = None
 		self.children = []
 		self.is_expanded = False
@@ -127,7 +126,6 @@ class Position:
 		self.depth = self.parent.depth + 1
 		self.total_nums = apply_diff(self.parent.total_nums, self.own_nums)
 		self._solution_cost = None
-		self.is_dirty = False
 		self.is_fully_processed = False
 
 	def recalc_nums_down(self):
@@ -138,12 +136,6 @@ class Position:
 			if position.best_key is not None:
 				solver.pq_push(position)
 			descendant_positions.extend(position.children)
-
-	def mark_dirty_down(self):
-		self.is_dirty = True
-		self.is_fully_processed = False
-		for child in self.children:
-			child.mark_dirty_down()
 
 	def cut_down(self):
 		self.is_fully_processed = True
@@ -519,9 +511,6 @@ class SokobanSolver():
 		position.is_expanded = True
 
 	def process_position(self, position):
-		if position.is_dirty:
-			position.calc_nums()
-
 		if position.is_fully_processed:
 			return True
 
