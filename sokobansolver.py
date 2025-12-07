@@ -6,6 +6,7 @@ from grid import grid, search_bits, _ONE
 from time import time
 from hungarian import Hungarian, INF
 import heapq
+import bisect
 import itertools
 
 MIN_SOLUTION_DEPTH = 5
@@ -133,8 +134,8 @@ class Position:
 		while descendant_positions:
 			position = descendant_positions.pop()
 			position.calc_nums()
-			if position.best_key is not None:
-				solver.pq_push(position)
+			if solver.improve_position:
+				solver.improve_position(position)
 			descendant_positions.extend(position.children)
 
 	def cut_down(self):
@@ -212,6 +213,7 @@ class SokobanSolver():
 			self.num_found_solved_positions = 0
 			self.num_costy_solved_bound_positions = 0
 		self.past_vus_cost_factor = 1  # 1 is for A*
+		self.improve_position = None
 		self.sort_positions = None
 		self._pq_counter = None
 		grid.reset()
@@ -609,40 +611,84 @@ class SokobanSolver():
 
 		return not depth_limit_positions
 
+	class BFSFrontier:
+		def __init__(self, sorted_mode):
+			self.sorted_mode = sorted_mode
+			self.depth_backets = {}  # depth -> list
+			self.position_depths = {}
+			self.min_depth = None
+
+		def __bool__(self):
+			return self.min_depth is not None
+
+		def __len__(self):
+			return len(self.position_depths)
+
+		def _update_after_remove(self, depth):
+			if not self.depth_backets[depth]:
+				del self.depth_backets[depth]
+				if depth == self.min_depth:
+					self.min_depth = min(self.depth_backets.keys()) if self.depth_backets else None
+
+		def insert(self, position):
+			depth = position.depth
+			if depth not in self.depth_backets:
+				self.depth_backets[depth] = []
+			bucket = self.depth_backets[depth]
+
+			old_depth = self.position_depths.get(position)
+			self.position_depths[position] = depth
+
+			if self.sorted_mode:
+				if old_depth is not None:
+					self.depth_backets[old_depth].remove(position)
+				bisect.insort(bucket, position, key=lambda p: cost_to_key(p.total_nums))
+			elif old_depth is None or old_depth != depth:
+				if old_depth is not None:
+					self.depth_backets[old_depth].remove(position)
+				bucket.append(position)
+
+			if old_depth is not None:
+				self._update_after_remove(old_depth)
+			if self.min_depth is None or depth < self.min_depth:
+				self.min_depth = depth
+
+		def top(self):
+			return None if self.min_depth is None else self.depth_backets[self.min_depth][0]
+
+		def pop(self):
+			if self.min_depth is None:
+				return None
+			bucket = self.depth_backets[self.min_depth]
+			position = bucket.pop(0)
+			self._update_after_remove(self.min_depth)
+			del self.position_depths[position]
+			return position
+
+		def all(self):
+			return [position for _, bucket in sorted(self.depth_backets.items()) for position in bucket]
+
 	def find_solution_using_bfs(self):
-		curr_level_positions = self.unprocessed_positions
-		curr_queued = set(curr_level_positions)
-		depth_limit_positions = []
+		frontier = self.unprocessed_positions
 
-		while curr_level_positions:
-			next_level_positions = []
-			next_queued = set()
+		while frontier:
+			if frontier.min_depth > self.solution_depth:
+				debug([frontier.min_depth], DBG_SOLV2, "Solution depth limit %d exceeded" % self.solution_depth)
+				return False
 
-			for position in curr_level_positions:
-				if position.depth > self.solution_depth:
-					depth_limit_positions.append(position)
-					debug([position.depth], DBG_SOLV2, "Solution depth limit %d exceeded" % self.solution_depth)
-					continue
+			position = frontier.top()
 
-				is_fully_processed = self.process_position(position)
-				if is_fully_processed is None:
-					self.unprocessed_positions = curr_level_positions[curr_level_positions.index(position):] + next_level_positions + depth_limit_positions
-					return None
-				if is_fully_processed:
-					continue
+			is_fully_processed = self.process_position(position)
+			if is_fully_processed is None:
+				return None
+			frontier.pop()
+			if is_fully_processed:
+				continue
 
-				for child in position.children:
-					if child in curr_queued or child in next_queued:
-						continue
-					next_level_positions.append(child)
-					next_queued.add(child)
+			for child in position.children:
+				frontier.insert(child)
 
-			# move to next level
-			curr_level_positions = next_level_positions
-			curr_queued = next_queued
-
-		self.unprocessed_positions = depth_limit_positions
-		return not depth_limit_positions
+		return True
 
 	def find_solution_using_pq(self):
 		while True:
@@ -866,8 +912,20 @@ class SokobanSolver():
 				self.unprocessed_positions = []
 				self._pq_counter = itertools.count()
 				self.pq_push(self.initial_position)
+			elif self.solution_alg == SOLUTION_ALG_BFS:
+				self.unprocessed_positions = self.BFSFrontier(self.solution_type == SOLUTION_TYPE_BY_MOVES)
+				self.unprocessed_positions.insert(self.initial_position)
 			else:
 				self.unprocessed_positions = [self.initial_position]
+
+			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+				def improve_position(position):
+					if position.best_key is not None:
+						self.pq_push(position)
+				self.improve_position = improve_position
+			elif self.solution_alg == SOLUTION_ALG_BFS and self.solution_type == SOLUTION_TYPE_BY_MOVES:
+				self.improve_position = lambda position: self.unprocessed_positions.insert(position)
+
 			return None, self.get_find_solution_status_str()
 
 		if stop or self.solution_depth > MAX_SOLUTION_DEPTH or time() > self.end_solution_time:
