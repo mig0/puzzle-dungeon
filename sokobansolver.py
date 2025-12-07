@@ -24,8 +24,12 @@ SOLUTION_ALG_GREED = "Greedy"
 SOLUTION_ALG_ASTAR = "A*"
 
 DBG_PRUN = "prun"
+DBG_SEVT = "sevt"
 
 solver = None
+
+def cost_to_str(cost):
+	return "%d/%d" % cost
 
 def cost_to_key(cost):
 	return cost if solver.solution_type == SOLUTION_TYPE_BY_MOVES else (cost[1], cost[0])
@@ -52,7 +56,8 @@ class SuperPosition:
 			new_total_nums = apply_diff(parent.total_nums, own_nums) if parent else (0, 0)
 			if position.cmp(new_total_nums) > 0:
 				position.reparent(parent, own_nums, segments)
-				debug([position.depth], DBG_SOLV3, "Position already seen, but new path is better")
+				debug([position.depth], DBG_SOLV3, "Position already seen, but new path %s is better" % position.nums_str)
+				debug(DBG_SEVT, "REP %d %d %s" % (position.id, parent.id, position.nums_str))
 			else:
 				debug([position.depth], DBG_SOLV3, "Position already seen, and no improvement")
 
@@ -86,14 +91,16 @@ class Position:
 		self.is_fully_processed = False
 		self.best_key = None  # used in heap
 		solver.num_created_positions += 1
+		self.id = solver.num_created_positions
 		solver.last_created_position = self
 		if self.depth > solver.max_created_depth:
 			solver.max_created_depth = self.depth
 		debug([self.depth], DBG_SOLV3, "Created %s" % self)
+		debug(DBG_SEVT, "NEW %d %d %s %s" % (self.id, parent.id if parent else 0, self.persistent_id, self.nums_str))
 
 	@property
 	def nums_str(self):
-		return "%d/%d" % (self.total_nums[0], self.total_nums[1])
+		return cost_to_str(self.total_nums)
 
 	@property
 	def is_solved(self):
@@ -177,6 +184,10 @@ class Position:
 				prev_char_cell = new_char_cell
 		return solution_pairs
 
+	@property
+	def persistent_id(self):
+		return "%d:%s" % (self.char_idx, ','.join(map(str, self.super.barrel_idxs)))
+
 	def __str__(self):
 		return "{◰[%d] %s ☻%s ■%s}" % \
 			(self.depth, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
@@ -222,7 +233,9 @@ class SokobanSolver():
 		if self.sort_positions is None:
 			return
 
-		key = cost_to_key(self.sort_positions(position))
+		total_cost = self.sort_positions(position)
+		debug(DBG_SEVT, "PUT %d %s" % (position.id, cost_to_str(total_cost)))
+		key = cost_to_key(total_cost)
 
 		# verify that there is no better key in heap already
 		if key == position.best_key:
@@ -246,6 +259,7 @@ class SokobanSolver():
 				continue
 
 			assert not position.is_fully_processed
+			debug(DBG_SEVT, "GET %d %s" % (position.id, cost_to_str(cost_to_key(key))))
 			return position
 
 		return None
@@ -477,10 +491,12 @@ class SokobanSolver():
 			num_shifts += 1
 		own_nums = num_moves, num_shifts
 
-		if self.solved_position and self.solved_position.cmp(apply_diff(position.total_nums, own_nums)) <= 0:
+		new_total_nums = apply_diff(position.total_nums, own_nums)
+		if self.solved_position and self.solved_position.cmp(new_total_nums) <= 0:
 			if debug.has(DBG_PRUN):
 				self.num_non_created_costy_positions += 1
 			debug([position.depth], DBG_SOLV3, "Not creating child that does not improve found solution")
+			debug(DBG_SEVT, "NOC %d solved-is-better %s" % (position.id, cost_to_str(new_total_nums)))
 			return None
 
 		new_char_idx = grid.cell_idxs[new_char_cell]
@@ -490,6 +506,7 @@ class SokobanSolver():
 			if debug.has(DBG_PRUN):
 				self.num_non_created_dead_positions += 1
 			debug([position.depth], DBG_SOLV3, "Not creating child in deadlocked super-position")
+			debug(DBG_SEVT, "NOC %d deadlock %s" % (position.id, cost_to_str(new_total_nums)))
 			return None
 
 		child = super_position.get_or_reparent_or_create_position(new_char_idx, position, own_nums, segments)
@@ -533,6 +550,7 @@ class SokobanSolver():
 			if debug.has(DBG_PRUN):
 				self.num_costy_than_solved_positions += 1
 			debug([depth], DBG_SOLV2, "Position does not improve the found solution")
+			debug(DBG_SEVT, "PRN %d solved-is-better %s" % (position.id, position.nums_str))
 			position.cut_down()
 			return True
 
@@ -541,15 +559,19 @@ class SokobanSolver():
 			if debug.has(DBG_PRUN):
 				self.num_found_solved_positions += 1
 			debug([depth], DBG_SOLV2, "Found solution %s in %.1fs" % (position.nums_str, time() - self.start_solution_time))
+			debug(DBG_SEVT, "SOL %d %s" % (position.id, position.nums_str))
 			position.cut_down()
 			return None if self.return_first else True
 
 		if self.solved_position:
 			min_cost = self.get_min_solution_cost(position.super.barrel_idxs)
-			if self.solved_position.cmp(apply_diff(position.total_nums, min_cost)) <= 0:
+			assert min_cost
+			total_cost = apply_diff(position.total_nums, min_cost)
+			if self.solved_position.cmp(total_cost) <= 0:
 				if debug.has(DBG_PRUN):
 					self.num_costy_solved_bound_positions += 1
 				debug([depth], DBG_SOLV2, "Pruning position by solution lower bound")
+				debug(DBG_SEVT, "PRN %s by-lower-bound %s %s %s" % (position.id, *map(cost_to_str, [position.total_nums, min_cost, total_cost])))
 				position.cut_down()
 				return True
 
