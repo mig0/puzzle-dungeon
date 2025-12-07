@@ -246,9 +246,9 @@ class SokobanSolver():
 				continue
 
 			assert not position.is_fully_processed
-			return key, position
+			return position
 
-		return None, None
+		return None
 
 	def is_barrel_matching_found(self, barrel_idxs):
 		if not self.is_barrel_mismatch_possible:
@@ -692,7 +692,7 @@ class SokobanSolver():
 
 	def find_solution_using_pq(self):
 		while True:
-			key, position = self.pq_pop()
+			position = self.pq_pop()
 			if position is None:
 				# heap is empty, finished
 				return True
