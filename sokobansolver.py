@@ -48,7 +48,7 @@ class SuperPosition:
 
 	def get_or_reparent_or_create_position(self, char_idx, parent, own_nums, segments):
 		position = self.positions.get(char_idx)
-		if position is None:
+		if position is None or self.is_solved and position.parent is None:
 			position = Position(self, char_idx, parent, own_nums, segments)
 			self.positions[char_idx] = position
 		else:
@@ -186,7 +186,7 @@ class Position:
 
 	@property
 	def persistent_id(self):
-		return "%d:%s" % (self.char_idx, ','.join(map(str, self.super.barrel_idxs)))
+		return "%d:%s%s" % (self.char_idx, ','.join(map(str, self.super.barrel_idxs)), '+' if self.is_solved else '')
 
 	def __str__(self):
 		return "{◰[%d] %s ☻%s ■%s}" % \
@@ -921,7 +921,7 @@ class SokobanSolver():
 			debug(DBG_SOLV2, "Solving for barrels: %s" % (self.barrel_idxs,))
 			grid.set_barrels(self.barrel_idxs)
 			super_position = self.find_or_create_super_position(self.char_idx)
-			self.initial_position = Position(super_position, self.char_idx, None, None, None)
+			self.initial_position = super_position.get_or_reparent_or_create_position(self.char_idx, None, None, None)
 
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()
