@@ -85,8 +85,10 @@ class Position:
 			self.segments = []
 			self.depth = 0
 			self.total_nums = (0, 0)
+			self._str = None
 			self._solution_cost = None
 		self._segments_str = None
+		self._persistent_id = None
 		self.children = []
 		self.is_expanded = False
 		self.is_fully_processed = False
@@ -134,6 +136,7 @@ class Position:
 	def calc_nums(self):
 		self.depth = self.parent.depth + 1
 		self.total_nums = apply_diff(self.parent.total_nums, self.own_nums)
+		self._str = None
 		self._solution_cost = None
 		self.is_fully_processed = False
 
@@ -187,11 +190,14 @@ class Position:
 
 	@property
 	def persistent_id(self):
-		return "%d:%s%s" % (self.char_idx, ','.join(map(str, self.super.barrel_idxs)), '+' if self.is_solved else '')
+		if self._persistent_id is None:
+			self._persistent_id = "%d:%s%s" % (self.char_idx, ','.join(map(str, self.super.barrel_idxs)), '+' if self.is_solved else '')
+		return self._persistent_id
 
 	def __str__(self):
-		return "{◰[%d] %s ☻%s ■%s}" % \
-			(self.depth, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
+		if self._str is None:
+			self._str = "{◰[%d] %s ☻%s ■%s}" % (self.depth, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
+		return self._str
 
 class SokobanSolver():
 	def __init__(self):
