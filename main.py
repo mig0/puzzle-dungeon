@@ -38,7 +38,6 @@ scale_to_display = False
 
 # set data dir and default encoding for the whole program
 pgzero.loaders.set_root(DATA_DIR)
-sys.stdout.reconfigure(encoding='utf-8')
 
 # get 4 neughbour cells for cell
 def get_cell_neighbors(cell, x_range=None, y_range=None):

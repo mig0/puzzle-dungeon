@@ -1,3 +1,4 @@
+import sys
 import atexit
 import signal
 from common import warn
@@ -5,6 +6,9 @@ from debug import debug
 from profiler import profiler
 from load import fetch_letslogic_collections, fetch_letslogic_collection, load_letslogic_level, detect_map_file
 from sokobanparser import parse_sokoban_levels
+
+# allow unicode in command line output
+sys.stdout.reconfigure(encoding='utf-8')
 
 # Process common options and args.
 # Options: --debug, --run-profiler, --list-collections, --list-ll-collections, --reverse-barrel-mode
