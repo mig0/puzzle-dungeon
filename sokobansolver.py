@@ -899,7 +899,7 @@ class SokobanSolver():
 		if self.solution_alg == SOLUTION_ALG_DFS:
 			status_str += "; limit %d" % self.solution_depth
 		elif self.solution_alg == SOLUTION_ALG_BFS:
-			status_str += "; depth %s" % max_depth
+			status_str += "; depth %s" % max(0, max_depth - 1)
 		else:
 			status_str += "; %s deepest %d" % (self.solution_alg[0:2], max_depth)
 		status_str += "; positions: %d" % self.num_processed_positions
