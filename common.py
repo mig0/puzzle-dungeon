@@ -37,6 +37,10 @@ def open_read(filename, descr=None):
 	except Exception as e:
 		die("Can't open %s (%s)" % (filename_descr, e))
 
+def load_file(filename):
+	with open_read(filename) as file:
+		return file.read()
+
 def get_caller_function_name_or_self(n=0):
 	caller = inspect.currentframe().f_back
 	for _ in range(n):
@@ -69,14 +73,13 @@ def markdown_to_html(text):
 		warn("markdown_to_html: Error executing '%s'" % markdown_to_html_cmd)
 		die(e)
 
-def load_tabbed_yaml(path):
+def load_tabbed_yaml(filename):
 	'''
 	Load a YAML-like config that uses TAB indentation.
 	This function converts leading tabs to 8 spaces per tab, then safe-loads YAML.
 	Then it converts lists to tuples recursively.
 	'''
-	with open(path, 'r', encoding='utf-8') as f:
-		text = f.read()
+	text = load_file(filename)
 
 	def _tabs_to_spaces(m):
 		return ' ' * 8 * len(m.group(1))
