@@ -9,7 +9,7 @@ import argparse
 from load import parse_map_file_signature
 from level import Level
 from debug import debug
-from common import die, warn
+from common import die, warn, load_file
 from records import CollectionRecords
 from colorize import *
 from sizetools import set_fitting_map_size
@@ -91,6 +91,8 @@ for level_index, level_config in enumerate(level_configs):
 	if level.puzzle_type != 'BarrelPuzzle':
 		warn("Ignoring level %d of non BarrelPuzzle type (%s)" % (level_index, level.puzzle_type))
 		continue
+	if level.map_file is not None:
+		level.map_string = load_file(level.map_file)
 	if level.map_string is None:
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		continue
