@@ -67,6 +67,7 @@ class SuperPosition:
 	def solution_cost(self):
 		if self._solution_cost is None:
 			self._solution_cost = solver.get_min_solution_cost(self.barrel_idxs)
+			assert self._solution_cost, "Position was created, but super-position looks dead"
 		return self._solution_cost
 
 class Position:
@@ -921,6 +922,8 @@ class SokobanSolver():
 			debug(DBG_SOLV2, "Solving for barrels: %s" % (self.barrel_idxs,))
 			grid.set_barrels(self.barrel_idxs)
 			super_position = self.find_or_create_super_position(self.char_idx)
+			if super_position.is_dead:
+				return self.get_found_solution_items("initial-deadlocked"), None
 			self.initial_position = super_position.get_or_reparent_or_create_position(self.char_idx, None, None, None)
 
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
