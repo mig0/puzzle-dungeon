@@ -413,11 +413,12 @@ class SokobanSolver():
 
 		n = len(barrel_idxs)
 		assert n == self.hungarian.n
+		m = self.hungarian.m
 		cost_factor = grid.num_bits * grid.num_bits
 		costs = self.hungarian.costs
 
 		# prepare scalar packed-cost matrix
-		for j in range(n):
+		for j in range(m):
 			plate_idx = grid.plate_idxs[j]
 			plate_costs = self.min_plate_barrel_costs.get(plate_idx, {})
 			for i in range(n):
@@ -750,7 +751,7 @@ class SokobanSolver():
 		if barrel_bits & grid.dead_barrel_bits != grid.no_bits:
 			debug(DBG_SOLV, "Some barrels are on dead barrel cells - unsolvable")
 			return False
-		self.hungarian = Hungarian(grid.num_plates)
+		self.hungarian = Hungarian(len(self.barrel_idxs), grid.num_plates)
 		return True
 
 	def prepare_solution(self, char=None):
