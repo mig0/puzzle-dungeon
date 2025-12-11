@@ -413,6 +413,7 @@ class SokobanSolver():
 
 		n = len(barrel_idxs)
 		assert n == self.hungarian.n
+		cost_factor = grid.num_bits * grid.num_bits
 		costs = self.hungarian.costs
 
 		# prepare scalar packed-cost matrix
@@ -428,11 +429,11 @@ class SokobanSolver():
 					costs[i][j] = INF
 				else:
 					key = cost_to_key(cost)
-					costs[i][j] = key[0] * grid.num_bits + key[1]
+					costs[i][j] = key[0] * cost_factor + key[1]
 
 		packed_cost = self.hungarian.assign()
 
-		return cost_to_key((packed_cost // grid.num_bits, packed_cost % grid.num_bits))
+		return cost_to_key((packed_cost // cost_factor, packed_cost % cost_factor))
 
 	def estimate_solution_depth(self):
 		cost = self.get_min_solution_cost(self.barrel_idxs)
