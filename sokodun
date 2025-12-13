@@ -34,6 +34,7 @@ parser.add_argument('-B', '--bfs', help="use BFS algorithm to find solution", ac
 parser.add_argument('-D', '--dfs', help="use DFS algorithm to find solution", action='store_true')
 parser.add_argument('-G', '--greed', help="use Greedy algorithm to find solution", action='store_true')
 parser.add_argument('-U', '--ucs', help="use Uniform Cost algorithm to find solution", action='store_true')
+parser.add_argument('-_', '--disable-prepare', help="do not prepare costs for lower-bound", action='store_true')
 parser.add_argument('-0', '--disable-budget', help="do not report progress every second", action='store_true')
 parser.add_argument('-1', '--return-first', help="return first found solution (not optimal)", action='store_true')
 parser.add_argument('-x', '--show-dead', help="show dead-barrel cells on map", action='store_true')
@@ -47,6 +48,7 @@ cmdargs = parser.parse_args()
 
 reverse_barrel_mode = cmdargs.reverse_barrel_mode
 record_filename = cmdargs.record_file
+disable_prepare = cmdargs.disable_prepare
 disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
 solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmdargs.bfs else SOLUTION_ALG_DFS if cmdargs.dfs else SOLUTION_ALG_GREED if cmdargs.greed else SOLUTION_ALG_UCS if cmdargs.ucs else None
@@ -100,6 +102,7 @@ for level_index, level_config in enumerate(level_configs):
 	solver = create_solver(level.map_string, reverse_barrel_mode)
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
+	solver.disable_prepare = disable_prepare
 
 	def show_solution(solution_items):
 		if show_time:
