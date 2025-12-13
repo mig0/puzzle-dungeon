@@ -34,6 +34,7 @@ from translate import _, set_lang
 from mainscreen import main_screen_level
 from sokobanparser import parse_sokoban_levels
 from statusmessage import reset_status_messages, set_status_message, set_quick_status_message, draw_status_message
+from processcmdargs import parse_clipboard_levels
 
 signal.signal(signal.SIGINT, lambda signum, frame: print("\nInterrupted by user") or exit())
 
@@ -2043,34 +2044,6 @@ def undo_move():
 		puzzle.on_undo_move()
 	else:
 		play_sound('error')
-
-def parse_clipboard_levels(id_str, config={}):
-	error_prefix = "Ignoring '%s', " % id_str
-	if not (map_string := clipboard.get()):
-		warn(error_prefix + "since clipboard is empty")
-		return None
-	map_info = detect_map_file(None, map_string=map_string)
-	if not map_info:
-		warn(error_prefix + "no map in clipboard")
-		return None
-	is_sokoban_map, error, puzzle_type, size = map_info
-	if is_sokoban_map:
-		level_configs = parse_sokoban_levels(map_string, config)
-		if not level_configs:
-			warn(error_prefix + "no levels in sokoban map")
-		return level_configs
-	if error:
-		warn(error_prefix + "Not a sokoban map and %s" % error)
-		return None
-	return [{
-		'puzzle-type': puzzle_type,
-		'map-size': size,
-		'map-string': map_string,
-		'name': "%s map from clipboard" % puzzle_type,
-		'bg-image': config.get('bg-image'),
-		'music': config.get('music'),
-		'theme': config.get('theme'),
-	}]
 
 def handle_cmdargs():
 	if cmdargs.list_collections:
