@@ -2,6 +2,7 @@ import os
 import io
 import sys
 import random
+import signal
 import pygame
 import pgzero
 from pgzero.constants import keys
@@ -33,6 +34,8 @@ from translate import _, set_lang
 from mainscreen import main_screen_level
 from sokobanparser import parse_sokoban_levels
 from statusmessage import reset_status_messages, set_status_message, set_quick_status_message, draw_status_message
+
+signal.signal(signal.SIGINT, lambda signum, frame: print("\nInterrupted by user") or exit())
 
 scale_to_display = False
 
