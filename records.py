@@ -69,7 +69,7 @@ class CollectionRecords:
 
 	def _update_record(self, i, result):
 		records = self.move_records if self.by_moves else self.push_records
-		if result and (not records[i] or result < records[i]):
+		if result and (not records[i] or self.cmp_costs(result, records[i])) < 0:
 			records[i] = result
 			return True
 		return False
