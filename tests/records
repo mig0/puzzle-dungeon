@@ -41,7 +41,7 @@ def test_parse_dual_costs():
 
 	test.eq(r.push_records, [(48, 16), (20, 10)])
 	test.eq(r.move_records, [(47, 17), (19, 9)])
-	test.eq(r.level_ids, ["Level 1", "Level 2"])
+	test.eq(r.level_ids, [None, None])
 
 def test_parse_invalid_line():
 	write_file([
@@ -67,14 +67,14 @@ def test_cmp_level_result_single_costs():
 	test.eq(r.cmp_level_result("18/10"), -1)  # better moves
 	test.eq(r.cmp_level_result("30/15"), 0)   # equal
 	test.eq(r.cmp_level_result("21/21"), 1)   # worse
-	test.none(r.cmp_level_result("21/21"))    # N/A
+	test.eq(r.cmp_level_result("21/21"), -1)  # NEW RECORD
 	test.none(r.cmp_level_result(None))       # N/A
 
 	r = CollectionRecords(TEST_FILE, by_moves=True)
 	test.eq(r.cmp_level_result("18/11"), -1)  # better moves
 	test.eq(r.cmp_level_result("30/15"), 0)   # equal
 	test.eq(r.cmp_level_result("41/9"), 1)    # worse
-	test.none(r.cmp_level_result("21/21"))    # N/A
+	test.eq(r.cmp_level_result("21/21"), -1)  # NEW RECORD
 	test.none(r.cmp_level_result(None))       # N/A
 
 def test_cmp_level_result_dual_costs():
@@ -86,17 +86,17 @@ def test_cmp_level_result_dual_costs():
 	r = CollectionRecords(TEST_FILE, by_moves=False)
 	test.eq(r.cmp_level_result("12/4"), -1)
 	test.eq(r.cmp_level_result("12/4"), 1)
-	test.none(r.cmp_level_result("12/4"))  # N/A
+	test.eq(r.cmp_level_result("12/4"), -1)  # NEW
 
 	r = CollectionRecords(TEST_FILE, by_moves=True)
 	test.eq(r.cmp_level_result("12/4"), 1)
 	test.eq(r.cmp_level_result("12/4"), -1)
-	test.none(r.cmp_level_result("12/4"))  # N/A
+	test.eq(r.cmp_level_result("12/4"), -1)  # NEW
 
 	r = CollectionRecords(TEST_FILE)
 	test.eq(r.cmp_level_result("11/5"), 0)
-	test.none(r.cmp_level_result(None))    # N/A
-	test.none(r.cmp_level_result("12/4"))  # N/A
+	test.none(r.cmp_level_result(None))      # N/A
+	test.eq(r.cmp_level_result("12/4"), -1)  # NEW
 
 def test_cmp_sequential_updates_indices():
 	write_file([
@@ -113,7 +113,7 @@ def test_cmp_sequential_updates_indices():
 	test.eq(r.next_result_idx, 2)
 	test.eq(r.cmp_level_result("50/20"), 1)
 	test.eq(r.next_result_idx, 3)
-	test.eq(r.cmp_level_result("1/1"), None)
+	test.eq(r.cmp_level_result("100/50"), -1)
 
 # -----------------------------------------------------
 # update_file tests
