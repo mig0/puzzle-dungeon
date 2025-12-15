@@ -72,6 +72,9 @@ def _is_dict_like(s):
 		return False
 
 	parts = _split_top_level(s, ",")
+	if len(parts) == 1 and re.search(r'^\d+:\d\d(:\d\d)?$', parts[0]):
+		return False
+
 	for p in parts:
 		p = p.strip()
 		if not p:

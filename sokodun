@@ -98,7 +98,7 @@ for level_index, level_config in enumerate(level_configs):
 	if level.map_string is None:
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		continue
-	print("Solving level %d of %d: %s" % (level_index, len(level_configs), level.name))
+	print("Solving level %s of %d: %s" % (colorize(level_index, COLOR_BOLD), len(level_configs), colorize(level.name, COLOR_ITALIC)))
 	solver = create_solver(level.map_string, reverse_barrel_mode)
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
@@ -106,11 +106,11 @@ for level_index, level_config in enumerate(level_configs):
 
 	def show_solution(solution_items):
 		if show_time:
-			print("Time: %s" % solver.last_solution_time_str)
+			print("Time: %s" % colorize_auto(solver.last_solution_time_str))
 		if not solution_items:
 			print("Solution not found")
 		else:
-			print("Solution %s: %s" % (solver.last_solution_nums_str, solver.last_solution_str))
+			print("Solution %s: %s" % (colorize_auto(solver.last_solution_nums_str), solver.last_solution_str))
 		if coll_records:
 			record_str = colorize_auto(coll_records.record_str_at_result)
 			c = coll_records.cmp_level_result(solver.last_solution_nums_str)
