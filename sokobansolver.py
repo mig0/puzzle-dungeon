@@ -418,6 +418,9 @@ class SokobanSolver():
 		if not self.is_barrel_matching_found(barrel_idxs):
 			return None
 
+		if self.disable_prepare:
+			return (0, 0)
+
 		n = len(barrel_idxs)
 		assert n == self.hungarian.n
 		m = self.hungarian.m
@@ -471,7 +474,8 @@ class SokobanSolver():
 		else:
 			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts(valid_pairs=self.valid_shift_pairs)
 
-		accessible_cells_near_barrels.sort(key=lambda two_cells: cost_to_key(self.min_char_barrel_costs[grid.to_idxs(two_cells)]))
+		if not self.disable_prepare:
+			accessible_cells_near_barrels.sort(key=lambda two_cells: cost_to_key(self.min_char_barrel_costs[grid.to_idxs(two_cells)]))
 		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_cells_near_barrels)
 		if grid.is_zsb:
 			for proto_segments in all_proto_segments:
@@ -767,6 +771,8 @@ class SokobanSolver():
 		self.min_plate_char_barrel_costs = {}
 		self.min_plate_barrel_costs = {}
 		self.valid_shift_pairs = None
+		self.accessible_barrel_plate_idxs = {}
+		self.is_barrel_mismatch_possible = False
 
 		if grid.plate_bits == grid.no_bits:
 			grid.dead_barrel_bits = grid.all_bits
@@ -844,8 +850,6 @@ class SokobanSolver():
 			grid.show_map("Map with dead-barrel cells", show_dead=True)
 
 		# build optimistic barrel -> reachable plates adjacency
-		self.accessible_barrel_plate_idxs = {}
-		self.is_barrel_mismatch_possible = False
 		for barrel_idx in search_bits(~grid.dead_barrel_bits, _ONE):
 			accessible_plate_idxs = [plate_idx for plate_idx in grid.plate_idxs if barrel_idx in self.min_plate_barrel_costs.get(plate_idx, {})]
 			self.accessible_barrel_plate_idxs[barrel_idx] = accessible_plate_idxs
