@@ -265,7 +265,7 @@ class SokobanSolver():
 			if position.best_key != key:
 				continue
 
-			assert not position.is_fully_processed
+			assert not position.is_fully_processed or self.solution_alg == SOLUTION_ALG_GREED
 			debug(DBG_SEVT, "GET %d %s" % (position.id, cost_to_str(cost_to_key(key))))
 			return position
 
