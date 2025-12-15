@@ -312,7 +312,7 @@ def fetch_letslogic(action):
 			if res.status != 200:
 				warn("Got HTTP status %d on %s" % (res.status, url))
 				return None
-			output = res.read().decode()
+			output = res.read().decode(errors='replace')
 			debug(3, output)
 			return output
 	except Exception as e:
@@ -398,7 +398,7 @@ def fetch_letslogic_collections():
 		if output is not None:
 			save_user_file(ll_colls_filename, output)
 		else:
-			warn("Can't fetch letslogic collection, check url, key or internet")
+			warn("Can't fetch letslogic collections, check url, key or internet")
 			return []
 
 	null = None
