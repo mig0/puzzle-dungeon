@@ -199,8 +199,236 @@ sok_obvious_14 = (
 	'#######',
 )
 
+sok_awkward_01 = (
+	'choriban.5',
+	' ######',
+	' #  #.#',
+	' #@ #.#',
+	'##$   #',
+	'#  $  #',
+	'#   ###',
+	'#####  ',
+)
+
+sok_awkward_02 = (
+	'choriban.23',
+	' ######',
+	' #   .#',
+	'## $  #',
+	'#@$ # #',
+	'# $ #.#',
+	'###  .#',
+	'  #####',
+)
+
+sok_awkward_03 = (
+	'choriban.27',
+	'####  ',
+	'#  #  ',
+	'#  ###',
+	'#  $ #',
+	'#  *.#',
+	'#@*  #',
+	'#  ###',
+	'####  ',
+)
+
+sok_awkward_04 = (
+	'choriban.30',
+	'   ######',
+	'####    #',
+	'#@ $  $ #',
+	'# # $# ##',
+	'#...   # ',
+	'######## ',
+)
+
+sok_awkward_05 = (
+	'choriban.32',
+	'#####  ',
+	'#.. ###',
+	'# .$  #',
+	'## @$ #',
+	' #  $ #',
+	' ###  #',
+	'   ####',
+)
+
+sok_awkward_06 = (
+	'choriban.35',
+	' #####',
+	' #@..#',
+	'##$*$#',
+	'#    #',
+	'#    #',
+	'######',
+)
+
+sok_awkward_07 = (
+	'choriban.37',
+	'#####  ',
+	'# ..###',
+	'# . $ #',
+	'#  #$ #',
+	'#@$   #',
+	'###   #',
+	'  #####',
+)
+
+sok_awkward_08 = (
+	'choriban.38',
+	'#####  ',
+	'#.. ###',
+	'# .   #',
+	'##  $ #',
+	'#@$ $ #',
+	'####  #',
+	'   ####',
+)
+
+sok_awkward_09 = (
+	'choriban.40',
+	' ######',
+	' # ...#',
+	' #$#  #',
+	'##  @ #',
+	'# $$  #',
+	'#    ##',
+	'###### ',
+)
+
+sok_awkward_10 = (
+	'choriban.41',
+	'    ###',
+	'  ###.#',
+	'  #@ .#',
+	'###$$.#',
+	'#   $ #',
+	'#    ##',
+	'###### ',
+)
+
+sok_awkward_11 = (
+	'choriban.42',
+	'    ###',
+	' ####+#',
+	' #  ..#',
+	'##$#  #',
+	'#  $$ #',
+	'#    ##',
+	'###  # ',
+	'  #### ',
+)
+
+sok_awkward_12 = (
+	'choriban.43',
+	'####### ',
+	'#  ##@##',
+	'#    $ #',
+	'#   $..#',
+	'#### #.#',
+	'  #  $ #',
+	'  #   ##',
+	'  ##### ',
+)
+
+sok_awkward_13 = (
+	'choriban.46',
+	'  #### ',
+	'###  # ',
+	'#    ##',
+	'# $ $ #',
+	'#  #$@#',
+	'#... ##',
+	'###### ',
+)
+
+sok_awkward_14 = (
+	'choriban.49',
+	'  ######',
+	'  #@ #.#',
+	'####$ .#',
+	'#  #  .#',
+	'#  $ $ #',
+	'#     ##',
+	'#  #### ',
+	'####    ',
+)
+
+sok_awkward_15 = (
+	'choriban.52',
+	'   #####',
+	'####   #',
+	'#  $   #',
+	'#. @$$ #',
+	'#..  ###',
+	'######  ',
+)
+
+sok_awkward_16 = (
+	'choriban.53',
+	' ###   ',
+	' #+#   ',
+	' #*####',
+	'##    #',
+	'#  $# #',
+	'# #   #',
+	'# ### #',
+	'#     #',
+	'#######',
+)
+
+sok_awkward_17 = (
+	'choriban.54 ',
+	' ###      ',
+	' #.#######',
+	' #.#     #',
+	'##+  ### #',
+	'# * $### #',
+	'# #  $   #',
+	'#   $#####',
+	'#    #    ',
+	'######    ',
+)
+
+sok_awkward_18 = (
+	'choriban.55',
+	'    ###',
+	' ####.#',
+	' #  ..#',
+	'## $ .#',
+	'#@$$$##',
+	'#    # ',
+	'###### ',
+)
+
+sok_awkward_19 = (
+	'simplified microban.8',
+	'   ####',
+	'  # ..@#',
+	'  # $$ #',
+	' ### ##',
+	'#    ##',
+	'# #   #',
+	'#   # #',
+	' ##   #',
+	'   ###',
+)
+
+sok_awkward_20 = (
+	'microban.16',
+	' ####     ',
+	' #  ####  ',
+	' #     ## ',
+	'## ##   # ',
+	'#. .# @$##',
+	'#   # $$ #',
+	'#  .#    #',
+	'##########',
+)
+
 sok_takaken_01 = (
-	# scrambled egg
+	'scrambled egg',
 	' #####',
 	' # @ ###',
 	'## #$  #',
@@ -212,7 +440,7 @@ sok_takaken_01 = (
 )
 
 sok_takaken_02 = (
-	# a point
+	'a point',
 	'#####',
 	'#   #####',
 	'# # #   #',
@@ -224,7 +452,7 @@ sok_takaken_02 = (
 )
 
 sok_takaken_03 = (
-	# twins
+	'twins',
 	' ######',
 	'#   $. #  #####',
 	'#.$    # #    .#',
@@ -238,7 +466,7 @@ sok_takaken_03 = (
 )
 
 sok_takaken_04 = (
-	# rescue in the bay
+	'rescue in the bay',
 	'     ####',
 	'   ###  ####',
 	'#### $  #  #',
@@ -249,7 +477,7 @@ sok_takaken_04 = (
 )
 
 sok_takaken_05 = (
-	# baby classic
+	'baby classic',
 	'#######',
 	'#...  #',
 	'# # $ #',
@@ -260,7 +488,7 @@ sok_takaken_05 = (
 )
 
 sok_takaken_06 = (
-	# key
+	'key',
 	'  #####',
 	'###  @#',
 	'#  $  #',
@@ -272,7 +500,7 @@ sok_takaken_06 = (
 )
 
 sok_takaken_07 = (
-	# Love
+	'Love',
 	'   #####',
 	'  ## @ #',
 	'  #    #  #####    ######',
@@ -291,7 +519,7 @@ sok_takaken_07 = (
 )
 
 sok_takaken_08 = (
-	# rule
+	'rule',
 	'  ######',
 	'###    ###',
 	'#   $$ ..#',
@@ -307,7 +535,7 @@ sok_takaken_08 = (
 )
 
 sok_takaken_09 = (
-	# two points
+	'two points',
 	' ######',
 	' #    #',
 	' #$  .#',
@@ -320,7 +548,7 @@ sok_takaken_09 = (
 )
 
 sok_takaken_10 = (
-	# in a mirror
+	'in a mirror',
 	' ########',
 	' #  #   #',
 	' #..#$$ #',
@@ -333,7 +561,7 @@ sok_takaken_10 = (
 )
 
 sok_takaken_11 = (
-	# two points again
+	'two points again',
 	' #####',
 	' #   ######',
 	'## # @    #',
@@ -344,7 +572,7 @@ sok_takaken_11 = (
 )
 
 sok_takaken_12 = (
-	# magic box
+	'magic box',
 	'  #####',
 	'### @ ###',
 	'#   #   #',
@@ -354,7 +582,7 @@ sok_takaken_12 = (
 )
 
 sok_takaken_13 = (
-	# short-sleeved shirt
+	'short-sleeved shirt',
 	'#########',
 	'#  * *  #',
 	'#  $ $  #',
@@ -367,7 +595,7 @@ sok_takaken_13 = (
 )
 
 sok_takaken_14 = (
-	# second UFO
+	'second UFO',
 	'   #####',
 	'   #   #',
 	'   #   #',
@@ -383,7 +611,7 @@ sok_takaken_14 = (
 )
 
 sok_complex_01 = (
-	# YASTGen #11 Chaos
+	'YASTGen #11 Chaos',
 	'--#####',
 	'###@ .#',
 	'# $ #.#',
@@ -394,7 +622,20 @@ sok_complex_01 = (
 )
 
 sok_complex_02 = (
-	# MICROCOSMOS 02
+	'Easy 3 Boxes #12',
+	'#########',
+	'#   #.  #',
+	'#. .    #',
+	'#  #$#@ #',
+	'# $  ####',
+	'####    #',
+	'#    $  #',
+	'#   #   #',
+	'#########',
+)
+
+sok_complex_03 = (
+	'MICROCOSMOS 02',
 	'#################',
 	'#  #  #  #  #   #',
 	'#.$   #  #.$    #',
@@ -426,6 +667,26 @@ optimal_solution_nums_strs = {
 	sok_obvious_12: '39/11',
 	sok_obvious_13: '45/10',
 	sok_obvious_14: '64/12',
+	sok_awkward_01: '46/15',
+	sok_awkward_02: '91/25',
+	sok_awkward_03: '62/18',
+	sok_awkward_04: '87/24',
+	sok_awkward_05: ('79/21', '71/23'),
+	sok_awkward_06: '37/11',
+	sok_awkward_07: '68/20',
+	sok_awkward_08: ('82/22', '74/24'),
+	sok_awkward_09: '48/18',
+	sok_awkward_10: '47/16',
+	sok_awkward_11: '83/21',
+	sok_awkward_12: '115/43',
+	sok_awkward_13: '80/23',
+	sok_awkward_14: '81/28',
+	sok_awkward_15: '61/23',
+	sok_awkward_16: '52/10',
+	sok_awkward_17: '127/30',
+	sok_awkward_18: '54/18',
+	sok_awkward_19: '79/20',
+	sok_awkward_20: '100/39',
 	sok_takaken_01: '170/43',
 	sok_takaken_02: '185/42',
 	sok_takaken_03: '144/47',
@@ -440,8 +701,9 @@ optimal_solution_nums_strs = {
 	sok_takaken_12: '86/19',
 	sok_takaken_13: ('213/54', '207/58'),
 	sok_takaken_14: ('266/73', '247/75'),
-	sok_complex_01: ('146/38', '146/38'),  # '144/38',
-	sok_complex_02: ('221/82', '217/82'),  # '211/82',
+	sok_complex_01: '144/38',
+	sok_complex_02: '183/58',
+	sok_complex_03: '211/82',
 }
 
 optimal_solution_nums_strs_by_type = {
@@ -472,8 +734,11 @@ optimal_solution_strs = {
 	sok_obvious_12: 'lddddrUUddrruLdlluurDuluurDDlddRRuLdlUU',
 	sok_obvious_13: 'llddrdrruLLdlUluurrrDulllddrUluRddrdrruLLdlUU',
 	sok_obvious_14: 'rrddllldRRuruullDurrddldlluRuurrddrdLLruuullddRdrUUdllldRRuluurR',
+	sok_awkward_19: 'llDDDldddrruuLuuuurrdLulDDDlllddrrUdlluurRdddrruuLUUUluRdddlllddrrUdlluurRdrUUU',
+	sok_awkward_20: 'lddrUdrruLLdlUUUruLLLulDDDldRuuurrrrdrDLdlUUruLLLulDDDlddrrULdlUruuurrrrddddrruLLdlUUUruLLLulDDDDldR',
 	sok_complex_01: 'dDuurrddLLrrddLLUlluuRDRddrruuLLrruullDlldddRRuULrrruullDldRddlUruuurrddddLLuuRlddrruUUdlldlldRRuuulDrddlluRurrrddLLUluRRlddrruUllldldRRRluuullD',
-	sok_complex_02: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
+	sok_complex_02: 'ullDDDrrddlULLdlluRRRRluuuulllddRRluurrdDDRddrruuLLdLUUUdlluurRRurrdLLLLrdddrddrUruLLdlLdlluRRRUUUdlluluurDrRRurrdLLLLrdddrrddlUruLdlUUUdllluuurrdLrRddllUdrruuRurrddlUruLdlllullDRddlU',
+	sok_complex_03: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
 }
 
 optimal_solution_strs_by_type = {
@@ -488,19 +753,23 @@ def print_if_verbose(*args):
 		print(*args)
 
 def create_sokoban_map(lines):
+	if lines[0][0].isalpha():
+		lines = lines[1:]
 	assert is_sokoban_map(lines), "Invalid Sokoban map:\n%s" % '\n'.join(lines)
 	return numpy.array([list(line) for line in convert_and_pad_map_lines(lines)], dtype='<U1').T
 
 def create_solver(sokoban_map_lines, reverse_barrel_mode=False, solution_alg=None, return_first=False):
 	map = create_sokoban_map(sokoban_map_lines)
-	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, "Created solver for map" if verbose else False)
+	descr = "Created %s solver for map" % (solution_alg or "default")
+	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, descr if verbose else False)
 
 def test_solution(sok, unique_solution_str=False, solution_alg=None, return_first=False):
 	for solution_type in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
 		solver = create_solver(sok, False, solution_alg, return_first)
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
-		test.eq(solver.last_solution_nums_str, optimal_solution_nums_strs_by_type[solution_type][sok])
+		sok_id = sok[0] + ": " if sok[0][0].isalpha() else ''
+		test.eq(sok_id + solver.last_solution_nums_str, sok_id + optimal_solution_nums_strs_by_type[solution_type][sok])
 		if unique_solution_str:
 			test.eq(solver.last_solution_str, optimal_solution_strs_by_type[solution_type][sok])
 		else:
@@ -521,12 +790,16 @@ def test_obvious_solutions():
 	for sok in sok_obvious_01, sok_obvious_02, sok_obvious_03, sok_obvious_04, sok_obvious_05, sok_obvious_06, sok_obvious_07, sok_obvious_08, sok_obvious_09, sok_obvious_10, sok_obvious_11, sok_obvious_12, sok_obvious_13, sok_obvious_14:
 		test_solution(sok, True)
 
+def test_awkward_solutions():
+	for sok in sok_awkward_01, sok_awkward_02, sok_awkward_03, sok_awkward_04, sok_awkward_05, sok_awkward_06, sok_awkward_07, sok_awkward_08, sok_awkward_09, sok_awkward_10, sok_awkward_11, sok_awkward_12, sok_awkward_13, sok_awkward_14, sok_awkward_15, sok_awkward_16, sok_awkward_17, sok_awkward_18, sok_awkward_19, sok_awkward_20:
+		test_solution(sok, sok in (sok_awkward_19, sok_awkward_20), SOLUTION_ALG_ASTAR)
+
 def test_takaken_solutions():
 	for sok in sok_takaken_01, sok_takaken_05, sok_takaken_09, sok_takaken_11, sok_takaken_12:
 		test_solution(sok)
 
 def test_complex_solutions():
-	for sok in sok_complex_01, sok_complex_02:
+	for sok in sok_complex_01, sok_complex_02, sok_complex_03:
 		test_solution(sok, False, SOLUTION_ALG_ASTAR, True)
 
 def test_trivial_without_solutions():
@@ -559,40 +832,28 @@ def test_trivial_without_solutions():
 	))
 
 def test_algorithms_consistency():
-	for sok in sok_trivial_h3, sok_obvious_03, sok_obvious_06:
+	has_reverse_sol = [sok_obvious_03]
+	for sok in sok_trivial_h3, sok_obvious_03, sok_obvious_06, sok_awkward_04, sok_awkward_16, sok_awkward_19:
 		for reverse_barrel_mode in False, True:
 			results = {}
 			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR:
 				# solve both types
 				for typ in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
-					solver = create_solver(sok, reverse_barrel_mode)
-					solver.solution_alg = alg
+					solver = create_solver(sok, reverse_barrel_mode, alg)
 					sol = solver.solve(typ)
+					exp_solution = not reverse_barrel_mode or sok in has_reverse_sol
+					test.ok(sol or not exp_solution, "No expected %s solution %s for %s by %s" % (
+						"reverse" if reverse_barrel_mode else "forward",
+						optimal_solution_nums_strs_by_type[typ][sok], alg,
+						"moves" if typ == SOLUTION_TYPE_BY_MOVES else "shifts"
+					))
 					results[alg, typ] = solver.last_solution_nums_str
-				test.eq(results[alg, SOLUTION_TYPE_BY_SHIFTS], results[alg, SOLUTION_TYPE_BY_MOVES])
+				test.eq(results[alg, SOLUTION_TYPE_BY_MOVES], results[alg, SOLUTION_TYPE_BY_SHIFTS])
 			def create_key(a, r, v):
 				return ','.join([a, str(r), str(v)])
 			# compare all results to BFS results
 			for (alg, typ), v in results.items():
 				test.eq(create_key(alg, reverse_barrel_mode, v), create_key(alg, reverse_barrel_mode, results[SOLUTION_ALG_BFS, typ]))
-
-def test_reparent_dirty_propagation():
-	sok = sok_trivial_s1
-	solver = create_solver(sok)
-	solver.solution_alg = SOLUTION_ALG_BFS
-	# prepare and create the initial structures
-	solver.prepare_solution(solver.char_cell)
-	grid.set_barrels(solver.barrel_cells)
-	super_position = solver.find_or_create_super_position(grid.to_idx(solver.char_cell))
-	position = Position(super_position, solver.char_cell, None, None, None)
-	# create a fake child and reparent to check propagation
-	child = Position(super_position, solver.char_cell, position, (3, 1), [([], solver.char_cell, solver.barrel_cells[0])])
-	# now reparent child to position again with different own_nums
-	child.reparent(position, (1, 1), child.segments)
-	# after reparent, child's total_nums and depth must reflect new parent
-	test.eq(child.parent, position)
-	test.eq(child.is_dirty, True)
-	test.eq(child.is_fully_processed, False)
 
 def test_prepare_solution_without_plates():
 	sok = ('#######', '# @ $ #', '#######')
@@ -656,7 +917,7 @@ def test_position_num_calculation():
 	test.eq(child.total_nums, (3, 2))
 	# Reparent child with new own_nums
 	child.reparent(root, (1, 1), [])
-	test.eq(child.total_nums, (3, 2))
+	test.eq(child.total_nums, (1, 1))
 
 def test_find_solution_status_string():
 	solver = create_solver(sok_trivial_h2)
@@ -674,11 +935,11 @@ test = TestSuite("SokobanSolver", '-a' in args, '-v' in args, '-p' in args)
 try:
 	test_trivial_solutions()
 	test_obvious_solutions()
+	test_awkward_solutions()
 	test_takaken_solutions()
 	test_complex_solutions()
 	test_trivial_without_solutions()
 	test_algorithms_consistency()
-	test_reparent_dirty_propagation()
 	test_prepare_solution_without_plates()
 	test_prepare_solution_with_plate()
 	test_prepare_solution_char_filtering()
