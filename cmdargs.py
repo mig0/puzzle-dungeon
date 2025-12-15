@@ -31,9 +31,3 @@ if cmdargs_str == "''":
 	cmdargs_str = ""
 
 cmdargs = parser.parse_args(shlex.split(cmdargs_str))
-
-debug.configure(cmdargs.debug)
-
-if cmdargs.run_profiler:
-	profiler.start()
-	atexit.register(lambda: profiler.stop())

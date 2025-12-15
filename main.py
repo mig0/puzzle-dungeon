@@ -34,7 +34,7 @@ from translate import _, set_lang
 from mainscreen import main_screen_level
 from sokobanparser import parse_sokoban_levels
 from statusmessage import reset_status_messages, set_status_message, set_quick_status_message, draw_status_message
-from processcmdargs import parse_clipboard_levels
+from processcmdargs import process_cmdargs, parse_clipboard_levels
 
 signal.signal(signal.SIGINT, lambda signum, frame: print("\nInterrupted by user") or exit())
 
@@ -1045,7 +1045,8 @@ def init_new_level(level_id, reload_stored=False):
 	if not is_current_level and reload_stored:
 		die("Can't reload a non-current level")
 
-	if not is_current_level and not game.is_valid_level_id(level_id):
+	from collectiontools import is_valid_level_id
+	if not is_current_level and not is_valid_level_id(level_id):
 		die("Requested level id %s is invalid" % level_id)
 
 	if puzzle:
@@ -2046,69 +2047,21 @@ def undo_move():
 		play_sound('error')
 
 def handle_cmdargs():
-	if cmdargs.list_collections:
-		numeric = cmdargs.use_numeric
-		max_id_len = max(len(c.get_id(numeric)) for c in game.collections)
-		for collection in game.collections:
-			print("%s - %s levels (%d)" % (collection.get_id(numeric).ljust(max_id_len), collection.name, len(collection.level_configs)))
-		exit()
-	if cmdargs.list_ll_collections:
-		collections = fetch_letslogic_collections()
-		max_id_len = max(len(c_id) for c_id in collections)
-		for c_id, c in collections.items():
-			print("%s - %s (%d)" % (c_id.ljust(max_id_len), c['title'], c['levels']))
-		exit()
-
-	fallback_to_main_screen = True
-
-	game.set_custom_collection_config({
+	level_configs, game.custom_collection = process_cmdargs(cmdargs, {
 		"bg-image": cmdargs.bg_image,
 		"cloud-mode": cmdargs.cloud_mode,
 		"music": cmdargs.music,
 		"puzzle-type": cmdargs.puzzle_type,
-		"reverse-barrel-mode": cmdargs.reverse_barrel_mode,
 		"theme": cmdargs.theme,
 	})
-
-	if args := cmdargs.args:
-		level_configs = []
-		for arg in args:
-			if game.is_valid_level_id(arg):
-				collection, _, level_config = game.get_collection_level_config_by_id(arg)
-				level_configs.append(collection.with_level_config_defaults(level_config))
-			elif collection := game.get_collection_by_id(arg):
-				for level_config in collection.level_configs:
-					level_configs.append(collection.with_level_config_defaults(level_config))
-			elif arg == "clipboard:":
-				level_configs.extend(parse_clipboard_levels("clipboard:", game.custom_collection.config) or [])
-			elif arg.startswith("letslogic:"):
-				if map_string := fetch_letslogic_collection(arg[10:]):
-					level_configs.extend(parse_sokoban_levels(map_string, game.custom_collection.config))
-			elif map_info := detect_map_file(arg):
-				is_sokoban_map, error, puzzle_type, size = map_info
-				if is_sokoban_map:
-					level_configs.extend(parse_sokoban_levels(arg, game.custom_collection.config))
-					continue
-				if error:
-					warn("Ignoring map-file %s: Not a sokoban map and %s" % (arg, error))
-					continue
-				level_configs.append({
-					'puzzle-type': puzzle_type,
-					'map-size': size,
-					'map-file': arg,
-					'name': "%s map %s" % (puzzle_type, arg),
-				})
-			else:
-				warn("Ignoring unknown argument %s" % arg)
-		if level_configs:
-			if game.set_custom_collection_level_configs(level_configs):
-				fallback_to_main_screen = False
+	fallback_to_main_screen = not (level_configs and game.set_custom_collection_level_configs(level_configs))
 
 	if level_or_collection_id := cmdargs.start:
+		from collectiontools import is_valid_level_id, get_collection_by_id
 		level_id = None
-		if game.is_valid_level_id(level_or_collection_id):
+		if is_valid_level_id(level_or_collection_id):
 			level_id = level_or_collection_id
-		elif collection := game.get_collection_by_id(level_or_collection_id):
+		elif collection := get_collection_by_id(level_or_collection_id):
 			level_id = collection.get_level_id()
 		else:
 			warn("Ignoring unexisting level or collection '%s'" % level_or_collection_id)

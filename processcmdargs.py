@@ -117,7 +117,7 @@ def parse_map_string_levels(map_string, input_id_str, content_id_str, config={})
 		'puzzle-type': puzzle_type,
 		'map-size': size,
 		'map-string': map_string,
-		'name': f"%s map from {content_id_str}" % puzzle_type,
+		'name': f"{puzzle_type} map from {content_id_str}",
 		'bg-image': config.get('bg-image'),
 		'music': config.get('music'),
 		'theme': config.get('theme'),

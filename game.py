@@ -110,10 +110,10 @@ class Game:
 		self._set_display_size()
 		self.screen_size_fitting_display = None
 
-		self.collections = []
 		self.level = Level()
-		self._register_all_collections()
-		self._create_custom_collection()
+		from collectiontools import all_collections
+		self.collections = all_collections
+		self.custom_collection = None
 
 	def begin_char_move(self, char, dir):
 		char_move = self.last_char_move
@@ -260,97 +260,17 @@ class Game:
 		self.screen_size_fitting_display = (int(WIDTH / scale_factor), int(HEIGHT / scale_factor))
 
 	def set_requested_new_level(self, level_id=None, reload_stored=False):
+		from collectiontools import is_valid_level_id
 		if not level_id:
 			level_id = self.level.get_id()
-		if not self.is_valid_level_id(level_id):
+		if not is_valid_level_id(level_id):
 			return False
 		self.requested_new_level = (level_id, reload_stored)
 		return True
 
-	def _find_all_collections(self, dir_path, id, all_collections=None):
-		if all_collections is None:
-			all_collections = []
-
-		config_path = dir_path + '/config'
-		if os.path.isfile(config_path):
-			config = load_tabbed_yaml(config_path)
-			collection = Collection(id, config)
-			collections = []
-			sokoban_map_files_by_id = {}
-			if sokoban_map_files_by_sub_id := config.get('sokoban-map-files'):
-				del config['sokoban-map-files']
-				if type(sokoban_map_files_by_sub_id) == tuple:
-					sokoban_map_files_by_sub_id_tuple = sokoban_map_files_by_sub_id
-					width = len(str(len(sokoban_map_files_by_sub_id_tuple)))
-					sokoban_map_files_by_sub_id = {}
-					for i, sokoban_map_file in enumerate(sokoban_map_files_by_sub_id_tuple):
-						sub_id = "%0*d" % (width, i + 1)
-						sokoban_map_files_by_sub_id[sub_id] = sokoban_map_file
-				for sub_id, sokoban_map_file in sokoban_map_files_by_sub_id.items():
-					c = copy.copy(collection)
-					c.id += '/%s' % sub_id
-					c.name += ' - %s' % sub_id
-					collections.append(c)
-					sokoban_map_files_by_id[c.id] = sokoban_map_file
-			elif collection.level_configs is not None or config.get('sokoban-map-file'):
-				collections.append(collection)
-			for collection in collections:
-				if sokoban_map_file := config.get('sokoban-map-file') or sokoban_map_files_by_id.get(collection.id):
-					if 'sokoban-map-file' in config:
-						del config['sokoban-map-file']
-					collection.level_configs = parse_sokoban_levels(sokoban_map_file)
-				if collection.num_levels == 0:
-					warn("Ignoring collection %s with no levels" % collection.id)
-				else:
-					all_collections.append(collection)
-			if not collections:
-				warn("Ignoring collection %s with no levels and no sokoban-map-files" % collection.id)
-
-		with os.scandir(dir_path) as entries:
-			for entry in entries:
-				if entry.is_dir():
-					entry_id = id + ('/' if id else '') + entry.name
-					self._find_all_collections(dir_path + '/' + entry.name, entry_id, all_collections)
-
-		return all_collections
-
-	def _register_all_collections(self):
-		collections = self._find_all_collections(DATA_DIR + '/levels', '')
-
-		# assign unique integer 'n' with magic-n fill logic
-		def sort_collection_by_magic_n(c):
-			# None goes last; otherwise by magic_n numeric; tie-breaker by id
-			return (c.magic_n or 1000, c.id)
-
-		collections.sort(key=sort_collection_by_magic_n)
-
-		used_n = set()
-		next_n = 1
-
-		for collection in collections:
-			if collection.magic_n is not None and next_n < collection.magic_n:
-				next_n = collection.magic_n
-			while next_n in used_n:
-				next_n += 1
-			collection.n = next_n
-			used_n.add(next_n)
-			next_n += 1
-
-		self.collections = sorted(collections, key=lambda c: c.n)
-
-	def _create_custom_collection(self):
-		self.custom_collection_config = {
-			'icon': 'default/trap0',
-			'name': 'Custom collection',
-			'n': 0,
-		}
-		self.custom_collection = Collection("custom", self.custom_collection_config)
-
-	def set_custom_collection_config(self, config):
-		config |= self.custom_collection_config
-		self.custom_collection.config = config
-
 	def set_custom_collection_level_configs(self, level_configs):
+		if not self.custom_collection:
+			return False
 		num_levels0 = self.custom_collection.num_levels
 		self.custom_collection.level_configs = level_configs
 		num_levels1 = self.custom_collection.num_levels
@@ -362,25 +282,6 @@ class Game:
 			self.level.unset()
 			return True
 		return False
-
-	def get_collection_level_config_by_id(self, level_id, assert_valid=False):
-		collection_id, level_index = parse_level_id(level_id, assert_valid)
-		if not collection_id:
-			return (None, None, None)
-		collection = self.get_collection_by_id(collection_id)
-		if collection and 1 <= level_index <= collection.num_levels:
-			return collection, level_index, collection.level_configs[level_index - 1]
-		if assert_valid:
-			if not collection:
-				die("Unexisting collection for level_id %s" % level_id, True)
-			die("Level is out of range in collection for level_id %s" % level_id, True)
-		return (None, None, None)
-
-	def get_collection_by_id(self, collection_id):
-		try:
-			return next(c for c in self.collections if c.has_id(collection_id))
-		except:
-			return None
 
 	def get_adjacent_collection(self, offset, collection=None):
 		collection = collection or self.level.collection
@@ -430,12 +331,7 @@ class Game:
 		return collection.get_id() + collection.get_padded_level_index_suffix(level_index)
 
 	def set_level_id(self, level_id):
-		self.level.set_from_config(*self.get_collection_level_config_by_id(level_id, True))
-
-	def is_valid_level_id(self, level_id):
-		for collection in self.collections:
-			if collection.has_level_id(level_id):
-				return True
-		return False
+		from collectiontools import get_collection_level_config_by_id
+		self.level.set_from_config(*get_collection_level_config_by_id(level_id, True))
 
 game = Game()
