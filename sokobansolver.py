@@ -1017,6 +1017,22 @@ class SokobanSolver():
 		global solver
 		solver = self
 
+# modify map and barrel_cells in-place
+def reverse_barrel_map(map, barrel_cells):
+	size_x, size_y = map.shape
+	for cy in range(size_y):
+		for cx in range(size_x):
+			cell = cx, cy
+			is_plate = map[cell] == CELL_PLATE
+			is_barrel = cell in barrel_cells
+			if is_plate and not is_barrel:
+				map[cell] = CELL_FLOOR
+				barrel_cells.append(cell)
+			elif is_barrel and not is_plate:
+				map[cell] = CELL_PLATE
+				barrel_cells.remove(cell)
+	barrel_cells[:] = sort_cells(barrel_cells)
+
 def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False, limit_time=None):
 	char_cell = None
 	barrel_cells = []
@@ -1037,6 +1053,9 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 			else:
 				continue
 			map[cell] = CELL_PLATE if is_plate else CELL_FLOOR
+
+	if reverse_barrel_mode:
+		reverse_barrel_map(map, barrel_cells)
 
 	solver = SokobanSolver()
 	if limit_time:

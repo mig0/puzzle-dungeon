@@ -769,7 +769,7 @@ def test_solution(sok, unique_solution_str=False, solution_alg=None, return_firs
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
 		sok_id = sok[0] + ": " if sok[0][0].isalpha() else ''
-		test.eq(sok_id + solver.last_solution_nums_str, sok_id + optimal_solution_nums_strs_by_type[solution_type][sok])
+		test.eq(sok_id + str(solver.last_solution_nums_str), sok_id + optimal_solution_nums_strs_by_type[solution_type][sok])
 		if unique_solution_str:
 			test.eq(solver.last_solution_str, optimal_solution_strs_by_type[solution_type][sok])
 		else:
@@ -832,8 +832,8 @@ def test_trivial_without_solutions():
 	))
 
 def test_algorithms_consistency():
-	has_reverse_sol = [sok_obvious_03]
-	for sok in sok_trivial_h3, sok_obvious_03, sok_obvious_06, sok_awkward_04, sok_awkward_16, sok_awkward_19:
+	no_reverse_sol_soks = [sok_awkward_16]
+	for sok in sok_trivial_h3, sok_obvious_03, sok_obvious_06, sok_awkward_04, sok_awkward_16, sok_awkward_18:
 		for reverse_barrel_mode in False, True:
 			results = {}
 			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR:
@@ -841,8 +841,8 @@ def test_algorithms_consistency():
 				for typ in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
 					solver = create_solver(sok, reverse_barrel_mode, alg)
 					sol = solver.solve(typ)
-					exp_solution = not reverse_barrel_mode or sok in has_reverse_sol
-					test.ok(sol or not exp_solution, "No expected %s solution %s for %s by %s" % (
+					exp_no_solution = reverse_barrel_mode and sok in no_reverse_sol_soks
+					test.ok(sol or exp_no_solution, "No expected %s solution %s for %s by %s" % (
 						"reverse" if reverse_barrel_mode else "forward",
 						optimal_solution_nums_strs_by_type[typ][sok], alg,
 						"moves" if typ == SOLUTION_TYPE_BY_MOVES else "shifts"
