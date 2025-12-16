@@ -51,10 +51,10 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 			level_indexes.extend(range(int(arg[:sep_idx]), int(arg[sep_idx + 1:]) + 1))
 		elif is_valid_level_id(arg):
 			collection, _, level_config = get_collection_level_config_by_id(arg)
-			level_configs.append(collection.with_level_config_defaults(level_config))
+			level_configs.append(custom_collection.with_level_config_defaults(level_config))
 		elif collection := get_collection_by_id(arg):
 			for level_config in collection.level_configs:
-				level_configs.append(collection.with_level_config_defaults(level_config))
+				level_configs.append(custom_collection.with_level_config_defaults(level_config))
 		elif arg == "stdin:" or arg == "-":
 			level_configs.extend(parse_stdin_levels(arg, custom_collection.config) or [])
 		elif arg == "clipboard:":

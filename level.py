@@ -129,7 +129,7 @@ class Collection:
 	def with_level_config_defaults(self, level_config):
 		level_config = deepcopy(level_config)
 		for key in ('bg-image', 'cloud-mode', 'music', 'puzzle-type', 'reverse-barrel-mode', 'theme'):
-			if level_config.get(key) is None and self.config.get(key) is not None:
+			if self.config.get(key) is not None:
 				level_config[key] = self.config[key]
 		return level_config
 

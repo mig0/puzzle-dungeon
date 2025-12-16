@@ -25,7 +25,7 @@ parser.add_argument('-d', '--debug', metavar='SELECTOR', action='append', defaul
 parser.add_argument('-C', '--list-collections', help="list all collections", action='store_true')
 parser.add_argument('-L', '--list-ll-collections', help="list all letslogic collections", action='store_true')
 parser.add_argument('-n', '--use-numeric', help="use numeric ids to list collections", action='store_true')
-parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reverse barrel mode to custom levels", action='store_true')
+parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reverse barrel mode to custom levels", action='store_true', default=None)
 parser.add_argument('-p', '--run-profiler', help="run code with profiler", action='store_true')
 parser.add_argument('-s', '--show-sok', help="show map in sok format rather than internal", action='store_true')
 parser.add_argument('-m', '--by-moves', help="find move optimal solution, not push/pull optimal", action='store_true')
