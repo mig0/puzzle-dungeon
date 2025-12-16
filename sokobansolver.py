@@ -782,6 +782,8 @@ class SokobanSolver():
 		if self.disable_prepare:
 			return
 
+		grid.enable_shift_deadlocks = False
+
 		char_idx = grid.to_idx_or_none(char) if char else None
 		grid.barrel_bits = grid.no_bits
 		char_accessible_bits = grid.get_accessible_bits(char_idx) if char_idx else grid.all_bits
@@ -843,6 +845,7 @@ class SokobanSolver():
 
 		self.valid_shift_pairs = set(min_char_costs.keys())
 
+		grid.enable_shift_deadlocks = True
 		grid.barrel_bits = grid.no_bits.copy()
 
 		grid.dead_barrel_bits = ~grid.to_bits(min_costs.keys())

@@ -254,7 +254,7 @@ def test_push_pull_shift():
 	test_add_barrel_and_all_ops(grid, "pull", (2, 4), (3, 4), True)
 	test_add_barrel_and_all_ops(grid, "pull", (4, 1), (5, 1), True)
 	grid.set_barrels([(1, 3), (1, 5), (5, 5)])
-	test_add_barrel_and_all_ops(grid, "pull", (2, 4), (3, 4), True)  # no surrounding deadlock
+	test_add_barrel_and_all_ops(grid, "pull", (2, 4), (3, 4), False)  # surrounding deadlock
 	test_add_barrel_and_all_ops(grid, "pull", (4, 1), (5, 1), True)
 	test_add_barrel_and_all_ops(grid, "pull", (5, 4), (5, 3), False)  # blocking barrel
 	test_add_barrel_and_all_ops(grid, "pull", (5, 4), (5, 5), True)

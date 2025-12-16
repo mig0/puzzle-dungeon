@@ -96,6 +96,7 @@ class Grid:
 		self.all_bits = _ZEROBITS
 		self.no_bits = _ZEROBITS
 		# support concept of barrels
+		self.enable_shift_deadlocks = True
 		self.reverse_barrel_mode = False
 		self.barrel_bits = _ZEROBITS
 		self.orig_barrel_bits_stack = []
@@ -535,7 +536,7 @@ class Grid:
 			return None
 
 		# eliminate 2x2 deadlocks
-		if self.is_r_or_l_2x2_barrel_deadlock(new_barrel_cell, dir):
+		if self.enable_shift_deadlocks and self.is_r_or_l_2x2_barrel_deadlock(new_barrel_cell, dir):
 #			self.show_map(" ", char=char_cell, cell_colors={barrel_cell: COLOR_BRED, char_cell: COLOR_BYELLOW, new_barrel_cell: COLOR_BCYAN}, show_dead='color')
 			return None
 
@@ -559,7 +560,7 @@ class Grid:
 			return None
 
 		# eliminate locked-char deadlock
-		if False and self.is_surrounding_barrel_deadlock(new_char_cell, new_barrel_cell, dir):
+		if self.enable_shift_deadlocks and self.is_surrounding_barrel_deadlock(new_char_cell, new_barrel_cell, dir):
 			return None
 
 		return new_char_cell, new_barrel_cell
