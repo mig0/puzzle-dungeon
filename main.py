@@ -1280,10 +1280,9 @@ def draw():
 		return
 	if not game.screen:
 		game.screen = screen
-	screen.fill("#2f3542")
+	screen.fill("#383838")
 	if bg_image:
 		screen.blit(bg_image, (MAP_POS_X1, MAP_POS_Y1))
-	visible_barrels = get_revealed_actors(barrels)
 	visible_enemies = get_revealed_actors(enemies)
 
 	draw_map()
@@ -1294,7 +1293,7 @@ def draw():
 		lift.draw()
 	for drop in drops:
 		drop.draw_instances()
-	for barrel in visible_barrels:
+	for barrel in get_revealed_actors(barrels):
 		barrel.draw()
 	for enemy in killed_enemies:
 		enemy.draw()
