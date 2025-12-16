@@ -9,6 +9,7 @@ OBSTACLE_COST = None
 class BarrelPuzzle(Puzzle):
 	def init(self):
 		self.solver = SokobanSolver()
+		self.pre_solver_state = None
 
 	def assert_config(self):
 		return not flags.is_any_maze
@@ -486,6 +487,10 @@ class BarrelPuzzle(Puzzle):
 				solution.reset()
 			if not solution.is_active() and not solution.is_find_mode():
 				self.solver.solution_type = SOLUTION_TYPE_BY_MOVES if keyboard.shift else SOLUTION_TYPE_BY_SHIFTS
+		if keyboard.tab:
+			char.c = grid.idx_cells[self.solver.last_created_position.char_idx]
+			barrels.clear()
+			barrels.extend([create_barrel(grid.idx_cells[idx]) for idx in self.solver.last_created_position.super.barrel_idxs])
 
 	def on_enter_cell(self):
 		game.remember_obj_state(self)
@@ -503,9 +508,14 @@ class BarrelPuzzle(Puzzle):
 
 	def find_solution_func(self):
 		solution_items, msg = self.solver.find_solution_func(solution.stop_find)
+		if not msg:
+			char.c, orig_barrels = self.pre_solver_state
+			barrels.clear()
+			barrels.extend(orig_barrels)
 		return solution_items, (msg, self.barrel_spinner) if msg else None
 
 	def prepare_solution(self):
+		self.pre_solver_state = [char.c, barrels.copy()]
 		self.solver.configure(game.map, flags.is_reverse_barrel, char.c, tuple(self.get_room_barrel_cells()))
 		return ("Preparing to find solution", self.find_solution_func)
 
