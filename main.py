@@ -1502,7 +1502,7 @@ def handle_press_key():
 		set_theme("jewel")
 		return
 	if keyboard.f6:
-		set_theme("jewel")
+		set_theme("cargo")
 		return
 	if keyboard.f7:
 		set_theme("minecraft")

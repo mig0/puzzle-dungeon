@@ -162,7 +162,7 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 			levels.append({
 				"name": level_name or "No Name",
 				"bg-image": config.get('bg-image') or "bg/starry-sky.webp",
-				"theme": config.get('theme') or choice(["jewel", "stoneage1", "stoneage2", "stoneage3", "stoneage4", "stoneage5", "default", "modern1", "moss"]),
+				"theme": config.get('theme') or choice(["jewel", "cargo", "stoneage1", "stoneage5", "default", "modern1", "moss"]),
 				"music": config.get('music') or choice(["playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures"]) + ".mp3",
 				"map-size": map_size,
 				"map-string": map_string,
