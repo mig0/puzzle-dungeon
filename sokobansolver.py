@@ -7,7 +7,6 @@ from time import time
 from hungarian import Hungarian, INF
 import heapq
 import bisect
-import itertools
 
 MIN_SOLUTION_DEPTH = 5
 MAX_SOLUTION_DEPTH = 500
@@ -233,13 +232,9 @@ class SokobanSolver():
 		self.past_vus_cost_factor = 1  # 1 is for A*
 		self.improve_position = None
 		self.sort_positions = None
-		self._pq_counter = None
 		grid.reset()
 
 	def pq_push(self, position):
-		if self.sort_positions is None:
-			return
-
 		total_cost = self.sort_positions(position)
 		debug(DBG_SEVT, "PUT %d %s" % (position.id, cost_to_str(total_cost)))
 		key = cost_to_key(total_cost)
@@ -249,8 +244,8 @@ class SokobanSolver():
 			return
 		assert position.best_key is None or position.best_key > key
 
-		# tie-break by counter for stable ordering
-		entry = (key, next(self._pq_counter), position)
+		# tie-break by position id for stable ordering
+		entry = (key, position.id, position)
 		heapq.heappush(self.unprocessed_positions, entry)
 
 		position.best_key = key
@@ -950,7 +945,6 @@ class SokobanSolver():
 				self.sort_positions = lambda position: position.solution_cost
 			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
 				self.unprocessed_positions = []
-				self._pq_counter = itertools.count()
 				self.pq_push(self.initial_position)
 			elif self.solution_alg == SOLUTION_ALG_BFS:
 				self.unprocessed_positions = self.BFSFrontier(self.solution_type == SOLUTION_TYPE_BY_MOVES)
