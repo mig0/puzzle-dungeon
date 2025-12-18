@@ -11,6 +11,7 @@ def _is_windows_cmd():
 
 USE_COLORS = sys.stdout.isatty() and not os.environ.get('NO_COLOR') and not _is_windows_cmd()
 
+COLOR_NONE      = ""
 COLOR_BOLD      = "1"
 COLOR_DIM       = "2"
 COLOR_ITALIC    = "3"
