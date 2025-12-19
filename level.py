@@ -28,11 +28,11 @@ class Level:
 
 		# reset all fields to defaults
 		self.actors_always_revealed = False
-		self.bg_image = collection.config.get('bg-image') or None
+		self.bg_image = None
 		self.bg_image_crop = False
 		self.char_health = None
 		self.char_power = None
-		self.cloud_mode = collection.config.get('cloud-mode') or False
+		self.cloud_mode = False
 		self.disable_win = False
 		self.enemy_key_drop = False
 		self.four_rooms = False
@@ -43,26 +43,24 @@ class Level:
 		self.map_file = None
 		self.map_size = None
 		self.map_string = None
-		self.music = collection.config.get('music') or "valiant_warriors"
+		self.music = "valiant_warriors"
 		self.name = None
 		self.nine_rooms = False
 		self.num_enemies = DEFAULT_NUM_ENEMIES
 		self.grid_maze = False
 		self.random_maze = False
 		self.spiral_maze = False
-		self.puzzle_type = collection.config.get('puzzle-type') or 'Puzzle'
+		self.puzzle_type = 'Puzzle'
 		self.puzzle_config = {}
-		self.reverse_barrel_mode = collection.config.get('reverse-barrel-mode') or False
+		self.reverse_barrel_mode = False
 		self.stopless = False
-		self.theme = collection.config.get('theme') or "default"
+		self.theme = "default"
 		self.time_limit = None
 		self.title = None
 		self.use_clock = False
 
 		# apply config fields
 		for key, value in config.items():
-			if value is None and key in special_config_keys:
-				continue
 			field = key.replace("-", "_")
 			if hasattr(self, field):
 				default = getattr(self, field)
@@ -103,7 +101,9 @@ class Collection:
 		self.magic_n = config.get('magic-n', None)
 		self.n = config.get('n')
 
-		self.level_configs = config.get('levels', None)
+		level_configs = config.get('levels')
+		self.level_configs = tuple(self.with_level_config_defaults(level_config)
+			for level_config in level_configs) if level_configs else None
 
 	@property
 	def num_levels(self):
