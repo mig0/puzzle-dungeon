@@ -85,7 +85,7 @@ for position in root.findall("scenario/position"):
 	atom_id_scen_cells[atom_id] = ('??', '??') if atom_id in atom_id_scen_cells else (x, y)
 
 if args.map_mode or info_mode:
-	print("# Dungeon Atomix %s map %dx%d" % (level_name, len(map[0]), len(map)))
+	print("# Dungeon AtomixPuzzle %s map %dx%d" % (level_name, len(map[0]), len(map)))
 	for y in range(len(map)):
 		for x in range(len(map[y])):
 			print(map[y][x], end='')

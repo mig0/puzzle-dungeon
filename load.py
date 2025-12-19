@@ -64,8 +64,8 @@ def parse_map_file_signature(file):
 	if len(words) <= 4:
 		return "Invalid signature line, no expected puzzle-type and size", None, None
 	puzzle_type = words[2]
-#	if not puzzle_type.endswith("Puzzle"):
-#		return "Invalid signature line, invalid puzzle-type %s" % puzzle_type, None, None
+	if not puzzle_type.endswith("Puzzle"):
+		return "Invalid signature line, invalid puzzle-type %s" % puzzle_type, None, None
 	size_str = words[-1].rstrip("\n")
 	sizes = size_str.split("x")
 	if len(sizes) != 2 or not sizes[0].isdigit() or not sizes[1].isdigit():
