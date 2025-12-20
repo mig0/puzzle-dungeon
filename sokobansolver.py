@@ -118,9 +118,9 @@ class Position:
 		self.children.append(child)
 
 	def remove_from_parent(self):
-		if self.parent:
-			self.parent.children.remove(self)
-			self.parent = None
+		assert self.parent, "Bug in Position, remove_from_parent without parent"
+		self.parent.children.remove(self)
+		self.parent = None
 
 	def reparent(self, parent, own_nums, segments):
 		assert parent, "Bug in Position, parent is None"
@@ -193,9 +193,12 @@ class Position:
 			self._persistent_id = "%d:%s%s" % (self.char_idx, ','.join(map(str, self.super.barrel_idxs)), '+' if self.is_solved else '')
 		return self._persistent_id
 
+	def show(self):
+		grid.show_map(descr="Posision %s" % self, barrels=self.super.barrel_idxs, char=self.char_idx, idx_colors={self.segments[-1][1]: 1}, show_dead="color")
+
 	def __str__(self):
 		if self._str is None:
-			self._str = "{◰[%d] %s ☻%s ■%s}" % (self.depth, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
+			self._str = "{◰[%d] %d %s ☻%s ■%s}" % (self.depth, self.id, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
 		return self._str
 
 class SokobanSolver():
