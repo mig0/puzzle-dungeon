@@ -644,6 +644,19 @@ sok_complex_03 = (
 	'#################',
 )
 
+sok_complex_04 = (
+	'Microban 65',
+	'  ######',
+	'  #    #',
+	'  #  $ #',
+	' ####$ #',
+	'## $ $ #',
+	'#....# ##',
+	'#     @ #',
+	'##  #   #',
+	' ########',
+)
+
 optimal_solution_nums_strs = {
 	sok_trivial_h1: '1/1',
 	sok_trivial_h2: '1/1',
@@ -704,6 +717,7 @@ optimal_solution_nums_strs = {
 	sok_complex_01: '144/38',
 	sok_complex_02: '183/58',
 	sok_complex_03: '211/82',
+	sok_complex_04: ('140/41', '138/45'),
 }
 
 optimal_solution_nums_strs_by_type = {
@@ -739,6 +753,7 @@ optimal_solution_strs = {
 	sok_complex_01: 'dDuurrddLLrrddLLUlluuRDRddrruuLLrruullDlldddRRuULrrruullDldRddlUruuurrddddLLuuRlddrruUUdlldlldRRuuulDrddlluRurrrddLLUluRRlddrruUllldldRRRluuullD',
 	sok_complex_02: 'ullDDDrrddlULLdlluRRRRluuuulllddRRluurrdDDRddrruuLLdLUUUdlluurRRurrdLLLLrdddrddrUruLLdlLdlluRRRUUUdlluluurDrRRurrdLLLLrdddrrddlUruLdlUUUdllluuurrdLrRddllUdrruuRurrddlUruLdlllullDRddlU',
 	sok_complex_03: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
+	sok_complex_04: ('uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRurDDullddrdrruLuuuuulDulldRRDrdddLLuuRurDDulllldddrUrrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU', 'uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRuruulDulldRRDrDDuLLddrdrruLLLullddrUluuRRRurDDullddrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU')
 }
 
 optimal_solution_strs_by_type = {
@@ -799,7 +814,7 @@ def test_takaken_solutions():
 		test_solution(sok)
 
 def test_complex_solutions():
-	for sok in sok_complex_01, sok_complex_02, sok_complex_03:
+	for sok in sok_complex_01, sok_complex_02, sok_complex_03, sok_complex_04:
 		test_solution(sok, False, SOLUTION_ALG_ASTAR, True)
 
 def test_trivial_without_solutions():
