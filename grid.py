@@ -179,7 +179,7 @@ class Grid:
 			self.all_passable_neigh_bits.append(self.to_bits(passable_neigh_idxs))
 			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
 
-	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, show_dead=False, extra_cb=None):
+	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, extra_cb=None):
 		if descr:
 			print(descr)
 		char_cell = self.to_cell(char) if char else None
@@ -190,6 +190,8 @@ class Grid:
 		if show_dead == 'color':
 			cell_colors = (cell_colors or {}) | {cell: COLOR_RED for cell in self.to_cells(self.dead_barrel_bits)}
 			show_dead = False
+		if idx_colors:
+			cell_colors = (cell_colors or {}) | {self.to_cell(idx): color for idx, color in idx_colors.items()}
 		def get_cell_type_with_clean_floor(cell):
 			return CELL_FLOOR if clean and self.map[cell] in CELL_FLOOR_TYPES else self.map[cell]
 		for cy in range(self.size_y):
