@@ -56,7 +56,6 @@ class SuperPosition:
 			if position.cmp(new_total_nums) > 0:
 				position.reparent(parent, own_nums, segments)
 				debug([position.depth], DBG_SOLV3, "Position already seen, but new path %s is better" % position.nums_str)
-				debug(DBG_SEVT, "REP %d %d %s" % (position.id, parent.id, position.nums_str))
 			else:
 				debug([position.depth], DBG_SOLV3, "Position already seen, and no improvement")
 
@@ -71,6 +70,8 @@ class SuperPosition:
 
 class Position:
 	def __init__(self, super, char_idx, parent, own_nums, segments):
+		solver.num_created_positions += 1
+		self.id = solver.num_created_positions
 		self.super = super
 		self.char_idx = char_idx
 		self.parent = parent
@@ -89,11 +90,10 @@ class Position:
 		self._segments_str = None
 		self._persistent_id = None
 		self.children = []
+		self.child_edges = {}  # used for A* only
 		self.is_expanded = False
 		self.is_fully_processed = False
 		self.best_key = None  # used in heap
-		solver.num_created_positions += 1
-		self.id = solver.num_created_positions
 		solver.last_created_position = self
 		if self.depth > solver.max_created_depth:
 			solver.max_created_depth = self.depth
@@ -131,6 +131,15 @@ class Position:
 		self.own_nums = own_nums
 		self.segments = segments
 		self.recalc_nums_down()
+		debug(DBG_SEVT, "REP %d %d %s" % (self.id, parent.id, self.nums_str))
+		self.relax_child_edges()
+
+	def relax_child_edges(self):
+		for child, child_info in self.child_edges.items():
+			if child.parent != self:
+				own_nums, segments = child_info
+				if child.cmp(apply_diff(self.total_nums, own_nums)) > 0:
+					child.reparent(self, own_nums, segments)
 
 	def calc_nums(self):
 		self.depth = self.parent.depth + 1
@@ -195,6 +204,9 @@ class Position:
 
 	def show(self):
 		grid.show_map(descr="Posision %s" % self, barrels=self.super.barrel_idxs, char=self.char_idx, idx_colors={self.segments[-1][1]: 1}, show_dead="color")
+
+	def __hash__(self):
+		return self.id
 
 	def __str__(self):
 		if self._str is None:
@@ -522,10 +534,11 @@ class SokobanSolver():
 
 		child = super_position.get_or_reparent_or_create_position(new_char_idx, position, own_nums, segments)
 
-		return child
+		return (child, own_nums, segments)
 
 	def expand_position(self, position):
 		if position.is_expanded:
+			position.relax_child_edges()
 			return
 
 		debug([position.depth], DBG_SOLV2, "%s" % position.segments_str)
@@ -536,7 +549,10 @@ class SokobanSolver():
 			assert distance is not None, "Bug in find_solution algorithm: no char path"
 			segments = [(distance, char_idx, barrel_idx), *rest_segments]
 
-			self.create_child_position_or_reparent_if_better(position, segments)
+			child_edge = self.create_child_position_or_reparent_if_better(position, segments)
+			if child_edge and self.solution_alg == SOLUTION_ALG_ASTAR:
+				child, *edge = child_edge
+				position.child_edges[child] = edge
 
 		position.is_expanded = True
 
