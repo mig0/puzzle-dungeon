@@ -7,7 +7,7 @@ levels:
 	map-file: mirror/simple-barrels.map
 	name: Simple Barrels with Mirrors
 	num-enemies: 0
-	theme: classic
+	theme: jewel
 	music: gaming_spirit
 	char-health: null
 	puzzle-config: {}
@@ -23,7 +23,7 @@ levels:
 	map-file: mirror/hike.map
 	name: Hike
 	num-enemies: 0
-	theme: default
+	theme: cargo
 	music: gaming_spirit
 	char-health: null
 	puzzle-config: {}
