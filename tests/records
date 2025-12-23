@@ -28,26 +28,26 @@ def test_parse_single_costs():
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=False)
 
-	test.eq(r.push_records, [(48, 16), (10, 5), (99, 33)])
 	test.eq(r.move_records, [(48, 16), (10, 5), (99, 33)])
+	test.eq(r.push_records, [(48, 16), (10, 5), (99, 33)])
 	test.eq(r.level_ids, ["1", "2", "3"])
 
 def test_parse_dual_costs():
 	write_file([
-		"48/16  47/17",
-		"20/10  19/9",
+		"47/17 48/16",
+		"19/9  20/10",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=False)
 
-	test.eq(r.push_records, [(48, 16), (20, 10)])
 	test.eq(r.move_records, [(47, 17), (19, 9)])
+	test.eq(r.push_records, [(48, 16), (20, 10)])
 	test.eq(r.level_ids, [None, None])
 
 def test_parse_with_empty_and_comment_lines():
 	write_file([
 		"# This is example records file",
 		"",
-		" 10/5  15/10 ",
+		" 15/10  10/5 ",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=True)
 
@@ -55,7 +55,7 @@ def test_parse_with_empty_and_comment_lines():
 
 def test_parse_invalid_line():
 	write_file([
-		"1\t48/16 47/17 99/33",
+		"1\t47/17 48/16 99/33",
 	])
 	test.catch(lambda: CollectionRecords(TEST_FILE))
 
@@ -89,8 +89,8 @@ def test_cmp_level_result_single_costs():
 
 def test_cmp_level_result_dual_costs():
 	write_file([
-		"1\t11/5 10/6",
-		"1\t13/3 12/7",
+		"1\t10/6 11/5",
+		"1\t12/7 13/3",
 	])
 
 	r = CollectionRecords(TEST_FILE, by_moves=False)
@@ -161,8 +161,8 @@ def test_update_file_push_mode_with_update():
 
 def test_update_file_move_mode_with_update():
 	write_file([
-		"1\t10/5  8/4",
-		"2\t30/8 29/9",
+		"1\t8/4  10/5",
+		"2\t29/9 30/8",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=True)
 
@@ -179,9 +179,9 @@ def test_update_file_move_mode_with_update():
 
 def test_update_file_partial_update():
 	write_file([
-		"1\t10/5  8/5",
-		"2\t30/10 29/9",
-		"3\t40/20 35/10",
+		"1\t8/5  10/5",
+		"2\t29/9  30/10",
+		"3\t35/10  40/20",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=True)
 
@@ -198,7 +198,7 @@ def test_update_file_partial_update():
 
 def test_record_strs_and_result_strs():
 	write_file([
-		"1\t10/5  9/5",
+		"1\t9/5 10/5",
 		"2\t20/10",
 	])
 	r = CollectionRecords(TEST_FILE)

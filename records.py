@@ -28,11 +28,12 @@ class CollectionRecords:
 
 	Properties:
 	  - record_strs      → list of "A/B", depending on by_moves
-	  - push_record_strs → list of "A/B"
 	  - move_record_strs → list of "A/B"
+	  - push_record_strs → list of "A/B"
 	  - result_strs      → list of "A/B"
-	  - push_records → list of cost (num_moves, num_shifts)
+	  - records      → list of cost (num_moves, num_shifts)
 	  - move_records → list of cost (num_moves, num_shifts)
+	  - push_records → list of cost (num_moves, num_shifts)
 	  - results      → list of cost (num_moves, num_shifts)
 	  - next_result_idx
 	  - level_ids
@@ -48,8 +49,8 @@ class CollectionRecords:
 		self.by_moves = by_moves
 		self.def_level_ids = def_level_ids
 
-		self.push_records = []  # list of (moves, pushes)
 		self.move_records = []  # list of (moves, pushes)
+		self.push_records = []  # list of (moves, pushes)
 		self.level_ids = []     # keep original left column for rewrite
 		self.results = []       # keep reported results
 		self.next_result_idx = 0  # counter for iterative interface
@@ -64,8 +65,8 @@ class CollectionRecords:
 		self.level_ids.append(level_id if level_id is not None else f"Level {len(self.level_ids) + 1}" if self.def_level_ids else None)
 		if cost2 is None:
 			cost2 = cost1
-		self.push_records.append(cost1)
-		self.move_records.append(cost2)
+		self.move_records.append(cost1)
+		self.push_records.append(cost2)
 
 	def _update_record(self, i, result):
 		records = self.move_records if self.by_moves else self.push_records
@@ -103,16 +104,16 @@ class CollectionRecords:
 		return [f"{cost[0]}/{cost[1]}" if cost else None for cost in costs]
 
 	@property
-	def push_record_strs(self):
-		return self.get_cost_strs(self.push_records)
+	def record_strs(self):
+		return self.get_cost_strs(self.records)
 
 	@property
 	def move_record_strs(self):
 		return self.get_cost_strs(self.move_records)
 
 	@property
-	def record_strs(self):
-		return self.get_cost_strs(self.records)
+	def push_record_strs(self):
+		return self.get_cost_strs(self.push_records)
 
 	@property
 	def result_strs(self):
@@ -178,7 +179,7 @@ class CollectionRecords:
 		"""
 
 		lines = []
-		for level_id, cost1, cost2 in zip(self.level_ids, self.push_records, self.move_records):
+		for level_id, cost1, cost2 in zip(self.level_ids, self.move_records, self.push_records):
 			if cost1 is None:
 				cost_str = "1000000/1000000"
 			elif cost1 == cost2:
