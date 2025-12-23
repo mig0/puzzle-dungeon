@@ -94,6 +94,8 @@ class CollectionRecords:
 					self._append_record(level_id, _parse_cost_str(parts[0]))
 				elif len(parts) == 2:
 					self._append_record(level_id, _parse_cost_str(parts[0]), _parse_cost_str(parts[1]))
+				elif line == "" or line.startswith("#"):
+					pass  # ignore empty or comment line
 				else:
 					raise RecordsParseError(f"Invalid cost format at line {line_no}: {cost_str}")
 

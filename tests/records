@@ -24,7 +24,7 @@ def test_parse_single_costs():
 	write_file([
 		"1\t48/16",
 		"2\t10/5",
-		"3\t99/33"
+		"3\t99/33",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=False)
 
@@ -35,7 +35,7 @@ def test_parse_single_costs():
 def test_parse_dual_costs():
 	write_file([
 		"48/16  47/17",
-		"20/10  19/9"
+		"20/10  19/9",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=False)
 
@@ -43,9 +43,19 @@ def test_parse_dual_costs():
 	test.eq(r.move_records, [(47, 17), (19, 9)])
 	test.eq(r.level_ids, [None, None])
 
+def test_parse_with_empty_and_comment_lines():
+	write_file([
+		"# This is example records file",
+		"",
+		" 10/5  15/10 ",
+	])
+	r = CollectionRecords(TEST_FILE, by_moves=True)
+
+	test.eq(r.records, [(15, 10)])
+
 def test_parse_invalid_line():
 	write_file([
-		"1\t48/16 47/17 99/33"
+		"1\t48/16 47/17 99/33",
 	])
 	test.catch(lambda: CollectionRecords(TEST_FILE))
 
@@ -102,7 +112,7 @@ def test_cmp_sequential_updates_indices():
 	write_file([
 		"1\t10/5",
 		"2\t30/10",
-		"3\t40/20"
+		"3\t40/20",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=False)
 
@@ -122,7 +132,7 @@ def test_cmp_sequential_updates_indices():
 def test_update_file_push_mode_no_update():
 	write_file([
 		"1\t10/5",
-		"2\t30/10"
+		"2\t30/10",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=False)
 
@@ -205,6 +215,7 @@ test = TestSuite("records")
 
 test_parse_single_costs()
 test_parse_dual_costs()
+test_parse_with_empty_and_comment_lines()
 test_parse_invalid_line()
 test_parse_missing_file()
 test_cmp_level_result_single_costs()
