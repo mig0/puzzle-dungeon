@@ -245,6 +245,7 @@ class SokobanSolver():
 			self.num_found_solved_positions = 0
 			self.num_costy_solved_bound_positions = 0
 		self.past_vus_cost_factor = 1  # 1 is for A*
+		self.use_relax_child_edges = False
 		self.improve_position = None
 		self.sort_positions = None
 		grid.reset()
@@ -550,7 +551,7 @@ class SokobanSolver():
 			segments = [(distance, char_idx, barrel_idx), *rest_segments]
 
 			child_edge = self.create_child_position_or_reparent_if_better(position, segments)
-			if child_edge and self.solution_alg == SOLUTION_ALG_ASTAR:
+			if child_edge and self.use_relax_child_edges:
 				child, *edge = child_edge
 				position.child_edges[child] = edge
 
@@ -962,6 +963,7 @@ class SokobanSolver():
 				self.sort_positions = lambda position: position.solution_cost
 			if self.solution_alg == SOLUTION_ALG_ASTAR:
 				self.sort_positions = lambda position: position.solution_cost
+				self.use_relax_child_edges = True
 			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
 				self.unprocessed_positions = []
 				self.pq_push(self.initial_position)
@@ -978,6 +980,7 @@ class SokobanSolver():
 				self.improve_position = improve_position
 			elif self.solution_alg == SOLUTION_ALG_BFS and self.solution_type == SOLUTION_TYPE_BY_MOVES:
 				self.improve_position = lambda position: self.unprocessed_positions.insert(position)
+				self.use_relax_child_edges = True
 
 			return None, self.get_find_solution_status_str()
 
