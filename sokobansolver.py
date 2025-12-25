@@ -282,6 +282,12 @@ class SokobanSolver():
 
 		return None
 
+	def get_min_position_cost(self, barrel_idxs):
+		total_cost = (0, 0)
+		for barrel_idx in barrel_idxs:
+			total_cost = apply_diff(total_cost, self.min_target_costs[barrel_idx])
+		return total_cost
+
 	def is_barrel_matching_found(self, barrel_idxs):
 		if not self.is_barrel_mismatch_possible:
 			return True
@@ -592,14 +598,17 @@ class SokobanSolver():
 			return None if self.return_first else True
 
 		if self.solved_position:
+			assert not self.return_first
+			# TODO: think when to use: min_nums = position.total_nums
+			min_nums = self.get_min_position_cost(position.super.barrel_idxs)
 			min_cost = self.get_min_solution_cost(position.super.barrel_idxs)
 			assert min_cost
-			total_cost = apply_diff(position.total_nums, min_cost)
+			total_cost = apply_diff(min_nums, min_cost)
 			if self.solved_position.cmp(total_cost) <= 0:
 				if debug.has(DBG_PRUN):
 					self.num_costy_solved_bound_positions += 1
 				debug([depth], DBG_SOLV2, "Pruning position by solution lower bound")
-				debug(DBG_SEVT, "PRN %s by-lower-bound %s %s %s" % (position.id, *map(cost_to_str, [position.total_nums, min_cost, total_cost])))
+				debug(DBG_SEVT, "PRN %s by-lower-bound %s %s %s" % (position.id, *map(cost_to_str, [min_nums, min_cost, total_cost])))
 				position.cut_down()
 				return True
 
@@ -780,6 +789,60 @@ class SokobanSolver():
 		self.hungarian = Hungarian(len(self.barrel_idxs), grid.num_plates)
 		return True
 
+	def expand_barrel_costs(self, min_char_costs, min_costs, start_idx, is_reverse):
+		grid_try_shift = grid.try_opposite_shift if is_reverse else grid.try_shift
+		min_plate_char_costs = {}
+		min_plate_costs = {}
+
+		depth = 0
+		min_costs[start_idx] = (0, 0)
+		min_plate_costs[start_idx] = (0, 0)
+		unprocessed = []
+		for char_idx in grid.all_passable_neigh_idxs[start_idx]:
+			min_char_costs[(char_idx, start_idx)] = (0, 0)
+			min_plate_char_costs[(char_idx, start_idx)] = (0, 0)
+			unprocessed.append((char_idx, start_idx, 0))
+
+		while unprocessed:
+			depth += 1
+			next_unprocessed = []
+
+			for last_char_idx, barrel_idx, last_dist in unprocessed:
+				grid.barrel_bits = grid.to_bit(barrel_idx)
+				accessible_bits = grid.get_accessible_bits(last_char_idx)
+
+				for char_idx in grid.all_passable_neigh_idxs[barrel_idx]:
+					if not accessible_bits[char_idx]:
+						continue
+
+					new_cells = grid_try_shift(grid.idx_cells[char_idx], grid.idx_cells[barrel_idx])
+					if not new_cells:
+						continue
+
+					new_idxs = grid.to_idxs(new_cells)
+					own_dist = grid.get_accessible_distance(char_idx, last_char_idx)
+					new_dist = last_dist + own_dist + 1
+					cost = (new_dist, depth)
+					new_barrel_idx = new_idxs[1]
+
+					was_improved = False
+					if new_idxs not in min_char_costs or cmp_costs(min_char_costs[new_idxs], cost) > 0:
+						min_char_costs[new_idxs] = cost
+						if new_barrel_idx not in min_costs or cmp_costs(min_costs[new_barrel_idx], cost) > 0:
+							min_costs[new_barrel_idx] = cost
+						was_improved = True
+					if new_idxs not in min_plate_char_costs or cmp_costs(min_plate_char_costs[new_idxs], cost) > 0:
+						min_plate_char_costs[new_idxs] = cost
+						if new_barrel_idx not in min_plate_costs or cmp_costs(min_plate_costs[new_barrel_idx], cost) > 0:
+							min_plate_costs[new_barrel_idx] = cost
+						was_improved = True
+					if was_improved:
+						next_unprocessed.append(new_idxs + (new_dist,))
+
+			unprocessed = next_unprocessed
+
+		return min_plate_char_costs, min_plate_costs
+
 	def prepare_solution(self, char=None):
 		self.min_char_barrel_costs = min_char_costs = {}
 		self.min_barrel_costs = min_costs = {}
@@ -788,6 +851,8 @@ class SokobanSolver():
 		self.valid_shift_pairs = None
 		self.accessible_barrel_plate_idxs = {}
 		self.is_barrel_mismatch_possible = False
+		self.min_char_target_costs = {}
+		self.min_target_costs = {}
 
 		if grid.plate_bits == grid.no_bits:
 			grid.dead_barrel_bits = grid.all_bits
@@ -803,60 +868,12 @@ class SokobanSolver():
 		grid.barrel_bits = grid.no_bits
 		char_accessible_bits = grid.get_accessible_bits(char_idx) if char_idx else grid.all_bits
 
-		# run BFS separately for each plate to compute distances from that plate
+		# run BFS separately for each plate to compute costs to that plate
 		for plate_idx in search_bits(grid.plate_bits, _ONE):
 			if not char_accessible_bits[plate_idx]:
 				continue
-			plate_cell = grid.to_cell(plate_idx)
-			self.min_plate_barrel_costs[plate_idx] = min_plate_costs = {}
-			self.min_plate_char_barrel_costs[plate_idx] = min_plate_char_costs = {}
-
-			depth = 0
-			min_costs[plate_idx] = (0, 0)
-			min_plate_costs[plate_idx] = (0, 0)
-			unprocessed = []
-			for char_idx in grid.all_passable_neigh_idxs[plate_idx]:
-				min_char_costs[(char_idx, plate_idx)] = (0, 0)
-				min_plate_char_costs[(char_idx, plate_idx)] = (0, 0)
-				unprocessed.append((char_idx, plate_idx, 0))
-
-			while unprocessed:
-				depth += 1
-				next_unprocessed = []
-
-				for last_char_idx, barrel_idx, last_dist in unprocessed:
-					grid.barrel_bits = grid.to_bit(barrel_idx)
-					accessible_bits = grid.get_accessible_bits(last_char_idx)
-
-					for char_idx in grid.all_passable_neigh_idxs[barrel_idx]:
-						if not accessible_bits[char_idx]:
-							continue
-
-						new_cells = grid.try_opposite_shift(grid.idx_cells[char_idx], grid.idx_cells[barrel_idx])
-						if not new_cells:
-							continue
-
-						new_idxs = grid.to_idxs(new_cells)
-						own_dist = grid.get_accessible_distance(char_idx, last_char_idx)
-						new_dist = last_dist + own_dist + 1
-						cost = (new_dist, depth)
-						new_barrel_idx = new_idxs[1]
-
-						was_improved = False
-						if new_idxs not in min_char_costs or cmp_costs(min_char_costs[new_idxs], cost) > 0:
-							min_char_costs[new_idxs] = cost
-							if new_barrel_idx not in min_costs or cmp_costs(min_costs[new_barrel_idx], cost) > 0:
-								min_costs[new_barrel_idx] = cost
-							was_improved = True
-						if new_idxs not in min_plate_char_costs or cmp_costs(min_plate_char_costs[new_idxs], cost) > 0:
-							min_plate_char_costs[new_idxs] = cost
-							if new_barrel_idx not in min_plate_costs or cmp_costs(min_plate_costs[new_barrel_idx], cost) > 0:
-								min_plate_costs[new_barrel_idx] = cost
-							was_improved = True
-						if was_improved:
-							next_unprocessed.append(new_idxs + (new_dist,))
-
-				unprocessed = next_unprocessed
+			self.min_plate_char_barrel_costs[plate_idx], self.min_plate_barrel_costs[plate_idx] = \
+				self.expand_barrel_costs(min_char_costs, min_costs, plate_idx, True)
 
 		self.valid_shift_pairs = set(min_char_costs.keys())
 
@@ -872,6 +889,12 @@ class SokobanSolver():
 			accessible_plate_idxs = [plate_idx for plate_idx in grid.plate_idxs if barrel_idx in self.min_plate_barrel_costs.get(plate_idx, {})]
 			self.accessible_barrel_plate_idxs[barrel_idx] = accessible_plate_idxs
 			self.is_barrel_mismatch_possible |= len(accessible_plate_idxs) < grid.num_plates
+
+		# run BFS separately for each barrel to compute costs from that barrel
+		for barrel_idx in grid.to_idxs_or_none(self.barrel_cells):
+			if self.return_first or not barrel_idx or not char_accessible_bits[barrel_idx]:
+				continue
+			self.expand_barrel_costs(self.min_char_target_costs, self.min_target_costs, barrel_idx, False)
 
 		if debug.has("precosts"):
 			def idx_costs_to_str(d):
@@ -958,6 +981,7 @@ class SokobanSolver():
 				self.solution_depth = self.estimate_solution_depth()
 			if self.solution_alg == SOLUTION_ALG_UCS:
 				self.sort_positions = lambda position: position.total_nums
+				self.return_first = True
 			if self.solution_alg == SOLUTION_ALG_GREED:
 				self.past_vus_cost_factor = (0.82, 1.22)
 				self.sort_positions = lambda position: position.solution_cost
