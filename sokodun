@@ -40,7 +40,7 @@ parser.add_argument('-1', '--return-first', help="return first found solution (n
 parser.add_argument('-x', '--show-dead', help="show dead-barrel cells on map", action='store_true')
 parser.add_argument('-t', '--show-time', help="show solution time in seconds", action='store_true')
 parser.add_argument('-T', '--limit-time', help="limit solution time to given seconds", metavar='SEC', action='store')
-parser.add_argument('-R', '--record-file', help="compare to record file", metavar='FILE', action='store')
+parser.add_argument('-R', '--record-file', help='compare with records; "." (in-level), "" (disable)', metavar='FILE', action='store')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
 parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file")
 
@@ -84,6 +84,10 @@ def create_solver(map_string, reverse_barrel_mode=False):
 
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
+
+record_key = "move-record" if cmdargs.by_moves else "push-record"
+if record_filename == '.' or record_filename is None and any(level_config["puzzle-config"].get(record_key) for level_config in level_configs):
+	record_filename = [level_config["puzzle-config"].get(record_key) for level_config in level_configs]
 
 coll_records = CollectionRecords(record_filename, cmdargs.by_moves) if record_filename else None
 
