@@ -326,6 +326,10 @@ def get_ll_sokoban_level_string(config, ll_coll_title):
 	string += "Title: %s\n" % config['title']
 	string += "Collection: %s\n" % ll_coll_title
 	string += "Author: %s\n" % config['author']
+	if "blue_pushes" in config:
+		string += "Move-Record: %d/%d\n" % (config["blue_moves"], config["blue_pushes"])
+	if "green_pushes" in config:
+		string += "Push-Record: %d/%d\n" % (config["green_moves"], config["green_pushes"])
 	return string
 
 def fetch_letslogic_collection(ll_coll_id):

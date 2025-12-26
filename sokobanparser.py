@@ -148,6 +148,8 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 	level_name = None
 	is_pre_level_name = False
 	pre_level_name = None
+	move_record = None
+	push_record = None
 	while True:
 		line = file.readline()
 		is_eof = line == ''
@@ -159,6 +161,9 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 
 		if is_eof and map_lines or map_lines and not old_is_in_map and is_in_map:
 			map_size, map_string = create_map_string(map_lines)
+			puzzle_config = {}
+			if move_record: puzzle_config["move-record"] = move_record
+			if push_record: puzzle_config["push-record"] = push_record
 			levels.append({
 				"name": level_name or "No Name",
 				"bg-image": config.get('bg-image') or "bg/starry-sky.webp",
@@ -169,7 +174,7 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 				"num-enemies": 0,
 				"char-health": None,
 				"puzzle-type": "BarrelPuzzle",
-				"puzzle-config": {},
+				"puzzle-config": puzzle_config,
 			})
 
 		if is_eof:
@@ -181,6 +186,8 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 				level_name = pre_level_name
 				is_pre_level_name = False
 				pre_level_name = None
+				move_record = None
+				push_record = None
 			map_lines.append(line)
 		else:
 			if is_pre_level_name:
@@ -192,6 +199,10 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 				pre_level_name = line
 			if map_lines and line.startswith('Title:'):
 				level_name = line[6:].strip()
+			if map_lines and line.startswith('Move-Record:'):
+				move_record = line[12:].strip()
+			if map_lines and line.startswith('Push-Record:'):
+				push_record = line[12:].strip()
 
 	file.close()
 
