@@ -45,7 +45,6 @@ class CollectionRecords:
 	"""
 
 	def __init__(self, filename, by_moves=False, def_level_ids=False):
-		self.filename = filename
 		self.by_moves = by_moves
 		self.def_level_ids = def_level_ids
 
@@ -55,7 +54,13 @@ class CollectionRecords:
 		self.results = []       # keep reported results
 		self.next_result_idx = 0  # counter for iterative interface
 
-		self._read_file()
+		if isinstance(filename, str):
+			self.filename = filename
+			self._read_file()
+		else:
+			self.filename = None
+			for record_str in filename:
+				self._append_record(None, _parse_cost_str(record_str))
 
 	@property
 	def records(self):

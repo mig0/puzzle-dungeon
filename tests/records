@@ -63,6 +63,19 @@ def test_parse_missing_file():
 	bad_file = "tests/no_such_records.txt"
 	test.catch(lambda: CollectionRecords(bad_file))
 
+def test_parse_list_not_file():
+	records = [
+		"100/15",
+		"200/15",
+		None,
+		"10/2",
+	]
+	r = CollectionRecords(records)
+	test.eq(r.record_strs, records)
+	test.eq(r.move_record_strs, records)
+	test.eq(r.push_record_strs, records)
+	test.eq(r.records, [(100, 15), (200, 15), None, (10, 2)])
+
 # -----------------------------------------------------
 # cmp_level_result tests
 # -----------------------------------------------------
@@ -218,6 +231,7 @@ test_parse_dual_costs()
 test_parse_with_empty_and_comment_lines()
 test_parse_invalid_line()
 test_parse_missing_file()
+test_parse_list_not_file()
 test_cmp_level_result_single_costs()
 test_cmp_level_result_dual_costs()
 test_cmp_sequential_updates_indices()
