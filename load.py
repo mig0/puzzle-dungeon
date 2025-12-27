@@ -319,13 +319,13 @@ def fetch_letslogic(action):
 		warn("%s on %s" % (e, url))
 		return None
 
-def get_ll_sokoban_level_string(config, ll_coll_title):
+def get_ll_sokoban_level_string(config, ll_coll_config):
 	map_str = "\n".join([config['map'][i:i+config['width']] for i in range(0, len(config['map']), config['width'])])
 	string = map_str.translate(dict((ord(cn), (ch)) for cn, ch in zip('01234567', '-#@$.*+_'))) + "\n"
 	string += "ID: %s\n" % config['id']
 	string += "Title: %s\n" % config['title']
-	string += "Collection: %s\n" % ll_coll_title
-	string += "Author: %s\n" % config['author']
+	string += "Collection: %s\n" % ll_coll_config['title']
+	string += "Author: %s\n" % (config['author'] or ll_coll_config['author'])
 	if "blue_pushes" in config:
 		string += "Move-Record: %d/%d\n" % (config["blue_moves"], config["blue_pushes"])
 	if "green_pushes" in config:
@@ -358,7 +358,7 @@ def fetch_letslogic_collection(ll_coll_id):
 	level_configs = None
 	output = fetch_letslogic("collection/%s" % ll_coll_id)
 
-	ll_coll_title = ll_collections.get(ll_coll_id, {'title': ll_coll_id})['title']
+	ll_coll_config = ll_collections.get(ll_coll_id, {'title': ll_coll_id, 'author': None})
 
 	if output is not None:
 		null = None
@@ -369,7 +369,7 @@ def fetch_letslogic_collection(ll_coll_id):
 			return None
 		sokoban_coll_string = ""
 		for ll_level_config in ll_level_configs:
-			sokoban_level_string = get_ll_sokoban_level_string(ll_level_config, ll_coll_title)
+			sokoban_level_string = get_ll_sokoban_level_string(ll_level_config, ll_coll_config)
 			ll_level_filename = get_letslogic_level_filename(ll_level_config['id'])
 			save_user_file(ll_level_filename, sokoban_level_string)
 			sokoban_coll_string += sokoban_level_string + "\n"
