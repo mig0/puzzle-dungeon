@@ -2,14 +2,7 @@ import sys
 import os
 import re
 
-def _is_windows_cmd():
-	if os.name != "nt" or "WT_SESSION" in os.environ:
-		return False
-	if os.environ.get("COMSPEC", "").lower().endswith("cmd.exe"):
-		return True
-	return False
-
-USE_COLORS = sys.stdout.isatty() and not os.environ.get('NO_COLOR') and not _is_windows_cmd()
+USE_COLORS = not os.environ.get('NO_COLOR') and (sys.stdout.isatty() or os.environ.get('MSYSTEM'))
 
 COLOR_NONE      = ""
 COLOR_BOLD      = "1"
