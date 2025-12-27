@@ -84,6 +84,7 @@ class MinotaurPuzzle(Puzzle):
 		return dest_cells, is_lost
 
 	def make_single_minotaur_move(self, dest_cells):
+		debug(2, f"make_single_minotaur_move {self.minotaur.c} -> {dest_cells}")
 		if not dest_cells:
 			return
 		dest_cell, *dest_cells = dest_cells
@@ -94,8 +95,9 @@ class MinotaurPuzzle(Puzzle):
 
 		# animate single moves
 		if not dest_cells:
+			anim_duration = solution.move_delay if solution.play_mode else SINGLE_MINOTAUR_MOVE_DURATION
 			self.minotaur.move_pos((self.get_minotaur_dir(0), self.get_minotaur_dir(1)), factor=8)
-			self.minotaur.animate(SINGLE_MINOTAUR_MOVE_DURATION, "bounce_end")
+			self.minotaur.animate(anim_duration / self.num_moves, "bounce_end")
 		else:
 			self.make_single_minotaur_move(dest_cells)
 
@@ -254,7 +256,9 @@ class MinotaurPuzzle(Puzzle):
 		self.minotaur.draw()
 
 	def press_cell(self, cell, button=None):
-		if button and button != 3 and not (button == 1 and char.c == cell):
+		if button == 3:
+			return True
+		if button and not (button == 1 and char.c == cell):
 			return False
 		# skip move
 		self.make_minotaur_move()
