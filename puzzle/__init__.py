@@ -302,12 +302,15 @@ class VirtualPuzzle(Puzzle):
 	def is_virtual(self):
 		return True
 
+def all_subclasses(cls):
+	return set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in all_subclasses(c)])
+
 import os, pkgutil
 for _, module, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
 	__import__(__name__ + "." + module)
 
 def get_all_puzzle_classes():
-	return [Puzzle] + Puzzle.__subclasses__() + VirtualPuzzle.__subclasses__()
+	return [Puzzle] + list(all_subclasses(Puzzle))
 
 def create_puzzle(Globals):
 	if not Puzzle.__subclasses__():
