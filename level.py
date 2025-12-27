@@ -4,8 +4,6 @@ from common import warn, die
 from config import DEFAULT_NUM_ENEMIES
 from cmdargs import cmdargs
 
-special_config_keys = ('bg-image', 'cloud-mode', 'music', 'puzzle-type', 'theme')
-
 class Level:
 	def __init__(self):
 		self.unset()

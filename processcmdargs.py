@@ -70,12 +70,12 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 			if error:
 				warn("Ignoring map-file %s: Not a sokoban map and %s" % (arg, error))
 				continue
-			level_configs.append({
+			level_configs.append(custom_collection.with_level_config_defaults({
 				'puzzle-type': puzzle_type,
 				'map-size': size,
 				'map-file': arg,
 				'name': "%s map %s" % (puzzle_type, arg),
-			})
+			}))
 		else:
 			warn("Ignoring unknown argument %s" % arg)
 
