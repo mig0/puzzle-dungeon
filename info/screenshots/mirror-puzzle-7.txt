@@ -1,6 +1,10 @@
-Title: Simple Mirror puzzle with barrels
+Title: Mirror level with gates, locks, portals, and barrels
 Puzzle: mirror
-Theme: classic
+Theme: cargo
 
-In this simple example level, you need to move the barrels hosting the
-mirrors and adjust the mirrors' orientations.
+In this level, you need to open gates and collect keys in the correct
+order to gain access to the plates and barrels. Then, move the barrels
+that host the mirrors and adjust the mirrors’ orientations to solve the
+puzzle.
+
+Also see [solved screenshot](mirror-puzzle-8).

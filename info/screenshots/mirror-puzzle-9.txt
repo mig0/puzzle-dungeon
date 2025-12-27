@@ -1,0 +1,7 @@
+Title: Mirror puzzle with barrels, traps and glasses
+Puzzle: mirror
+Theme: ancient2
+
+Another Mirror puzzle level that has extra elements, like traps and glass
+cells. Move barrels hosting the mirrors and change the mirrors'
+orientation to solve the level.

@@ -1,6 +1,10 @@
-Title: Mirror puzzle with barrels, traps and glasses
+Title: Mirror level with gates, locks, portals, and barrels (solved)
 Puzzle: mirror
+Theme: cargo
 
-Another Mirror puzzle level that has extra elements, like traps and glass
-cells. Move barrels hosting the mirrors and change the mirrors'
-orientation to solve the level.
+In this level, you need to open gates and collect keys in the correct
+order to gain access to the plates and barrels. Then, move the barrels
+that host the mirrors and adjust the mirrors’ orientations to solve the
+puzzle.
+
+Also see [unsolved screenshot](mirror-puzzle-7).
