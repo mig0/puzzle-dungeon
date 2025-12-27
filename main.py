@@ -224,7 +224,7 @@ def convert_outer_floors(cell_type=None):
 				continue
 			cell = cx, cy
 			if game.map[cell] in CELL_FLOOR_TYPES and not cell in floor_cells_to_convert:
-				floor_cells_to_convert.update(get_accessible_cells((cell)))
+				floor_cells_to_convert.update(get_accessible_cells(cell, place=True))
 	for cell in floor_cells_to_convert:
 		game.map[cell] = CELL_OUTER_WALL
 
@@ -328,7 +328,7 @@ def is_cell_accessible(cell, obstacles=None, place=False, allow_obstacles=False,
 		return False
 	return not is_cell_in_actors(cell, barrels if allow_enemy else barrels + enemies)
 
-def get_accessible_neighbors(cell, obstacles=None, allow_obstacles=False, allow_enemy=False, allow_closed_gate=False, allow_stay=False):
+def get_accessible_neighbors(cell, obstacles=None, place=False, allow_obstacles=False, allow_enemy=False, allow_closed_gate=False, allow_stay=False):
 	neighbors = []
 	if ALLOW_DIAGONAL_MOVES and False:
 		directions = ((-1, -1), (0, -1), (+1, -1), (-1, 0), (+1, 0), (-1, +1), (0, +1), (+1, +1))
@@ -338,19 +338,19 @@ def get_accessible_neighbors(cell, obstacles=None, allow_obstacles=False, allow_
 		neigh = apply_diff(cell, diff)
 		if is_cell_in_room(neigh) and (
 			allow_closed_gate and game.map[neigh] == CELL_GATE0 or
-			is_cell_accessible(neigh, obstacles, allow_obstacles=allow_obstacles, allow_enemy=allow_enemy)
+			is_cell_accessible(neigh, obstacles, place, allow_obstacles=allow_obstacles, allow_enemy=allow_enemy)
 		):
 			neighbors.append(neigh)
 	debug(3, "* get_accessible_neighbors %s - %s" % (str(cell), neighbors))
 	return neighbors
 
-def get_accessible_cells(start_cell, obstacles=None):
+def get_accessible_cells(start_cell, obstacles=None, place=False):
 	accessible_cells = []
 	unprocessed_cells = [start_cell]
 	while unprocessed_cells:
 		cell = unprocessed_cells.pop(0)
 		accessible_cells.append(cell)
-		neigbours = get_accessible_neighbors(cell, obstacles)
+		neigbours = get_accessible_neighbors(cell, obstacles, place)
 		for n in neigbours:
 			if n not in accessible_cells and n not in unprocessed_cells:
 				unprocessed_cells.append(n)
