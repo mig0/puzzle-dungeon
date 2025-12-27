@@ -1,0 +1,196 @@
+ #####
+ # @ ###
+## #$  #
+# *. . #
+#  $$ ##
+### #.#
+  #   #
+  #####
+Title: scrambled egg
+Author: takaken
+Move-Record: 170/43
+Push-Record: 170/43
+
+#####
+#   #####
+# # #   #
+# $   $ #
+#..#$#$##
+#.@$   #
+#..  ###
+######
+Title: a point
+Author: takaken
+Move-Record: 185/42
+Push-Record: 185/42
+
+ ######
+#   $. #  #####
+#.$    # #    .#
+#### .## #.  $ #
+ ###  #  ###  ##
+  ##  #   ## $#
+   #  #    #. #
+####$#######$###
+#       @      #
+################
+Title: twins
+Author: takaken
+Move-Record: 144/47
+Push-Record: 144/47
+
+     ####
+   ###  ####
+#### $  #  #
+# $  $ $   #
+# # #$#$#  #
+# ....@.. ##
+###########
+Title: rescue in the bay
+Author: takaken
+Move-Record: 250/69
+Push-Record: 256/67
+
+#######
+#...  #
+# # $ #
+#  $  #
+###$ ##
+  # @#
+  ####
+Title: baby classic
+Author: takaken
+Move-Record: 84/24
+Push-Record: 84/24
+
+  #####
+###  @#
+#  $  #
+#    #########
+# #$   ....  #
+#  $ ######$ #
+##  ##    #  #
+ ####     ####
+Title: key
+Author: takaken
+Move-Record: 170/60
+Push-Record: 180/52
+
+   #####
+  ## @ #
+  #    #  #####    ######
+ ##   #####   ######    #
+##   ##  .#   #   #  ## #
+# . ## $#.## *$  ## ##  #
+#   ##  $  # .#  #     ##
+#   ###    ##   ## $$#. #
+#  $  #  ####   ####  . #
+# .$  ## #  ## ##  ## ###
+### #### #   # #    # #
+  # #  # #   # #    # #
+### #### ##### ###### ###
+#                       #
+#########################
+Title: Love
+Author: takaken
+Move-Record: 361/60
+Push-Record: 365/58
+
+  ######
+###    ###
+#   $$ ..#
+# ##   # #
+#  ### @ #
+#    ##$ #
+# **  #  #
+### # # ##
+ #  $ # #
+ #  . #.#
+ ###  ###
+   ####
+Title: rule
+Author: takaken
+Move-Record: 185/41
+Push-Record: 185/41
+
+ ######
+ #    #
+ #$  .#
+## ## #
+#     #
+# $ #.##
+###    #
+  ## @ #
+   #####
+Title: two points
+Author: takaken
+Move-Record: 93/16
+Push-Record: 93/16
+
+ ########
+ #  #   #
+ #..#$$ #
+ #  @   #
+##  #   ##
+#   #    #
+#...#$$$ #
+#   #    #
+##########
+Title: in a mirror
+Author: takaken
+Move-Record: 146/54
+Push-Record: 148/52
+
+ #####
+ #   ######
+## # @    #
+# . . ### #
+#   #$ $  #
+###   #   #
+  #########
+Title: two points again
+Author: takaken
+Move-Record: 105/22
+Push-Record: 105/22
+
+  #####
+### @ ###
+#   #   #
+#. ** $ #
+#   #   #
+#########
+Title: magic box
+Author: takaken
+Move-Record: 86/19
+Push-Record: 86/19
+
+#########
+#  * *  #
+#  $ $  #
+### . ###
+  #$.$#
+  # . #
+  # . #
+  #@ ##
+  #####
+Title: short-sleeved shirt
+Author: takaken
+Move-Record: 207/58
+Push-Record: 213/54
+
+   #####
+   #   #
+   #   #
+####   #
+#  $$$ #
+#    # ##
+## ###  #
+#   ##  #
+#    #  #
+# ***...#
+###@ ####
+  ####
+Title: second UFO
+Author: takaken
+Move-Record: 246/83
+Push-Record: 264/73

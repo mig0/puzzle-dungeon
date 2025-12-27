@@ -8,5 +8,6 @@ sokoban-map-files:
 	minicosmos: minicosmos.txt
 	nabokosmos: nabokosmos.txt
 	picokosmos: picokosmos.txt
+	picolevels: picolevels.txt
 	sokogen: sokogen.txt
 	yoshio: yoshio.txt

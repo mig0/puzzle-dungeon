@@ -1,0 +1,5 @@
+name: Sokoban - Takaken
+icon: jewel/barrel
+magic-n: 80
+puzzle-type: BarrelPuzzle
+sokoban-map-file: takaken.txt

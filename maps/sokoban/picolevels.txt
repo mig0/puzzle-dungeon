@@ -1,0 +1,662 @@
+__####
+###--#
+#---@#
+#-.$-#
+#-*$##
+#-.-#_
+#####_
+ID: 3481
+Title: Level 1
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 50/13
+Push-Record: 50/13
+
+___####
+__##--#
+###.--#
+#---$-#
+#@-.$##
+###--#_
+__####_
+ID: 3482
+Title: Level 2
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 39/11
+Push-Record: 39/11
+
+__####_
+_##--#_
+_#-.-##
+##$-.-#
+#-$*--#
+#-@--##
+######_
+ID: 3483
+Title: Level 3
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 69/17
+Push-Record: 69/17
+
+######
+#----#
+#--.-#
+##$-*#
+_#-*@#
+_##--#
+_#####
+ID: 3484
+Title: Level 4
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 58/14
+Push-Record: 58/14
+
+#######
+#-----#
+#-#.--#
+#--@$-#
+###*-##
+__#--#_
+__####_
+ID: 3485
+Title: Level 5
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 36/10
+Push-Record: 36/10
+
+__####_
+###-@#_
+#--*-##
+#--*.-#
+#--*$-#
+#---###
+#####__
+ID: 3486
+Title: Level 6
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 59/13
+Push-Record: 59/13
+
+######_
+#----##
+#-----#
+#-*.*-#
+##$.-##
+_#-$##_
+_#@-#__
+_####__
+ID: 3487
+Title: Level 7
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 61/19
+Push-Record: 61/19
+
+####__
+#--###
+#-$.-#
+#--$.#
+##$.-#
+_#@-##
+_#--#_
+_####_
+ID: 3488
+Title: Level 8
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 61/17
+Push-Record: 61/17
+
+#######
+#-$.--#
+#-.---#
+#-.@###
+#-$-$-#
+###---#
+_#####_
+ID: 3489
+Title: Level 9
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 67/18
+Push-Record: 67/18
+
+__####__
+__#--###
+###.@.-#
+#--$.#-#
+#---$--#
+####-$##
+___#--#_
+___####_
+ID: 3490
+Title: Level 10
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 106/29
+Push-Record: 106/29
+
+___#####
+_###--.#
+##---#@#
+#----$-#
+#--#$#-#
+##-$..-#
+_#######
+ID: 3491
+Title: Level 11
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 76/20
+Push-Record: 76/20
+
+___#####
+####-@-#
+#.---#-#
+#-#-$$-#
+#-$.-#.#
+####---#
+___#####
+ID: 3492
+Title: Level 12
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 67/19
+Push-Record: 69/17
+
+___#####
+___#---#
+####@#-#
+#----$-#
+#-#...##
+#-$-#$#_
+###---#_
+__#####_
+ID: 3493
+Title: Level 13
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 102/21
+Push-Record: 102/21
+
+#####___
+#.--#___
+#-#$####
+#-#--$-#
+#---@#-#
+#.-$.#-#
+####---#
+___#####
+ID: 3494
+Title: Level 14
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 76/18
+Push-Record: 76/18
+
+#####___
+#--.#___
+#-#@#___
+#-#-####
+#-$-$--#
+#-#$-#-#
+#--..#-#
+####---#
+___#####
+ID: 3495
+Title: Level 15
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 103/19
+Push-Record: 103/19
+
+__######
+###@.--#
+#-$--#-#
+#-##$#-#
+#-##-$-#
+#-.--.##
+##-##-#_
+_#----#_
+_######_
+ID: 3496
+Title: Level 16
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 86/18
+Push-Record: 86/18
+
+__####__
+__#--#__
+__#-.###
+###$-$-#
+#-@-$#-#
+#-#..--#
+#---####
+#####___
+ID: 3497
+Title: Level 17
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 60/21
+Push-Record: 60/21
+
+#####__
+#.--#__
+#-#$###
+#@#-$-#
+#-$--.#
+#-##.-#
+#-----#
+#######
+ID: 3498
+Title: Level 18
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 110/20
+Push-Record: 110/20
+
+___####
+####--#
+#.$-$-#
+#-#---#
+#.--$##
+#.##@#_
+#----#_
+######_
+ID: 3499
+Title: Level 19
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 79/22
+Push-Record: 79/22
+
+___#####
+___#---#
+####-#-#
+#---$$-#
+#@#--#-#
+#-#-$#-#
+#--...-#
+########
+ID: 3500
+Title: Level 20
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 81/18
+Push-Record: 81/18
+
+######_
+#---@#_
+#--.$##
+#-#$$-#
+#..-$-#
+###.#-#
+__#---#
+__#####
+ID: 3501
+Title: Level 21
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 81/17
+Push-Record: 81/17
+
+___#####
+####---#
+#-$-$#@#
+#-#----#
+#-...###
+##-#-#__
+_#-#$#__
+_#---#__
+_#####__
+ID: 3502
+Title: Level 22
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 62/15
+Push-Record: 62/15
+
+########
+#------#
+#@#--#-#
+#-#$-..#
+#--$$#.#
+####---#
+___#####
+ID: 3503
+Title: Level 23
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 98/20
+Push-Record: 108/16
+
+####__
+#--###
+#@$--#
+#-$.-#
+##$.-#
+_#-.-#
+_#####
+ID: 3504
+Title: Level 24
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 62/16
+Push-Record: 62/16
+
+#######
+#.@$--#
+#-$-#-#
+#.$-.-#
+#######
+ID: 3505
+Title: Level 25
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 25/8
+Push-Record: 25/8
+
+#######
+#-----#
+#-#$#.#
+#-$@$-#
+###--.#
+__#.#-#
+__#---#
+__#####
+ID: 3506
+Title: Level 26
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 71/17
+Push-Record: 71/17
+
+___#####
+___#---#
+####$#-#
+#-----.#
+#-#-.$##
+#-$-#.#_
+###--@#_
+__#####_
+ID: 3507
+Title: Level 27
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 76/17
+Push-Record: 76/17
+
+#####___
+#---#___
+#@#-####
+#-$----#
+##...#-#
+_#$#-$-#
+_#---###
+_#####__
+ID: 3508
+Title: Level 28
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 98/21
+Push-Record: 98/21
+
+___#####
+####-@-#
+#-.$-#-#
+#-#-.$-#
+#--.-###
+##$#-#__
+_#---#__
+_#####__
+ID: 3509
+Title: Level 29
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 74/18
+Push-Record: 74/18
+
+__#####_
+__#---#_
+__#-#$##
+###-.--#
+#-.$-#-#
+#-#@-$.#
+#---####
+#####___
+ID: 3510
+Title: Level 30
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 79/20
+Push-Record: 79/20
+
+___#####
+___#---#
+####$#-#
+#@$----#
+#-#...##
+#-$-#-#_
+###---#_
+__#####_
+ID: 3511
+Title: Level 31
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 90/22
+Push-Record: 90/22
+
+_#####__
+_#@--#__
+##$#$#__
+#--.-###
+#-#--.-#
+#-$.-#-#
+####---#
+___#####
+ID: 3512
+Title: Level 32
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 96/22
+Push-Record: 96/22
+
+#####____
+#---#____
+#-#-#####
+#-----$.#
+####$##@#
+___#.##-#
+___#-.$-#
+___######
+ID: 3513
+Title: Level 33
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 24/11
+Push-Record: 24/11
+
+######__
+#-.--#__
+#@-#$###
+#-*-$--#
+#--.-#-#
+###-##-#
+__#----#
+__######
+ID: 3514
+Title: Level 34
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 109/19
+Push-Record: 109/19
+
+####___
+#--###_
+#--$-##
+#-$*.-#
+##.-#-#
+_#@---#
+_######
+ID: 3515
+Title: Level 35
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 54/15
+Push-Record: 54/15
+
+######_
+#----#_
+#-..-##
+#-#-*-#
+#-$-#@#
+###$--#
+__#---#
+__#####
+ID: 3516
+Title: Level 36
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 93/17
+Push-Record: 93/17
+
+__######
+###----#
+#-.--#-#
+#-#.-*-#
+#--$@###
+#--#$#__
+#----#__
+######__
+ID: 3517
+Title: Level 37
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 57/16
+Push-Record: 57/16
+
+_#####__
+_#---###
+_#-.-$-#
+##.-##@#
+#.$-##-#
+#-#-$--#
+#-#-####
+#---#___
+#####___
+ID: 3518
+Title: Level 38
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 115/19
+Push-Record: 123/17
+
+#####___
+#---####
+#-#--$-#
+#-#$-#.#
+#.*---@#
+####-#-#
+___#---#
+___#####
+ID: 3519
+Title: Level 39
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 99/25
+Push-Record: 106/21
+
+#####____
+#---#####
+#-#-$@--#
+#.---##-#
+#$#--##-#
+#.#--$--#
+#.--#####
+#####____
+ID: 3520
+Title: Level 40
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 102/22
+Push-Record: 102/22
+
+#####___
+#---#___
+#-#-####
+#-$@$--#
+##$--#-#
+_#-#-#-#
+_#--...#
+_#######
+ID: 3521
+Title: Level 41
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 105/23
+Push-Record: 105/23
+
+_####__
+_#--##_
+##-*-#_
+#--.$##
+#@-*--#
+##----#
+_######
+ID: 3522
+Title: Level 42
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 73/15
+Push-Record: 73/15
+
+######__
+#----#__
+#---.###
+#-#.$.-#
+#--$-#-#
+###$##-#
+__#--@-#
+__######
+ID: 3523
+Title: Level 43
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 106/22
+Push-Record: 108/20
+
+######__
+#----#__
+#-.-.###
+#.#-$--#
+#--$-#-#
+###$##-#
+__#--@-#
+__######
+ID: 3524
+Title: Level 44
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 136/26
+Push-Record: 136/26
+
+####____
+#.-#####
+#----$@#
+#-.$---#
+#$-#####
+#-.#____
+####____
+ID: 3525
+Title: Level 45
+Collection: Picolevels
+Author: Marti Homs Caussa
+Move-Record: 84/24
+Push-Record: 84/24
+
