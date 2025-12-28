@@ -325,7 +325,7 @@ class BarrelPuzzle(Puzzle):
 		best_path_values = (None, None, None, None)
 		for barrel_cell, plate_cell in barrel_plate_cell_pairs:
 			if barrel_cell == plate_cell:
-				print("BUG. Barrel %s to be moved is already on its plate" % str(barrel_cell))
+				warn("BUG: Barrel %s to be moved is already on its plate" % str(barrel_cell))
 				continue
 			other_barrel_cells = [_barrel_cell for _barrel_cell, _ in barrel_plate_cell_pairs if _barrel_cell != barrel_cell] + placed_barrel_cells
 			# generate best barrel path to its plate
@@ -349,7 +349,7 @@ class BarrelPuzzle(Puzzle):
 
 		self.convert_to_floor(char_cell)
 		debug(2, "generate %s %s %s" % (str(char_cell), barrel_cells, plate_cells))
-		self.Globals.debug_map(2)
+		self.Globals.debug_map(2, char_cell=char_cell)
 
 		num_tries = 4000
 		while num_tries > 0 and unplaced_barrel_plate_cell_pairs:
