@@ -301,14 +301,10 @@ def detect_map_file(filename, map_string=None):
 		return True, None, None, None
 	return False, error, None, None
 
-def fetch_letslogic(action):
-	url = LETSLOGIC_API_URL + action
+def fetch_url(url, data=None):
 	debug(2, "Fetching %s" % url)
-	key = LETSLOGIC_API_KEY
-	if key.startswith('_'):
-		key = codecs.decode(key[1:][::-1], 'rot13')
 	try:
-		with urlopen(url, data=bytes('key=' + key, 'utf-8'), timeout=URLOPEN_TIMEOUT) as res:
+		with urlopen(url, data=data, timeout=URLOPEN_TIMEOUT) as res:
 			if res.status != 200:
 				warn("Got HTTP status %d on %s" % (res.status, url))
 				return None
@@ -318,6 +314,13 @@ def fetch_letslogic(action):
 	except Exception as e:
 		warn("%s on %s" % (e, url))
 		return None
+
+def fetch_letslogic(action):
+	url = LETSLOGIC_API_URL + action
+	key = LETSLOGIC_API_KEY
+	if key.startswith('_'):
+		key = codecs.decode(key[1:][::-1], 'rot13')
+	return fetch_url(url, bytes('key=' + key, 'utf-8'))
 
 def get_ll_sokoban_level_string(config, ll_coll_config):
 	map_str = "\n".join([config['map'][i:i+config['width']] for i in range(0, len(config['map']), config['width'])])
