@@ -6,7 +6,7 @@ levels:
 -
 	name: Zero Space type B - 3x3
 	num-enemies: 0
-	theme: default
+	theme: jewel
 	music: gaming_spirit
 	char-health: null
 	puzzle-config:
@@ -15,7 +15,7 @@ levels:
 -
 	name: Zero Space type B - 4x4
 	num-enemies: 0
-	theme: default
+	theme: cargo
 	music: gaming_spirit
 	char-health: null
 	puzzle-config:
@@ -34,7 +34,7 @@ levels:
 	name: Zero Space type B - 6x6
 	map-size: [15, 15]
 	num-enemies: 0
-	theme: default
+	theme: jewel
 	music: gaming_spirit
 	char-health: null
 	puzzle-config:
@@ -52,7 +52,7 @@ levels:
 -
 	name: Reverse Zero Space type B - 4x4
 	num-enemies: 0
-	theme: moss
+	theme: cargo
 	music: gaming_spirit
 	char-health: null
 	reverse-barrel-mode: True
