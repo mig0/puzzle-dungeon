@@ -1320,17 +1320,18 @@ def draw():
 		draw_central_flash()
 		screen.draw.text(end_line, center=(POS_CENTER_X, POS_CENTER_Y), color='white', gcolor=("#008080" if is_game_won else "#800000"), owidth=0.8, ocolor="#202020", alpha=1, fontsize=60)
 
+	text_pos_y = POS_CENTER_Y if puzzle.is_virtual() else CELL_H / 2
 	if mode == "game" and level_title_time > 0:
 		if puzzle.is_virtual():
 			draw_central_flash()
 		yd = -14 if level_name else 0
-		screen.draw.text(_(level_title), center=(POS_CENTER_X, POS_CENTER_Y + yd), color='yellow', gcolor="#AAA060", owidth=1.2, ocolor="#404030", alpha=1, fontsize=50)
-		screen.draw.text(_(level_name),  center=(POS_CENTER_X, POS_CENTER_Y + 21), color='white',  gcolor="#C08080", owidth=1.2, ocolor="#404030", alpha=1, fontsize=32)
+		screen.draw.text(_(level_title), center=(POS_CENTER_X, text_pos_y + yd), color='yellow', gcolor="#AAA060", owidth=1.2, ocolor="#404030", alpha=1, fontsize=50)
+		screen.draw.text(_(level_name),  center=(POS_CENTER_X, text_pos_y + 21), color='white',  gcolor="#C08080", owidth=1.2, ocolor="#404030", alpha=1, fontsize=32)
 	elif mode == "game" and level_goal_time > 0:
 		goal_line = _(level_goal)
 		if puzzle.is_virtual():
 			draw_central_flash()
-		screen.draw.text(goal_line, center=(POS_CENTER_X, POS_CENTER_Y), color='#FFFFFF', gcolor="#66AA00", owidth=1.2, ocolor="#404030", alpha=1, fontsize=40)
+		screen.draw.text(goal_line, center=(POS_CENTER_X, text_pos_y), color='#FFFFFF', gcolor="#66AA00", owidth=1.2, ocolor="#404030", alpha=1, fontsize=40)
 
 	if scale_to_display and game.screen_size_fitting_display:
 		scaled = pygame.transform.smoothscale(screen.surface, game.screen_size_fitting_display)
