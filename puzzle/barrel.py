@@ -89,10 +89,11 @@ class BarrelPuzzle(Puzzle):
 			msg = "This is Zero Space type-B %s%s puzzle" % (grid.get_zsb_size_str(), reverse_str)
 		else:
 			msg = "This is Sokoban%s puzzle" % reverse_str
-		if "move-record" in self.config:
-			msg += " · Move Record: %s" % self.config["move-record"]
-		if "push-record" in self.config:
-			msg += " · Push Record: %s" % self.config["push-record"]
+		if not flags.is_reverse_barrel:
+			if "move-record" in self.config:
+				msg += " · Move Record: %s" % self.config["move-record"]
+			if "push-record" in self.config:
+				msg += " · Push Record: %s" % self.config["push-record"]
 
 		set_status_message(msg, self)
 
