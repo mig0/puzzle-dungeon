@@ -364,7 +364,7 @@ def get_accessible_cell_distances(start_cell, obstacles=None, allow_obstacles=Fa
 		cell = unprocessed_cells.pop(0)
 		accessible_distance = accessible_cell_distances[cell]
 		accessible_cells.append(cell)
-		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles, allow_enemy)
+		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles=allow_obstacles, allow_enemy=allow_enemy)
 		for n in neigbours:
 			if n not in accessible_cells and n not in unprocessed_cells:
 				unprocessed_cells.append(n)
@@ -404,7 +404,7 @@ def find_path(start_cell, target_cell, obstacles=None, allow_obstacles=False, al
 	path_cells = [target_cell]
 	while accessible_distance > 1:
 		accessible_distance -= 1
-		neigh_cells = get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles, allow_enemy)
+		neigh_cells = get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles=allow_obstacles, allow_enemy=allow_enemy)
 		if randomize:
 			shuffle(neigh_cells)
 		for neigh_cell in neigh_cells:
@@ -427,7 +427,7 @@ def find_all_paths(start_cell, target_cell, obstacles=None, allow_obstacles=Fals
 		accessible_distance -= 1
 		new_all_path_cells = []
 		for path_cells in all_path_cells:
-			neigh_cells = [cell for cell in get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles)
+			neigh_cells = [cell for cell in get_accessible_neighbors(path_cells[0], obstacles, allow_obstacles=allow_obstacles)
 				if accessible_cell_distances.get(cell) == accessible_distance]
 			for neigh_cell in neigh_cells:
 				new_all_path_cells.append((neigh_cell, *path_cells))
@@ -467,7 +467,7 @@ def find_best_path(start_cell, target_cell, obstacles=None, allow_obstacles=Fals
 			target_cell_state = cell_state
 			break
 
-		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles, allow_stay=allow_stay)
+		neigbours = get_accessible_neighbors(cell, obstacles, allow_obstacles=allow_obstacles, allow_stay=allow_stay)
 		if randomize:
 			shuffle(neigbours)
 		for neigh in neigbours:
