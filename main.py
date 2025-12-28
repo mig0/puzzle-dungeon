@@ -1135,6 +1135,8 @@ def init_new_level(level_id, reload_stored=False):
 			create_enemy(*enemy_info)
 		for barrel_cell in stored_level["barrel_cells"]:
 			create_barrel(barrel_cell)
+		for cart_info in stored_level["cart_infos"]:
+			create_cart(*cart_info)
 		for lift_info in stored_level["lift_infos"]:
 			create_lift(*lift_info)
 		for mirror_data in stored_level["mirror_datas"]:
@@ -1174,6 +1176,7 @@ def init_new_level(level_id, reload_stored=False):
 		"char_cells": game.char_cells.copy(),
 		"enemy_infos": tuple((enemy.c, enemy.power or enemy.health, enemy.attack, enemy.drop) for enemy in enemies),
 		"barrel_cells": tuple(barrel.c for barrel in barrels),
+		"cart_infos": tuple((cart.c, cart.type) for cart in carts),
 		"lift_infos": tuple((lift.c, lift.type) for lift in lifts),
 		"mirror_datas": tuple(mirror.to_data() for mirror in mirrors),
 		"portal_destinations": dict(portal_destinations),
