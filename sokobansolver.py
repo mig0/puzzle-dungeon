@@ -892,7 +892,7 @@ class SokobanSolver():
 
 		# run BFS separately for each barrel to compute costs from that barrel
 		for barrel_idx in grid.to_idxs_or_none(self.barrel_cells):
-			if self.return_first or not barrel_idx or not char_accessible_bits[barrel_idx]:
+			if self.return_first or barrel_idx is None or not char_accessible_bits[barrel_idx]:
 				continue
 			self.expand_barrel_costs(self.min_char_target_costs, self.min_target_costs, barrel_idx, False)
 
@@ -912,6 +912,8 @@ class SokobanSolver():
 					"min_char_barrel_costs": self.min_char_barrel_costs,
 					"min_plate_barrel_costs": self.min_plate_barrel_costs,
 					"min_plate_char_barrel_costs": self.min_plate_char_barrel_costs,
+					"min_target_costs": self.min_target_costs,
+					"min_char_target_costs": self.min_char_target_costs,
 				})
 
 	def get_found_solution_items(self, reason):
