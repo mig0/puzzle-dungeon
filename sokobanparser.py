@@ -164,11 +164,14 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 			puzzle_config = {}
 			if move_record: puzzle_config["move-record"] = move_record
 			if push_record: puzzle_config["push-record"] = push_record
+			config_get = lambda key, default: config[key] if key in config and config[key] is not None else default
 			levels.append({
 				"name": level_name or "No Name",
 				"bg-image": config.get('bg-image') or "bg/starry-sky.webp",
-				"theme": config.get('theme') or choice(["jewel", "cargo", "stoneage1", "stoneage5", "default", "modern1", "moss"]),
+				"theme": config.get('theme') or choice(["jewel", "cargo", "stoneage1", "stoneage5", "default", "modern1", "moss", "jewel"]),
 				"music": config.get('music') or choice(["playful_sparrow", "film", "forest_walk", "epic_cinematic_trailer", "adventures"]) + ".mp3",
+				"cloud-mode": config_get('cloud-mode', False),
+				"reverse-barrel-mode": config_get('reverse-barrel-mode', False),
 				"map-size": map_size,
 				"map-string": map_string,
 				"num-enemies": 0,
