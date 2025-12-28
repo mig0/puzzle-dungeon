@@ -203,7 +203,7 @@ class Position:
 		return self._persistent_id
 
 	def show(self):
-		grid.show_map(descr="Posision %s" % self, barrels=self.super.barrel_idxs, char=self.char_idx, idx_colors={self.segments[-1][1]: 1}, show_dead="color")
+		grid.show_map(descr="Posision %s" % self, barrels=self.super.barrel_idxs, char=self.char_idx, idx_colors={self.segments[-1][1]: 1} if self.segments else {}, show_dead="color")
 
 	def __hash__(self):
 		return self.id
@@ -215,7 +215,6 @@ class Position:
 
 class SokobanSolver():
 	def __init__(self):
-		self.solution_alg = None
 		self.return_first = False
 		self.disable_budget = False
 		self.disable_prepare = False
@@ -224,9 +223,10 @@ class SokobanSolver():
 	def reset_solution_data(self):
 		global solver
 		solver = None
-		self.limit_time = MAX_FIND_SOLUTION_TIME
 		self.visited_super_positions = {}  # super_position_id -> SuperPosition
+		self.limit_time = MAX_FIND_SOLUTION_TIME
 		self.solution_depth = MAX_SOLUTION_DEPTH
+		self.solution_alg = None
 		self.solution_type = SOLUTION_TYPE_BY_SHIFTS
 		self.initial_position = None
 		self.solved_position = None
@@ -1105,9 +1105,9 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 	solver.solution_alg = solution_alg
 	solver.return_first = return_first
 	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
-	if show_dead:
-		solver.prepare_solution(char_cell)
 	if show_map:
+		if show_dead:
+			solver.prepare_solution(char_cell)
 		descr = None if show_map is True else show_map
 		grid.show_map(descr, char=char_cell, barrels=barrel_cells, show_dead=show_dead)
 	return solver
