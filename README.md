@@ -135,7 +135,19 @@ on GNU/Linux, Windows, and other operating systems.
 |RAlt-D|Use DFS algorithm
 |RAlt-G|Use Greedy algorithm
 |RAlt-U|Use USC (Uniform) algorithm
-|Shift-KP-Enter|Find move optimal (not push optimal) solution
+|RAlt-0|Disable reporting every second
+|RAlt--|Disable preparing costs (debug only)
+|KP-Enter|Find push optimal solution
+|Shift-KP-Enter|Find move optimal solution
+|Backspace|Stop finding or playing solution, or unset solution
+
+## Controls when replaying any solution
+
+|mouse button|key|action
+|--|--|--
+|4 (wheel)|PgUp|Speed up replay
+|5 (wheel)|PgDown|Speed down replay
+|1 or 3|Backspace|Stop playing solution
 
 ## Controls for MirrorPuzzle
 
@@ -147,6 +159,14 @@ on GNU/Linux, Windows, and other operating systems.
 |5 (wheel) *or* 2|PgDown *or* Insert|Rotate mirror clockwise
 |6|Delete|Reset mirror
 |-|Shift-Delete|Reset all mirrors
+
+## Mouse controls for various puzzles
+
+|mouse button|action
+|--|--|--
+|1|Go to the neighbour cell, if applicable
+|2|Undo, if applicable
+|3|Go to the selected cell, if applicable
 
 ## Source code
 
