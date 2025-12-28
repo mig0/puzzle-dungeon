@@ -23,7 +23,7 @@ parser.add_argument('-P', '--puzzle-type', '--puzzle', type=str, help="use this 
 parser.add_argument('-t', '--theme', type=str, help="use this theme for custom levels")
 parser.add_argument('-M', '--no-music', help="turn music off", action='store_true')
 parser.add_argument('-S', '--no-sound', help="turn sound off", action='store_true')
-parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file for custom collection")
+parser.add_argument("args", nargs='*', help="level-id, collection-id, map-file or url for custom collection")
 
 cmdargs_str = os.environ.get("CMD_ARGS", "").strip()
 # printf "%q" generates '' for no args

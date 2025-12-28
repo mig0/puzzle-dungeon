@@ -42,7 +42,7 @@ parser.add_argument('-t', '--show-time', help="show solution time in seconds", a
 parser.add_argument('-T', '--limit-time', help="limit solution time to given seconds", metavar='SEC', action='store')
 parser.add_argument('-R', '--record-file', help='compare with records; "." (in-level), "" (disable)', metavar='FILE', action='store')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
-parser.add_argument("args", nargs='*', help="level-id, collection-id or map-file")
+parser.add_argument("args", nargs='*', help="level-id, collection-id, map-file or url")
 
 cmdargs = parser.parse_args()
 

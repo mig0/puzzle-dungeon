@@ -55,6 +55,8 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 		elif collection := get_collection_by_id(arg):
 			for level_config in collection.level_configs:
 				level_configs.append(custom_collection.with_level_config_defaults(level_config))
+		elif arg.startswith("http:") or arg.startswith("https:"):
+			level_configs.extend(parse_url_levels(arg, custom_collection.config) or [])
 		elif arg == "stdin:" or arg == "-":
 			level_configs.extend(parse_stdin_levels(arg, custom_collection.config) or [])
 		elif arg == "clipboard:":
@@ -100,6 +102,8 @@ def parse_map_string_levels(map_string, input_id_str, content_id_str, config={})
 	if not map_string:
 		warn(error_prefix + f"since {content_id_str} is empty")
 		return None
+	if map_string.startswith("http:") or map_string.startswith("https:"):
+		return parse_url_levels(map_string, config)
 	map_info = detect_map_file(None, map_string=map_string)
 	if not map_info:
 		warn(error_prefix + f"no map in {content_id_str}")
@@ -122,6 +126,10 @@ def parse_map_string_levels(map_string, input_id_str, content_id_str, config={})
 		'music': config.get('music'),
 		'theme': config.get('theme'),
 	}]
+
+def parse_url_levels(url, config={}):
+	from load import fetch_url
+	return parse_map_string_levels(fetch_url(url), url, 'url', config)
 
 def parse_stdin_levels(input_id_str, config={}):
 	from sys import stdin
