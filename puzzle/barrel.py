@@ -145,67 +145,60 @@ class BarrelPuzzle(Puzzle):
 
 	def pull_barrel_randomly(self, barrel, visited_cell_pairs, num_moves):
 		idx = barrels.index(barrel)
-		weighted_neighbors = []
+		weighted_pulls = []
 		# sort 4 barrel directions to place char to the "adjacent to barrel" cell for a pull (prefer empty cells)
-		for c in self.Globals.get_actor_neighbors(barrel, self.area.x_range, self.area.y_range):
-			if (c, char.c) in visited_cell_pairs:
+		for char_cell in self.Globals.get_actor_neighbors(barrel, self.area.x_range, self.area.y_range):
+			if (char_cell, char.c) in visited_cell_pairs:
 				continue
-			cx, cy = c
-			if is_cell_in_actors(c, barrels):
+			if is_cell_in_actors(char_cell, barrels):
 				continue
-			new_cx = cx + cx - barrel.cx
-			new_cy = cy + cy - barrel.cy
-			if new_cx not in self.area.x_range or new_cy not in self.area.y_range:
+			new_char_cell = apply_diff(char_cell, apply_diff(char_cell, barrel.c, subtract=True))
+			if not self.area.is_cell_inside(new_char_cell):
 				continue
-			if is_cell_in_actors((new_cx, new_cy), barrels):
+			if is_cell_in_actors(new_char_cell, barrels):
 				continue
 			weight = randint(0, 30)
-			if self.map[cx, cy] not in CELL_WALL_TYPES:
+			if self.map[char_cell] not in CELL_WALL_TYPES:
 				weight += 20
-			if self.map[cx, cy] == CELL_PLATE:
+			if self.map[char_cell] == CELL_PLATE:
 				weight += 4
-			if self.map[new_cx, new_cy] not in CELL_WALL_TYPES:
+			if self.map[new_char_cell] not in CELL_WALL_TYPES:
 				weight += 10
-			if self.map[new_cx, new_cy] == CELL_PLATE:
+			if self.map[new_char_cell] == CELL_PLATE:
 				weight += 2
-			weighted_neighbors.append((weight, c))
+			weighted_pulls.append((weight, (char_cell, new_char_cell)))
 
-		neighbors = [n[1] for n in sorted(weighted_neighbors, reverse=True)]
+		pulls = [n[1] for n in sorted(weighted_pulls, reverse=True)]
 
-		if not neighbors:
+		if not pulls:
 			# can't find free neighbor for barrel, stop
 			debug(2, "barrel #%d - failed to find free neighbor for barrel %s (%d left)" % (idx, barrel.c, num_moves))
 			return False
 
-		for neighbor in neighbors:
-			cx, cy = neighbor
-
+		for char_cell, new_char_cell in pulls:
 			# if the cell is not empty (WALL), make it empty (FLOOR with additions)
 			was_wall1_replaced = False
-			if self.map[neighbor] == CELL_WALL:
-				self.convert_to_floor(neighbor)
+			if self.map[char_cell] == CELL_WALL:
+				self.convert_to_floor(char_cell)
 				was_wall1_replaced = True
-			barrel_cx = barrel.cx
-			barrel_cy = barrel.cy
-			new_char_cx = cx + (cx - barrel_cx)
-			new_char_cy = cy + (cy - barrel_cy)
-			debug(2, "barrel #%d - neighbor %s, next cell (%d, %d)" % (idx, neighbor, new_char_cx, new_char_cy))
+			old_barrel_c = barrel.c
+			debug(2, "barrel #%d - neighbor %s, next cell %s" % (idx, char_cell, new_char_cell))
 			self.Globals.debug_map(2, full=True, clean=True, dual=True)
 			was_wall2_replaced = False
-			if self.map[new_char_cx, new_char_cy] == CELL_WALL:
-				self.convert_to_floor((new_char_cx, new_char_cy))
+			if self.map[new_char_cell] == CELL_WALL:
+				self.convert_to_floor(new_char_cell)
 				was_wall2_replaced = True
 
 			# if the char position is not None, first create random free path to the selected adjacent cell
 			old_char_c = char.c
 			if char.c is None:
-				char.c = (cx, cy)
-			if self.Globals.generate_random_free_path(char.c, neighbor):
+				char.c = char_cell
+			if self.Globals.generate_random_free_path(char.c, char_cell, area=self.area):
 				# pull the barrel to the char
-				barrel.c = char.c
-				char.c = (new_char_cx, new_char_cy)
+				barrel.c = char_cell
+				char.c = new_char_cell
 
-				visited_cell_pairs.append((neighbor, char.c))
+				visited_cell_pairs.append((char_cell, char.c))
 
 				if num_moves <= 1:
 					return True
@@ -215,15 +208,15 @@ class BarrelPuzzle(Puzzle):
 				else:
 					debug(2, "barrel #%d - failed to pull barrel (%d moves left)" % (idx, num_moves - 1))
 			else:
-				debug(2, "barrel #%d - failed to generate random free path to neighbor %s" % (idx, neighbor))
+				debug(2, "barrel #%d - failed to generate random free path to neighbor %s" % (idx, char_cell))
 
 			# can't create free path for char or can't pull barrel, restore the original state
 			char.c = old_char_c
-			barrel.c = (barrel_cx, barrel_cy)
+			barrel.c = old_barrel_c
 			if was_wall1_replaced:
-				self.map[cx, cy] = CELL_WALL
+				self.map[char_cell] = CELL_WALL
 			if was_wall2_replaced:
-				self.map[new_char_cx, new_char_cy] = CELL_WALL
+				self.map[new_char_cell] = CELL_WALL
 
 		return False
 
