@@ -3,7 +3,7 @@ import os
 import sys
 import codecs
 from time import time
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from debug import debug
 from common import die, warn
 from constants import *
@@ -303,12 +303,14 @@ def detect_map_file(filename, map_string=None):
 
 def fetch_url(url, data=None):
 	debug(2, "Fetching %s" % url)
+	headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:144.0) Gecko/20100101 Firefox/144.0"}
+	request = Request(url, data=data, headers=headers)
 	try:
-		with urlopen(url, data=data, timeout=URLOPEN_TIMEOUT) as res:
-			if res.status != 200:
-				warn("Got HTTP status %d on %s" % (res.status, url))
+		with urlopen(request, timeout=URLOPEN_TIMEOUT) as response:
+			if response.status != 200:
+				warn("Got HTTP status %d on %s" % (response.status, url))
 				return None
-			output = res.read().decode(errors='replace')
+			output = response.read().decode(errors='replace')
 			debug(3, output)
 			return output
 	except Exception as e:
