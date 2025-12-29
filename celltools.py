@@ -124,6 +124,9 @@ class Area:
 			return not self.is_cell_inside(cell) and self.is_cell_inside(cell, margin)
 		return False
 
+	def __str__(self):
+		return f"Area[{self.cell11}..{self.cell22}]"
+
 def get_bounding_area(cells):
 	xs, ys = zip(*cells)
 	return Area(min(xs), min(ys), max(xs), max(ys))
