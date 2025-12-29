@@ -161,7 +161,9 @@ class Grid:
 					self.idx_cells.append(cell)
 					self.cell_idxs[cell] = idx
 
-		assert self.idx_cells, "Grid without passable cells is not supported"
+		if not self.idx_cells:
+			self.show_map()
+			die("Grid without passable cells is not supported")
 
 		self.num_bits = len(self.idx_cells)
 		self.no_bits  = bitarray('0' * self.num_bits)
