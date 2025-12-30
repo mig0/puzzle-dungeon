@@ -2,7 +2,6 @@ import os
 from copy import deepcopy
 from common import warn, die
 from config import DEFAULT_NUM_ENEMIES
-from cmdargs import cmdargs
 
 class Level:
 	def __init__(self):
