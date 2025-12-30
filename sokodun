@@ -86,8 +86,9 @@ show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
 
 record_key = "move-record" if cmdargs.by_moves else "push-record"
-if record_filename == '.' or record_filename is None and any(level_config["puzzle-config"].get(record_key) for level_config in level_configs):
-	record_filename = [level_config["puzzle-config"].get(record_key) for level_config in level_configs]
+records_in_level_configs = lambda: (level_config.get("puzzle-config", {}).get(record_key) for level_config in level_configs)
+if record_filename == '.' or record_filename is None and any(records_in_level_configs()):
+	record_filename = [*records_in_level_configs()]
 
 coll_records = CollectionRecords(record_filename, cmdargs.by_moves) if record_filename else None
 
@@ -96,11 +97,13 @@ for level_index, level_config in enumerate(level_configs):
 	level.set_from_config(custom_collection, level_index, level_config)
 	if level.puzzle_type != 'BarrelPuzzle':
 		warn("Ignoring level %d of non BarrelPuzzle type (%s)" % (level_index, level.puzzle_type))
+		if coll_records: coll_records.cmp_level_result(None)
 		continue
 	if level.map_file is not None:
 		level.map_string = load_file(level.map_file)
 	if level.map_string is None:
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
+		if coll_records: coll_records.cmp_level_result(None)
 		continue
 	print("Solving level %s of %d: %s" % (colorize(level_index, COLOR_BOLD), len(level_configs), colorize(level.name, COLOR_ITALIC)))
 	solver = create_solver(level.map_string, reverse_barrel_mode)
