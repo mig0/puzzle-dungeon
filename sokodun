@@ -15,7 +15,7 @@ from colorize import *
 from sizetools import set_fitting_map_size
 from progressline import ProgressLine
 from sokobansolver import *
-from sokobanparser import create_sok_map
+from sokobanparser import create_sok_map, find_map_file
 from processcmdargs import process_cmdargs
 
 sys.argv[0] = 'sokodun'
@@ -100,7 +100,7 @@ for level_index, level_config in enumerate(level_configs):
 		if coll_records: coll_records.cmp_level_result(None)
 		continue
 	if level.map_file is not None:
-		level.map_string = load_file(level.map_file)
+		level.map_string = load_file(find_map_file(level.map_file))
 	if level.map_string is None:
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		if coll_records: coll_records.cmp_level_result(None)
