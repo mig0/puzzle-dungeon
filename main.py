@@ -1945,9 +1945,9 @@ def move_char(diff):
 			if enemy := get_actor_on_cell(next_barrel_cell, enemies):
 				game.remember_extra_obj_state(enemy)
 				if char.power is None:
+					game.cancel_char_move(char_move)
 					beat_or_kill_enemy(enemy, diff)
 					activate_beat_animation(barrel, diff, 'bounce_end')
-					game.cancel_char_move(char_move)
 					return
 				else:
 					# in power mode unconditionally kill enemy using barrel
