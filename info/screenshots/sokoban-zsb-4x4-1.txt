@@ -1,0 +1,7 @@
+Title: Sokoban ZSB 4x4 Barrel puzzle
+Puzzle: barrel
+Theme: cargo
+
+Auto-generated Sokoban Zero Space type-B 4x4 barrel puzzle, with 15
+barrels and plates. In ZSB NxM puzzle there is always N*M-1 barrels and
+plates. The proper solution uses double pushes.

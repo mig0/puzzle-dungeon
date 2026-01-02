@@ -1,6 +1,6 @@
 Title: Generated Hero puzzle level with strict-floors
 Puzzle: hero
-Theme: default
+Theme: jewel
 
 In the strict-floors mode of Hero Puzzle, the player must complete the
 floor once entered. The only way to escape is using the portal at the

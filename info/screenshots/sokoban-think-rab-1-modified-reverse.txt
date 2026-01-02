@@ -1,0 +1,10 @@
+Puzzle: barrel
+Theme: jewel
+Title: Modified original Sokoban level 1
+
+This level was modified by authors of Puzzle Dungeon to be more compact,
+suitable for the standard 13x13 size. However, here the barrels and
+plates are swapped. And barrel pushes are replaced by barrel pulls.
+This *reverse-barrel-mode* is achievable by pressing *Alt-E*.
+
+Also see the same [puzzle in forward mode](sokoban-think-rab-1-modified).

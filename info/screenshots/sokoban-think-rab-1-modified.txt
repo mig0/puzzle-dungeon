@@ -1,0 +1,11 @@
+Puzzle: barrel
+Theme: jewel
+Front: true
+Title: Modified original Sokoban level 1
+
+This level was modified by authors of Puzzle Dungeon to be more compact,
+suitable for the standard 13x13 size. The puzzle difficulty is similar to
+the original. The Move-optimal and Push-optimal records are stored in the
+sokoban map file itself using *Move-Record* and *Push-Record* headers.
+
+Also see the same [puzzle in reverse mode](sokoban-think-rab-1-modified-reverse).
