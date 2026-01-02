@@ -2,7 +2,7 @@ from . import *
 
 class HeroPuzzle(Puzzle):
 	def init(self):
-		self.is_strict_floors = bool(self.config.get("strict_floors"))
+		self.is_strict_floors = bool(self.config.get("strict-floors"))
 
 	def assert_config(self):
 		return bool(char.power)
