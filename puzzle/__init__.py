@@ -38,6 +38,7 @@ class Puzzle:
 		self.Globals = Globals
 		self.area = Area()
 		self.config = game.level.puzzle_config
+		self.is_generated = not (game.level.map_file or game.level.map_string)
 		self.load_map_special_cell_types = {CELL_SPECIAL0: 'str'}
 		grid.reset()
 		self.init()

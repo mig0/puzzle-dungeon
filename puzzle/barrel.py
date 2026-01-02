@@ -84,11 +84,12 @@ class BarrelPuzzle(Puzzle):
 		grid.configure(game.map)
 		grid.set_barrels(self.get_room_barrel_cells())
 		grid.check_zsb()
+		autogen_str = "auto-generated" if self.is_generated else "loaded"
 		reverse_str = " reverse" if flags.is_reverse_barrel else ""
 		if grid.is_zsb:
-			msg = "This is Zero Space type-B %s%s puzzle" % (grid.get_zsb_size_str(), reverse_str)
+			msg = "This is %s Zero Space type-B %s%s puzzle" % (autogen_str, grid.get_zsb_size_str(), reverse_str)
 		else:
-			msg = "This is Sokoban%s puzzle" % reverse_str
+			msg = "This is %s Sokoban%s puzzle" % (autogen_str, reverse_str)
 		if not flags.is_reverse_barrel:
 			if "move-record" in self.config:
 				msg += " · Move Record: %s" % self.config["move-record"]
