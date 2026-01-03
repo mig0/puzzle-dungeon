@@ -39,7 +39,8 @@ class HeroPuzzle(Puzzle):
 	def generate_random_nonsolvable_floor_cell(self, cell):
 		slot_type = randint(0, 2)
 		if slot_type == 0:
-			create_enemy(cell, randint(10, 50))
+			enemy = create_enemy(cell, randint(10, 50))
+			enemy.flip = (True, False)
 		elif slot_type == 1:
 			op = choice('×÷+-')
 			factor = (2, 3)[randint(0, 1)] if op in ('×', '÷') else (50, 100)[randint(0, 1)]
