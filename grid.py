@@ -163,7 +163,7 @@ class Grid:
 
 		if not self.idx_cells:
 			self.show_map()
-			die("Grid without passable cells is not supported")
+			die("Grid without passable cells (or cut_outer_floors on non-closed walls) is not supported")
 
 		self.num_bits = len(self.idx_cells)
 		self.no_bits  = bitarray('0' * self.num_bits)
