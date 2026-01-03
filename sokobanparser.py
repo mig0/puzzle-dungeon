@@ -200,12 +200,16 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 			if line.startswith('Level ') and line[6:].isdigit():
 				is_pre_level_name = True
 				pre_level_name = line
+			if line.startswith('ROUND ') and line[-1] == ':' and line[6:-1].isdigit():
+				pre_level_name = line[:-1]
 			if map_lines and line.startswith('Title:'):
 				level_name = line[6:].strip()
 			if map_lines and line.startswith('Move-Record:'):
 				move_record = line[12:].strip()
 			if map_lines and line.startswith('Push-Record:'):
 				push_record = line[12:].strip()
+			if map_lines and line.startswith('Moves:') and (parts := line.split(' Pushes:')) and len(parts) == 2:
+				move_record = parts[0][7:].strip() + '/' + parts[1].strip()
 
 	file.close()
 
