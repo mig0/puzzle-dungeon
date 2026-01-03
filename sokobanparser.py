@@ -40,11 +40,13 @@ def create_sok_map(map):
 	return sok_map
 
 def is_sokoban_map_line(line):
+	if len(line) < 2:
+		return False
 	is_all_floor = True
 	for ch in line:
 		if ch not in CHAR_CELL_TYPES.keys():
 			return False
-		if CHAR_CELL_TYPES[ch] != CELL_FLOOR:
+		if CHAR_CELL_TYPES[ch] in (CELL_WALL, CELL_VOID):
 			is_all_floor = False
 	return not is_all_floor
 
@@ -159,7 +161,7 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 		old_is_in_map = is_in_map
 		is_in_map = is_sokoban_map_line(line)
 
-		if is_eof and map_lines or map_lines and not old_is_in_map and is_in_map:
+		if map_lines and len(map_lines) >= 3 and (is_eof or not old_is_in_map and is_in_map):
 			map_size, map_string = create_map_string(map_lines)
 			puzzle_config = {}
 			if move_record: puzzle_config["move-record"] = move_record
