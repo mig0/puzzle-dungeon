@@ -1,5 +1,5 @@
 name: Sokoban - Sasquatch collection
-icon: modern1/barrel
+icon: cargo/barrel
 magic-n: 63
 puzzle-type: BarrelPuzzle
 sokoban-map-files:

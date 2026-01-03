@@ -1,5 +1,5 @@
 name: Sokoban - Zero Space Type B
-icon: default/barrel
+icon: cargo/start
 magic-n: 8
 puzzle-type: BarrelPuzzle
 levels:

@@ -1,5 +1,5 @@
 name: Sokoban - DrFogh collection
-icon: minecraft/barrel
+icon: cargo/finish
 magic-n: 60
 puzzle-type: BarrelPuzzle
 sokoban-map-files:
