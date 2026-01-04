@@ -2024,14 +2024,17 @@ def can_move(diff):
 	if cursor.is_lift_selected():
 		return cell_type == CELL_VOID and not is_cell_in_actors(dest_cell, lifts)
 
+	if is_cell_in_actors(dest_cell, barrels):
+		return not check_should_pull() and is_cell_accessible(apply_diff(dest_cell, diff), allow_enemy=True)
+
 	return (
 		cell_type not in CELL_CHAR_MOVE_OBSTACLES
 		or cell_type == CELL_LOCK1 and drop_key1.num_collected > 0
 		or cell_type == CELL_LOCK2 and drop_key2.num_collected > 0
-		or cell_type == CELL_ODIRL and diff != (+1, 0)
-		or cell_type == CELL_ODIRR and diff != (-1, 0)
-		or cell_type == CELL_ODIRU and diff != (0, +1)
-		or cell_type == CELL_ODIRD and diff != (0, -1)
+		or cell_type == CELL_ODIRL and diff != DIR_R
+		or cell_type == CELL_ODIRR and diff != DIR_L
+		or cell_type == CELL_ODIRU and diff != DIR_D
+		or cell_type == CELL_ODIRD and diff != DIR_U
 		or is_cell_in_actors(dest_cell, lifts)
 		or get_lift_target(char.c, diff)
 	)
