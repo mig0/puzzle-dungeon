@@ -8,7 +8,7 @@ import random
 from itertools import permutations
 from hungarian import Hungarian, INF
 from colorize import colorize_auto
-from test import TestSuite
+from testsuite import TestSuite
 
 verbose = sys.argv[1:].count('-v') >= 2
 

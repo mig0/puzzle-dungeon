@@ -6,8 +6,8 @@ import atexit
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from test import TestSuite
 from records import CollectionRecords, RecordsParseError
+from testsuite import TestSuite
 
 TEST_FILE = "tests/tmp-test-records.txt"
 atexit.register(lambda: os.path.isfile(TEST_FILE) and os.unlink(TEST_FILE))

@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from test import TestSuite, suppress_output
+from testsuite import TestSuite, suppress_output
 
 def pardon_failed_test(code):
 	error = "Expected to fail"

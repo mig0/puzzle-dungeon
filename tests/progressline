@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 import io
 from progressline import ProgressLine
 from teestream import stdout_redirected_to
-from test import TestSuite
+from testsuite import TestSuite
 
 def test_basic_print():
 	pl = ProgressLine(is_enabled=True, max_len=50)

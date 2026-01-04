@@ -8,9 +8,9 @@ from bitarray import bitarray
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 from constants import *
 from grid import Grid
-from test import TestSuite
 from celltools import cell_distance
 from teestream import stdout_redirected_to
+from testsuite import TestSuite
 
 verbose = False
 def print_if_verbose(*args):
