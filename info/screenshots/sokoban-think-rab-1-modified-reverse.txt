@@ -1,6 +1,11 @@
 Puzzle: barrel
 Theme: jewel
-Title: Modified original Sokoban level 1
+Title: Modified original Sokoban level 1 (Reverse mode)
+
+The original levels by Thinking Rabbit for the first English version
+of Sokoban, Soko-Ban were published by Spectrum Holobyte in 1988.
+The original levels came from Thinking Rabbit's Sokoban (1982),
+Sokoban2 (1984) and a few from SokobanMSX (1984).
 
 This level was modified by authors of Puzzle Dungeon to be more compact,
 suitable for the standard 13x13 size. However, here the barrels and
