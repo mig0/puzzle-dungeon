@@ -487,7 +487,7 @@ class BarrelPuzzle(Puzzle):
 				solution.reset()
 			if not solution.is_active() and not solution.is_find_mode():
 				self.solver.solution_type = SOLUTION_TYPE_BY_MOVES if keyboard.shift else SOLUTION_TYPE_BY_SHIFTS
-		if keyboard.tab:
+		if keyboard.tab and self.solver.last_created_position:
 			char.c = grid.idx_cells[self.solver.last_created_position.char_idx]
 			barrels.clear()
 			barrels.extend([create_barrel(grid.idx_cells[idx]) for idx in self.solver.last_created_position.super.barrel_idxs])
