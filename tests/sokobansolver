@@ -452,6 +452,17 @@ sok_awkward_22 = (
 	'######  ',
 )
 
+sok_awkward_23 = (
+	'microcosmos.28',
+	'     ####',
+	'    ##  #',
+	'   ## . #',
+	'#### $  #',
+	'# $ $.@##',
+	'#  .  ## ',
+	'#######  ',
+)
+
 sok_takaken_01 = (
 	'scrambled egg',
 	' #####',
@@ -727,6 +738,7 @@ optimal_solution_nums_strs = {
 	sok_awkward_20: '100/39',
 	sok_awkward_21: '193/32',
 	sok_awkward_22: ('180/24', '170/30'),
+	sok_awkward_23: '73/23',
 	sok_takaken_01: '170/43',
 	sok_takaken_02: '185/42',
 	sok_takaken_03: '144/47',
@@ -779,6 +791,7 @@ optimal_solution_strs = {
 	sok_awkward_20: 'lddrUdrruLLdlUUUruLLLulDDDldRuuurrrrdrDLdlUUruLLLulDDDlddrrULdlUruuurrrrddddrruLLdlUUUruLLLulDDDDldR',
 	sok_awkward_21: 'rruurDurDlldlluuuurrrrrrdddLLLrrruuullllllddddrrdrrUdllulluuuurrrrrrdddlLdLLLrrrurruuulllllldddllddrrUUUUdddrrrruulDrdLLLrrurrruuulllllLLrdddllddrrUUUUdddrrruulDrdLLrurrrruuulllllLdddllddrrUUUU',
 	sok_awkward_22: ('llddlddddrUluuuruurrdddddLLdlUUdrrruuuuulldddDuuuurrdddddlLdllluuuuRRllddddrrrurruuuuullllDurrrrdddddlldllluuuuRuurrdDDDlDuruuuurrdddddlLdLUrrruuuLruulldDDDuurrdddlLuuuuullddlddddR', 'ddLruulldDlddrUldddrUluurUrrdddLLdlUUdrrruuulldDuurruullDDrrdddlLdllluuuuRRRuullDurrrrdddddlldllluuuuRuurrddDDlDuruuuurrddLrdddlLdLUrrruuuuulldDDDuurrdddlLuuuuullddlddddR'),
+	sok_awkward_23: 'ldlluRuRldldlluRRdrrUrUruulDlDlDururrdLdLLuRdrUlldLdlluRRRurrdLdLLuRllldR',
 	sok_complex_01: 'dDuurrddLLrrddLLUlluuRDRddrruuLLrruullDlldddRRuULrrruullDldRddlUruuurrddddLLuuRlddrruUUdlldlldRRuuulDrddlluRurrrddLLUluRRlddrruUllldldRRRluuullD',
 	sok_complex_02: 'ullDDDrrddlULLdlluRRRRluuuulllddRRluurrdDDRddrruuLLdLUUUdlluurRRurrdLLLLrdddrddrUruLLdlLdlluRRRUUUdlluluurDrRRurrdLLLLrdddrrddlUruLdlUUUdllluuurrdLrRddllUdrruuRurrddlUruLdlllullDRddlU',
 	sok_complex_03: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
@@ -837,7 +850,7 @@ def test_obvious_solutions():
 def test_awkward_solutions():
 	for sok in sok_awkward_01, sok_awkward_02, sok_awkward_03, sok_awkward_04, sok_awkward_05, sok_awkward_06, sok_awkward_07, sok_awkward_08, sok_awkward_09, sok_awkward_10, sok_awkward_11, sok_awkward_12, sok_awkward_13, sok_awkward_14, sok_awkward_15, sok_awkward_16, sok_awkward_17, sok_awkward_18, sok_awkward_19, sok_awkward_20, sok_awkward_21:
 		test_solution(sok, sok in (sok_awkward_19, sok_awkward_20, sok_awkward_21), SOLUTION_ALG_ASTAR)
-	for sok in sok_awkward_22,:
+	for sok in sok_awkward_22, sok_awkward_23:
 		test_solution(sok, True, SOLUTION_ALG_BFS)
 
 def test_takaken_solutions():
