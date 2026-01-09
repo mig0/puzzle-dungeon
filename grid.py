@@ -182,10 +182,10 @@ class Grid:
 			self.all_passable_neigh_bits.append(self.to_bits(passable_neigh_idxs))
 			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
 
-	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, extra_cb=None):
+	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, show_la=False, extra_cb=None):
 		if descr:
 			print(descr)
-		char_cell = self.to_cell(char) if char else None
+		char_cell = self.to_cell(char) if char is not None else None
 		if barrels:
 			self.store_reset_barrels(barrels)
 		if show_dead == 'auto':
@@ -193,6 +193,8 @@ class Grid:
 		if show_dead == 'color':
 			cell_colors = (cell_colors or {}) | {cell: COLOR_RED for cell in self.to_cells(self.dead_barrel_bits)}
 			show_dead = False
+		if show_la:
+			cell_colors = (cell_colors or {}) | {cell: COLOR_GREEN for cell in self.to_cells(self.last_accessible_bits)}
 		if idx_colors:
 			cell_colors = (cell_colors or {}) | {self.to_cell(idx): color for idx, color in idx_colors.items()}
 		def get_cell_type_with_clean_floor(cell):
