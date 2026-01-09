@@ -284,7 +284,7 @@ class Grid:
 	def is_passable_neigh(self, first, second):
 		return self.to_idx(second) in self.all_passable_neigh_idxs[self.to_idx(first)]
 
-	def get_accessible_bits(self, start, obstacles=None):
+	def get_accessible_bits(self, start, obstacles=None, allow_obstacles=False):
 		start_idx = self.to_idx(start)
 		obstacle_bits = self.barrel_bits if obstacles is None else self.to_bits(obstacles)
 
@@ -300,6 +300,8 @@ class Grid:
 
 			for idx in search_bits(unprocessed_bits, _ONE):
 				new_bits |= self.all_passable_neigh_bits[idx]
+			if allow_obstacles:
+				accessible_bits |= new_bits & obstacle_bits
 			new_bits &= ~processed_bits
 			if new_bits == self.no_bits:
 				break
@@ -311,8 +313,11 @@ class Grid:
 
 		return accessible_bits
 
+	def get_min_idx(self, bits):
+		return next(search_bits(bits, _ONE))
+
 	def get_min_last_accessible_idx(self):
-		return next(search_bits(self.last_accessible_bits, _ONE))
+		return self.get_min_idx(self.last_accessible_bits)
 
 	def get_accessible_neigh_cells(self, cell):
 		return self.to_cells(self.all_passable_neigh_idxs[self.to_idx(cell)])
