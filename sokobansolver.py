@@ -2,7 +2,7 @@ from constants import *
 from celltools import *
 from common import get_time_str
 from debug import *
-from grid import grid, search_bits, _ONE
+from grid import grid, iter_bits
 from time import time
 from hungarian import Hungarian, INF
 import heapq
@@ -869,7 +869,7 @@ class SokobanSolver():
 		char_accessible_bits = grid.get_accessible_bits(char_idx) if char_idx else grid.all_bits
 
 		# run BFS separately for each plate to compute costs to that plate
-		for plate_idx in search_bits(grid.plate_bits, _ONE):
+		for plate_idx in iter_bits(grid.plate_bits):
 			if not char_accessible_bits[plate_idx]:
 				continue
 			self.min_plate_char_barrel_costs[plate_idx], self.min_plate_barrel_costs[plate_idx] = \
@@ -885,7 +885,7 @@ class SokobanSolver():
 			grid.show_map("Map with dead-barrel cells", show_dead=True)
 
 		# build optimistic barrel -> reachable plates adjacency
-		for barrel_idx in search_bits(~grid.dead_barrel_bits, _ONE):
+		for barrel_idx in iter_bits(~grid.dead_barrel_bits):
 			accessible_plate_idxs = [plate_idx for plate_idx in grid.plate_idxs if barrel_idx in self.min_plate_barrel_costs.get(plate_idx, {})]
 			self.accessible_barrel_plate_idxs[barrel_idx] = accessible_plate_idxs
 			self.is_barrel_mismatch_possible |= len(accessible_plate_idxs) < grid.num_plates

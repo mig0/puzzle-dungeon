@@ -24,6 +24,7 @@ SORTED_DIRS = sort_cells(DIRS)
 
 # support bitarray prior to 2.9.x, replace search with more efficient itersearch
 search_bits = bitarray.itersearch if hasattr(bitarray, 'itersearch') else bitarray.search
+iter_bits = lambda bits: search_bits(bits, _ONE)
 
 class Grid:
 	"""
