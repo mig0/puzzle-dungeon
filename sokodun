@@ -115,7 +115,7 @@ for level_index, level_config in enumerate(level_configs):
 		if show_time:
 			print("Time: %s" % colorize_auto(solver.last_solution_time_str))
 		if not solution_items:
-			print("Solution not found")
+			print("Solution %s" % (colorize_auto("not found")))
 		else:
 			print("Solution %s: %s" % (colorize_auto(solver.last_solution_nums_str), solver.last_solution_str))
 		if coll_records:

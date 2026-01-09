@@ -93,7 +93,7 @@ def colorize_auto(s):
 		return colorize(s, COLOR_GREEN)
 	elif s == 'NEW RECORD':
 		return colorize(s, COLOR_BGREEN)
-	elif s == 'WORSE':
+	elif s == 'WORSE' or s == 'not found':
 		return colorize(s, COLOR_RED)
 	elif s == 'N/A':
 		return colorize(s, COLOR_YELLOW)
