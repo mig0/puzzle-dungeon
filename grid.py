@@ -182,7 +182,7 @@ class Grid:
 			self.all_passable_neigh_bits.append(self.to_bits(passable_neigh_idxs))
 			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
 
-	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, show_la=False, extra_cb=None):
+	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, show_la=False, corrals=None, extra_cb=None):
 		if descr:
 			print(descr)
 		char_cell = self.to_cell(char) if char is not None else None
@@ -195,6 +195,15 @@ class Grid:
 			show_dead = False
 		if show_la:
 			cell_colors = (cell_colors or {}) | {cell: COLOR_GREEN for cell in self.to_cells(self.last_accessible_bits)}
+		if corrals:
+			color = int(COLOR_RED)
+			cell_colors = cell_colors or {}
+			for corral_floor_bits, corral_barrel_bits in corrals:
+				for cell in grid.to_cells(corral_floor_bits):
+					cell_colors[cell] = color
+				for cell in grid.to_cells(corral_barrel_bits):
+					cell_colors[cell] = str(color + int(COLOR_BRED) - int(COLOR_RED))
+				color += 1
 		if idx_colors:
 			cell_colors = (cell_colors or {}) | {self.to_cell(idx): color for idx, color in idx_colors.items()}
 		def get_cell_type_with_clean_floor(cell):
@@ -749,5 +758,22 @@ class Grid:
 				if self.can_shift(char_cell, barrel_cell):
 					cell_pairs.append((char_cell, barrel_cell))
 		return cell_pairs
+
+	def get_corral(self, start_idx):
+		corral_bits = self.get_accessible_bits(start_idx, allow_obstacles=True)
+		return (corral_bits & ~self.barrel_bits, corral_bits & self.barrel_bits)
+
+	# return list of (corral_floor_bits, corral_barrel_bits)
+	# should to be called after get_accessible_bits()
+	def get_corrals(self):
+		remaining_bits = ~self.last_accessible_bits & ~self.barrel_bits
+		corrals = []
+
+		while remaining_bits != self.no_bits:
+			start_idx = self.get_min_idx(remaining_bits)
+			corrals.append(self.get_corral(start_idx))
+			remaining_bits &= ~self.last_accessible_bits
+
+		return corrals
 
 grid = Grid()
