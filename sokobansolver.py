@@ -22,8 +22,9 @@ SOLUTION_ALG_UCS   = "Uniform"
 SOLUTION_ALG_GREED = "Greedy"
 SOLUTION_ALG_ASTAR = "A*"
 
-DBG_PRUN = "prun"
-DBG_SEVT = "sevt"
+DBG_PRUN = "prun"  # show prune info on progress
+DBG_DLCK = "dlck"  # show deadlock maps when detected
+DBG_SEVT = "sevt"  # enable SokobanSolver Event trace
 
 solver = None
 
@@ -241,6 +242,7 @@ class SokobanSolver():
 		self.last_dead_super_position = None
 		self.last_dead_super_position_shift_cells = None
 		if debug.has(DBG_PRUN):
+			self.num_freeze_deadlocks = 0
 			self.num_non_created_costy_positions = 0
 			self.num_non_created_dead_positions = 0
 			self.num_costy_than_solved_positions = 0
@@ -477,6 +479,46 @@ class SokobanSolver():
 			return solution_depth
 		return ((solution_depth - MIN_SOLUTION_DEPTH - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP + MIN_SOLUTION_DEPTH
 
+	def is_freeze_deadlock(self, char_idx, start_barrel_idx):
+		if not self.barrel_axis_blockers or grid.is_zsb:
+			return False
+
+		all_barrels = set(grid.barrel_idxs)
+		frozen_barrels = set()
+		visited_barrels = {start_barrel_idx}
+
+		def is_barrel_frozen(barrel_idx, axis):
+			if barrel_idx in visited_barrels:
+				return True
+			visited_barrels.add(barrel_idx)
+
+			blockers = self.barrel_axis_blockers[barrel_idx][axis]
+			if not blockers:
+				return True
+
+			blocker_barrels = blockers & all_barrels
+			if not blocker_barrels:
+				return False
+
+			new_axis = ORTHOGONAL_AXES[axis]
+			for neigh_idx in blocker_barrels:
+				if is_barrel_frozen(neigh_idx, new_axis):
+					frozen_barrels.add(neigh_idx)
+					return True
+			return False
+
+		for axis in (AXIS_H, AXIS_V):
+			visited_barrels.remove(start_barrel_idx)
+			if not is_barrel_frozen(start_barrel_idx, axis):
+				return False
+		frozen_barrels.add(start_barrel_idx)
+		if is_deadlock := any(barrel_idx not in grid.plate_idxs for barrel_idx in frozen_barrels):
+			if debug.has(DBG_PRUN):
+				self.num_freeze_deadlocks += 1
+			if debug.has(DBG_DLCK):
+				grid.show_map(descr="Freeze Deadlock", char=char_idx, idx_colors={start_barrel_idx: 32})
+		return is_deadlock
+
 	def find_or_create_super_position(self, char_idx):
 		barrel_idxs = grid.barrel_idxs
 		if grid.is_zsb:
@@ -518,7 +560,7 @@ class SokobanSolver():
 		num_moves, num_shifts = 0, 0
 		grid.set_barrels(position.super.barrel_idxs)
 		for distance, char_idx, barrel_idx in segments:
-			new_char_cell, _ = grid.shift(grid.idx_cells[char_idx], grid.idx_cells[barrel_idx])
+			new_char_cell, new_barrel_cell = grid.shift(grid.idx_cells[char_idx], grid.idx_cells[barrel_idx])
 			num_moves += distance + 1
 			num_shifts += 1
 		own_nums = num_moves, num_shifts
@@ -533,6 +575,10 @@ class SokobanSolver():
 
 		new_char_idx = grid.cell_idxs[new_char_cell]
 		super_position = self.find_or_create_super_position(new_char_idx)
+
+		if not super_position.is_dead and new_char_idx not in super_position.positions:
+			shift_idxs = (new_char_idx, grid.cell_idxs[new_barrel_cell])
+			super_position.is_dead = self.is_freeze_deadlock(*shift_idxs)
 
 		if super_position.is_dead:
 			self.last_dead_super_position = super_position
@@ -795,12 +841,16 @@ class SokobanSolver():
 
 	def expand_barrel_costs(self, min_char_costs, min_costs, start_idx, is_reverse):
 		grid_try_shift = grid.try_opposite_shift if is_reverse else grid.try_shift
+		update_shift_dsts = is_reverse
+
 		min_plate_char_costs = {}
 		min_plate_costs = {}
 
 		depth = 0
 		min_costs[start_idx] = (0, 0)
 		min_plate_costs[start_idx] = (0, 0)
+		if update_shift_dsts:
+			self.barrel_axis_blockers.setdefault(start_idx, [set(), set()])
 		unprocessed = []
 		for char_idx in grid.all_passable_neigh_idxs[start_idx]:
 			min_char_costs[(char_idx, start_idx)] = (0, 0)
@@ -829,6 +879,11 @@ class SokobanSolver():
 					cost = (new_dist, depth)
 					new_barrel_idx = new_idxs[1]
 
+					if update_shift_dsts and (new_idxs not in min_char_costs or min_char_costs[new_idxs] == (0, 0)):
+						axis_blockers = self.barrel_axis_blockers.setdefault(new_barrel_idx, [set(), set()])
+						axis = AXIS_V if new_cells[0][0] == new_cells[1][0] else AXIS_H
+						axis_blockers[axis].add(barrel_idx)
+
 					was_improved = False
 					if new_idxs not in min_char_costs or cmp_costs(min_char_costs[new_idxs], cost) > 0:
 						min_char_costs[new_idxs] = cost
@@ -853,6 +908,7 @@ class SokobanSolver():
 		self.min_plate_char_barrel_costs = {}
 		self.min_plate_barrel_costs = {}
 		self.valid_shift_pairs = None
+		self.barrel_axis_blockers = {}
 		self.accessible_barrel_plate_idxs = {}
 		self.is_barrel_mismatch_possible = False
 		self.min_char_target_costs = {}
@@ -904,6 +960,7 @@ class SokobanSolver():
 			debug("Precalculated valid data:")
 			debug([2], {
 				"valid_shift_pairs": self.valid_shift_pairs,
+				"barrel_axis_blockers": self.barrel_axis_blockers,
 			})
 
 		if debug.has("precosts"):
@@ -965,7 +1022,7 @@ class SokobanSolver():
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
 		if debug.has(DBG_PRUN):
-			status_str += "; ncc %d ncd %d sol %d cts %d csb %d" % (self.num_non_created_costy_positions, self.num_non_created_dead_positions, self.num_found_solved_positions, self.num_costy_than_solved_positions, self.num_costy_solved_bound_positions)
+			status_str += "; fd %d ncd %d sol %d ncc %d cts %d csb %d" % (self.num_freeze_deadlocks, self.num_non_created_dead_positions, self.num_found_solved_positions, self.num_non_created_costy_positions, self.num_costy_than_solved_positions, self.num_costy_solved_bound_positions)
 		debug(DBG_SOLV, status_str + "; sp: %d p: %d" % (len(self.visited_super_positions), self.num_created_positions))
 		return status_str
 
