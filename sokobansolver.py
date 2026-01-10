@@ -243,6 +243,7 @@ class SokobanSolver():
 		self.last_dead_super_position_shift_cells = None
 		if debug.has(DBG_PRUN):
 			self.num_freeze_deadlocks = 0
+			self.num_corral_deadlocks = 0
 			self.num_non_created_costy_positions = 0
 			self.num_non_created_dead_positions = 0
 			self.num_costy_than_solved_positions = 0
@@ -519,6 +520,97 @@ class SokobanSolver():
 				grid.show_map(descr="Freeze Deadlock", char=char_idx, idx_colors={start_barrel_idx: 32})
 		return is_deadlock
 
+	def is_corral_freeze_deadlock(self, char_idx, start_barrel_idx):
+		if not self.valid_shift_srcs or grid.is_zsb:
+			return False
+
+		barrel_bits = grid.barrel_bits
+		accessible_bits = grid.get_accessible_bits(char_idx)
+		checked_floor_bits = accessible_bits.copy()
+
+		def is_corral_frozen(corral_floor_bits, corral_barrel_bits, corral_bits):
+			assert corral_floor_bits != grid.no_bits and corral_barrel_bits != grid.no_bits
+			if corral_barrel_bits & ~grid.plate_bits == grid.no_bits:
+				return False
+			has_no_unsolved_plates = grid.plate_bits & corral_floor_bits == grid.no_bits
+
+			def is_corral_or_corner_barrel(barrel_idx):
+				return corral_barrel_bits[barrel_idx] or barrel_bits[barrel_idx] and \
+					(grid.all_passable_neigh_bits[barrel_idx] & corral_barrel_bits).count() >= 2
+
+			def can_shift_neigh_corral_barrel(barrel_idx):
+				for neigh_idx in iter_bits(grid.all_passable_neigh_bits[barrel_idx]):
+					if not is_corral_or_corner_barrel(neigh_idx):
+						continue
+					# see loma.37 and original.3
+					for src_idx in self.valid_shift_srcs[neigh_idx]:
+						dst_idx = self.valid_shift_dsts[src_idx, neigh_idx]
+						if src_idx == barrel_idx and not barrel_bits[dst_idx]:
+							return True
+						if dst_idx == barrel_idx and not barrel_bits[src_idx]:
+							return True
+				return False
+
+			def is_pushed_corral_barrel_frozen(barrel_idx):
+				for src_idx in self.valid_shift_srcs[barrel_idx]:
+					dst_idx = self.valid_shift_dsts[src_idx, barrel_idx]
+					if not corral_barrel_bits[barrel_idx] and not corral_barrel_bits[dst_idx]:
+						return False
+				return True
+
+			def is_adj_corral_barrel_frozen(barrel_idx):
+				if not barrel_bits[barrel_idx]:
+					return False
+				for src_idx in self.valid_shift_srcs[barrel_idx]:
+					dst_idx = self.valid_shift_dsts[src_idx, barrel_idx]
+					if not corral_barrel_bits[src_idx] and not corral_barrel_bits[dst_idx]:
+						return False
+				return True
+
+			for barrel_idx in iter_bits(corral_barrel_bits):
+				for src_idx in self.valid_shift_srcs[barrel_idx]:
+					# push inside-out, can't reach without other pushes
+					if corral_floor_bits[src_idx] or corral_barrel_bits[src_idx]:
+						continue
+					dst_idx = self.valid_shift_dsts[src_idx, barrel_idx]
+					if corral_floor_bits[dst_idx]:
+						# push inward, can open corral
+						if grid.can_shift(grid.idx_cells[src_idx], grid.idx_cells[barrel_idx]):
+							if (has_no_unsolved_plates
+								and (grid.all_passable_neigh_bits[barrel_idx] & corral_floor_bits).count() <= 1
+								and not can_shift_neigh_corral_barrel(barrel_idx)
+								and is_pushed_corral_barrel_frozen(dst_idx)
+							):
+								continue
+							return False
+					elif corral_barrel_bits[dst_idx]:
+						continue
+					else:
+						# push sideways, can open corral
+						if not is_adj_corral_barrel_frozen(src_idx) and not is_adj_corral_barrel_frozen(dst_idx):
+							return False
+			return True
+
+		neighs = set(grid.all_passable_neigh_idxs[start_barrel_idx])
+		neighs.update(*(grid.all_passable_neigh_idxs[neigh_idx] for neigh_idx in neighs.copy() if barrel_bits[neigh_idx]))
+		for neigh_idx in neighs:
+			if barrel_bits[neigh_idx] or checked_floor_bits[neigh_idx]:
+				continue
+
+			corral_floor_bits, corral_barrel_bits = grid.get_corral(neigh_idx)
+
+			if corral_floor_bits & checked_floor_bits != grid.no_bits:
+				continue
+			checked_floor_bits |= corral_floor_bits
+
+			if is_corral_frozen(corral_floor_bits, corral_barrel_bits, grid.last_accessible_bits):
+				if debug.has(DBG_PRUN):
+					self.num_corral_deadlocks += 1
+				if debug.has(DBG_DLCK):
+					grid.show_map(descr="Corral Freeze Deadlock", char=char_idx, corrals=[(corral_floor_bits, corral_barrel_bits)], idx_colors={start_barrel_idx: '38;5;178'})
+				return True
+		return False
+
 	def find_or_create_super_position(self, char_idx):
 		barrel_idxs = grid.barrel_idxs
 		if grid.is_zsb:
@@ -578,7 +670,7 @@ class SokobanSolver():
 
 		if not super_position.is_dead and new_char_idx not in super_position.positions:
 			shift_idxs = (new_char_idx, grid.cell_idxs[new_barrel_cell])
-			super_position.is_dead = self.is_freeze_deadlock(*shift_idxs)
+			super_position.is_dead = self.is_freeze_deadlock(*shift_idxs) or self.is_corral_freeze_deadlock(*shift_idxs)
 
 		if super_position.is_dead:
 			self.last_dead_super_position = super_position
@@ -851,6 +943,7 @@ class SokobanSolver():
 		min_plate_costs[start_idx] = (0, 0)
 		if update_shift_dsts:
 			self.barrel_axis_blockers.setdefault(start_idx, [set(), set()])
+			self.valid_shift_srcs.setdefault(start_idx, set())
 		unprocessed = []
 		for char_idx in grid.all_passable_neigh_idxs[start_idx]:
 			min_char_costs[(char_idx, start_idx)] = (0, 0)
@@ -883,6 +976,8 @@ class SokobanSolver():
 						axis_blockers = self.barrel_axis_blockers.setdefault(new_barrel_idx, [set(), set()])
 						axis = AXIS_V if new_cells[0][0] == new_cells[1][0] else AXIS_H
 						axis_blockers[axis].add(barrel_idx)
+						self.valid_shift_srcs.setdefault(new_barrel_idx, set()).add(new_idxs[0])
+						self.valid_shift_dsts[new_idxs] = barrel_idx
 
 					was_improved = False
 					if new_idxs not in min_char_costs or cmp_costs(min_char_costs[new_idxs], cost) > 0:
@@ -908,6 +1003,8 @@ class SokobanSolver():
 		self.min_plate_char_barrel_costs = {}
 		self.min_plate_barrel_costs = {}
 		self.valid_shift_pairs = None
+		self.valid_shift_srcs = {}
+		self.valid_shift_dsts = {}
 		self.barrel_axis_blockers = {}
 		self.accessible_barrel_plate_idxs = {}
 		self.is_barrel_mismatch_possible = False
@@ -960,6 +1057,8 @@ class SokobanSolver():
 			debug("Precalculated valid data:")
 			debug([2], {
 				"valid_shift_pairs": self.valid_shift_pairs,
+				"valid_shift_srcs": self.valid_shift_srcs,
+				"valid_shift_dsts": self.valid_shift_dsts,
 				"barrel_axis_blockers": self.barrel_axis_blockers,
 			})
 
@@ -1022,7 +1121,7 @@ class SokobanSolver():
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
 		if debug.has(DBG_PRUN):
-			status_str += "; fd %d ncd %d sol %d ncc %d cts %d csb %d" % (self.num_freeze_deadlocks, self.num_non_created_dead_positions, self.num_found_solved_positions, self.num_non_created_costy_positions, self.num_costy_than_solved_positions, self.num_costy_solved_bound_positions)
+			status_str += "; fd %d cd %d ncd %d sol %d ncc %d cts %d csb %d" % (self.num_freeze_deadlocks, self.num_corral_deadlocks, self.num_non_created_dead_positions, self.num_found_solved_positions, self.num_non_created_costy_positions, self.num_costy_than_solved_positions, self.num_costy_solved_bound_positions)
 		debug(DBG_SOLV, status_str + "; sp: %d p: %d" % (len(self.visited_super_positions), self.num_created_positions))
 		return status_str
 
