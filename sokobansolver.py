@@ -896,6 +896,12 @@ class SokobanSolver():
 				continue
 			self.expand_barrel_costs(self.min_char_target_costs, self.min_target_costs, barrel_idx, False)
 
+		if debug.has("prevalid"):
+			debug("Precalculated valid data:")
+			debug([2], {
+				"valid_shift_pairs": self.valid_shift_pairs,
+			})
+
 		if debug.has("precosts"):
 			def idx_costs_to_str(d):
 				return ', '.join(['%d: %d/%d' % (idx, *cost) for idx, cost in d.items()])
@@ -906,7 +912,7 @@ class SokobanSolver():
 			debug([2], idx_costs_to_str(dict(sorted(min_plate_costs.items()))))
 
 			if debug.has("precosts+"):
-				debug("Precalculated data:")
+				debug("Precalculated costs data:")
 				debug([2], {
 					"min_barrel_costs": self.min_barrel_costs,
 					"min_char_barrel_costs": self.min_char_barrel_costs,
