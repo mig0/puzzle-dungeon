@@ -1010,8 +1010,9 @@ class SokobanSolver():
 
 			return None, self.get_find_solution_status_str()
 
-		if stop or self.solution_depth > MAX_SOLUTION_DEPTH or time() > self.end_solution_time:
-			return self.get_found_solution_items("terminated"), None
+		too_deep = self.solution_depth > MAX_SOLUTION_DEPTH
+		if stop or too_deep or time() > self.end_solution_time:
+			return self.get_found_solution_items("terminated (%s)" % ("by user" if stop else "too deep" if too_deep else "time out")), None
 
 		debug(DBG_SOLV2, "Using %s%s" % (self.solution_alg, " up to depth %d" % self.solution_depth if self.solution_depth < MAX_SOLUTION_DEPTH else ""))
 
