@@ -21,7 +21,7 @@ def process_cmdargs(cmdargs, extra_custom_collection_config=None):
 		atexit.register(lambda: profiler.stop())
 
 	if cmdargs.list_ll_collections:
-		collections = fetch_letslogic_collections()
+		collections = fetch_letslogic_collections() or exit(1)
 		max_id_len = max(len(c_id) for c_id in collections)
 		for c_id, c in collections.items():
 			print("%s - %s (%d)" % (c_id.ljust(max_id_len), c['title'], c['levels']))

@@ -408,13 +408,13 @@ def fetch_letslogic_collections():
 			save_user_file(ll_colls_filename, output)
 		else:
 			warn("Can't fetch letslogic collections, check url, key or internet")
-			return []
+			return {}
 
 	null = None
 	try:
 		collections = eval(output)
 	except Exception as e:
 		warn("Failed to parse letslogic collections:\n%s" % str(e))
-		return []
+		return {}
 
 	return dict((str(c["id"]), c) for c in sorted(collections, key=lambda c: c["id"]))
