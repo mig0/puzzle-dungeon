@@ -238,6 +238,8 @@ class SokobanSolver():
 		self.max_created_depth = 0
 		self.unprocessed_positions = None
 		self.num_processed_positions = 0
+		self.last_dead_super_position = None
+		self.last_dead_super_position_shift_cells = None
 		if debug.has(DBG_PRUN):
 			self.num_non_created_costy_positions = 0
 			self.num_non_created_dead_positions = 0
@@ -533,6 +535,8 @@ class SokobanSolver():
 		super_position = self.find_or_create_super_position(new_char_idx)
 
 		if super_position.is_dead:
+			self.last_dead_super_position = super_position
+			self.last_dead_super_position_shift_cells = (new_char_cell, new_barrel_cell)
 			if debug.has(DBG_PRUN):
 				self.num_non_created_dead_positions += 1
 			debug([position.depth], DBG_SOLV3, "Not creating child in deadlocked super-position")

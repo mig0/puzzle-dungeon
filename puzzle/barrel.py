@@ -491,6 +491,11 @@ class BarrelPuzzle(Puzzle):
 			char.c = grid.idx_cells[self.solver.last_created_position.char_idx]
 			barrels.clear()
 			barrels.extend([create_barrel(grid.idx_cells[idx]) for idx in self.solver.last_created_position.super.barrel_idxs])
+		if keyboard.backquote and self.solver.last_dead_super_position:
+			char.c, barrel_cell = self.solver.last_dead_super_position_shift_cells
+			barrels.clear()
+			barrels.extend([create_barrel(grid.idx_cells[idx]) for idx in self.solver.last_dead_super_position.barrel_idxs])
+			get_actor_on_cell(barrel_cell, barrels).color = (220, 220, 40)
 
 	def on_enter_cell(self):
 		game.remember_obj_state(self)
