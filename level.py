@@ -64,6 +64,8 @@ class Level:
 				expected_type = type(default) if default is not None or value is None else \
 					tuple if key == 'map-size' else int if any(map(key.endswith, ("-power", "-limit", "-health"))) else str
 				if expected_type != type(value):
+					if value is None:
+						continue
 					warn("Ignoring config %s=%s in level %s; expected type %s" %
 						(key, str(value), self.get_id(), expected_type.__name__))
 				else:
