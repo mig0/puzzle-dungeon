@@ -107,7 +107,7 @@ on GNU/Linux, Windows, and other operating systems.
 |Space|Press cell, force teleport and more
 |Enter|Activate cursor
 |Esc|Exit to the main screen
-|KP-Enter|Find solution, then replay it
+|KP_Enter|Find a solution, then replay it
 |Backspace|Unset prepared solution if any
 |RShift-E|Set language to English
 |RShift-R|Set language to Russian
@@ -121,25 +121,30 @@ on GNU/Linux, Windows, and other operating systems.
 |PageUp|  Simulate mouse button 4
 |PageDown|Simulate mouse button 5
 |Ctrl-Escape|Display Pygame Console if available
-|Alt-E|Reload with toggled reverse-barrel-mode
-|Alt-C|Load custom collection levels from clipboard
-|Alt-S|Load solution from clipboard
+|Alt-R|Reload level (guaranteed same map unlike plain *r*)
+|Alt-E|Reload level with toggled reverse-barrel mode
+|Alt-C|Load custom collection levels from the clipboard
+|Alt-S|Load a solution from the clipboard
 
 ## Controls for BarrelPuzzle (Sokoban) solver
 
 |key|action
 |--|--
-|RAlt-1|Toggle return-first solution
-|RAlt-A|Use A* algorithm
-|RAlt-B|Use BFS algorithm
-|RAlt-D|Use DFS algorithm
-|RAlt-G|Use Greedy algorithm
-|RAlt-U|Use USC (Uniform) algorithm
-|RAlt-0|Disable reporting every second
-|RAlt--|Disable preparing costs (debug only)
-|KP-Enter|Find push optimal solution
-|Shift-KP-Enter|Find move optimal solution
-|Backspace|Stop finding or playing solution, or unset solution
+|RCtrl-1|Toggle return-first solution
+|RCtrl-A|Use A* algorithm
+|RCtrl-B|Use BFS algorithm
+|RCtrl-D|Use DFS algorithm
+|RCtrl-G|Use Greedy algorithm
+|RCtrl-U|Use USC (Uniform Cost) algorithm
+|RCtrl-0|Disable periodic progress reporting
+|RCtrl--|Disable cost and valid shift preparation (debug only)
+|KP_Enter|Find a push optimal solution
+|Shift-KP_Enter|Find a move optimal solution
+|Backspace|Stop solving or playing a solution, or unset the solution
+|RCtrl-Tab|Show the most recently created position while solving
+|RCtrl-Backquote|Show the most recently detected deadlock while solving
+
+See dedicated [Sokoban Solver](sokobansolver.html) page for more information.
 
 ## Controls when replaying any solution
 
@@ -198,6 +203,9 @@ package, or checkout the source code from github, then run:
 On Windows, run __dungeon.bat__.
 
 On Unix systems, you may optionally install it using "make install".
+
+See [dungeon](dungeon.html) page for complete information about options
+and arguments.
 
 ## Puzzles
 
