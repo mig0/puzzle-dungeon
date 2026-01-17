@@ -1,0 +1,5 @@
+Title: Sokodun Usage
+
+This screenshots shows a sample [`sokodun`](sokodun.html) run, with
+`--help`, and then finding the push-optimal A* solution in the first
+Sokoban level in the Original Thinking Rabbit collection.
