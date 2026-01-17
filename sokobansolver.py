@@ -23,8 +23,15 @@ SOLUTION_ALG_GREED = "Greedy"
 SOLUTION_ALG_ASTAR = "A*"
 
 DBG_PRUN = "prun"  # show prune info on progress
+DBG_NOFD = "nofd"  # disable Freeze deadlock detection
+DBG_NOCD = "nocd"  # disable Corral Freeze deadlock detection
 DBG_DLCK = "dlck"  # show deadlock maps when detected
 DBG_SEVT = "sevt"  # enable SokobanSolver Event trace
+
+HAS_PRUN = False
+HAS_NOFD = False
+HAS_NOCD = False
+HAS_DLCK = False
 
 solver = None
 
@@ -224,6 +231,12 @@ class SokobanSolver():
 	def reset_solution_data(self):
 		global solver
 		solver = None
+		global HAS_PRUN, HAS_NOFD, HAS_NOCD, HAS_DLCK
+		HAS_PRUN = debug.has(DBG_PRUN)
+		HAS_NOFD = debug.has(DBG_NOFD)
+		HAS_NOCD = debug.has(DBG_NOCD)
+		HAS_DLCK = debug.has(DBG_DLCK)
+
 		self.visited_super_positions = {}  # super_position_id -> SuperPosition
 		self.limit_time = MAX_FIND_SOLUTION_TIME
 		self.solution_depth = MAX_SOLUTION_DEPTH
@@ -241,7 +254,8 @@ class SokobanSolver():
 		self.num_processed_positions = 0
 		self.last_dead_super_position = None
 		self.last_dead_super_position_shift_cells = None
-		if debug.has(DBG_PRUN):
+		if HAS_PRUN:
+			self.num_match_deadlocks = 0
 			self.num_freeze_deadlocks = 0
 			self.num_corral_deadlocks = 0
 			self.num_non_created_costy_positions = 0
@@ -481,7 +495,7 @@ class SokobanSolver():
 		return ((solution_depth - MIN_SOLUTION_DEPTH - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP + MIN_SOLUTION_DEPTH
 
 	def is_freeze_deadlock(self, char_idx, start_barrel_idx):
-		if not self.barrel_axis_blockers or grid.is_zsb:
+		if HAS_NOFD or not self.barrel_axis_blockers or grid.is_zsb:
 			return False
 
 		all_barrels = set(grid.barrel_idxs)
@@ -514,14 +528,14 @@ class SokobanSolver():
 				return False
 		frozen_barrels.add(start_barrel_idx)
 		if is_deadlock := any(barrel_idx not in grid.plate_idxs for barrel_idx in frozen_barrels):
-			if debug.has(DBG_PRUN):
+			if HAS_PRUN:
 				self.num_freeze_deadlocks += 1
-			if debug.has(DBG_DLCK):
+			if HAS_DLCK:
 				grid.show_map(descr="Freeze Deadlock", char=char_idx, idx_colors={start_barrel_idx: 32})
 		return is_deadlock
 
 	def is_corral_freeze_deadlock(self, char_idx, start_barrel_idx):
-		if not self.valid_shift_srcs or grid.is_zsb:
+		if HAS_NOCD or not self.valid_shift_srcs or grid.is_zsb:
 			return False
 
 		barrel_bits = grid.barrel_bits
@@ -604,9 +618,9 @@ class SokobanSolver():
 			checked_floor_bits |= corral_floor_bits
 
 			if is_corral_frozen(corral_floor_bits, corral_barrel_bits, grid.last_accessible_bits):
-				if debug.has(DBG_PRUN):
+				if HAS_PRUN:
 					self.num_corral_deadlocks += 1
-				if debug.has(DBG_DLCK):
+				if HAS_DLCK:
 					grid.show_map(descr="Corral Freeze Deadlock", char=char_idx, corrals=[(corral_floor_bits, corral_barrel_bits)], idx_colors={start_barrel_idx: '38;5;178'})
 				return True
 		return False
@@ -645,6 +659,11 @@ class SokobanSolver():
 		self.visited_super_positions[super_position_id] = super_position
 
 		super_position.is_dead = not self.is_barrel_matching_found(barrel_idxs)
+		if super_position.is_dead:
+			if HAS_PRUN:
+				self.num_match_deadlocks += 1
+			if HAS_DLCK:
+				grid.show_map(descr="Match Deadlock", char=char_idx)
 
 		return super_position
 
@@ -659,7 +678,7 @@ class SokobanSolver():
 
 		new_total_nums = apply_diff(position.total_nums, own_nums)
 		if self.solved_position and self.solved_position.cmp(new_total_nums) <= 0:
-			if debug.has(DBG_PRUN):
+			if HAS_PRUN:
 				self.num_non_created_costy_positions += 1
 			debug([position.depth], DBG_SOLV3, "Not creating child that does not improve found solution")
 			debug(DBG_SEVT, "NOC %d solved-is-better %s" % (position.id, cost_to_str(new_total_nums)))
@@ -675,7 +694,7 @@ class SokobanSolver():
 		if super_position.is_dead:
 			self.last_dead_super_position = super_position
 			self.last_dead_super_position_shift_cells = (new_char_cell, new_barrel_cell)
-			if debug.has(DBG_PRUN):
+			if HAS_PRUN:
 				self.num_non_created_dead_positions += 1
 			debug([position.depth], DBG_SOLV3, "Not creating child in deadlocked super-position")
 			debug(DBG_SEVT, "NOC %d deadlock %s" % (position.id, cost_to_str(new_total_nums)))
@@ -723,7 +742,7 @@ class SokobanSolver():
 			return True
 
 		if self.solved_position and position.cmp(self.solved_position) >= 0:
-			if debug.has(DBG_PRUN):
+			if HAS_PRUN:
 				self.num_costy_than_solved_positions += 1
 			debug([depth], DBG_SOLV2, "Position does not improve the found solution")
 			debug(DBG_SEVT, "PRN %d solved-is-better %s" % (position.id, position.nums_str))
@@ -732,7 +751,7 @@ class SokobanSolver():
 
 		if position.is_solved:
 			self.solved_position = position
-			if debug.has(DBG_PRUN):
+			if HAS_PRUN:
 				self.num_found_solved_positions += 1
 			debug([depth], DBG_SOLV2, "Found solution %s in %.1fs" % (position.nums_str, time() - self.start_solution_time))
 			debug(DBG_SEVT, "SOL %d %s" % (position.id, position.nums_str))
@@ -747,7 +766,7 @@ class SokobanSolver():
 			assert min_cost
 			total_cost = apply_diff(min_nums, min_cost)
 			if self.solved_position.cmp(total_cost) <= 0:
-				if debug.has(DBG_PRUN):
+				if HAS_PRUN:
 					self.num_costy_solved_bound_positions += 1
 				debug([depth], DBG_SOLV2, "Pruning position by solution lower bound")
 				debug(DBG_SEVT, "PRN %s by-lower-bound %s %s %s" % (position.id, *map(cost_to_str, [min_nums, min_cost, total_cost])))
@@ -1120,8 +1139,20 @@ class SokobanSolver():
 			status_str += " + %d" % len(self.unprocessed_positions)
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
-		if debug.has(DBG_PRUN):
-			status_str += "; fd %d cd %d ncd %d sol %d ncc %d cts %d csb %d" % (self.num_freeze_deadlocks, self.num_corral_deadlocks, self.num_non_created_dead_positions, self.num_found_solved_positions, self.num_non_created_costy_positions, self.num_costy_than_solved_positions, self.num_costy_solved_bound_positions)
+		if HAS_PRUN:
+			prun_str = ""
+			for k, v in (
+				('md', self.num_match_deadlocks),
+				('fd', self.num_freeze_deadlocks),
+				('cd', self.num_corral_deadlocks),
+				('ncd', self.num_non_created_dead_positions),
+				('sol', self.num_found_solved_positions),
+				('ncc', self.num_non_created_costy_positions),
+				('cts', self.num_costy_than_solved_positions),
+				('csb', self.num_costy_solved_bound_positions),
+			):
+				if v != 0: prun_str += f" {k} {v}"
+			status_str += ";%s" % (prun_str if prun_str else " -")
 		debug(DBG_SOLV, status_str + "; sp: %d p: %d" % (len(self.visited_super_positions), self.num_created_positions))
 		return status_str
 
