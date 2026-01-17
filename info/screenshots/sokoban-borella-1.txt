@@ -2,8 +2,10 @@ Puzzle: barrel
 Theme: cargo
 Title: Suitcase 01 / Borella 1 level
 
-This level can be played in Puzzle Dungeon as letslogic "Suitcase 01"
-collection level 66 (or collection letslogic:624, or level
-letslogic:/85516 after loading "letslogic:Suitcase 01" collection).
+This is level 66 in LetsLogic "Suitcase 01" collection.
 
-Run: dungeon "letslogic:Suitcase 01" 66
+It can be played in Puzzle Dungeon by loading collection `letslogic:624`
+(or directly level `letslogic:/85516` after loading its
+`"letslogic:Suitcase 01"` collection).
+
+Run: `dungeon "letslogic:Suitcase 01" 66`
