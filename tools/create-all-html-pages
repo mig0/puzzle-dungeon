@@ -13,6 +13,7 @@ fi
 update-readme-md
 create-html-elements-index
 create-html-elements-news
+create-html-elements-from-md dungeon
 create-html-elements-from-md sokobansolver
 create-html-elements-authors
 create-html-elements-puzzles
@@ -23,6 +24,7 @@ create-html-elements-themes
 create-html-page index
 create-html-page news
 create-html-page download
+create-html-page dungeon
 create-html-page sokobansolver
 create-html-page resources
 create-html-page authors
