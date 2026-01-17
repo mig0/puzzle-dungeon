@@ -463,6 +463,56 @@ sok_awkward_23 = (
 	'#######  ',
 )
 
+sok_awkward_24 = (
+	'microcosmos.32',
+	'  ##### ',
+	'  #   # ',
+	'###*# ##',
+	'#    * #',
+	'# #  # #',
+	'# * +  #',
+	'##  #$##',
+	' ##   # ',
+	'  ##### ',
+)
+
+sok_awkward_25 = (
+	'microcosmos.29',
+	'   ####',
+	' ###  #',
+	'## @$ #',
+	'# .$  #',
+	'# .* ##',
+	'# .$ # ',
+	'##  ## ',
+	' ####  ',
+)
+
+sok_awkward_26 = (
+	'loma.37',
+	'  ##### ',
+	'###   # ',
+	'#   # ##',
+	'#   $  #',
+	'###$*. #',
+	'  # .###',
+	'  # @#  ',
+	'  ####  ',
+)
+
+sok_awkward_27 = (
+	'anomaly1.15',
+	'  ####   ',
+	'  #  ####',
+	'###     #',
+	'#    ## #',
+	'# #.. # #',
+	'# ##* # #',
+	'#   *$$ #',
+	'#### @###',
+	'   ####  ',
+)
+
 sok_takaken_01 = (
 	'scrambled egg',
 	' #####',
@@ -693,6 +743,20 @@ sok_complex_04 = (
 	' ########',
 )
 
+sok_complex_05 = (
+	'MICROCOSMOS 30',
+	'######    ',
+	'#   .#    ',
+	'# . @#    ',
+	'# # ###   ',
+	'# # $ ##  ',
+	'# *.   ## ',
+	'#### $$ ##',
+	'   ##    #',
+	'    ##   #',
+	'     #####',
+)
+
 optimal_solution_nums_strs = {
 	sok_trivial_h1: '1/1',
 	sok_trivial_h2: '1/1',
@@ -739,24 +803,29 @@ optimal_solution_nums_strs = {
 	sok_awkward_21: '193/32',
 	sok_awkward_22: ('180/24', '170/30'),
 	sok_awkward_23: '73/23',
+	sok_awkward_24: '82/20',
+	sok_awkward_25: '83/24',
+	sok_awkward_26: '102/30',
+	sok_awkward_27: ('139/24', '137/26'),
 	sok_takaken_01: '170/43',
 	sok_takaken_02: '185/42',
 	sok_takaken_03: '144/47',
 	sok_takaken_04: ('256/67', '250/69'),
 	sok_takaken_05: '84/24',
-	sok_takaken_06: ('180/52', '170/56'),
-	sok_takaken_07: ('373/58', '369/60'),  # ('365/58', '361/60')
+	sok_takaken_06: ('180/52', '170/60'),
+	sok_takaken_07: ('365/58', '361/60'),
 	sok_takaken_08: '185/41',
 	sok_takaken_09: '93/16',
 	sok_takaken_10: ('148/52', '146/54'),
 	sok_takaken_11: '105/22',
 	sok_takaken_12: '86/19',
 	sok_takaken_13: ('213/54', '207/58'),
-	sok_takaken_14: ('266/73', '247/75'),
+	sok_takaken_14: ('264/73', '246/83'),
 	sok_complex_01: '144/38',
 	sok_complex_02: '183/58',
 	sok_complex_03: '211/82',
 	sok_complex_04: ('140/41', '138/45'),
+	sok_complex_05: '161/40',
 }
 
 optimal_solution_nums_strs_by_type = {
@@ -792,10 +861,15 @@ optimal_solution_strs = {
 	sok_awkward_21: 'rruurDurDlldlluuuurrrrrrdddLLLrrruuullllllddddrrdrrUdllulluuuurrrrrrdddlLdLLLrrrurruuulllllldddllddrrUUUUdddrrrruulDrdLLLrrurrruuulllllLLrdddllddrrUUUUdddrrruulDrdLLrurrrruuulllllLdddllddrrUUUU',
 	sok_awkward_22: ('llddlddddrUluuuruurrdddddLLdlUUdrrruuuuulldddDuuuurrdddddlLdllluuuuRRllddddrrrurruuuuullllDurrrrdddddlldllluuuuRuurrdDDDlDuruuuurrdddddlLdLUrrruuuLruulldDDDuurrdddlLuuuuullddlddddR', 'ddLruulldDlddrUldddrUluurUrrdddLLdlUUdrrruuulldDuurruullDDrrdddlLdllluuuuRRRuullDurrrrdddddlldllluuuuRuurrddDDlDuruuuurrddLrdddlLdLUrrruuuuulldDDDuurrdddlLuuuuullddlddddR'),
 	sok_awkward_23: 'ldlluRuRldldlluRRdrrUrUruulDlDlDururrdLdLLuRdrUlldLdlluRRRurrdLdLLuRllldR',
+	sok_awkward_24: 'uulllddRdrUrrruuLLddlddrrUdlluuruuLDDuurruullDDrddllluuRRDrdLuuuurrddrddLddllUUUUR',
+	sok_awkward_25: ('lddRUrruulDrdLLdlddrUrULrUruulDDlddlluuRuRDrruulDrdLulldlddrrrUULDrdLuurruulDrdLulD', 'lddRUrruulDrdLLdlddrUrULrUruulDDlddlluuRuRDrruulDrdLulldlddrrrUULDurruulDrdLulDrddL'),
+	sok_awkward_26: 'ulUURDrruLLLdddrUUruuullDDRdrUllulldRRRddlUruLrdrruLdlluuurrDDrdLuuullddRDuluurrdDrdLullulldRRRluurrdD',
+	sok_awkward_27: ('ULUUluurrrrddddLLdlUrrruuuulllldlldddrRRRlllluuurrdrrDullulldddrrrUruLdddrUlllluuurrurrrrddddLLLuurDulUluurDrrrddddlLdlUrrruuuulllDllldddrR', 'ULUUluurrrrddddLLdlUrrruuuulllldlldddrRRRlllluuurrdrrDulUllldddrrrUruLdddrUluuuluurDrrrddddLLLuurDulUluurDrrrddddlLdlUrrruuuulllDllldddrR'),
 	sok_complex_01: 'dDuurrddLLrrddLLUlluuRDRddrruuLLrruullDlldddRRuULrrruullDldRddlUruuurrddddLLuuRlddrruUUdlldlldRRuuulDrddlluRurrrddLLUluRRlddrruUllldldRRRluuullD',
 	sok_complex_02: 'ullDDDrrddlULLdlluRRRRluuuulllddRRluurrdDDRddrruuLLdLUUUdlluurRRurrdLLLLrdddrddrUruLLdlLdlluRRRUUUdlluluurDrRRurrdLLLLrdddrrddlUruLdlUUUdllluuurrdLrRddllUdrruuRurrddlUruLdlllullDRddlU',
 	sok_complex_03: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
-	sok_complex_04: ('uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRurDDullddrdrruLuuuuulDulldRRDrdddLLuuRurDDulllldddrUrrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU', 'uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRuruulDulldRRDrDDuLLddrdrruLLLullddrUluuRRRurDDullddrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU')
+	sok_complex_04: ('uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRurDDullddrdrruLuuuuulDulldRRDrdddLLuuRurDDulllldddrUrrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU', 'uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRuruulDulldRRDrDDuLLddrdrruLLLullddrUluuRRRurDDullddrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU'),
+	sok_complex_05: 'ldddrrrDullluuulldddRRRdRdRdrruLuLuLuLrdrdrddlUlUlUlUUddlluuuurrrdLdddrdrdrruLuLLdRurDullLuuuullddddRRRdrruLuLrddlUlUUUdddrruLdllluuuurRddDrdLrrrdrddlUruLdlUruLL',
 }
 
 optimal_solution_strs_by_type = {
@@ -850,7 +924,7 @@ def test_obvious_solutions():
 def test_awkward_solutions():
 	for sok in sok_awkward_01, sok_awkward_02, sok_awkward_03, sok_awkward_04, sok_awkward_05, sok_awkward_06, sok_awkward_07, sok_awkward_08, sok_awkward_09, sok_awkward_10, sok_awkward_11, sok_awkward_12, sok_awkward_13, sok_awkward_14, sok_awkward_15, sok_awkward_16, sok_awkward_17, sok_awkward_18, sok_awkward_19, sok_awkward_20, sok_awkward_21:
 		test_solution(sok, sok in (sok_awkward_19, sok_awkward_20, sok_awkward_21), SOLUTION_ALG_ASTAR)
-	for sok in sok_awkward_22, sok_awkward_23:
+	for sok in sok_awkward_22, sok_awkward_23, sok_awkward_24, sok_awkward_25, sok_awkward_26, sok_awkward_27:
 		test_solution(sok, True, SOLUTION_ALG_BFS)
 
 def test_takaken_solutions():
@@ -858,7 +932,7 @@ def test_takaken_solutions():
 		test_solution(sok)
 
 def test_complex_solutions():
-	for sok in sok_complex_01, sok_complex_02, sok_complex_03, sok_complex_04:
+	for sok in sok_complex_01, sok_complex_02, sok_complex_03, sok_complex_04, sok_complex_05:
 		test_solution(sok, False, SOLUTION_ALG_ASTAR, True)
 
 def test_trivial_without_solutions():
