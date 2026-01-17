@@ -1,0 +1,14 @@
+   ####
+  # ..@#
+  # $$ #
+ ### ##
+#    ##
+# #$ #
+# .  #
+ ##  #
+   ###
+Title: No solution without cheat mode
+
+Press RShift-C to toggle the cheat mode. Then you may press Shift-arrows
+to pull barrels instead of pushing. This way the level may be solved in
+Puzzle Dungeon. :)
