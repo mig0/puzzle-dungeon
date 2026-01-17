@@ -89,7 +89,7 @@ def colorize_auto(s):
 		s = str(s)
 	if not USE_COLORS:
 		return s
-	if s == 'OK':
+	if s == 'OK' or s == 'found':
 		return colorize(s, COLOR_GREEN)
 	elif s == 'NEW RECORD':
 		return colorize(s, COLOR_BGREEN)

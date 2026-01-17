@@ -91,6 +91,7 @@ if record_filename == '.' or record_filename is None and any(records_in_level_co
 	record_filename = [*records_in_level_configs()]
 
 coll_records = CollectionRecords(record_filename, cmdargs.by_moves) if record_filename else None
+is_optimal = not return_first and not reverse_barrel_mode and solution_alg in (None, SOLUTION_ALG_ASTAR, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS)
 
 for level_index, level_config in enumerate(level_configs):
 	level_index += 1
@@ -105,23 +106,30 @@ for level_index, level_config in enumerate(level_configs):
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		if coll_records: coll_records.cmp_level_result(None)
 		continue
-	print("Solving level %s of %d: %s" % (colorize(level_index, COLOR_BOLD), len(level_configs), colorize(level.name, COLOR_ITALIC)))
+	if quiet <= 3:
+		print("Solving level %s of %d: %s" % (colorize(level_index, COLOR_BOLD), len(level_configs), colorize(level.name, COLOR_ITALIC)))
 	solver = create_solver(level.map_string, reverse_barrel_mode)
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
 	solver.disable_prepare = disable_prepare
 
 	def show_solution(solution_items):
-		if show_time:
-			print("Time: %s" % colorize_auto(solver.last_solution_time_str))
-		if not solution_items:
-			print("Solution %s" % (colorize_auto("not found")))
-		else:
-			print("Solution %s: %s" % (colorize_auto(solver.last_solution_nums_str), solver.last_solution_str))
 		if coll_records:
 			record_str = colorize_auto(coll_records.record_str_at_result)
 			c = coll_records.cmp_level_result(solver.last_solution_nums_str)
-			print("Record %s: %s" % (record_str, colorize_auto('N/A' if c is None else 'OK' if c == 0 else 'WORSE' if c == 1 else 'NEW RECORD')))
+			record_status_str = colorize_auto('N/A' if c is None else 'OK' if c == 0 else 'WORSE' if c == 1 else 'NEW RECORD')
+		if show_time:
+			print("Time: %s" % colorize_auto(solver.last_solution_time_str))
+		if quiet >= 3 and is_optimal and solution_items and coll_records:
+			print("Solution: %s" % record_status_str)
+		elif not solution_items:
+			print("Solution %s" % colorize_auto("not found"))
+		elif quiet >= 3:
+			print("Solution %s" % colorize_auto("found"))
+		else:
+			print("Solution %s: %s" % (colorize_auto(solver.last_solution_nums_str), solver.last_solution_str))
+		if quiet <= 2 and coll_records:
+			print("Record %s: %s" % (record_str, record_status_str))
 
 	try:
 		while True:
@@ -132,7 +140,7 @@ for level_index, level_config in enumerate(level_configs):
 		progress_line.put()
 
 		show_solution(solution_items)
-		print()
+		if quiet <= 3: print()
 	except KeyboardInterrupt:
 		print()
 		solution_items = solver.get_found_solution_items("terminated")
