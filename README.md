@@ -130,14 +130,14 @@ on GNU/Linux, Windows, and other operating systems.
 
 |key|action
 |--|--
-|RCtrl-1|Toggle return-first solution
+|RCtrl-1|Toggle return-first solution mode
 |RCtrl-A|Use A* algorithm
 |RCtrl-B|Use BFS algorithm
 |RCtrl-D|Use DFS algorithm
 |RCtrl-G|Use Greedy algorithm
-|RCtrl-U|Use USC (Uniform Cost) algorithm
+|RCtrl-U|Use UCS (Uniform Cost) algorithm
 |RCtrl-0|Disable periodic progress reporting
-|RCtrl--|Disable cost and valid shift preparation (debug only)
+|RCtrl-\-|Disable cost and valid shift preparation (debug only)
 |KP_Enter|Find a push optimal solution
 |Shift-KP_Enter|Find a move optimal solution
 |Backspace|Stop solving or playing a solution, or unset the solution

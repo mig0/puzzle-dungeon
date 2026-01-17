@@ -204,14 +204,14 @@ So such Position object is just never created; this can't be disabled.
 
 |GUI key|CLI option|Action
 |--|--|--------
-|RCtrl-1|`-1`|Toggle return-first solution
+|RCtrl-1|`-1`|Toggle return-first solution mode
 |RCtrl-A|`-A`|Use A* algorithm
 |RCtrl-B|`-B`|Use BFS algorithm
 |RCtrl-D|`-D`|Use DFS algorithm
 |RCtrl-G|`-G`|Use Greedy algorithm
-|RCtrl-U|`-U`|Use USC (Uniform Cost) algorithm
+|RCtrl-U|`-U`|Use UCS (Uniform Cost) algorithm
 |RCtrl-0|`-0`|Disable periodic progress reporting
-|RCtrl--|`-_`|Disable cost and valid shift preparation (debug only)
+|RCtrl-\-|`-_`|Disable cost and valid shift preparation (debug only)
 |KP_Enter|default|Find a push optimal solution
 |Shift-KP_Enter|`-m`|Find a move optimal solution
 |Backspace|*Ctrl-C* or N/A|Stop solving or playing a solution, or unset the solution
