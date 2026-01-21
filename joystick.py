@@ -23,7 +23,6 @@ class HidPlaystationConfig:
 		9:  'OPTIONS',
 		10: 'SYSTEM',
 		11:  None,
-		12:  None,
 	}
 
 	MODIFIER_BUTTONS = {
@@ -68,7 +67,7 @@ class HidPlaystationConfig:
 
 	@classmethod
 	def is_detected(cls, joystick):
-		return joystick.get_numaxes() == 6 and joystick.get_numballs() == 0 and joystick.get_numbuttons() == 13 and joystick.get_numhats() == 1
+		return joystick.get_numaxes() == 6 and joystick.get_numballs() == 0 and joystick.get_numbuttons() in (12, 13) and joystick.get_numhats() == 1
 
 class NohidPlaystationConfig(HidPlaystationConfig):
 	BUTTON_NAMES = {
