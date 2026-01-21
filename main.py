@@ -90,9 +90,20 @@ idle_time = 0
 
 last_regeneration_time = 0
 
-last_time_arrow_keys_processed = None
-last_processed_arrow_keys = []
-pressed_arrow_keys = []
+class ArrowKeys:
+	def __init__(self):
+		self.reset()
+
+	def reset(self):
+		self.pressed = []
+		self.clicked = []
+		self.pending = []
+		self.reacted = []
+		self.reacted_prev = []
+		self.reacted_diff = None
+		self.reacted_time = None
+
+arrow_keys = ArrowKeys()
 
 level_title = None
 level_name = None
@@ -276,7 +287,7 @@ def advance_room():
 	return True
 
 def enter_room(idx):
-	global mode, last_time_arrow_keys_processed
+	global mode
 
 	set_room_and_notify_puzzle(idx)
 	reset_status_messages()
@@ -284,7 +295,7 @@ def enter_room(idx):
 	char.reset_animation()
 	char.reset_inplace_animation()
 
-	last_time_arrow_keys_processed = None
+	arrow_keys.reset()
 
 	place_char_in_room()
 
@@ -2082,7 +2093,6 @@ def handle_cmdargs():
 def update(dt):
 	global level_title_time, level_goal_time
 	global game_time, level_time, idle_time, last_regeneration_time
-	global last_time_arrow_keys_processed, last_processed_arrow_keys, pressed_arrow_keys
 
 	if mode == "start":
 		if handle_requested_new_level():
@@ -2156,75 +2166,71 @@ def update(dt):
 		return
 
 	keys = pygame.key.get_pressed()
-	joistick_arrow_keys = get_joysticks_arrow_keys()
+	joystick_arrow_keys = get_joysticks_arrow_keys()
 
-	if last_time_arrow_keys_processed is None:
-		last_time_arrow_keys_processed = game_time
-		last_processed_arrow_keys = []
-		pressed_arrow_keys = []
+	if arrow_keys.reacted_time is None:
+		arrow_keys.reacted_time = game_time
 
+	oposite_keys = OPPOSITE_DIRECTIONS
+
+	pressed = []
 	for key in ('r', 'l', 'd', 'u'):
-		is_key_pressed = keys[ARROW_KEY_CODE[key]] or key in joistick_arrow_keys
-		if is_key_pressed and key not in pressed_arrow_keys:
-			pressed_arrow_keys.append(key)
+		is_key_pressed = keys[ARROW_KEY_CODE[key]] or key in joystick_arrow_keys
+		if is_key_pressed:
+			pressed.append(key)
 			reset_idle_time()
-		if not is_key_pressed and key in pressed_arrow_keys and key in last_processed_arrow_keys:
-			pressed_arrow_keys.remove(key)
+	for key in pressed:
+		if key not in arrow_keys.pressed and oposite_keys[key] not in pressed:
+			arrow_keys.pressed.append(key)
+			if key not in arrow_keys.clicked:
+				arrow_keys.clicked.append(key)
+	for key in arrow_keys.pressed.copy():
+		if key not in pressed:
+			arrow_keys.pressed.remove(key)
 
-	if game_time - last_time_arrow_keys_processed < ARROW_KEYS_RESOLUTION:
+	if game_time - arrow_keys.reacted_time < ARROW_KEYS_RESOLUTION:
 		return
 
-	last_time_arrow_keys_processed = game_time
-	last_processed_arrow_keys = []
-	last_processed_arrow_diff = (0, 0)
+	for key in arrow_keys.pending:
+		if key not in arrow_keys.reacted_prev and arrow_keys.reacted and key not in arrow_keys.reacted \
+			and key not in arrow_keys.pressed and oposite_keys[key] not in arrow_keys.pressed:
+			arrow_keys.pressed.insert(0, key)
+	for key in arrow_keys.clicked:
+		if key not in arrow_keys.reacted_prev and key not in arrow_keys.reacted \
+			and key not in arrow_keys.pressed and oposite_keys[key] not in arrow_keys.pressed:
+			arrow_keys.pressed.insert(0, key)
+	arrow_keys.pressed.sort(key=lambda k: 1 if k in arrow_keys.reacted else 0)
+
+	arrow_keys.reacted_prev = arrow_keys.reacted.copy()
+	arrow_keys.clicked.clear()
+	arrow_keys.pending = arrow_keys.pressed.copy()
+	arrow_keys.reacted.clear()
+	arrow_keys.reacted_time = game_time
+	arrow_keys.reacted_diff = None
 
 	new_char_rotation_dir = None
 	new_char_flip_direction = None
-	def set_arrow_key_to_process(key, diff):
-		global last_processed_arrow_keys
-		nonlocal last_processed_arrow_diff
-		nonlocal new_char_rotation_dir
-		nonlocal new_char_flip_direction
-		if not ALLOW_DIAGONAL_MOVES and last_processed_arrow_keys:
-			return
-		pressed_arrow_keys.remove(key)
-		next_diff = apply_diff(last_processed_arrow_diff, diff)
+	for key in arrow_keys.pressed:
+		if not ALLOW_DIAGONAL_MOVES and arrow_keys.reacted_diff:
+			continue
+		diff = DIRS_BY_NAME[key]
+		next_diff = apply_diff(arrow_keys.reacted_diff, diff) if arrow_keys.reacted_diff else diff
 		if cursor.is_char_selected():
 			new_char_rotation_dir = DIRS_BY_NAME[key]
 		if cursor.is_char_selected() and key in (DIRECTION_R, DIRECTION_L):
 			new_char_flip_direction = key
 		if can_move(next_diff) and not keyboard.rctrl:
-			last_processed_arrow_keys.append(key)
-			last_processed_arrow_diff = next_diff
-
-	for key in list(pressed_arrow_keys):
-		if key == 'r' and key not in last_processed_arrow_keys and 'l' not in last_processed_arrow_keys:
-			set_arrow_key_to_process(key, (+1, +0))
-		if key == 'l' and key not in last_processed_arrow_keys and 'r' not in last_processed_arrow_keys:
-			set_arrow_key_to_process(key, (-1, +0))
-		if key == 'd' and key not in last_processed_arrow_keys and 'u' not in last_processed_arrow_keys:
-			set_arrow_key_to_process(key, (+0, +1))
-		if key == 'u' and key not in last_processed_arrow_keys and 'd' not in last_processed_arrow_keys:
-			set_arrow_key_to_process(key, (+0, -1))
-
-	diff_x = 0
-	diff_y = 0
-
-	if 'r' in last_processed_arrow_keys:
-		diff_x += 1
-	if 'l' in last_processed_arrow_keys:
-		diff_x -= 1
-	if 'd' in last_processed_arrow_keys:
-		diff_y += 1
-	if 'u' in last_processed_arrow_keys:
-		diff_y -= 1
+			arrow_keys.pending.remove(key)
+			arrow_keys.reacted.append(key)
+			arrow_keys.reacted_diff = next_diff
+	arrow_keys.pressed.clear()
 
 	if new_char_rotation_dir:
 		char.set_rotate_facing(new_char_rotation_dir)
 	if new_char_flip_direction:
 		char.set_h_flip_facing((new_char_flip_direction == DIRECTION_L) ^ (not check_should_pull()))
 
-	if diff_x or diff_y:
-		process_move((diff_x, diff_y),)
+	if arrow_keys.reacted_diff:
+		process_move(arrow_keys.reacted_diff)
 
 set_solution_funcs(find_path, move_char, press_cell_in_solution, prepare_move)
