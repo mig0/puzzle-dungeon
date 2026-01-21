@@ -4,6 +4,25 @@ magic-n: 7
 puzzle-type: BarrelPuzzle
 levels:
 -
+	bg-image: bg/chemistry-1.webp
+	theme: jewel
+	music: film
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		size: [11, 11]
+		num_barrels: 5
+-
+	bg-image: bg/chemistry-2.webp
+	theme: cargo
+	music: film
+	char-health: null
+	num-enemies: 0
+	puzzle-config:
+		size: [7, 7]
+		num_barrels: 6
+		use_ng: true
+-
 	bg-image: bg/starry-sky.webp
 	theme: classic
 	music: breath
@@ -23,7 +42,7 @@ levels:
 		num_barrels: 5
 		use_ng: true
 -
-	theme: moss
+	theme: modern1
 	music: adventures
 	num-enemies: 0
 	char-health: null
