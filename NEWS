@@ -1,3 +1,165 @@
+Version 0.4.0 - 2026-01-23
+--------------------------
+
+* Redesign of Collections and Levels
+	- All levels now belong to collections, auto-registered at startup.
+	- Collections are referred by string ID (path-like) or numeric ID.
+	- Level ID format is COLLECTION-ID.LEVEL-INDEX, e.g. hero.2 or 13.2.
+	- Collection configs use YAML and are stored in levels/ directory.
+	- A special custom collection with ID 0 can be populated on startup.
+	- Command line args and options configure the custom collection.
+	- The custom collection can be recreated by clipboard import (Alt-C).
+
+* Reworked Main Screen
+	- Main Screen shows all auto-registered and custom collections.
+	- Easier navigation and better hints for collections to enter.
+	- The custom collection is only shown on Main Screen when non empty.
+
+* New Themes and Updates
+	- “jewel” — suitable for Sokoban and many other puzzles (press F5).
+	- “cargo” — suitable for Sokoban and some other puzzles (press F6).
+	- Reworked ancient1 theme, now it's green floor and yellow walls.
+	- Improved plates and other images in several themes.
+	- New keybindings Shift-F3 and Shift-F4 for ancient2 and modern2.
+
+* Support for Various Level Arguments from Command Line
+	- Collection IDs, e.g. "stoneage/original".
+	- Level IDs, e.g. "atomix/original.5".
+	- Map files (Sokoban map files and internal maps auto-detected).
+	- Clipboard input (map or URL supported): "clipboard:".
+	- Standard input (map or URL supported): "stdin:" or "-".
+	- Map files via URL, e.g. "https://url-shortener.me/5NTJ".
+	- LetsLogic collection IDs ("letslogic:Micro Cosmos", letslogic:30).
+	- LetsLogic level IDs (after loading their collection), see below.
+
+* Support LetsLogic Sokoban Collections
+	- New flag --list-ll-collections shows all LetsLogic collections.
+	- The LetsLogic collection list is cached locally for 1 week.
+	- URL-like syntax: letslogic:<coll-id-or-title>, letslogic:/<level-id>.
+	- Requested LetsLogic collections and all levels are cached locally.
+	- Configurable LetsLogic API key (by default, generic acc is used).
+	- Graceful handling and reporting of internet and server issues.
+
+* New Sokoban Solver Highlights
+	- Supports classical search algorithms: BFS, UCS, A*, Greedy, DFS.
+	- Two solution cost metrics:
+		push/pull-optimal — minimize shifts then moves,
+		move-optimal — minimize moves then shifts.
+	- Unified solver core for GUI and CLI with extensive automated testing.
+	- Solver architecture separates barrel configuration (SuperPosition)
+	  and character state (Position) for efficiency.
+	- Domain-specific heuristics with Hungarian matching and lower-bound
+	  costs for A* and pruning.
+	- Detects multiple deadlock types: local, match, freeze, corral freeze.
+	- Supports special level classes: Circular, ZSB, reverse mode.
+	- Periodic progress reports and optional early return.
+
+* New “sokodun” Command-Line Tool
+	- Dedicated CLI for Sokoban solving using the same solver as the GUI.
+	- Supports specifying multiple levels and collections on command line.
+	- Allows algorithm selection: --astar, --bfs, --ucs, --greed, --dfs.
+	- Supports solution types: push-optimal and move-optimal (--by-moves).
+	- Return the first found solution with --return-first.
+	- Time-limited solving via --limit-time.
+	- Flexible output: visual vs standard map format (--show-sok),
+	  dead cell highlighting (--show-dead), timing per level (--show-time).
+	- Record comparison and control with --record-file.
+	- Quiet and verbosity flags for automation workflows.
+
+* Command Line and Configuration
+	- Unified startup option instead of --level and --collection:
+		“-s, --start LEVEL-OR-COLL-ID”
+	- New custom collection options:
+		“-t, --theme THEME”
+		“-m, --music MUSIC”
+		“-b, --bg-image BG_IMAGE”
+		“-P, --puzzle-type PUZZLE_TYPE”
+		“-c, --cloud-mode”
+		“-r, --reverse-barrel-mode”
+	- New options:
+		“--list-ll-collections”
+		“-M, --no-music”
+		“-S, --no-sound”
+		“-p, --run-profiler”
+		“-d, --debug LVL-or-FEATURE”
+
+* New Debug Mechanism (via --debug option)
+	- “jreg”, “jprs” — joystick debug registration/presses
+	- “grid”, “grid+” — grid subsystem output
+	- “path”, “path+” — pathfinding output
+	- “solv”, “solv+”, “solv++” — solver internals log (very verbose)
+	- “szsb”, “szsb+” — Sokoban ZSB output
+	- “prun” — periodic prune and deadlock counters
+	- “nofd” — disable Freeze deadlock detection
+	- “nocd” — disable Corral Freeze deadlock detection
+	- “dlck” — show all Match, Freeze, Corral Freeze deadlocks
+	- “sevt” — SokobanSolver event log (verbose; redirect to *.sel file)
+	- “prevalid” — SokibanSolver prepared valid shift data per level
+	- “precosts”, “precosts+” — SokibanSolver prepared costs per level
+
+* New Modules
+	- celltools.py
+	- collectiontools.py
+	- colorize.py
+	- grid.py
+	- hungarian.py
+	- level.py
+	- load.py
+	- processcmdargs.py
+	- profiler.py
+	- progressline.py
+	- records.py
+	- sokobansolver.py
+	- testsuite.py
+
+* New regression Tests
+	- tests/all
+	- tests/celltools
+	- tests/colorize
+	- tests/grid
+	- tests/hungarian
+	- tests/progressline
+	- tests/records
+	- tests/sokobansolver
+	- tests/sokobansolver-long
+	- tests/teestream
+	- tests/testsuite
+
+* BarrelPuzzle (Sokoban) Enhancements
+	- Full support for reverse-barrel-mode (press Alt-E):
+	  barrels and plates swapped; pulls instead of pushes.
+	- Multiple solution controls via keyboard including algorithm:
+	  RCtrl-1/A/B/D/G/U/0/-/Tab/Backquote.
+	- KP_Enter — find push/pull optimal solution.
+	- Shift-KP_Enter — find move optimal solution.
+	- Solution progress updates at least once per second.
+	- Solutions in LURD format (no spaces), copied to clipboard.
+
+* Input Handling and UX
+	- Improved full-screen (F11 and Shift-F11), also fitting Ctrl-S.
+	- Ignore lone Shift/Ctrl/Alt presses centrally.
+	- Many keybindings no longer stop solution search or replay.
+	- Reserve right Ctrl / right Alt combinations for puzzles.
+	- Change RShift-D to RShift-M — copy current map to clipboard.
+	- Backspace — clear prepared solution without reloading level.
+	- Any key during solving marks stop_find, allowing early return.
+	- Updated joystick profiles and error recovery.
+	- Improved short status messages for common situations.
+	- Import LURD-based solution from clipboard by Alt-S.
+
+* Miscellaneous Fixes and Improvements
+	- Fix mirror flip drawing and other rendering issues.
+	- Fix convert_outer_floors for all border floors.
+	- Fix warnings when switching levels during kill-enemy animations.
+	- Add actor facing modes (static, horizontal flip, rotate) and
+	  use it for character and for enemy (in HeroPuzzle).
+	- Improve level config error messages.
+	- Fix GatePuzzle and LockPuzzle assert_config logic.
+	- Auto-append .png in load_image for missing extensions.
+	- Fix translated goal strings; allow recursive translation tokens.
+	- Catch joystick disconnect errors cleanly.
+	- Add cheat-mode (RShift-C) that allows pulls with Shifts and more.
+
 Version 0.3.0 - 2025-08-21
 --------------------------
 
