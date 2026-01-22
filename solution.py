@@ -1,5 +1,6 @@
 from time import time
 from flags import flags
+from common import warn
 from config import SOLUTION_MOVE_DELAY, SOLUTION_MOVE_DELAY_RANGE, SOLUTION_MOVE_DELAY_CHANGE
 from objects import char
 from constants import DIR_NAMES, DIRS_BY_NAME, DIRECTIONS
@@ -81,7 +82,7 @@ class SolutionItem:
 			self.is_done = not self.path_cells
 
 		if self.is_done:
-			print("Warning: Called play_move on SolutionItem that is done; ignoring")
+			warn("Called play_move on SolutionItem that is done; ignoring")
 			return
 
 		if self.cell_to_press:
@@ -169,7 +170,7 @@ class Solution:
 			if ch in DIRECTIONS or ch in SHIFT_DIRECTIONS:
 				args.append(ch)
 			else:
-				warn("Unsupported char (%s) is solution string")
+				warn("Unsupported char '%s' in solution string" % ch)
 				return False
 		if not args:
 			warn("Ignored empty solution string")
