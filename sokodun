@@ -6,6 +6,7 @@ import sys
 import copy
 import numpy
 import argparse
+sys.path.append(".")  # to be replaced with DATA_DIR
 from load import parse_map_file_signature
 from level import Level
 from debug import debug

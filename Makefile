@@ -42,16 +42,25 @@ check-dependencies:
 install: check-dependencies
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) dungeon $(DESTDIR)$(bindir)
+	$(INSTALL) sokodun $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(datadir)
 	$(INSTALL) -d $(DESTDIR)$(PKG_DATADIR)
 	$(INSTALL) -d $(DESTDIR)$(PKG_DATADIR)/images
 	$(INSTALL) -d $(DESTDIR)$(PKG_DATADIR)/info
+	$(INSTALL) -d $(DESTDIR)$(PKG_DATADIR)/levels
 	$(INSTALL) -d $(DESTDIR)$(PKG_DATADIR)/maps
 	$(INSTALL) -d $(DESTDIR)$(PKG_DATADIR)/music
-	@for dir in bg images info/puzzles maps music pictures sounds; do \
+	$(INSTALL) -d $(DESTDIR)$(PKG_DATADIR)/records
+	@for dir in bg images info/puzzles levels maps music pictures records sounds; do \
 		for file in `find $$dir -follow -type f -print`; do \
 			echo install: $(DESTDIR)$(PKG_DATADIR)/$$file; \
 			$(INSTALL) -d -m 755 `dirname $(DESTDIR)$(PKG_DATADIR)/$$file`; \
+			$(INSTALL) -m 644 $$file $(DESTDIR)$(PKG_DATADIR)/$$file; \
+		done; \
+	done
+	@for dir in info; do \
+		for file in `find $$dir -maxdepth 0 -type f -print`; do \
+			echo install: $(DESTDIR)$(PKG_DATADIR)/$$file; \
 			$(INSTALL) -m 644 $$file $(DESTDIR)$(PKG_DATADIR)/$$file; \
 		done; \
 	done
@@ -64,9 +73,11 @@ install: check-dependencies
 	done
 	$(SED) -i 's|DATA_DIR = "."|DATA_DIR = "$(PKG_DATADIR)"|' $(DESTDIR)$(PKG_DATADIR)/config.py
 	$(SED) -i 's|pgzrun main.py|pgzrun "$(PKG_DATADIR)"/main.py|' $(DESTDIR)$(bindir)/dungeon
+	$(SED) -i 's|sys.path.append(".")|sys.path.append("$(PKG_DATADIR)")|' $(DESTDIR)$(bindir)/sokodun
 
 uninstall:
 	$(RM) $(DESTDIR)$(bindir)/dungeon
+	$(RM) $(DESTDIR)$(bindir)/sokodun
 	$(RM) -r $(DESTDIR)$(PKG_DATADIR)
 
 web:
@@ -89,6 +100,7 @@ dist: check-dependencies
 		$(INSTALL) -D -m 644 $$file $(distdir)/$$file; \
 	done
 	@$(INSTALL) -t $(distdir) dungeon
+	@$(INSTALL) -t $(distdir) sokodun
 	@echo "Creating $(distdir).tar.gz"
 	@$(TAR) --owner root --group root -czf $(distdir).tar.gz $(distdir)
 	@echo "Creating $(distdir).zip"
