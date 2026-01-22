@@ -12,6 +12,8 @@ filename = "NEWS"
 ENTRY_PREFIX = "Version "
 ITEM_PREFIX = "* "
 SUBITEM_PREFIX = "\t- "
+SUBITEM_CONT_PREFIX = "\t  "
+SUBSUBITEM_PREFIX = "\t\t"
 
 file_r = open(filename, "r")
 if not file_r:
@@ -20,6 +22,9 @@ if not file_r:
 
 file_w = RegenerateFile("elements/news.html")
 file_w.print('<h1>Latest News</h1>')
+
+def quote(s):
+	return s.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>").replace("“", "<tt>").replace("”", "</tt>")
 
 has_any_entry = False
 last_item = None
@@ -32,6 +37,8 @@ while True:
 	is_new_entry = line.startswith(ENTRY_PREFIX)
 	is_new_item = line.startswith(ITEM_PREFIX)
 	is_new_subitem = line.startswith(SUBITEM_PREFIX)
+	is_subitem_cont = line.startswith(SUBITEM_CONT_PREFIX)
+	is_new_subsubitem = line.startswith(SUBSUBITEM_PREFIX)
 	should_close_item = last_item and (is_eof or is_new_entry or is_new_item)
 	should_close_entry = has_any_entry and (is_eof or is_new_entry)
 
@@ -44,8 +51,14 @@ while True:
 	if should_close_item:
 		if last_subitems:
 			file_w.print("<ul>")
-			for subitem in last_subitems:
-				file_w.print("\t\t<li>%s</li>" % subitem)
+			for subitem, subsubitems in last_subitems:
+				file_w.write("\t\t<li>%s" % quote(subitem))
+				if subsubitems:
+					file_w.print("<ul>")
+					for subsubitem in subsubitems:
+						file_w.print("\t\t\t<li>%s</li>" % quote(subsubitem))
+					file_w.write("\t\t</ul>")
+				file_w.print("</li>")
 			file_w.write("\t</ul>")
 		file_w.print("</li>")
 
@@ -55,7 +68,7 @@ while True:
 	if is_eof:
 		break
 	elif is_new_entry:
-		file_w.print("\n<h2>%s</h2>\n<ul>" % line)
+		file_w.print('\n<h2>%s</h2>\n<ul class="news">' % quote(line))
 		has_any_entry = True
 		last_item = None
 		last_subitems = None
@@ -63,11 +76,21 @@ while True:
 		assert_line(has_any_entry, "Item line without Version line")
 		last_item = line.lstrip(ITEM_PREFIX)
 		last_subitems = []
-		file_w.write("\t<li>%s" % last_item)
+		file_w.write("\t<li>%s" % quote(last_item))
 	elif is_new_subitem:
 		assert_line(has_any_entry, "Subitem line without Version line")
 		assert_line(last_item, "Subitem line without item line")
-		last_subitems.append(line.lstrip(SUBITEM_PREFIX))
+		last_subitems.append([line.lstrip(SUBITEM_PREFIX), []])
+	elif is_subitem_cont:
+		assert_line(has_any_entry, "Subitem continuation line without Version line")
+		assert_line(last_item, "Subitem continuation line without item line")
+		assert_line(last_subitems, "Subitem continuation line without subitem line")
+		last_subitems[-1][0] += "\n" + line.lstrip(SUBITEM_CONT_PREFIX)
+	elif is_new_subsubitem:
+		assert_line(has_any_entry, "Subsubitem line without Version line")
+		assert_line(last_item, "Subsubitem line without item line")
+		assert_line(last_subitems, "Subsubitem line without subitem line")
+		last_subitems[-1][1].append(line.lstrip(SUBSUBITEM_PREFIX))
 	else:
 		# ignore all empty or unsupported lines
 		pass
