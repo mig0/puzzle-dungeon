@@ -1,0 +1,30 @@
+Title: Barrel Puzzle levels
+Puzzles: barrel
+Themes: ancient1, cargo, classic, default, jewel, modern1, stoneage1, stoneage5
+Main: 1
+
+This video demonstrates both auto-generated and loaded Barrel Puzzle
+(Sokoban) levels.
+
+The first level, *original-1-modified.txt*, is solved in two stages: one
+barrel manually, then using the return-first Greedy solver. Then the same
+in reverse mode (after pressing *Alt-E*). During solution replay, the
+speed can be adjusted using mouse wheel or *PgUp*/*PgDn* keys.
+
+Next, a 5x5 Zero-Space Type B (ZSB) level is auto-generated and solved.
+This is followed by more auto-generated levels: one with 5 barrels using
+the old generation method, and another with 6 barrels using the new
+method. After that, an auto-generated 4-room puzzle is shown. All these
+levels are solved manually.
+
+The video then shows a level featuring skeleton enemies, where Undo (*u*
+or *z*) is used. This is followed by an auto-generated level with 7
+barrels. An auto-generated level with 16 barrels was skipped by pressing
+*n*. A subsequent 9-room level is played with a 1-minute time limit.
+
+The final part of the video showcases four moderate levels from the
+*Suitcase 01* collection. The first two levels (*AK-7* and *AK-10*) are
+solved manually. In the third level (*Borella-1*), a solution is imported
+from the clipboard using *Ctrl-S*. In the last level (*AK-1*), the map is
+imported from the clipboard with *Ctrl-C* and, after some manual moves,
+is solved optimally using the BFS algorithm.
