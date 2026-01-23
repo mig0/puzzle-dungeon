@@ -1,7 +1,7 @@
 Title: 12 Mirror Puzzle levels
 Puzzles: mirror
 Themes: ancient2, classic, default, minecraft, modern1, moss
-Main: 4
+Main: 5
 
 Mirror Puzzle is one of the most feature-rich puzzles. It supports
 mirrors on barrels, carts, and lifts, as well as toggling gates, opening
