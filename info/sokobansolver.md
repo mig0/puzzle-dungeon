@@ -234,7 +234,8 @@ This is possibly the most complete Sokoban solver implemented in Python.
 It may be much slower than some specialized solvers because:
 
 - it is written in the high-level Python language,
-- advanced corral based heuristics are not yet implemented.
+- no support for tunnels and more complex deadlocks,
+- advanced corral based heuristics are not yet implemented, etc.
 
 A typical Sokoban level contains many millions of unique positions.
 Currently the solver keeps all visited positions and never removes them

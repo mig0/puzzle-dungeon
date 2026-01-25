@@ -118,11 +118,6 @@ The record file is a text file containing one line per level. Each line
 contains either one *m/p* value or two space-separated *m/p* values,
 representing move-optimal and push-optimal records respectively.
 
-By default, the record comparision is automatically done if the level
-metadata contains the record information, i.e. "Move-Record: m/p" and
-"Push-Record: m/p" headers after the map, or "Moves: m Pushes: p" header
-that is taken as move-optimal record.
-
 By default, record comparison is performed automatically if the level
 metadata contains record information, such as:
 
