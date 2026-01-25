@@ -48,10 +48,13 @@ def test_parse_with_empty_and_comment_lines():
 		"# This is example records file",
 		"",
 		" 15/10  10/5 ",
+		"Level 3\t",
+		"Level 4\t20/13 30/22",
+		"#End\t of record file",
 	])
 	r = CollectionRecords(TEST_FILE, by_moves=True)
 
-	test.eq(r.records, [(15, 10)])
+	test.eq(r.records, [None, (15, 10), None, (20, 13)])
 
 def test_parse_invalid_line():
 	write_file([

@@ -87,7 +87,7 @@ class CollectionRecords:
 		with open(self.filename, "r", encoding="utf-8") as file:
 			for ln, line in enumerate(file):
 				line_no = ln + 1
-				line = line.strip()
+				line = line.strip("\n\r ")
 
 				if "\t" in line:
 					level_id, cost_str = line.split("\t", 1)
@@ -96,12 +96,14 @@ class CollectionRecords:
 
 				# cost_str may be "A/B" or "A/B C/D"
 				parts = cost_str.split()
-				if len(parts) == 1:
+				if line.startswith("#"):
+					pass  # ignore comment line
+				elif len(parts) == 1:
 					self._append_record(level_id, _parse_cost_str(parts[0]))
 				elif len(parts) == 2:
 					self._append_record(level_id, _parse_cost_str(parts[0]), _parse_cost_str(parts[1]))
-				elif line == "" or line.startswith("#"):
-					pass  # ignore empty or comment line
+				elif not cost_str:
+					self._append_record(level_id, None)
 				else:
 					raise RecordsParseError(f"Invalid cost format at line {line_no}: {cost_str}")
 
