@@ -148,7 +148,6 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 	is_in_map = False
 	map_lines = None
 	level_name = None
-	is_pre_level_name = False
 	pre_level_name = None
 	move_record = None
 	push_record = None
@@ -189,18 +188,15 @@ def parse_sokoban_levels(string_or_filename_or_file, config={}):
 			if not old_is_in_map:
 				map_lines = []
 				level_name = pre_level_name
-				is_pre_level_name = False
 				pre_level_name = None
 				move_record = None
 				push_record = None
 			map_lines.append(line)
 		else:
-			if is_pre_level_name:
-				if line.startswith("'") and line.endswith("'"):
-					pre_level_name = pre_level_name + ": " + line[1:-1]
+			if line.startswith("'") and line.endswith("'"):
+				pre_level_name = pre_level_name + ": " + line[1:-1] if pre_level_name else line[1:-1]
 				continue
 			if line.startswith('Level ') and line[6:].isdigit():
-				is_pre_level_name = True
 				pre_level_name = line
 			if line.startswith('ROUND ') and line[-1] == ':' and line[6:-1].isdigit():
 				pre_level_name = line[:-1]
