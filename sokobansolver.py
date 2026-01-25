@@ -762,7 +762,7 @@ class SokobanSolver():
 			assert not self.return_first
 			# TODO: think when to use: min_nums = position.total_nums
 			min_nums = self.get_min_position_cost(position.super.barrel_idxs)
-			min_cost = self.get_min_solution_cost(position.super.barrel_idxs)
+			min_cost = position.super.solution_cost
 			assert min_cost
 			total_cost = apply_diff(min_nums, min_cost)
 			if self.solved_position.cmp(total_cost) <= 0:
