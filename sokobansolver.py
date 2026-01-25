@@ -1248,6 +1248,7 @@ class SokobanSolver():
 
 	def configure(self, map, reverse_barrel_mode, char_cell, barrel_cells):
 		grid.configure(map, reverse_barrel_mode=reverse_barrel_mode, cut_outer_floors=True)
+		barrel_cells = [cell for cell in barrel_cells if cell in grid.cell_idxs]
 		grid.set_barrels(barrel_cells)
 		grid.check_zsb()
 		if self.solution_alg is None:
@@ -1307,6 +1308,6 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 		if show_dead:
 			solver.prepare_solution(char_cell)
 		descr = None if show_map is True else show_map
-		grid.show_map(descr, char=char_cell, barrels=barrel_cells, show_dead=show_dead)
+		grid.show_map(descr, char=char_cell, barrels=solver.barrel_cells, show_dead=show_dead)
 	return solver
 
