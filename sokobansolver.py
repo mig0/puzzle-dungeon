@@ -637,13 +637,13 @@ class SokobanSolver():
 			return self.visited_super_positions[super_position_id]
 
 		if grid.is_zsb:
-			accessible_cells_near_barrels = grid.get_all_valid_zsb_char_barrel_moves()
+			accessible_shift_pairs = grid.get_all_valid_zsb_shifts()
 		else:
-			accessible_cells_near_barrels = grid.get_all_valid_char_barrel_shifts(valid_pairs=self.valid_shift_pairs)
+			accessible_shift_pairs = grid.get_all_accessible_valid_shifts(valid_srcs=self.valid_shift_srcs)
 
 		if not self.disable_prepare:
-			accessible_cells_near_barrels.sort(key=lambda two_cells: cost_to_key(self.min_char_barrel_costs[grid.to_idxs(two_cells)]))
-		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_cells_near_barrels)
+			accessible_shift_pairs.sort(key=lambda two_cells: cost_to_key(self.min_char_barrel_costs[grid.to_idxs(two_cells)]))
+		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_shift_pairs)
 		if grid.is_zsb:
 			for proto_segments in all_proto_segments:
 				_, char_idx, barrel_idx = proto_segments[0]
@@ -1021,7 +1021,6 @@ class SokobanSolver():
 		self.min_barrel_costs = min_costs = {}
 		self.min_plate_char_barrel_costs = {}
 		self.min_plate_barrel_costs = {}
-		self.valid_shift_pairs = None
 		self.valid_shift_srcs = {}
 		self.valid_shift_dsts = {}
 		self.barrel_axis_blockers = {}
@@ -1051,8 +1050,6 @@ class SokobanSolver():
 			self.min_plate_char_barrel_costs[plate_idx], self.min_plate_barrel_costs[plate_idx] = \
 				self.expand_barrel_costs(min_char_costs, min_costs, plate_idx, True)
 
-		self.valid_shift_pairs = set(min_char_costs.keys())
-
 		grid.enable_shift_deadlocks = True
 		grid.barrel_bits = grid.no_bits.copy()
 
@@ -1075,7 +1072,6 @@ class SokobanSolver():
 		if debug.has("prevalid"):
 			debug("Precalculated valid data:")
 			debug([2], {
-				"valid_shift_pairs": self.valid_shift_pairs,
 				"valid_shift_srcs": self.valid_shift_srcs,
 				"valid_shift_dsts": self.valid_shift_dsts,
 				"barrel_axis_blockers": self.barrel_axis_blockers,

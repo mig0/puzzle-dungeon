@@ -71,7 +71,6 @@ class Grid:
 		barrel_idxs
 		barrel_cells
 		is_solved_for_barrels
-		get_all_adjacent_barrel_pairs
 	- Supports Sokoban solution via:
 		can_push, can_pull, can_shift, try_opposite_shift
 		push, pull, shift, opposite_shift
@@ -80,7 +79,7 @@ class Grid:
 		is_four_barrel_deadlock
 		is_r_or_l_2x2_barrel_deadlock
 		is_surrounding_barrel_deadlock
-		get_all_valid_char_barrel_shifts
+		get_all_accessible_valid_shifts
 		prepare_sokoban_solution
 		reset_sokoban_solution
 	"""
@@ -693,7 +692,7 @@ class Grid:
 				all_barrel_moves.append((barrel_cell, target_cell))
 		return all_barrel_moves
 
-	def get_all_valid_zsb_char_barrel_moves(self):
+	def get_all_valid_zsb_shifts(self):
 		return [(apply_diff(barrel_cell, cell_dir(target_cell, barrel_cell), self.reverse_barrel_mode), barrel_cell)
 			for barrel_cell, target_cell in self.get_all_valid_zsb_barrel_moves(self.barrel_cells)]
 
@@ -743,21 +742,19 @@ class Grid:
 
 	# return list of all accessible (char_cell, barrel_cell) pairs valid for shift
 	# should to be called after get_accessible_bits()
-	def get_all_valid_char_barrel_shifts(self, accessible_bits=None, valid_pairs=None):
+	def get_all_accessible_valid_shifts(self, accessible_bits=None, valid_srcs=None):
 		if accessible_bits is None:
 			accessible_bits = self.last_accessible_bits
-		cell_pairs = []
+		shift_pairs = []
 		for barrel_idx in search_bits(self.barrel_bits, _ONE):
-			for char_idx in self.all_passable_neigh_idxs[barrel_idx]:
+			for char_idx in (valid_srcs if valid_srcs else self.all_passable_neigh_idxs)[barrel_idx]:
 				if not accessible_bits[char_idx]:
-					continue
-				if valid_pairs and (char_idx, barrel_idx) not in valid_pairs:
 					continue
 				char_cell = self.idx_cells[char_idx]
 				barrel_cell = self.idx_cells[barrel_idx]
 				if self.can_shift(char_cell, barrel_cell):
-					cell_pairs.append((char_cell, barrel_cell))
-		return cell_pairs
+					shift_pairs.append((char_cell, barrel_cell))
+		return shift_pairs
 
 	def get_corral(self, start_idx):
 		corral_bits = self.get_accessible_bits(start_idx, allow_obstacles=True)
