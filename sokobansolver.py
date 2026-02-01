@@ -1078,15 +1078,7 @@ class SokobanSolver():
 				continue
 			self.expand_barrel_costs(self.min_char_target_costs, self.min_target_costs, barrel_idx, False)
 
-		if debug.has("prevalid"):
-			debug("Precalculated valid data:")
-			debug([2], {
-				"valid_shift_srcs": self.valid_shift_srcs,
-				"valid_shift_dsts": self.valid_shift_dsts,
-				"barrel_axis_blockers": self.barrel_axis_blockers,
-			})
-
-		if debug.has("precosts"):
+		if debug.has("presampl"):
 			def idx_costs_to_str(d):
 				return ', '.join(['%d: %d/%d' % (idx, *cost) for idx, cost in d.items()])
 			debug("min_barrel_costs")
@@ -1094,17 +1086,23 @@ class SokobanSolver():
 			plate_idx, min_plate_costs = sorted(self.min_plate_barrel_costs.items())[0]
 			debug("min_plate_barrel_costs for the 1-st plate idx=%d" % plate_idx)
 			debug([2], idx_costs_to_str(dict(sorted(min_plate_costs.items()))))
-
-			if debug.has("precosts+"):
-				debug("Precalculated costs data:")
-				debug([2], {
-					"min_barrel_costs": self.min_barrel_costs,
-					"min_char_barrel_costs": self.min_char_barrel_costs,
-					"min_plate_barrel_costs": self.min_plate_barrel_costs,
-					"min_plate_char_barrel_costs": self.min_plate_char_barrel_costs,
-					"min_target_costs": self.min_target_costs,
-					"min_char_target_costs": self.min_char_target_costs,
-				})
+		if debug.has("prevalid"):
+			debug("Precalculated valid data:")
+			debug([2], {
+				"valid_shift_srcs": self.valid_shift_srcs,
+				"valid_shift_dsts": self.valid_shift_dsts,
+				"barrel_axis_blockers": self.barrel_axis_blockers,
+			})
+		if debug.has("precosts"):
+			debug("Precalculated costs data:")
+			debug([2], {
+				"min_barrel_costs": self.min_barrel_costs,
+				"min_char_barrel_costs": self.min_char_barrel_costs,
+				"min_plate_barrel_costs": self.min_plate_barrel_costs,
+				"min_plate_char_barrel_costs": self.min_plate_char_barrel_costs,
+				"min_target_costs": self.min_target_costs,
+				"min_char_target_costs": self.min_char_target_costs,
+			})
 
 	def get_found_solution_items(self, reason):
 		# store the solution nums for users

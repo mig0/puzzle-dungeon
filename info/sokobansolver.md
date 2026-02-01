@@ -189,7 +189,7 @@ FEATURE*) flags:
 - *`sevt`* - dump SokobanSolver event log (floody; redirect to *.sel file)
 - *`solv`*, *`solv+`*, *`solv++`* - dump position processing log (floody)
 - *`prevalid`* - dump prepared valid shift data per level
-- *`precosts`*, *`precosts+`* - dump prepared costs data per level
+- *`precosts`* - dump prepared costs data per level
 
 These feature flags are handled by SokobanSolver itself, either changing
 behaviour or writing relevant output to stdout. Multiple flags may be

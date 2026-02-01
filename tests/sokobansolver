@@ -1061,9 +1061,10 @@ def test_find_solution_status_string():
 	test.is_in('Finding', status)
 
 args = sys.argv[1:]
-verbose = args.count('-v') >= 2
-if args.count('-v') >= 3:
-	debug.configure([feature + ('+' * (args.count('-v') - 3)) for feature in ('solv', 'precosts')])
+num_vs = args.count('-v')
+verbose = num_vs >= 2
+if num_vs >= 3:
+	debug.configure(['solv' + ('+' * (num_vs - 3))] + (['prevalid', 'precosts'] if num_vs >= 4 else []))
 test = TestSuite("SokobanSolver", '-a' in args, '-v' in args, '-p' in args)
 try:
 	test_trivial_solutions()
