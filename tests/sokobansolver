@@ -900,18 +900,18 @@ def test_solution(sok, unique_solution_str=False, solution_alg=None, return_firs
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
 		sok_id = sok[0] + ": " if sok[0][0].isalpha() else ''
-		test.eq(sok_id + str(solver.last_solution_nums_str), sok_id + optimal_solution_nums_strs_by_type[solution_type][sok])
+		test.eq(sok_id + str(solver.last_solution.nums_str), sok_id + optimal_solution_nums_strs_by_type[solution_type][sok])
 		if unique_solution_str:
-			test.eq(solver.last_solution_str, optimal_solution_strs_by_type[solution_type][sok])
+			test.eq(solver.last_solution.str, optimal_solution_strs_by_type[solution_type][sok])
 		else:
-			test.ne(solver.last_solution_str, '')
+			test.ne(solver.last_solution.str, '')
 
 def test_no_solution(sok):
 	solver = create_solver(sok)
 	solution_items = solver.solve()
 	test.none(solution_items)
-	test.none(solver.last_solution_nums_str)
-	test.none(solver.last_solution_str)
+	test.none(solver.last_solution.nums_str)
+	test.none(solver.last_solution.str)
 
 def test_trivial_solutions():
 	for sok in sok_trivial_h1, sok_trivial_h2, sok_trivial_h3, sok_trivial_h4, sok_trivial_v1, sok_trivial_v2, sok_trivial_s1, sok_trivial_s2:
@@ -980,7 +980,7 @@ def test_algorithms_consistency():
 						optimal_solution_nums_strs_by_type[typ][sok], alg,
 						"moves" if typ == SOLUTION_TYPE_BY_MOVES else "shifts"
 					))
-					results[alg, typ] = solver.last_solution_nums_str
+					results[alg, typ] = solver.last_solution.nums_str
 				test.eq(results[alg, SOLUTION_TYPE_BY_MOVES], results[alg, SOLUTION_TYPE_BY_SHIFTS])
 			def create_key(a, r, v):
 				return ','.join([a, str(r), str(v)])

@@ -117,10 +117,10 @@ for level_index, level_config in enumerate(level_configs):
 	def show_solution(solution_items):
 		if coll_records:
 			record_str = colorize_auto(coll_records.record_str_at_result)
-			c = coll_records.cmp_level_result(solver.last_solution_nums_str)
+			c = coll_records.cmp_level_result(solver.last_solution.nums_str)
 			record_status_str = colorize_auto('N/A' if c is None else 'OK' if c == 0 else 'WORSE' if c == 1 else 'NEW RECORD')
 		if show_time:
-			print("Time: %s" % colorize_auto(solver.last_solution_time_str))
+			print("Time: %s" % colorize_auto(solver.last_solution.time_str))
 		if quiet >= 3 and is_optimal and solution_items and coll_records:
 			print("Solution: %s" % record_status_str)
 		elif not solution_items:
@@ -128,7 +128,7 @@ for level_index, level_config in enumerate(level_configs):
 		elif quiet >= 3:
 			print("Solution %s" % colorize_auto("found"))
 		else:
-			print("Solution %s: %s" % (colorize_auto(solver.last_solution_nums_str), solver.last_solution_str))
+			print("Solution %s: %s" % (colorize_auto(solver.last_solution.nums_str), solver.last_solution.str))
 		if quiet <= 2 and coll_records:
 			print("Record %s: %s" % (record_str, record_status_str))
 

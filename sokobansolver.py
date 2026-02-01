@@ -221,6 +221,15 @@ class Position:
 			self._str = "{◰[%d] %d %s ☻%s ■%s}" % (self.depth, self.id, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
 		return self._str
 
+class SolutionInfo():
+	def __init__(self, start_time, num_positions, num_superpositions):
+		self.time = time() - start_time
+		self.time_str = get_time_str(self.time)
+		self.nums_str = None
+		self.str = None
+		self.num_positions = num_positions
+		self.num_superpositions = num_superpositions
+
 class SokobanSolver():
 	def __init__(self):
 		self.return_first = False
@@ -1099,25 +1108,22 @@ class SokobanSolver():
 
 	def get_found_solution_items(self, reason):
 		# store the solution nums for users
-		solution_items = None
-		self.last_solution_time_str = get_time_str(time() - self.start_solution_time)
-		self.last_solution_nums_str = None
-		self.last_solution_str = None
+		self.last_solution = SolutionInfo(self.start_solution_time, self.num_created_positions, len(self.visited_super_positions))
 		is_solved = self.solved_position is not None
 		if is_solved:
-			self.last_solution_nums_str = self.solved_position.nums_str
-			self.last_solution_str = ''
+			self.last_solution.nums_str = self.solved_position.nums_str
+			self.last_solution.str = ''
 			char_cell = self.char_cell
 			for char_path, shift_direction in self.solved_position.to_solution_pairs():
 				for cell in char_path:
-					self.last_solution_str += DIR_NAMES[cell_diff(char_cell, cell)]
+					self.last_solution.str += DIR_NAMES[cell_diff(char_cell, cell)]
 					char_cell = cell
-				self.last_solution_str += shift_direction.upper()
+				self.last_solution.str += shift_direction.upper()
 				char_cell = apply_diff(char_cell, DIRS_BY_NAME[shift_direction])
 
-		debug(DBG_SOLV, "Finding solution %s, returning %s solution" % (reason, self.last_solution_nums_str or "no"))
+		debug(DBG_SOLV, "Finding solution %s, returning %s solution" % (reason, self.last_solution.nums_str or "no"))
 		self.reset_solution_data()
-		return list(self.last_solution_str) if is_solved else None
+		return list(self.last_solution.str) if is_solved else None
 
 	def get_find_solution_status_str(self):
 		time_str = get_time_str(time() - self.start_solution_time)
