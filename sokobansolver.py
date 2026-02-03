@@ -221,15 +221,6 @@ class Position:
 			self._str = "{◰[%d] %d %s ☻%s ■%s}" % (self.depth, self.id, self.nums_str, self.char_idx, ' '.join(map(str, self.super.barrel_idxs)))
 		return self._str
 
-class SolutionInfo():
-	def __init__(self, start_time, num_positions, num_superpositions):
-		self.time = time() - start_time
-		self.time_str = get_time_str(self.time)
-		self.nums_str = None
-		self.str = None
-		self.num_positions = num_positions
-		self.num_superpositions = num_superpositions
-
 class SokobanSolver():
 	def __init__(self):
 		self.return_first = False
@@ -1106,22 +1097,11 @@ class SokobanSolver():
 
 	def get_found_solution_items(self, reason):
 		# store the solution nums for users
-		self.last_solution = SolutionInfo(self.start_solution_time, self.num_created_positions, len(self.visited_super_positions))
-		is_solved = self.solved_position is not None
-		if is_solved:
-			self.last_solution.nums_str = self.solved_position.nums_str
-			self.last_solution.str = ''
-			char_cell = self.char_cell
-			for char_path, shift_direction in self.solved_position.to_solution_pairs():
-				for cell in char_path:
-					self.last_solution.str += DIR_NAMES[cell_diff(char_cell, cell)]
-					char_cell = cell
-				self.last_solution.str += shift_direction.upper()
-				char_cell = apply_diff(char_cell, DIRS_BY_NAME[shift_direction])
+		self.last_solution = SolutionStatus()
 
 		debug(DBG_SOLV, "Finding solution %s, returning %s solution" % (reason, self.last_solution.nums_str or "no"))
 		self.reset_solution_data()
-		return list(self.last_solution.str) if is_solved else None
+		return list(self.last_solution.str) if self.last_solution.str else None
 
 	def get_find_solution_status_str(self):
 		time_str = get_time_str(time() - self.start_solution_time)
@@ -1257,6 +1237,29 @@ class SokobanSolver():
 		self.barrel_cells = barrel_cells
 		global solver
 		solver = self
+
+class SolutionStatus():
+	def __init__(self):
+		assert solver
+		self.time = time() - solver.start_solution_time
+		self.time_str = get_time_str(self.time)
+		self.nums_str = None
+		self.str = None
+		self.alg = solver.solution_alg
+		self.type = solver.solution_type
+		self.num_positions = solver.num_created_positions
+		self.num_superpositions = len(solver.visited_super_positions)
+		self.is_solved = solver.solved_position is not None
+		if self.is_solved:
+			self.nums_str = solver.solved_position.nums_str
+			self.str = ''
+			char_cell = solver.char_cell
+			for char_path, shift_direction in solver.solved_position.to_solution_pairs():
+				for cell in char_path:
+					self.str += DIR_NAMES[cell_diff(char_cell, cell)]
+					char_cell = cell
+				self.str += shift_direction.upper()
+				char_cell = apply_diff(char_cell, DIRS_BY_NAME[shift_direction])
 
 # modify map and barrel_cells in-place
 def reverse_barrel_map(map, barrel_cells):
