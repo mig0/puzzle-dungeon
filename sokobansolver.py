@@ -307,6 +307,17 @@ class SokobanSolver():
 			total_cost = apply_diff(total_cost, self.min_target_costs[barrel_idx])
 		return total_cost
 
+	def can_prune_by_solution_lower_bound(self, position, return_costs=False):
+		if not self.solved_position:
+			return False
+		assert not self.return_first
+		# TODO: think when to use: min_nums = position.total_nums
+		min_nums = self.get_min_position_cost(position.super.barrel_idxs)
+		min_cost = position.super.solution_cost
+		assert min_cost
+		total_cost = apply_diff(min_nums, min_cost)
+		return self.solved_position.cmp(total_cost) <= 0 and (not return_costs or [min_nums, min_cost, total_cost])
+
 	def is_barrel_matching_found(self, barrel_idxs):
 		if not self.is_barrel_mismatch_possible:
 			return True
@@ -758,20 +769,13 @@ class SokobanSolver():
 			position.cut_down()
 			return None if self.return_first else True
 
-		if self.solved_position:
-			assert not self.return_first
-			# TODO: think when to use: min_nums = position.total_nums
-			min_nums = self.get_min_position_cost(position.super.barrel_idxs)
-			min_cost = position.super.solution_cost
-			assert min_cost
-			total_cost = apply_diff(min_nums, min_cost)
-			if self.solved_position.cmp(total_cost) <= 0:
-				if HAS_PRUN:
-					self.num_costy_solved_bound_positions += 1
-				debug([depth], DBG_SOLV2, "Pruning position by solution lower bound")
-				debug(DBG_SEVT, "PRN %s by-lower-bound %s %s %s" % (position.id, *map(cost_to_str, [min_nums, min_cost, total_cost])))
-				position.cut_down()
-				return True
+		if hgf_costs := self.can_prune_by_solution_lower_bound(position, True):
+			if HAS_PRUN:
+				self.num_costy_solved_bound_positions += 1
+			debug([depth], DBG_SOLV2, "Pruning position by solution lower bound")
+			debug(DBG_SEVT, "PRN %s by-lower-bound %s %s %s" % (position.id, *map(cost_to_str, hgf_costs)))
+			position.cut_down()
+			return True
 
 		self.expand_position(position)
 
