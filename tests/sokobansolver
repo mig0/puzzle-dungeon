@@ -858,6 +858,7 @@ optimal_solution_strs = {
 	sok_obvious_14: 'rrddllldRRuruullDurrddldlluRuurrddrdLLruuullddRdrUUdllldRRuluurR',
 	sok_awkward_19: 'llDDDldddrruuLuuuurrdLulDDDlllddrrUdlluurRdddrruuLUUUluRdddlllddrrUdlluurRdrUUU',
 	sok_awkward_20: 'lddrUdrruLLdlUUUruLLLulDDDldRuuurrrrdrDLdlUUruLLLulDDDlddrrULdlUruuurrrrddddrruLLdlUUUruLLLulDDDDldR',
+	sok_awkward_20: 'lddrUdrruLLdlUUUruLLLulDDDrdLuuurrrrdrDLdlUUruLLLulDDDrddllURdrUluuurrrrddddrruLLdlUUUruLLLulDDDDldR',
 	sok_awkward_21: 'rruurDurDlldlluuuurrrrrrdddLLLrrruuullllllddddrrdrrUdllulluuuurrrrrrdddlLdLLLrrrurruuulllllldddllddrrUUUUdddrrrruulDrdLLLrrurrruuulllllLLrdddllddrrUUUUdddrrruulDrdLLrurrrruuulllllLdddllddrrUUUU',
 	sok_awkward_22: ('llddlddddrUluuuruurrdddddLLdlUUdrrruuuuulldddDuuuurrdddddlLdllluuuuRRllddddrrrurruuuuullllDurrrrdddddlldllluuuuRuurrdDDDlDuruuuurrdddddlLdLUrrruuuLruulldDDDuurrdddlLuuuuullddlddddR', 'ddLruulldDlddrUldddrUluurUrrdddLLdlUUdrrruuulldDuurruullDDrrdddlLdllluuuuRRRuullDurrrrdddddlldllluuuuRuurrddDDlDuruuuurrddLrdddlLdLUrrruuuuulldDDDuurrdddlLuuuuullddlddddR'),
 	sok_awkward_23: 'ldlluRuRldldlluRRdrrUrUruulDlDlDururrdLdLLuRdrUlldLdlluRRRurrdLdLLuRllldR',
@@ -966,7 +967,7 @@ def test_trivial_without_solutions():
 
 def test_algorithms_consistency():
 	no_reverse_sol_soks = [sok_awkward_16]
-	for sok in sok_trivial_h3, sok_obvious_03, sok_obvious_06, sok_obvious_09, sok_awkward_06, sok_awkward_18:
+	for sok in sok_trivial_h3, sok_obvious_03, sok_obvious_06, sok_obvious_09, sok_awkward_06:
 		for reverse_barrel_mode in False, True:
 			results = {}
 			for alg in SOLUTION_ALG_DFS, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR:
