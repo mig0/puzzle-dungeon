@@ -273,7 +273,7 @@ def test_all_valid_shifts_consistency():
 	char_cell = (2, 3)
 	grid.set_barrels([(3, 3), (4, 3)])
 	accessible_bits = grid.get_accessible_bits(char_cell)
-	cell_pairs = grid.get_all_valid_char_barrel_shifts(accessible_bits)
+	cell_pairs = grid.get_all_accessible_valid_shifts(accessible_bits)
 
 	test.ok(cell_pairs, "Should find at least one shift")
 	test.len(cell_pairs, 2)
@@ -284,7 +284,7 @@ def test_all_valid_shifts_consistency():
 
 	grid.set_barrels([(2, 4)])
 	accessible_bits = grid.get_accessible_bits(char_cell)
-	cell_pairs = grid.get_all_valid_char_barrel_shifts()
+	cell_pairs = grid.get_all_accessible_valid_shifts()
 	test.len(cell_pairs, 4)
 	for char_cell, barrel_cell in cell_pairs:
 		test.eq(cell_distance(char_cell, barrel_cell), 1)
