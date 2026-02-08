@@ -35,6 +35,8 @@ parser.add_argument('-B', '--bfs', help="use BFS algorithm to find solution", ac
 parser.add_argument('-D', '--dfs', help="use DFS algorithm to find solution", action='store_true')
 parser.add_argument('-G', '--greed', help="use Greedy algorithm to find solution", action='store_true')
 parser.add_argument('-U', '--ucs', help="use Uniform Cost algorithm to find solution", action='store_true')
+parser.add_argument('-F', '--faded', help="use UCS first, then fallback to Greedy", action='store_true')
+parser.add_argument('-S', '--sharp', help="use Greedy first, then switch to A*", action='store_true')
 parser.add_argument('-_', '--disable-prepare', help="do not prepare costs for lower-bound", action='store_true')
 parser.add_argument('-0', '--disable-budget', help="do not report progress every second", action='store_true')
 parser.add_argument('-1', '--return-first', help="return first found solution (not optimal)", action='store_true')
@@ -52,7 +54,7 @@ record_filename = cmdargs.record_file
 disable_prepare = cmdargs.disable_prepare
 disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
-solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmdargs.bfs else SOLUTION_ALG_DFS if cmdargs.dfs else SOLUTION_ALG_GREED if cmdargs.greed else SOLUTION_ALG_UCS if cmdargs.ucs else None
+solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmdargs.bfs else SOLUTION_ALG_DFS if cmdargs.dfs else SOLUTION_ALG_GREED if cmdargs.greed else SOLUTION_ALG_UCS if cmdargs.ucs else SOLUTION_ALG_FADED if cmdargs.faded else SOLUTION_ALG_SHARP if cmdargs.sharp else None
 return_first = cmdargs.return_first
 limit_time = int(cmdargs.limit_time) if cmdargs.limit_time and cmdargs.limit_time.isdigit() else None
 show_time = cmdargs.show_time
@@ -92,7 +94,7 @@ if record_filename == '.' or record_filename is None and any(records_in_level_co
 	record_filename = [*records_in_level_configs()]
 
 coll_records = CollectionRecords(record_filename, cmdargs.by_moves) if record_filename else None
-is_optimal = not return_first and not reverse_barrel_mode and solution_alg in (None, SOLUTION_ALG_ASTAR, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS)
+is_optimal = not return_first and not reverse_barrel_mode and solution_alg in (None, SOLUTION_ALG_ASTAR, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_SHARP)
 
 for level_index, level_config in enumerate(level_configs):
 	level_index += 1

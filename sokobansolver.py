@@ -18,9 +18,11 @@ SOLUTION_TYPE_BY_MOVES = 2
 
 SOLUTION_ALG_DFS   = "DFS"
 SOLUTION_ALG_BFS   = "BFS"
-SOLUTION_ALG_UCS   = "Uniform"
+SOLUTION_ALG_UCS   = "UCS"
 SOLUTION_ALG_GREED = "Greedy"
 SOLUTION_ALG_ASTAR = "A*"
+SOLUTION_ALG_FADED = "Faded"  # first UCS, then fallback to Greedy
+SOLUTION_ALG_SHARP = "Sharp"  # first Greedy, then switch to A*
 
 DBG_PRUN = "prun"  # show prune info on progress
 DBG_NOFD = "nofd"  # disable Freeze deadlock detection
@@ -238,6 +240,7 @@ class SokobanSolver():
 		HAS_DLCK = debug.has(DBG_DLCK)
 
 		self.visited_super_positions = {}  # super_position_id -> SuperPosition
+		self.requested_solution_alg = None  # including hybrid algorithms
 		self.stopped_by_user = False
 		self.max_depth_reached = False
 		self.time_limit_reached = False
@@ -270,7 +273,14 @@ class SokobanSolver():
 		self.use_relax_child_edges = False
 		self.improve_position = None
 		self.sort_positions = None
+		self.switch_to_astar = False
+		self.fallback_to_greed_time = None
 		grid.reset()
+
+	def iter_positions(self):
+		for super_position in self.visited_super_positions.values():
+			for position in super_position.positions.values():
+				yield position
 
 	def pq_push(self, position):
 		total_cost = self.sort_positions(position)
@@ -303,6 +313,39 @@ class SokobanSolver():
 			return position
 
 		return None
+
+	def configure_pq_algorithm(self):
+		self.past_vus_cost_factor = 1
+		self.use_relax_child_edges = self.solution_alg == SOLUTION_ALG_ASTAR or self.switch_to_astar
+		if self.solution_alg == SOLUTION_ALG_UCS:
+			self.sort_positions = lambda position: position.total_nums
+			self.return_first = True
+		if self.solution_alg == SOLUTION_ALG_GREED:
+			self.past_vus_cost_factor = (0.82, 1.22)
+			self.sort_positions = lambda position: position.solution_cost
+		if self.solution_alg == SOLUTION_ALG_ASTAR:
+			self.sort_positions = lambda position: position.solution_cost
+
+	def switch_pq_algorithm(self, solution_alg):
+		assert self.solution_alg != solution_alg
+		self.solution_alg = solution_alg
+		self.configure_pq_algorithm()
+
+		# rebuild PQ with new priorities
+		old_pq = self.unprocessed_positions
+		self.unprocessed_positions = []
+
+		# reset best_key and cached _solution_cost for all positions
+		for position in self.iter_positions():
+			position.best_key = None
+			position._solution_cost = None
+			position.is_fully_processed = self.can_prune_by_solution_lower_bound(position)
+			if solution_alg != SOLUTION_ALG_ASTAR:
+				position.child_edges.clear()
+
+		for _, _, position in old_pq:
+			if not position.is_fully_processed:
+				self.pq_push(position)
 
 	def get_min_position_cost(self, barrel_idxs):
 		total_cost = (0, 0)
@@ -771,6 +814,11 @@ class SokobanSolver():
 			debug([depth], DBG_SOLV2, "Found solution %s in %.1fs" % (position.nums_str, time() - self.start_solution_time))
 			debug(DBG_SEVT, "SOL %d %s" % (position.id, position.nums_str))
 			position.cut_down()
+			if self.switch_to_astar:
+				debug(DBG_SOLV2, "Switching solution alg to A* after finding solution")
+				self.switch_to_astar = False
+				self.switch_pq_algorithm(SOLUTION_ALG_ASTAR)
+				self.return_first = False
 			return None if self.return_first else True
 
 		if hgf_costs := self.can_prune_by_solution_lower_bound(position, True):
@@ -922,6 +970,13 @@ class SokobanSolver():
 
 	def find_solution_using_pq(self):
 		while True:
+			if self.fallback_to_greed_time and time() > self.fallback_to_greed_time:
+				debug(DBG_SOLV2, "Switching solution alg to Greedy return_first")
+				self.fallback_to_greed_time = None
+				self.switch_pq_algorithm(SOLUTION_ALG_GREED)
+				self.return_first = True
+				return None
+
 			position = self.pq_pop()
 			if position is None:
 				# heap is empty, finished
@@ -1170,16 +1225,8 @@ class SokobanSolver():
 
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()
-			if self.solution_alg == SOLUTION_ALG_UCS:
-				self.sort_positions = lambda position: position.total_nums
-				self.return_first = True
-			if self.solution_alg == SOLUTION_ALG_GREED:
-				self.past_vus_cost_factor = (0.82, 1.22)
-				self.sort_positions = lambda position: position.solution_cost
-			if self.solution_alg == SOLUTION_ALG_ASTAR:
-				self.sort_positions = lambda position: position.solution_cost
-				self.use_relax_child_edges = True
 			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+				self.configure_pq_algorithm()
 				self.unprocessed_positions = []
 				self.pq_push(self.initial_position)
 			elif self.solution_alg == SOLUTION_ALG_BFS:
@@ -1247,6 +1294,14 @@ class SokobanSolver():
 		grid.check_zsb()
 		if self.solution_alg is None:
 			self.solution_alg = SOLUTION_ALG_GREED if grid.is_zsb or self.return_first else SOLUTION_ALG_BFS
+		self.requested_solution_alg = self.solution_alg
+		if self.solution_alg == SOLUTION_ALG_SHARP:
+			self.switch_to_astar = True
+			self.solution_alg = SOLUTION_ALG_GREED
+			self.return_first = False
+		if self.solution_alg == SOLUTION_ALG_FADED:
+			self.fallback_to_greed_time = time() + min(self.limit_time, 60 * 60) / 2
+			self.solution_alg = SOLUTION_ALG_ASTAR
 		self.char_cell = char_cell
 		self.barrel_cells = barrel_cells
 		global solver
