@@ -238,6 +238,9 @@ class SokobanSolver():
 		HAS_DLCK = debug.has(DBG_DLCK)
 
 		self.visited_super_positions = {}  # super_position_id -> SuperPosition
+		self.stopped_by_user = False
+		self.max_depth_reached = False
+		self.time_limit_reached = False
 		self.limit_time = MAX_FIND_SOLUTION_TIME
 		self.solution_depth = MAX_SOLUTION_DEPTH
 		self.solution_alg = None
@@ -750,6 +753,7 @@ class SokobanSolver():
 		if time() > self.end_solution_time:
 			debug([depth], DBG_SOLV2, "Solution time limit %ds reached" % MAX_FIND_SOLUTION_TIME)
 			position.cut_down()
+			self.time_limit_reached = True
 			return True
 
 		if self.solved_position and position.cmp(self.solved_position) >= 0:
@@ -907,6 +911,8 @@ class SokobanSolver():
 				return None
 			frontier.pop()
 			if is_fully_processed:
+				if position.is_solved or self.time_limit_reached:
+					return None
 				continue
 
 			for child in position.children:
@@ -925,6 +931,8 @@ class SokobanSolver():
 				self.pq_push(position)
 				return None
 			if is_fully_processed:
+				if position.is_solved or self.time_limit_reached:
+					return None
 				continue
 			# push all children (their keys are computed inside pq_push)
 			for child in position.children:
@@ -1147,7 +1155,7 @@ class SokobanSolver():
 		if not self.start_solution_time:
 			# preparing to find solution
 			self.start_solution_time = time()
-			self.end_solution_time = time() + self.limit_time
+			self.end_solution_time = self.start_solution_time + self.limit_time
 
 			self.prepare_solution(self.char_cell)
 			if not self.check_solvability():
@@ -1192,7 +1200,9 @@ class SokobanSolver():
 			return None, self.get_find_solution_status_str()
 
 		too_deep = self.solution_depth > MAX_SOLUTION_DEPTH
-		if stop or too_deep or time() > self.end_solution_time:
+		self.stopped_by_user = stop
+		self.max_depth_reached = too_deep
+		if stop or too_deep or self.time_limit_reached:
 			return self.get_found_solution_items("terminated (%s)" % ("by user" if stop else "too deep" if too_deep else "time out")), None
 
 		debug(DBG_SOLV2, "Using %s%s" % (self.solution_alg, " up to depth %d" % self.solution_depth if self.solution_depth < MAX_SOLUTION_DEPTH else ""))
