@@ -94,7 +94,6 @@ if record_filename == '.' or record_filename is None and any(records_in_level_co
 	record_filename = [*records_in_level_configs()]
 
 coll_records = CollectionRecords(record_filename, cmdargs.by_moves) if record_filename else None
-is_optimal = not return_first and not reverse_barrel_mode and solution_alg in (None, SOLUTION_ALG_ASTAR, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_SHARP)
 
 for level_index, level_config in enumerate(level_configs):
 	level_index += 1
@@ -116,21 +115,22 @@ for level_index, level_config in enumerate(level_configs):
 	solver.disable_budget = disable_budget
 	solver.disable_prepare = disable_prepare
 
-	def show_solution(solution_items):
+	def show_solution():
+		status = solver.last_solution
 		if coll_records:
 			record_str = colorize_auto(coll_records.record_str_at_result)
-			c = coll_records.cmp_level_result(solver.last_solution.nums_str)
+			c = coll_records.cmp_level_result(status.nums_str)
 			record_status_str = colorize_auto('N/A' if c is None else 'OK' if c == 0 else 'WORSE' if c == 1 else 'NEW RECORD')
 		if show_time:
-			print("Time: %s" % colorize_auto(solver.last_solution.time_str))
-		if quiet >= 3 and is_optimal and solution_items and coll_records:
+			print("Time: %s" % colorize_auto(status.time_str))
+		if quiet >= 3 and status.is_requested_optimal and status.is_solved and not reverse_barrel_mode and coll_records:
 			print("Solution: %s" % record_status_str)
-		elif not solution_items:
+		elif not status.is_solved:
 			print("Solution %s" % colorize_auto("not found"))
 		elif quiet >= 3:
 			print("Solution %s" % colorize_auto("found"))
 		else:
-			print("Solution %s: %s" % (colorize_auto(solver.last_solution.nums_str), solver.last_solution.str))
+			print("Solution %s: %s" % (colorize_auto(status.nums_str), status.str))
 		if quiet <= 2 and coll_records:
 			print("Record %s: %s" % (record_str, record_status_str))
 
@@ -142,12 +142,12 @@ for level_index, level_config in enumerate(level_configs):
 			progress_line.put(msg)
 		progress_line.put()
 
-		show_solution(solution_items)
+		show_solution()
 		if quiet <= 3: print()
 	except KeyboardInterrupt:
 		print()
 		solution_items = solver.get_found_solution_items("terminated")
-		show_solution(solution_items)
+		show_solution()
 		print("Terminated by user. Press Enter to continue, or Ctrl-C to stop")
 		try:
 			sys.stdin.readline()

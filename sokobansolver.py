@@ -1287,11 +1287,15 @@ class SokobanSolver():
 		self.disable_budget = old_disable_budget
 		return solution_items
 
-	def configure(self, map, reverse_barrel_mode, char_cell, barrel_cells):
+	def configure(self, map, reverse_barrel_mode, char_cell, barrel_cells, solution_alg=None, return_first=None):
 		grid.configure(map, reverse_barrel_mode=reverse_barrel_mode, cut_outer_floors=True)
 		barrel_cells = [cell for cell in barrel_cells if cell in grid.cell_idxs]
 		grid.set_barrels(barrel_cells)
 		grid.check_zsb()
+		if solution_alg is not None:
+			self.solution_alg = solution_alg
+		if return_first is not None:
+			self.return_first = return_first
 		if self.solution_alg is None:
 			self.solution_alg = SOLUTION_ALG_GREED if grid.is_zsb or self.return_first else SOLUTION_ALG_BFS
 		self.requested_solution_alg = self.solution_alg
@@ -1316,9 +1320,12 @@ class SolutionStatus():
 		self.str = None
 		self.alg = solver.solution_alg
 		self.type = solver.solution_type
+		self.return_first = solver.return_first
+		self.reverse_mode = grid.reverse_barrel_mode
 		self.num_positions = solver.num_created_positions
 		self.num_superpositions = len(solver.visited_super_positions)
 		self.is_solved = solver.solved_position is not None
+		self.is_terminated = solver.stopped_by_user or solver.max_depth_reached or solver.time_limit_reached
 		if self.is_solved:
 			self.nums_str = solver.solved_position.nums_str
 			self.str = ''
@@ -1329,6 +1336,9 @@ class SolutionStatus():
 					char_cell = cell
 				self.str += shift_direction.upper()
 				char_cell = apply_diff(char_cell, DIRS_BY_NAME[shift_direction])
+		self.is_requested_optimal = (not self.return_first or SOLUTION_ALG_UCS) \
+			and solver.requested_solution_alg in (SOLUTION_ALG_ASTAR, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_SHARP)
+		self.is_optimal = self.is_requested_optimal and self.is_solved and not self.is_terminated
 
 # modify map and barrel_cells in-place
 def reverse_barrel_map(map, barrel_cells):
@@ -1373,9 +1383,7 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 	solver = SokobanSolver()
 	if limit_time:
 		solver.limit_time = limit_time
-	solver.solution_alg = solution_alg
-	solver.return_first = return_first
-	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells))
+	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells), solution_alg, return_first)
 	if show_map:
 		if show_dead:
 			solver.prepare_solution(char_cell)
