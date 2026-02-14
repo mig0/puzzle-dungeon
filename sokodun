@@ -124,8 +124,10 @@ for level_index, level_config in enumerate(level_configs):
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		if coll_records: coll_records.cmp_level_result(None)
 		continue
+	if coll_records:
+		record_str = colorize_auto(coll_records.record_str_at_result)
 	if quiet <= 3 and not catalogize:
-		print("Solving level %s of %d: %s" % (colorize(level_index, COLOR_BOLD), len(level_configs), colorize(level.name, COLOR_ITALIC)))
+		print("Solving level %s of %d: %s%s" % (colorize(level_index, COLOR_BOLD), len(level_configs), colorize(level.name, COLOR_ITALIC), f" ⏺ {record_str}" if coll_records else ""))
 	solver = create_solver(level.map_string, reverse_barrel_mode)
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
@@ -152,7 +154,6 @@ for level_index, level_config in enumerate(level_configs):
 	def show_solution():
 		status = solver.last_solution
 		if coll_records:
-			record_str = colorize_auto(coll_records.record_str_at_result)
 			c = coll_records.cmp_level_result(status.nums_str)
 			record_status_str = colorize_auto('N/A' if c is None else 'OK' if c == 0 else 'WORSE' if c == 1 else 'NEW RECORD')
 		if show_time:
