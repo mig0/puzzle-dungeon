@@ -1355,6 +1355,53 @@ class SokobanSolver():
 		global solver
 		solver = self
 
+	def is_grace_level(self):
+		plate_cells = grid.to_cells(grid.plate_bits)
+		barrel_cells = grid.to_cells(self.barrel_cells)
+
+		score = 0
+		p_pattern = normalize_pattern(plate_cells)
+		b_pattern = normalize_pattern(barrel_cells)
+		p_area = get_bounding_area(p_pattern)
+		b_area = get_bounding_area(b_pattern)
+
+		if plate_cells == barrel_cells:
+			score += 1
+		if is_on_one_line(plate_cells):
+			score += 1
+		if is_on_one_line(barrel_cells):
+			score += 1
+		if p_area.size_x * p_area.size_y <= 2 * len(plate_cells):
+			score += 1
+		if p_area.size_x * p_area.size_y == 1 * len(plate_cells):
+			score += 1
+		if b_area.size_x * b_area.size_y <= 2 * len(barrel_cells):
+			score += 1
+		if b_area.size_x * b_area.size_y == 1 * len(barrel_cells):
+			score += 1
+		if plate_cells and barrel_cells:
+			all_p_variants = all_pattern_variants(plate_cells)
+			all_b_variants = all_pattern_variants(barrel_cells)
+			if all_p_variants & all_b_variants:
+				score += 2
+
+		return score >= 4
+
+	def is_large_level(self):
+		return grid.num_bits > 150
+
+	def is_dense_level(self):
+		num_barrels = len(self.barrel_cells)
+		return num_barrels >= 10 and grid.num_bits / num_barrels <= 3
+
+	def is_level_tag(self, tag):
+		method = f"is_{tag}_level"
+		return getattr(self, method)()
+
+	def get_level_difficulty(self):
+		from random import randint
+		return randint(0, 4)
+
 class SolutionStatus():
 	def __init__(self):
 		assert solver

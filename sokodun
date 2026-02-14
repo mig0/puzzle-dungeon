@@ -10,7 +10,7 @@ sys.path.append(".")  # to be replaced with DATA_DIR
 from load import parse_map_file_signature
 from level import Level
 from debug import debug
-from common import die, warn, load_file
+from common import die, warn, load_file, get_range_str
 from records import CollectionRecords
 from colorize import *
 from sizetools import set_fitting_map_size
@@ -29,6 +29,7 @@ parser.add_argument('-n', '--use-numeric', help="use numeric ids to list collect
 parser.add_argument('-r', '--reverse-barrel-mode', '--reverse', help="apply reverse barrel mode to custom levels", action='store_true', default=None)
 parser.add_argument('-p', '--run-profiler', help="run code with profiler", action='store_true')
 parser.add_argument('-s', '--show-sok', help="show map in sok format rather than internal", action='store_true')
+parser.add_argument('-N', '--no-solve', help="show static level info only, but don't solve", action='store_true')
 parser.add_argument('-m', '--by-moves', help="find move optimal solution, not push/pull optimal", action='store_true')
 parser.add_argument('-A', '--astar', help="use A* algorithm to find solution", action='store_true')
 parser.add_argument('-B', '--bfs', help="use BFS algorithm to find solution", action='store_true')
@@ -46,6 +47,8 @@ parser.add_argument('-t', '--show-time', help="show solution time in seconds", a
 parser.add_argument('-T', '--limit-time', help="limit solution time to given seconds", metavar='SEC', action='store')
 parser.add_argument('-R', '--record-file', help='compare with records; "." (in-level), "" (disable)', metavar='FILE', action='store')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
+parser.add_argument('-v', '--verbose', help="show additional level details about", action='store_true')
+parser.add_argument('-c', '--catalogize', help="sort all levels by difficulty and beauty", action='store_true')
 parser.add_argument("args", nargs='*', help="level-id, collection-id, map-file or url")
 
 cmdargs = parser.parse_args()
@@ -61,7 +64,15 @@ limit_time = int(cmdargs.limit_time) if cmdargs.limit_time and cmdargs.limit_tim
 show_time = cmdargs.show_time
 show_dead = cmdargs.show_dead and 'auto'
 show_sok = cmdargs.show_sok
+no_solve = cmdargs.no_solve
 quiet = cmdargs.quiet or 0
+verbose = cmdargs.verbose
+catalogize = cmdargs.catalogize
+
+LEVEL_DFC_NAMES = ("tiny", "easy", "solid", "tough", "brutal")
+LEVEL_DFC_COLORS = (COLOR_F_GREEN, COLOR_F_LIME, COLOR_F_YELLOW, COLOR_F_ORANGE, COLOR_F_RED)
+LEVEL_TAG_NAMES = ("grace", "large", "dense")
+LEVEL_TAG_COLORS = (COLOR_F_PEARL, COLOR_F_AQUA, COLOR_F_VIOLET)
 
 set_fitting_map_size((5, 5))
 
@@ -84,7 +95,7 @@ def create_solver(map_string, reverse_barrel_mode=False):
 	map = create_sokoban_map(map_string)
 	if not quiet and show_sok:
 		print(create_sok_map(map), end='')
-	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, not quiet and not show_sok, show_dead, limit_time)
+	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, not quiet and not catalogize and not show_sok, show_dead, limit_time)
 
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)
@@ -95,6 +106,10 @@ if record_filename == '.' or record_filename is None and any(records_in_level_co
 	record_filename = [*records_in_level_configs()]
 
 coll_records = CollectionRecords(record_filename, cmdargs.by_moves) if record_filename else None
+if catalogize:
+	solution_alg = SOLUTION_ALG_FADED
+	level_dfc_indexes = [[] for _ in LEVEL_DFC_NAMES]
+	level_tag_indexes = [[] for _ in LEVEL_TAG_NAMES]
 
 for level_index, level_config in enumerate(level_configs):
 	level_index += 1
@@ -109,12 +124,30 @@ for level_index, level_config in enumerate(level_configs):
 		warn("Ignoring level %d of auto-generated BarrelPuzzle, try the same in dungeon" % level_index)
 		if coll_records: coll_records.cmp_level_result(None)
 		continue
-	if quiet <= 3:
+	if quiet <= 3 and not catalogize:
 		print("Solving level %s of %d: %s" % (colorize(level_index, COLOR_BOLD), len(level_configs), colorize(level.name, COLOR_ITALIC)))
 	solver = create_solver(level.map_string, reverse_barrel_mode)
 	solver.solution_type = solution_type
 	solver.disable_budget = disable_budget
 	solver.disable_prepare = disable_prepare
+	if catalogize:
+		for i, tag in enumerate(LEVEL_TAG_NAMES):
+			if solver.is_level_tag(tag): level_tag_indexes[i].append(level_index)
+	elif verbose:
+		tags = []
+		for i, tag in enumerate(LEVEL_TAG_NAMES):
+			if solver.is_level_tag(tag): tags.append(colorize(tag, LEVEL_TAG_COLORS[i]))
+		if not tags:
+			tags.append("normal")
+		print("Details: %s barrels, %s floors; %s" % (colorize_auto(grid.num_barrels), colorize_auto(grid.num_bits), ' '.join(tags)))
+	if no_solve:
+		continue
+	if catalogize:
+		if not limit_time: solver.limit_time = 60
+		progress_line.put("Solving level %d of %d using Faded with time limit" % (level_index, len(level_configs)))
+		solver.solve()
+		level_dfc_indexes[solver.get_level_difficulty()].append(level_index)
+		continue
 
 	def show_solution():
 		status = solver.last_solution
@@ -155,6 +188,21 @@ for level_index, level_config in enumerate(level_configs):
 		except KeyboardInterrupt:
 			print()
 			exit(1)
+
+if catalogize:
+	if not no_solve:
+		progress_line.put("")
+		print(colorize("Level difficulty", COLOR_F_WHITE) + ":")
+		for i, indexes in enumerate(level_dfc_indexes):
+			if indexes:
+				print("    " + colorize(LEVEL_DFC_NAMES[i], LEVEL_DFC_COLORS[i]) + ":", get_range_str(indexes))
+	no_special_levels = True
+	for i, indexes in enumerate(level_tag_indexes):
+		if indexes:
+			print(colorize(LEVEL_TAG_NAMES[i].capitalize() + " levels", LEVEL_TAG_COLORS[i]) + ":", get_range_str(indexes))
+			no_special_levels = False
+	if no_special_levels:
+		print("No special levels")
 
 if coll_records and os.environ.get("UPDATE_RECORDS", False):
 	updated = coll_records.update_file()
