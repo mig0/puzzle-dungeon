@@ -34,6 +34,7 @@ parser.add_argument('-A', '--astar', help="use A* algorithm to find solution", a
 parser.add_argument('-B', '--bfs', help="use BFS algorithm to find solution", action='store_true')
 parser.add_argument('-D', '--dfs', help="use DFS algorithm to find solution", action='store_true')
 parser.add_argument('-G', '--greed', help="use Greedy algorithm to find solution", action='store_true')
+parser.add_argument('-H', '--hyper', help="use Hyper algorithm to find solution", action='store_true')
 parser.add_argument('-U', '--ucs', help="use Uniform Cost algorithm to find solution", action='store_true')
 parser.add_argument('-F', '--faded', help="use UCS first, then fallback to Greedy", action='store_true')
 parser.add_argument('-S', '--sharp', help="use Greedy first, then switch to A*", action='store_true')
@@ -54,7 +55,7 @@ record_filename = cmdargs.record_file
 disable_prepare = cmdargs.disable_prepare
 disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
-solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmdargs.bfs else SOLUTION_ALG_DFS if cmdargs.dfs else SOLUTION_ALG_GREED if cmdargs.greed else SOLUTION_ALG_UCS if cmdargs.ucs else SOLUTION_ALG_FADED if cmdargs.faded else SOLUTION_ALG_SHARP if cmdargs.sharp else None
+solution_alg = SOLUTION_ALG_ASTAR if cmdargs.astar else SOLUTION_ALG_BFS if cmdargs.bfs else SOLUTION_ALG_DFS if cmdargs.dfs else SOLUTION_ALG_GREED if cmdargs.greed else SOLUTION_ALG_HYPER if cmdargs.hyper else SOLUTION_ALG_UCS if cmdargs.ucs else SOLUTION_ALG_FADED if cmdargs.faded else SOLUTION_ALG_SHARP if cmdargs.sharp else None
 return_first = cmdargs.return_first
 limit_time = int(cmdargs.limit_time) if cmdargs.limit_time and cmdargs.limit_time.isdigit() else None
 show_time = cmdargs.show_time

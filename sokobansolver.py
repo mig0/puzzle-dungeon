@@ -21,6 +21,7 @@ SOLUTION_ALG_BFS   = "BFS"
 SOLUTION_ALG_UCS   = "UCS"    # key is g (path cost)
 SOLUTION_ALG_ASTAR = "A*"     # key is g + h (estimated lower bound cost); plus relax-edges
 SOLUTION_ALG_GREED = "Greedy" # key is 40 * g + 60 * h; weighted A*
+SOLUTION_ALG_HYPER = "Hyper"  # key is (num_unsolved_barrels, extra, h)
 SOLUTION_ALG_FADED = "Faded"  # start with A*, but fallback to Greedy on timeout
 SOLUTION_ALG_SHARP = "Sharp"  # start with Greedy, but switch to A* on first solution
 
@@ -52,6 +53,9 @@ class SuperPosition:
 		self.barrel_idxs = barrel_idxs
 		self.all_proto_segments = all_proto_segments
 		self._solution_cost = None  # lazy calculation
+		self._num_unsolved = None
+		self._num_blockers = None
+		self._num_corrals = None
 		self.is_solved = grid.is_solved_for_barrels(barrel_idxs)
 		self.positions = {}  # char_idx -> Position
 
@@ -77,6 +81,35 @@ class SuperPosition:
 			self._solution_cost = solver.get_min_solution_cost(self.barrel_idxs)
 			assert self._solution_cost, "Position was created, but super-position looks dead"
 		return self._solution_cost
+
+	@property
+	def num_unsolved(self):
+		if self._num_unsolved is None:
+			self._num_unsolved = sum(1 - grid.plate_bits[idx] for idx in self.barrel_idxs)
+		return self._num_unsolved
+
+	@property
+	def num_blockers(self):
+		if self._num_blockers is None:
+			all_barrels = set(self.barrel_idxs)
+			num_blockers = 0
+			for barrel_idx in all_barrels:
+				weight = 1 if grid.plate_bits[barrel_idx] else 2
+				axis_blockers = solver.barrel_axis_blockers[barrel_idx]
+				for axis in (AXIS_H, AXIS_V):
+					if not (blockers := axis_blockers[axis]):
+						continue
+					num_blockers += (1 if blockers & all_barrels else 0) * weight
+			self._num_blockers = num_blockers
+		return self._num_blockers
+
+	@property
+	def num_corrals(self):
+		if self._num_corrals is None:
+			grid.set_barrels(self.barrel_idxs)
+			grid.get_accessible_bits(next(iter(self.positions)))
+			self._num_corrals = len(grid.get_corrals())
+		return self._num_corrals
 
 class Position:
 	def __init__(self, super, char_idx, parent, own_nums, segments):
@@ -274,6 +307,7 @@ class SokobanSolver():
 		self.use_relax_child_edges = False
 		self.improve_position = None
 		self.sort_positions = None
+		self.pre_sort_positions = None
 		self.switch_to_astar = False
 		self.fallback_to_greed_time = None
 		grid.reset()
@@ -287,6 +321,9 @@ class SokobanSolver():
 		total_cost = self.sort_positions(position)
 		debug(DBG_SEVT, "PUT %d %s" % (position.id, cost_to_str(total_cost)))
 		key = cost_to_key(total_cost)
+
+		if self.pre_sort_positions:
+			key = self.pre_sort_positions(position) + key
 
 		# verify that there is no better key in heap already
 		if key == position.best_key:
@@ -309,8 +346,8 @@ class SokobanSolver():
 			if position.best_key != key:
 				continue
 
-			assert not position.is_fully_processed or self.solution_alg == SOLUTION_ALG_GREED
-			debug(DBG_SEVT, "GET %d %s" % (position.id, cost_to_str(cost_to_key(key))))
+			assert not position.is_fully_processed or self.solution_alg in (SOLUTION_ALG_GREED, SOLUTION_ALG_HYPER)
+			debug(DBG_SEVT, "GET %d %s" % (position.id, cost_to_str(cost_to_key(key[-2:]))))
 			return position
 
 		return None
@@ -318,6 +355,7 @@ class SokobanSolver():
 	def configure_pq_algorithm(self):
 		self.path_vus_eslb_factor = 1
 		self.use_relax_child_edges = self.solution_alg == SOLUTION_ALG_ASTAR or self.switch_to_astar
+		self.pre_sort_positions = None
 		if self.solution_alg == SOLUTION_ALG_UCS:
 			self.sort_positions = lambda position: position.total_nums
 			self.return_first = True
@@ -326,6 +364,11 @@ class SokobanSolver():
 		if self.solution_alg == SOLUTION_ALG_GREED:
 			self.path_vus_eslb_factor = (100 - self.eslb_weight, self.eslb_weight)
 			self.sort_positions = lambda position: position.solution_cost
+		if self.solution_alg == SOLUTION_ALG_HYPER:
+			self.path_vus_eslb_factor = (0, 1)
+			self.sort_positions = lambda position: position.solution_cost
+#			self.pre_sort_positions = lambda position: (position.super.num_unsolved, position.super.num_corrals, position.super.num_blockers)
+			self.pre_sort_positions = lambda position: (position.super.num_unsolved,)
 
 	def switch_pq_algorithm(self, solution_alg):
 		assert self.solution_alg != solution_alg
@@ -1183,7 +1226,7 @@ class SokobanSolver():
 		else:
 			status_str += "; %s deepest %d" % (self.solution_alg[0:2], max_depth)
 		status_str += "; positions: %d" % self.num_processed_positions
-		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+		if self.solution_alg in (SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_ASTAR, SOLUTION_ALG_GREED, SOLUTION_ALG_HYPER):
 			status_str += " + %d" % len(self.unprocessed_positions)
 		if self.solved_position:
 			status_str += "; found %s" % self.solved_position.nums_str
@@ -1226,7 +1269,7 @@ class SokobanSolver():
 
 			if self.solution_alg in (SOLUTION_ALG_DFS, SOLUTION_ALG_BFS):
 				self.solution_depth = self.estimate_solution_depth()
-			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_ASTAR, SOLUTION_ALG_GREED, SOLUTION_ALG_HYPER):
 				self.configure_pq_algorithm()
 				self.unprocessed_positions = []
 				self.pq_push(self.initial_position)
@@ -1236,7 +1279,7 @@ class SokobanSolver():
 			else:
 				self.unprocessed_positions = [self.initial_position]
 
-			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_GREED, SOLUTION_ALG_ASTAR):
+			if self.solution_alg in (SOLUTION_ALG_UCS, SOLUTION_ALG_ASTAR, SOLUTION_ALG_GREED, SOLUTION_ALG_HYPER):
 				def improve_position(position):
 					if position.best_key is not None:
 						self.pq_push(position)

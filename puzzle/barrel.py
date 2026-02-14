@@ -463,6 +463,8 @@ class BarrelPuzzle(Puzzle):
 				self.solver.solution_alg = SOLUTION_ALG_DFS
 			if keyboard.g:
 				self.solver.solution_alg = SOLUTION_ALG_GREED
+			if keyboard.h:
+				self.solver.solution_alg = SOLUTION_ALG_HYPER
 			if keyboard.u:
 				self.solver.solution_alg = SOLUTION_ALG_UCS
 			if keyboard.f:
