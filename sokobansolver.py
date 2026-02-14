@@ -18,11 +18,11 @@ SOLUTION_TYPE_BY_MOVES = 2
 
 SOLUTION_ALG_DFS   = "DFS"
 SOLUTION_ALG_BFS   = "BFS"
-SOLUTION_ALG_UCS   = "UCS"
-SOLUTION_ALG_GREED = "Greedy"
-SOLUTION_ALG_ASTAR = "A*"
-SOLUTION_ALG_FADED = "Faded"  # first UCS, then fallback to Greedy
-SOLUTION_ALG_SHARP = "Sharp"  # first Greedy, then switch to A*
+SOLUTION_ALG_UCS   = "UCS"    # key is g (path cost)
+SOLUTION_ALG_ASTAR = "A*"     # key is g + h (estimated lower bound cost); plus relax-edges
+SOLUTION_ALG_GREED = "Greedy" # key is 40 * g + 60 * h; weighted A*
+SOLUTION_ALG_FADED = "Faded"  # start with A*, but fallback to Greedy on timeout
+SOLUTION_ALG_SHARP = "Sharp"  # start with Greedy, but switch to A* on first solution
 
 DBG_PRUN = "prun"  # show prune info on progress
 DBG_NOFD = "nofd"  # disable Freeze deadlock detection
@@ -184,7 +184,7 @@ class Position:
 	@property
 	def solution_cost(self):
 		if self._solution_cost is None:
-			self._solution_cost = apply_diff(self.total_nums, self.super.solution_cost, factor=solver.past_vus_cost_factor)
+			self._solution_cost = apply_diff(self.total_nums, self.super.solution_cost, factor=solver.path_vus_eslb_factor)
 		return self._solution_cost
 
 	def to_solution_pairs(self):
@@ -269,7 +269,8 @@ class SokobanSolver():
 			self.num_costy_than_solved_positions = 0
 			self.num_found_solved_positions = 0
 			self.num_costy_solved_bound_positions = 0
-		self.past_vus_cost_factor = 1  # 1 is for A*
+		self.path_vus_eslb_factor = 1  # 1 is for A*
+		self.eslb_weight = 60
 		self.use_relax_child_edges = False
 		self.improve_position = None
 		self.sort_positions = None
@@ -315,15 +316,15 @@ class SokobanSolver():
 		return None
 
 	def configure_pq_algorithm(self):
-		self.past_vus_cost_factor = 1
+		self.path_vus_eslb_factor = 1
 		self.use_relax_child_edges = self.solution_alg == SOLUTION_ALG_ASTAR or self.switch_to_astar
 		if self.solution_alg == SOLUTION_ALG_UCS:
 			self.sort_positions = lambda position: position.total_nums
 			self.return_first = True
-		if self.solution_alg == SOLUTION_ALG_GREED:
-			self.past_vus_cost_factor = (0.82, 1.22)
-			self.sort_positions = lambda position: position.solution_cost
 		if self.solution_alg == SOLUTION_ALG_ASTAR:
+			self.sort_positions = lambda position: position.solution_cost
+		if self.solution_alg == SOLUTION_ALG_GREED:
+			self.path_vus_eslb_factor = (100 - self.eslb_weight, self.eslb_weight)
 			self.sort_positions = lambda position: position.solution_cost
 
 	def switch_pq_algorithm(self, solution_alg):
