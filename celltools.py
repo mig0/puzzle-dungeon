@@ -131,3 +131,34 @@ def get_bounding_area(cells):
 	xs, ys = zip(*cells)
 	return Area(min(xs), min(ys), max(xs), max(ys))
 
+def is_on_one_line(cells):
+	if not cells:
+		return False
+	xs = {x for (x, y) in cells}
+	ys = {y for (x, y) in cells}
+	return len(xs) == 1 or len(ys) == 1
+
+def normalize_pattern(cells):
+	if not cells:
+		return frozenset()
+	min_x = min(x for x, y in cells)
+	min_y = min(y for x, y in cells)
+	return frozenset((x - min_x, y - min_y) for x, y in cells)
+
+def all_pattern_variants(cells):
+	# all rotations/reflections of a pattern, normalized
+	pattern = normalize_pattern(cells)
+	if not pattern:
+		return {pattern}
+	variants = set()
+	for swap in (False, True):
+		for sx in (1, -1):
+			for sy in (1, -1):
+				points = []
+				for (x, y) in pattern:
+					if swap:
+						x, y = y, x
+					points.append((sx * x, sy * y))
+				variants.add(normalize_pattern(points))
+	return variants
+
