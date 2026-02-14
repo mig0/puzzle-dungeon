@@ -34,7 +34,7 @@ selectable at runtime:
   remaining cost) to guide the search and find optimal solutions.
 
 - **Greedy Best-First Search**  
-  Uses the same heuristics as A* but prioritizes estimated remaining cost.
+  Uses the same heuristics as A\* but prioritizes estimated remaining cost.
   Optimality is not guaranteed, but solutions are often found faster.
 
 - **Depth-First Search (DFS)**  
@@ -42,7 +42,7 @@ selectable at runtime:
   use less memory, but has its own artifacts. It is implemented as IDDFS
   with a depth step.
 
-The optimality of BFS, UCS, and A* is confirmed by comprehensive tests
+The optimality of BFS, UCS, and A\* is confirmed by comprehensive tests
 across different level classes.
 
 ## Solution Types and Cost Metrics
@@ -84,7 +84,7 @@ Other properties are stored per Position, including:
 
 Each position has a single best parent at any time. If a better path to
 an existing position is found, the position is reparented. For algorithms
-that require edge relaxation (A*, BFS by moves), potential child edges
+that require edge relaxation (A\*, BFS by moves), potential child edges
 are stored to allow reparenting back when accumulated path cost improves.
 
 ## Heuristics and Lower Bounds
@@ -108,8 +108,8 @@ The lower bound from the initial position to intermediate positions
 (currently used for pruning after a solution is found) is computed as a
 sum of minimal barrel-to-target costs without matching.
 
-For heuristic-based algorithms (A* and Greedy), the perfect matching is
-used. The admissible heuristics preserves optimality for A*.
+For heuristic-based algorithms (A\* and Greedy), the perfect matching is
+used. The admissible heuristics preserves optimality for A\*.
 
 For UCS, optimality follows directly from cost-order exploration: the
 first solution found is optimal.
@@ -205,10 +205,11 @@ So such Position object is just never created; this can't be disabled.
 |GUI key|CLI option|Action
 |--|--|--------
 |RCtrl-1|`-1`|Toggle return-first solution mode
-|RCtrl-A|`-A`|Use A* algorithm
+|RCtrl-A|`-A`|Use A\* algorithm
 |RCtrl-B|`-B`|Use BFS algorithm
 |RCtrl-D|`-D`|Use DFS algorithm
 |RCtrl-G|`-G`|Use Greedy algorithm
+|RCtrl-H|`-H`|Use Hyper algorithm
 |RCtrl-U|`-U`|Use UCS (Uniform Cost) algorithm
 |RCtrl-0|`-0`|Disable periodic progress reporting
 |RCtrl-\-|`-_`|Disable cost and valid shift preparation (debug only)
@@ -252,12 +253,12 @@ You can run the solver on large levels to observe where it gets stuck,
 but do not leave it running for too long. It is recomended to always
 start with return-first Greedy mode (specify "sokodun -1" or press
 *RCtrl-1* in the GUI). Once it finds a return-first solution in
-reasonable time, you may attempt to solve it using BFS, A* or USC (*-B*,
+reasonable time, you may attempt to solve it using BFS, A\* or USC (*-B*,
 *-A*, *-U* with optional *-m* in the CLI, or *RCtrl-{B,A,U}* followed by
 *KP_Enter* or *Shift-KP_Enter* in the GUI) to find a push-optimal or
 move-optimal solution.
 
-If the solution does not progress quickly for Greedy or A*, this can mean
+If the solution does not progress quickly for Greedy or A\*, this can mean
 some non-trivial deadlock was not detected, and expanding a deadlocked
 position is costy. Press *RCtrl-Backquote* in the GUI to see the last
 discovered dynamic deadlock. Press *RCtrl-Tab* (any number of times) to
@@ -271,7 +272,7 @@ tooling, research, and further optimization.
 ## Validity of Solutions
 
 There are comprehensive tests. If you discover any anomaly, like a
-non-optimal solution for a letslogic level using BFS or A*, or a
+non-optimal solution for a letslogic level using BFS or A\*, or a
 "Solution not found" result, please report such exotic cases. They can
 then be fixed, added to tests, and prevented from recurring.
 
