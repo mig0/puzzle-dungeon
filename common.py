@@ -99,3 +99,28 @@ def load_tabbed_yaml(filename):
 def isinstance_by_name(obj, class_name):
 	return hasattr(obj, '__class__') and any(c.__name__ == class_name for c in obj.__class__.__mro__)
 
+def get_range_str(idxs):
+	if not idxs:
+		return ""
+
+	parts = []
+	start = prev = idxs[0]
+
+	for x in idxs[1:]:
+		if x == prev + 1:
+			prev = x
+			continue
+		# close current range
+		if start == prev:
+			parts.append(str(start))
+		else:
+			parts.append(f"{start}-{prev}")
+		start = prev = x
+
+	# close last range
+	if start == prev:
+		parts.append(str(start))
+	else:
+		parts.append(f"{start}-{prev}")
+
+	return " ".join(parts)
