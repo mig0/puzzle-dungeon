@@ -45,6 +45,7 @@ parser.add_argument('-1', '--return-first', help="return first found solution (n
 parser.add_argument('-x', '--show-dead', help="show dead-barrel cells on map", action='store_true')
 parser.add_argument('-t', '--show-time', help="show solution time in seconds", action='store_true')
 parser.add_argument('-T', '--limit-time', help="limit solution time to given seconds", metavar='SEC', action='store')
+parser.add_argument('-2', '--limit-by-record', help="limit solution by record", action='store_true')
 parser.add_argument('-R', '--record-file', help='compare with records; "." (in-level), "" (disable)', metavar='FILE', action='store')
 parser.add_argument('-q', '--quiet', help="do not show map (+ progress on second -q)", action='count')
 parser.add_argument('-v', '--verbose', help="show additional level details about", action='store_true')
@@ -55,6 +56,7 @@ cmdargs = parser.parse_args()
 
 reverse_barrel_mode = cmdargs.reverse_barrel_mode
 record_filename = cmdargs.record_file
+limit_by_record = cmdargs.limit_by_record
 disable_prepare = cmdargs.disable_prepare
 disable_budget = cmdargs.disable_budget
 solution_type = SOLUTION_TYPE_BY_MOVES if cmdargs.by_moves else SOLUTION_TYPE_BY_SHIFTS
@@ -95,7 +97,8 @@ def create_solver(map_string, reverse_barrel_mode=False):
 	map = create_sokoban_map(map_string)
 	if not quiet and show_sok:
 		print(create_sok_map(map), end='')
-	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, not quiet and not catalogize and not show_sok, show_dead, limit_time)
+	limit_cost = coll_records.record_at_result if limit_by_record and coll_records else None
+	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, not quiet and not catalogize and not show_sok, show_dead, limit_time, limit_cost)
 
 show_progress = quiet <= 1 and not debug.has('solv')
 progress_line = ProgressLine(show_progress)

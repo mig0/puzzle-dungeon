@@ -277,6 +277,7 @@ class SokobanSolver():
 		self.stopped_by_user = False
 		self.max_depth_reached = False
 		self.time_limit_reached = False
+		self.limit_cost = None
 		self.limit_time = MAX_FIND_SOLUTION_TIME
 		self.solution_depth = MAX_SOLUTION_DEPTH
 		self.solution_alg = None
@@ -398,15 +399,19 @@ class SokobanSolver():
 		return total_cost
 
 	def can_prune_by_solution_lower_bound(self, position, return_costs=False):
-		if not self.solved_position:
+		if solver.limit_cost:
+			limit_cost = self.limit_cost
+		elif self.solved_position:
+			assert not self.return_first
+			limit_cost = self.solved_position.total_nums
+		else:
 			return False
-		assert not self.return_first
 		# TODO: think when to use: min_nums = position.total_nums
 		min_nums = self.get_min_position_cost(position.super.barrel_idxs)
 		min_cost = position.super.solution_cost
 		assert min_cost
 		total_cost = apply_diff(min_nums, min_cost)
-		return self.solved_position.cmp(total_cost) <= 0 and (not return_costs or [min_nums, min_cost, total_cost])
+		return cmp_costs(limit_cost, total_cost) <= 0 and (not return_costs or [min_nums, min_cost, total_cost])
 
 	def is_barrel_matching_found(self, barrel_idxs):
 		if not self.is_barrel_mismatch_possible:
@@ -1176,7 +1181,7 @@ class SokobanSolver():
 
 		# run BFS separately for each barrel to compute costs from that barrel
 		for barrel_idx in grid.to_idxs_or_none(self.barrel_cells):
-			if self.return_first or barrel_idx is None or not char_accessible_bits[barrel_idx]:
+			if self.return_first and not self.limit_cost or barrel_idx is None or not char_accessible_bits[barrel_idx]:
 				continue
 			self.expand_barrel_costs(self.min_char_target_costs, self.min_target_costs, barrel_idx, False)
 
@@ -1427,7 +1432,7 @@ class SolutionStatus():
 					char_cell = cell
 				self.str += shift_direction.upper()
 				char_cell = apply_diff(char_cell, DIRS_BY_NAME[shift_direction])
-		self.is_requested_optimal = (not self.return_first or SOLUTION_ALG_UCS) \
+		self.is_requested_optimal = (not self.return_first or SOLUTION_ALG_UCS or solver.limit_cost) \
 			and solver.requested_solution_alg in (SOLUTION_ALG_ASTAR, SOLUTION_ALG_BFS, SOLUTION_ALG_UCS, SOLUTION_ALG_SHARP)
 		self.is_optimal = self.is_requested_optimal and self.is_solved and not self.is_terminated
 
@@ -1447,7 +1452,7 @@ def reverse_barrel_map(map, barrel_cells):
 				barrel_cells.remove(cell)
 	barrel_cells[:] = sort_cells(barrel_cells)
 
-def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False, limit_time=None):
+def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False, limit_time=None, limit_cost=None):
 	char_cell = None
 	barrel_cells = []
 	for cy in range(len(map[0])):
@@ -1474,7 +1479,12 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 	solver = SokobanSolver()
 	if limit_time:
 		solver.limit_time = limit_time
+	if limit_cost:
+		solution_alg = SOLUTION_ALG_ASTAR
+		return_first = True
 	solver.configure(map, reverse_barrel_mode, char_cell, tuple(barrel_cells), solution_alg, return_first)
+	if limit_cost:
+		solver.limit_cost = cost_to_key(apply_diff(cost_to_key(limit_cost), (0, 1)))
 	if show_map:
 		if show_dead:
 			solver.prepare_solution(char_cell)
