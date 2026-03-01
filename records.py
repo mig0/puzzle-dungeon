@@ -54,12 +54,12 @@ class CollectionRecords:
 		self.results = []       # keep reported results
 		self.next_result_idx = 0  # counter for iterative interface
 
-		if isinstance(filename, str):
+		if isinstance(filename, str) and ',' not in filename:
 			self.filename = filename
 			self._read_file()
 		else:
 			self.filename = None
-			for record_str in filename:
+			for record_str in filename.rstrip(',').split(',') if isinstance(filename, str) else filename:
 				self._append_record(None, _parse_cost_str(record_str))
 
 	@property
@@ -126,10 +126,16 @@ class CollectionRecords:
 	def result_strs(self):
 		return self.get_cost_strs(self.results)
 
+	def value_at_result(self, values):
+		return None if self.next_result_idx >= len(values) else values[self.next_result_idx]
+
+	@property
+	def record_at_result(self):
+		return self.value_at_result(self.records)
+
 	@property
 	def record_str_at_result(self):
-		record_strs = self.record_strs
-		return None if self.next_result_idx >= len(record_strs) else record_strs[self.next_result_idx]
+		return self.value_at_result(self.record_strs)
 
 	def cmp_costs(self, cost1, cost2):
 		(m1, s1), (m2, s2) = cost1, cost2
