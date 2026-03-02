@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 from constants import *
 from grid import grid
 from debug import debug
+from records import parse_cost_str
 from teestream import stdout_redirected_to
 from testsuite import TestSuite
 from sokobanparser import is_sokoban_map, convert_and_pad_map_lines
@@ -513,6 +514,19 @@ sok_awkward_27 = (
 	'   ####  ',
 )
 
+sok_awkward_28 = (
+	'microban.71',
+	'###########  ',
+	'#     #   ###',
+	'# $@$ # .  .#',
+	'# ## ### ## #',
+	'# #       # #',
+	'# #   #   # #',
+	'# ######### #',
+	'#           #',
+	'#############',
+)
+
 sok_takaken_01 = (
 	'scrambled egg',
 	' #####',
@@ -807,6 +821,7 @@ optimal_solution_nums_strs = {
 	sok_awkward_25: '83/24',
 	sok_awkward_26: '102/30',
 	sok_awkward_27: ('139/24', '137/26'),
+	sok_awkward_28: '120/21',
 	sok_takaken_01: '170/43',
 	sok_takaken_02: '185/42',
 	sok_takaken_03: '144/47',
@@ -857,7 +872,6 @@ optimal_solution_strs = {
 	sok_obvious_13: 'llddrdrruLLdlUluurrrDulllddrUluRddrdrruLLdlUU',
 	sok_obvious_14: 'rrddllldRRuruullDurrddldlluRuurrddrdLLruuullddRdrUUdllldRRuluurR',
 	sok_awkward_19: 'llDDDldddrruuLuuuurrdLulDDDlllddrrUdlluurRdddrruuLUUUluRdddlllddrrUdlluurRdrUUU',
-	sok_awkward_20: 'lddrUdrruLLdlUUUruLLLulDDDldRuuurrrrdrDLdlUUruLLLulDDDlddrrULdlUruuurrrrddddrruLLdlUUUruLLLulDDDDldR',
 	sok_awkward_20: 'lddrUdrruLLdlUUUruLLLulDDDrdLuuurrrrdrDLdlUUruLLLulDDDrddllURdrUluuurrrrddddrruLLdlUUUruLLLulDDDDldR',
 	sok_awkward_21: 'rruurDurDlldlluuuurrrrrrdddLLLrrruuullllllddddrrdrrUdllulluuuurrrrrrdddlLdLLLrrrurruuulllllldddllddrrUUUUdddrrrruulDrdLLLrrurrruuulllllLLrdddllddrrUUUUdddrrruulDrdLLrurrrruuulllllLdddllddrrUUUU',
 	sok_awkward_22: ('llddlddddrUluuuruurrdddddLLdlUUdrrruuuuulldddDuuuurrdddddlLdllluuuuRRllddddrrrurruuuuullllDurrrrdddddlldllluuuuRuurrdDDDlDuruuuurrdddddlLdLUrrruuuLruulldDDDuurrdddlLuuuuullddlddddR', 'ddLruulldDlddrUldddrUluurUrrdddLLdlUUdrrruuulldDuurruullDDrrdddlLdllluuuuRRRuullDurrrrdddddlldllluuuuRuurrddDDlDuruuuurrddLrdddlLdLUrrruuuuulldDDDuurrdddlLuuuuullddlddddR'),
@@ -866,6 +880,7 @@ optimal_solution_strs = {
 	sok_awkward_25: ('lddRUrruulDrdLLdlddrUrULrUruulDDlddlluuRuRDrruulDrdLulldlddrrrUULDrdLuurruulDrdLulD', 'lddRUrruulDrdLLdlddrUrULrUruulDDlddlluuRuRDrruulDrdLulldlddrrrUULDurruulDrdLulDrddL'),
 	sok_awkward_26: 'ulUURDrruLLLdddrUUruuullDDRdrUllulldRRRddlUruLrdrruLdlluuurrDDrdLuuullddRDuluurrdDrdLullulldRRRluurrdD',
 	sok_awkward_27: ('ULUUluurrrrddddLLdlUrrruuuulllldlldddrRRRlllluuurrdrrDullulldddrrrUruLdddrUlllluuurrurrrrddddLLLuurDulUluurDrrrddddlLdlUrrruuuulllDllldddrR', 'ULUUluurrrrddddLLdlUrrruuuulllldlldddrRRRlllluuurrdrrDulUllldddrrrUruLdddrUluuuluurDrrrddddLLLuurDulUluurDrrrddddlLdlUrrruuuulllDllldddrR'),
+	sok_awkward_28: 'urDDuulllddddddrrrrrrrrrruuuuulllddllldlluRRRRdrUUdlllluuullldRRurDDullldddddrrrrrrrrrruuuuullulldRRRllddllldlluRRRRdrUU',
 	sok_complex_01: 'dDuurrddLLrrddLLUlluuRDRddrruuLLrruullDlldddRRuULrrruullDldRddlUruuurrddddLLuuRlddrruUUdlldlldRRuuulDrddlluRurrrddLLUluRRlddrruUllldldRRRluuullD',
 	sok_complex_02: 'ullDDDrrddlULLdlluRRRRluuuulllddRRluurrdDDRddrruuLLdLUUUdlluurRRurrdLLLLrdddrddrUruLLdlLdlluRRRUUUdlluluurDrRRurrdLLLLrdddrrddlUruLdlUUUdllluuurrdLrRddllUdrruuRurrddlUruLdlllullDRddlU',
 	sok_complex_03: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
@@ -890,14 +905,15 @@ def create_sokoban_map(lines):
 	assert is_sokoban_map(lines), "Invalid Sokoban map:\n%s" % '\n'.join(lines)
 	return numpy.array([list(line) for line in convert_and_pad_map_lines(lines)], dtype='<U1').T
 
-def create_solver(sokoban_map_lines, reverse_barrel_mode=False, solution_alg=None, return_first=False):
+def create_solver(sokoban_map_lines, reverse_barrel_mode=False, solution_alg=None, return_first=False, limit_by_record=False, solution_type=None):
 	map = create_sokoban_map(sokoban_map_lines)
 	descr = "Created %s solver for map" % (solution_alg or "default")
-	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, descr if verbose else False)
+	limit_cost = parse_cost_str(optimal_solution_nums_strs_by_type[solution_type or SOLUTION_TYPE_BY_SHIFTS][sokoban_map_lines]) if limit_by_record else None
+	return create_sokoban_solver(map, reverse_barrel_mode, solution_alg, return_first, descr if verbose else False, limit_cost=limit_cost)
 
-def test_solution(sok, unique_solution_str=False, solution_alg=None, return_first=False):
+def test_solution(sok, unique_solution_str=False, solution_alg=None, return_first=False, limit_by_record=False):
 	for solution_type in SOLUTION_TYPE_BY_SHIFTS, SOLUTION_TYPE_BY_MOVES:
-		solver = create_solver(sok, False, solution_alg, return_first)
+		solver = create_solver(sok, False, solution_alg, return_first, limit_by_record, solution_type)
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
 		sok_id = sok[0] + ": " if sok[0][0].isalpha() else ''
@@ -923,7 +939,7 @@ def test_obvious_solutions():
 		test_solution(sok, True)
 
 def test_awkward_solutions():
-	for sok in sok_awkward_01, sok_awkward_02, sok_awkward_03, sok_awkward_04, sok_awkward_05, sok_awkward_06, sok_awkward_07, sok_awkward_08, sok_awkward_09, sok_awkward_10, sok_awkward_11, sok_awkward_12, sok_awkward_13, sok_awkward_14, sok_awkward_15, sok_awkward_16, sok_awkward_17, sok_awkward_18, sok_awkward_19, sok_awkward_20, sok_awkward_21:
+	for sok in sok_awkward_01, sok_awkward_02, sok_awkward_03, sok_awkward_04, sok_awkward_05, sok_awkward_06, sok_awkward_07, sok_awkward_08, sok_awkward_09, sok_awkward_10, sok_awkward_11, sok_awkward_12, sok_awkward_13, sok_awkward_14, sok_awkward_15, sok_awkward_16, sok_awkward_17, sok_awkward_18, sok_awkward_19, sok_awkward_20, sok_awkward_21, sok_awkward_28:
 		test_solution(sok, sok in (sok_awkward_19, sok_awkward_20, sok_awkward_21), SOLUTION_ALG_ASTAR)
 	for sok in sok_awkward_22, sok_awkward_23, sok_awkward_24, sok_awkward_25, sok_awkward_26, sok_awkward_27:
 		test_solution(sok, True, SOLUTION_ALG_BFS)
@@ -935,6 +951,12 @@ def test_takaken_solutions():
 def test_complex_solutions():
 	for sok in sok_complex_01, sok_complex_02, sok_complex_03, sok_complex_04, sok_complex_05:
 		test_solution(sok, False, SOLUTION_ALG_ASTAR, True)
+
+def test_limit_cost_solutions():
+	solver = create_solver(sok_awkward_28, limit_by_record=True)
+	test.none(solver.solve())  # this failure for "microban.71" is undesired, keep it as a test
+	for sok in sok_awkward_10, sok_takaken_02, sok_complex_01:
+		test_solution(sok, limit_by_record=True)
 
 def test_trivial_without_solutions():
 	# already solved trivial map; unsolvable, since needs at least one shift
@@ -1073,6 +1095,7 @@ try:
 	test_awkward_solutions()
 	test_takaken_solutions()
 	test_complex_solutions()
+	test_limit_cost_solutions()
 	test_trivial_without_solutions()
 	test_algorithms_consistency()
 	test_prepare_solution_without_plates()
