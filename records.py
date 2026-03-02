@@ -4,7 +4,7 @@ from celltools import cmp
 class RecordsParseError(Exception):
 	pass
 
-def _parse_cost_str(cost_str):
+def parse_cost_str(cost_str):
 	# cost_str must be 'NUM/NUM'
 	if cost_str is None or cost_str == "":
 		return None
@@ -60,7 +60,7 @@ class CollectionRecords:
 		else:
 			self.filename = None
 			for record_str in filename.rstrip(',').split(',') if isinstance(filename, str) else filename:
-				self._append_record(None, _parse_cost_str(record_str))
+				self._append_record(None, parse_cost_str(record_str))
 
 	@property
 	def records(self):
@@ -99,9 +99,9 @@ class CollectionRecords:
 				if line.startswith("#"):
 					pass  # ignore comment line
 				elif len(parts) == 1:
-					self._append_record(level_id, _parse_cost_str(parts[0]))
+					self._append_record(level_id, parse_cost_str(parts[0]))
 				elif len(parts) == 2:
-					self._append_record(level_id, _parse_cost_str(parts[0]), _parse_cost_str(parts[1]))
+					self._append_record(level_id, parse_cost_str(parts[0]), parse_cost_str(parts[1]))
 				elif not cost_str:
 					self._append_record(level_id, None)
 				else:
@@ -150,7 +150,7 @@ class CollectionRecords:
 
 		level_idx = self.next_result_idx
 
-		result = _parse_cost_str(result_str)
+		result = parse_cost_str(result_str)
 		record = self.records[level_idx] if level_idx < len(self.records) else None
 
 		self.results.append(result)
@@ -171,7 +171,7 @@ class CollectionRecords:
 		updated = False
 
 		for i, result_str in enumerate(result_strs):
-			result = _parse_cost_str(result_str)
+			result = parse_cost_str(result_str)
 
 			if i >= len(self.move_records):
 				self._append_record(None, result)

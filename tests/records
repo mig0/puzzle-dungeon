@@ -6,7 +6,7 @@ import atexit
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from records import CollectionRecords, RecordsParseError
+from records import CollectionRecords, RecordsParseError, parse_cost_str
 from testsuite import TestSuite
 
 TEST_FILE = "tests/tmp-test-records.txt"
@@ -19,6 +19,19 @@ def write_file(lines):
 # -----------------------------------------------------
 # Parsing tests
 # -----------------------------------------------------
+
+def test_parse_cost_str():
+	test.none(parse_cost_str(""))
+	test.none(parse_cost_str(None))
+	test.catch(lambda: parse_cost_str())
+	test.catch(lambda: parse_cost_str(1, 1))
+	test.catch(lambda: parse_cost_str("50/10.0"))
+	test.catch(lambda: parse_cost_str("invalid"))
+	test.catch(lambda: parse_cost_str("123"))
+	test.catch(lambda: parse_cost_str("123.4"))
+	test.catch(lambda: parse_cost_str("12/23 23/45"))
+	test.eq(parse_cost_str("1/1"), (1, 1))
+	test.eq(parse_cost_str("123/4"), (123, 4))
 
 def test_parse_single_costs():
 	write_file([
@@ -244,6 +257,7 @@ def test_record_strs_and_result_strs():
 
 test = TestSuite("records")
 
+test_parse_cost_str()
 test_parse_single_costs()
 test_parse_dual_costs()
 test_parse_with_empty_and_comment_lines()
