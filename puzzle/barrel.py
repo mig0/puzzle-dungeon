@@ -1,5 +1,6 @@
 from . import *
 from sokobansolver import *
+from records import parse_cost_str
 
 FLOOR_COST = 1
 CHAR_FLOOR_COST = -1
@@ -477,11 +478,16 @@ class BarrelPuzzle(Puzzle):
 				self.solver.disable_budget = not self.solver.disable_budget
 			if keyboard.k_1:
 				self.solver.return_first = not self.solver.return_first
-			msg = "Configured solution algorithm: %s; return: %s; budget-of-1s: %s; prepare: %s" % (
+			if keyboard.k_2:
+				record_key, diff = ("move-record", (0, 1)) if keyboard.shift else ("push-record", (1, 0))
+				limit_cost = apply_diff(parse_cost_str(self.config[record_key]), diff) if record_key in self.config else None
+				self.solver.limit_cost = None if self.solver.limit_cost else limit_cost
+			msg = "Configured solution alg: %s; return: %s; budget-of-1s: %s; prepare: %s%s" % (
 				self.solver.solution_alg or "default",
 				("first" if self.solver.return_first else "optimal"),
 				("disabled" if self.solver.disable_budget else "enabled"),
 				("disabled" if self.solver.disable_prepare else "enabled"),
+				("; limit-rec" if self.solver.limit_cost else "")
 			)
 			set_status_message(msg, self, None, 4)
 			return
