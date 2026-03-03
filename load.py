@@ -331,9 +331,9 @@ def get_ll_sokoban_level_string(config, ll_coll_config):
 	string += "Title: %s\n" % config['title']
 	string += "Collection: %s\n" % ll_coll_config['title']
 	string += "Author: %s\n" % (config['author'] or ll_coll_config['author'])
-	if "blue_pushes" in config:
+	if config.get("blue_pushes"):
 		string += "Move-Record: %d/%d\n" % (config["blue_moves"], config["blue_pushes"])
-	if "green_pushes" in config:
+	if config.get("green_pushes"):
 		string += "Push-Record: %d/%d\n" % (config["green_moves"], config["green_pushes"])
 	return string
 
