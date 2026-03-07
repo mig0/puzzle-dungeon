@@ -26,12 +26,14 @@ SOLUTION_ALG_FADED = "Faded"  # start with A*, but fallback to Greedy on timeout
 SOLUTION_ALG_SHARP = "Sharp"  # start with Greedy, but switch to A* on first solution
 
 DBG_PRUN = "prun"  # show prune info on progress
+DBG_NOTD = "notd"  # disable Tunnel deadlock detection
 DBG_NOFD = "nofd"  # disable Freeze deadlock detection
-DBG_NOCD = "nocd"  # disable Corral Freeze deadlock detection
+DBG_NOCD = "nocd"  # disable Corral deadlock detection
 DBG_DLCK = "dlck"  # show deadlock maps when detected
 DBG_SEVT = "sevt"  # enable SokobanSolver Event trace
 
 HAS_PRUN = False
+HAS_NOTD = False
 HAS_NOFD = False
 HAS_NOCD = False
 HAS_DLCK = False
@@ -268,6 +270,7 @@ class SokobanSolver():
 		solver = None
 		global HAS_PRUN, HAS_NOFD, HAS_NOCD, HAS_DLCK
 		HAS_PRUN = debug.has(DBG_PRUN)
+		HAS_NOTD = debug.has(DBG_NOTD)
 		HAS_NOFD = debug.has(DBG_NOFD)
 		HAS_NOCD = debug.has(DBG_NOCD)
 		HAS_DLCK = debug.has(DBG_DLCK)
@@ -296,6 +299,7 @@ class SokobanSolver():
 		self.last_dead_super_position_shift_cells = None
 		if HAS_PRUN:
 			self.num_match_deadlocks = 0
+			self.num_tunnel_deadlocks = 0
 			self.num_freeze_deadlocks = 0
 			self.num_corral_deadlocks = 0
 			self.num_non_created_costy_positions = 0
@@ -600,6 +604,20 @@ class SokobanSolver():
 			return solution_depth
 		return ((solution_depth - MIN_SOLUTION_DEPTH - 1) // SOLUTION_DEPTH_STEP + 1) * SOLUTION_DEPTH_STEP + MIN_SOLUTION_DEPTH
 
+	def is_tunnel_deadlock(self, char_idx, barrel_idx):
+		if HAS_NOTD or not grid.tunnels or not grid.tunnel_bits[barrel_idx]:
+			return False
+
+		tunnel = grid.get_tunnel(barrel_idx)
+		unsolved_tunnel_barrel_bits = tunnel[2] & grid.barrel_bits & ~grid.plate_bits
+
+		if is_deadlock := unsolved_tunnel_barrel_bits.count() > 1:
+			if HAS_PRUN:
+				self.num_tunnel_deadlocks += 1
+			if HAS_DLCK:
+				grid.show_map(descr="Tunnel Deadlock", char=char_idx, tunnels=[tunnel], idx_colors={barrel_idx: 32})
+		return is_deadlock
+
 	def is_freeze_deadlock(self, char_idx, start_barrel_idx):
 		if HAS_NOFD or not self.barrel_axis_blockers or grid.is_zsb:
 			return False
@@ -640,7 +658,7 @@ class SokobanSolver():
 				grid.show_map(descr="Freeze Deadlock", char=char_idx, idx_colors={start_barrel_idx: 32})
 		return is_deadlock
 
-	def is_corral_freeze_deadlock(self, char_idx, start_barrel_idx):
+	def is_corral_deadlock(self, char_idx, start_barrel_idx):
 		if HAS_NOCD or not self.valid_shift_srcs or grid.is_zsb:
 			return False
 
@@ -795,7 +813,12 @@ class SokobanSolver():
 
 		if not super_position.is_dead and new_char_idx not in super_position.positions:
 			shift_idxs = (new_char_idx, grid.cell_idxs[new_barrel_cell])
-			super_position.is_dead = self.is_freeze_deadlock(*shift_idxs) or self.is_corral_freeze_deadlock(*shift_idxs)
+			super_position.is_dead = (
+				self.is_tunnel_deadlock(*shift_idxs) or
+				self.is_freeze_deadlock(*shift_idxs) or
+				self.is_corral_deadlock(*shift_idxs) or
+				False
+			)
 
 		if super_position.is_dead:
 			self.last_dead_super_position = super_position
@@ -1247,6 +1270,7 @@ class SokobanSolver():
 			prun_str = ""
 			for k, v in (
 				('md', self.num_match_deadlocks),
+				('td', self.num_tunnel_deadlocks),
 				('fd', self.num_freeze_deadlocks),
 				('cd', self.num_corral_deadlocks),
 				('ncd', self.num_non_created_dead_positions),
