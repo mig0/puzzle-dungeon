@@ -20,7 +20,8 @@ DBG_SZSB2 = "szsb+"
 
 _ONE = frozenbitarray('1')
 _ZEROBITS = frozenbitarray('')
-SORTED_DIRS = sort_cells(DIRS)
+SORTED_DIRS = sort_cells(DIRS)  # DIR_U, DIR_L, DIR_R, DIR_D
+dir2i = {dir: i for i, dir in enumerate(SORTED_DIRS)}
 
 # support bitarray prior to 2.9.x, replace search with more efficient itersearch
 search_bits = bitarray.itersearch if hasattr(bitarray, 'itersearch') else bitarray.search
@@ -169,17 +170,15 @@ class Grid:
 		self.no_bits  = bitarray('0' * self.num_bits)
 
 		# precompute all passable neigbors per each passable cell
+		self.all_full_neigh_idxs = []
 		self.all_passable_neigh_idxs = []
 		self.all_passable_neigh_bits = []
 		for idx, cell in enumerate(self.idx_cells):
-			passable_neigh_idxs = []
-			for dir in SORTED_DIRS:
-				neigh_cell = apply_diff(cell, dir)
-				neigh_idx = self.cell_idxs.get(neigh_cell)
-				if neigh_idx is not None:
-					passable_neigh_idxs.append(neigh_idx)
+			full_neigh_idxs = tuple(self.cell_idxs.get(apply_diff(cell, dir)) for dir in SORTED_DIRS)
+			passable_neigh_idxs = tuple(idx for idx in full_neigh_idxs if idx is not None)
+			self.all_full_neigh_idxs.append(full_neigh_idxs)
+			self.all_passable_neigh_idxs.append(passable_neigh_idxs)
 			self.all_passable_neigh_bits.append(self.to_bits(passable_neigh_idxs))
-			self.all_passable_neigh_idxs.append(tuple(passable_neigh_idxs))
 
 	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, show_la=False, corrals=None, extra_cb=None):
 		if descr:
@@ -289,8 +288,11 @@ class Grid:
 
 	# Support for path finding
 
-	def is_passable_neigh(self, first, second):
-		return self.to_idx(second) in self.all_passable_neigh_idxs[self.to_idx(first)]
+	def is_passable_neigh(self, cell, neigh):
+		return self.to_idx(neigh) in self.all_passable_neigh_idxs[self.to_idx(cell)]
+
+	def is_passable_dir(self, cell, dir):
+		return self.all_full_neigh_idxs[self.to_idx(cell)][dir2i[dir]] is not None
 
 	def get_accessible_bits(self, start, obstacles=None, allow_obstacles=False):
 		start_idx = self.to_idx(start)
