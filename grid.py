@@ -294,7 +294,7 @@ class Grid:
 	def is_passable_dir(self, cell, dir):
 		return self.all_full_neigh_idxs[self.to_idx(cell)][dir2i[dir]] is not None
 
-	def get_accessible_bits(self, start, obstacles=None, allow_obstacles=False):
+	def get_accessible_bits(self, start, obstacles=None, allow_obstacles=False, set_la=True):
 		start_idx = self.to_idx(start)
 		obstacle_bits = self.barrel_bits if obstacles is None else self.to_bits(obstacles)
 
@@ -319,7 +319,8 @@ class Grid:
 			processed_bits |= new_bits
 			unprocessed_bits = new_bits
 
-		self.last_accessible_bits = accessible_bits
+		if set_la:
+			self.last_accessible_bits = accessible_bits
 
 		return accessible_bits
 
@@ -759,7 +760,7 @@ class Grid:
 		return shift_pairs
 
 	def get_corral(self, start_idx):
-		corral_bits = self.get_accessible_bits(start_idx, allow_obstacles=True)
+		corral_bits = self.get_accessible_bits(start_idx, allow_obstacles=True, set_la=False)
 		return (corral_bits & ~self.barrel_bits, corral_bits & self.barrel_bits)
 
 	# return list of (corral_floor_bits, corral_barrel_bits)
@@ -771,7 +772,7 @@ class Grid:
 		while remaining_bits != self.no_bits:
 			start_idx = self.get_min_idx(remaining_bits)
 			corrals.append(self.get_corral(start_idx))
-			remaining_bits &= ~self.last_accessible_bits
+			remaining_bits &= corrals[-1][0]
 
 		return corrals
 
