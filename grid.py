@@ -104,6 +104,8 @@ class Grid:
 		self.num_plates = 0
 		self.plate_bits = _ZEROBITS
 		self.dead_barrel_bits = _ZEROBITS
+		self.tunnels = []
+		self.tunnel_bits = _ZEROBITS
 
 	def configure(self, map, area=None, reverse_barrel_mode=False, cut_outer_floors=False):
 		self.reset()
@@ -143,6 +145,7 @@ class Grid:
 
 		self.plate_idxs = self.to_idxs(self.plate_bits)
 		self.dead_barrel_bits = self.no_bits
+		self.tunnel_bits = self.no_bits
 
 		debug(DBG_GRID, "Configured map with %d floors" % self.num_bits)
 		debug(DBG_GRID2, "- idx_cells: %s" % (self.idx_cells))
@@ -180,7 +183,7 @@ class Grid:
 			self.all_passable_neigh_idxs.append(passable_neigh_idxs)
 			self.all_passable_neigh_bits.append(self.to_bits(passable_neigh_idxs))
 
-	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, show_la=False, corrals=None, extra_cb=None):
+	def show_map(self, descr=None, clean=True, combined=True, dual=False, endl=False, char=None, barrels=None, cell_chars={}, cell_colors={}, idx_colors={}, show_dead=False, show_la=False, corrals=None, tunnels=None, extra_cb=None):
 		if descr:
 			print(descr)
 		char_cell = self.to_cell(char) if char is not None else None
@@ -193,15 +196,20 @@ class Grid:
 			show_dead = False
 		if show_la:
 			cell_colors = (cell_colors or {}) | {cell: COLOR_GREEN for cell in self.to_cells(self.last_accessible_bits)}
-		if corrals:
+		def add_cell_colors(objs, cb1, cb2):
+			nonlocal cell_colors
 			color = int(COLOR_RED)
 			cell_colors = cell_colors or {}
-			for corral_floor_bits, corral_barrel_bits in corrals:
-				for cell in grid.to_cells(corral_floor_bits):
+			for obj in objs:
+				for cell in self.to_cells(cb1(obj)):
 					cell_colors[cell] = color
-				for cell in grid.to_cells(corral_barrel_bits):
+				for cell in self.to_cells(cb2(obj)):
 					cell_colors[cell] = str(color + int(COLOR_BRED) - int(COLOR_RED))
-				color += 1
+				color += -7 if color == int(COLOR_WHITE) else 1
+		if corrals:
+			add_cell_colors(corrals, lambda c: c[0], lambda c: c[1])
+		if tunnels:
+			add_cell_colors(tunnels, lambda t: [i for i in t[1] if i is not None], lambda t: t[0])
 		if idx_colors:
 			cell_colors = (cell_colors or {}) | {self.to_cell(idx): color for idx, color in idx_colors.items()}
 		def get_cell_type_with_clean_floor(cell):
@@ -775,5 +783,44 @@ class Grid:
 			remaining_bits &= corrals[-1][0]
 
 		return corrals
+
+	def get_tunnel(self, idx):
+		assert self.tunnel_bits[idx]
+		for tunnel in self.tunnels:
+			if idx in tunnel[0]:
+				return tunnel
+		die("No tunnel at idx %d" % idx, True)
+
+	def detect_tunnels(self):
+		tunnels = []  # list of [idxs, [exit1_idx, exit2_idx]]
+		tunnels_by_exit = {}  # dict (idx, axis): tunnel
+		dir_quads = ((DIR_L, DIR_R, DIR_U, DIR_D), (DIR_U, DIR_D, DIR_L, DIR_R))
+		def is_neigh_aswall(idx, allowed_dir):
+			return (idx is None or len(self.all_passable_neigh_idxs[idx]) == 1
+				or len(self.all_passable_neigh_idxs[idx]) == 2
+				and (self.is_passable_dir(idx, allowed_dir)
+				or self.is_passable_dir(idx, OPPOSITE_DIRS[allowed_dir]))
+			)
+		for idx in iter_bits(~self.dead_barrel_bits):
+			idxs = self.all_full_neigh_idxs[idx]
+			for dir_quad in dir_quads:
+				idx1, idx2, idx3, idx4 = map(lambda dir: idxs[dir2i[dir]], dir_quad)
+				idx1, idx2 = map(lambda idx: None if idx is None or self.dead_barrel_bits[idx] else idx, (idx1, idx2))
+				dir = dir_quad[1]
+				if is_neigh_aswall(idx3, dir) and is_neigh_aswall(idx4, dir):
+					axis = DIR_AXES[dir]
+					if (idx, axis) in tunnels_by_exit:
+						tunnel = tunnels_by_exit[idx, axis]
+						del tunnels_by_exit[idx, axis]
+						tunnel[0].append(idx)
+						tunnel[1][1] = idx2
+					else:
+						tunnel = [[idx], [idx1, idx2]]
+						tunnels.append(tunnel)
+					tunnels_by_exit[idx2, axis] = tunnel
+
+		tunnels = [[*tunnel, self.to_bits(tunnel[0])] for tunnel in tunnels if len(tunnel[0]) >= 2]
+		self.tunnel_bits = self.to_bits([idx for tunnel in tunnels for idx in tunnel[0]])
+		self.tunnels = tunnels
 
 grid = Grid()

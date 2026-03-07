@@ -102,6 +102,13 @@ DIR_R = (+1, 0)
 DIR_U = (0, -1)
 DIR_D = (0, +1)
 
+OPPOSITE_DIRS = {
+	DIR_L: DIR_R,
+	DIR_R: DIR_L,
+	DIR_U: DIR_D,
+	DIR_D: DIR_U,
+}
+
 DIRS_BY_NAME = {
 	DIRECTION_L: DIR_L,
 	DIRECTION_R: DIR_R,

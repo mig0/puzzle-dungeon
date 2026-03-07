@@ -1185,6 +1185,8 @@ class SokobanSolver():
 				continue
 			self.expand_barrel_costs(self.min_char_target_costs, self.min_target_costs, barrel_idx, False)
 
+		grid.detect_tunnels()
+
 		if debug.has("presampl"):
 			def idx_costs_to_str(d):
 				return ', '.join(['%d: %d/%d' % (idx, *cost) for idx, cost in d.items()])
@@ -1209,6 +1211,12 @@ class SokobanSolver():
 				"min_plate_char_barrel_costs": self.min_plate_char_barrel_costs,
 				"min_target_costs": self.min_target_costs,
 				"min_char_target_costs": self.min_char_target_costs,
+			})
+		if debug.has("pretunns"):
+			debug("Precalculated tunnel data:")
+			debug([2], {
+				"tunnels": grid.tunnels,
+				"tunnels_bits": grid.tunnels_bits,
 			})
 
 	def get_found_solution_items(self, reason):
@@ -1452,7 +1460,7 @@ def reverse_barrel_map(map, barrel_cells):
 				barrel_cells.remove(cell)
 	barrel_cells[:] = sort_cells(barrel_cells)
 
-def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False, limit_time=None, limit_cost=None):
+def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, return_first=False, show_map=False, show_dead=False, show_tunn=False, limit_time=None, limit_cost=None):
 	char_cell = None
 	barrel_cells = []
 	for cy in range(len(map[0])):
@@ -1486,9 +1494,10 @@ def create_sokoban_solver(map, reverse_barrel_mode=False, solution_alg=None, ret
 	if limit_cost:
 		solver.limit_cost = cost_to_key(apply_diff(cost_to_key(limit_cost), (0, 1)))
 	if show_map:
-		if show_dead:
+		if show_dead or show_tunn:
 			solver.prepare_solution(char_cell)
 		descr = None if show_map is True else show_map
-		grid.show_map(descr, char=char_cell, barrels=solver.barrel_cells, show_dead=show_dead)
+		tunnels = grid.tunnels if show_tunn else None
+		grid.show_map(descr, char=char_cell, barrels=solver.barrel_cells, show_dead=show_dead, tunnels=tunnels)
 	return solver
 
