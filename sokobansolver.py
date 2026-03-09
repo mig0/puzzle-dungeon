@@ -766,8 +766,8 @@ class SokobanSolver():
 			accessible_shift_pairs = grid.get_all_accessible_valid_shifts(valid_srcs=self.valid_shift_srcs)
 
 		if not self.disable_prepare:
-			accessible_shift_pairs.sort(key=lambda two_cells: cost_to_key(self.min_char_barrel_costs[grid.to_idxs(two_cells)]))
-		all_proto_segments = tuple([(None, grid.cell_idxs[char_cell], grid.cell_idxs[barrel_cell])] for char_cell, barrel_cell in accessible_shift_pairs)
+			accessible_shift_pairs.sort(key=lambda shift_pair: cost_to_key(self.min_char_barrel_costs[shift_pair]))
+		all_proto_segments = tuple([(None, char_idx, barrel_idx)] for char_idx, barrel_idx in accessible_shift_pairs)
 		if grid.is_zsb:
 			for proto_segments in all_proto_segments:
 				_, char_idx, barrel_idx = proto_segments[0]

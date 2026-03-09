@@ -273,22 +273,23 @@ def test_all_valid_shifts_consistency():
 	char_cell = (2, 3)
 	grid.set_barrels([(3, 3), (4, 3)])
 	accessible_bits = grid.get_accessible_bits(char_cell)
-	cell_pairs = grid.get_all_accessible_valid_shifts(accessible_bits)
+	idx_pairs = grid.get_all_accessible_valid_shifts(accessible_bits)
 
-	test.ok(cell_pairs, "Should find at least one shift")
-	test.len(cell_pairs, 2)
-	for char_cell, barrel_cell in cell_pairs:
+	test.ok(idx_pairs, "Should find at least one shift")
+	test.len(idx_pairs, 2)
+	for char_idx, barrel_idx in idx_pairs:
 		# ensure these pairs are consistent
+		char_cell, barrel_cell = grid.to_cells([char_idx, barrel_idx])
 		test.ok(grid.can_shift(char_cell, barrel_cell), "Can't really shift %s -> %s" % (char_cell, barrel_cell))
 		test.eq(barrel_cell, (3, 3))
 
-	grid.set_barrels([(2, 4)])
+	grid.set_barrels([17])  # 17 is (2, 4)
 	accessible_bits = grid.get_accessible_bits(char_cell)
-	cell_pairs = grid.get_all_accessible_valid_shifts()
-	test.len(cell_pairs, 4)
-	for char_cell, barrel_cell in cell_pairs:
-		test.eq(cell_distance(char_cell, barrel_cell), 1)
-		test.eq(barrel_cell, (2, 4))
+	idx_pairs = grid.get_all_accessible_valid_shifts()
+	test.len(idx_pairs, 4)
+	for char_idx, barrel_idx in idx_pairs:
+		test.ok(grid.is_passable_neigh(char_idx, barrel_idx))
+		test.eq(barrel_idx, 17)
 
 	show_map_if_verbose(grid, "Map after test_all_valid_shifts_consistency")
 

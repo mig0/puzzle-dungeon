@@ -704,8 +704,10 @@ class Grid:
 		return all_barrel_moves
 
 	def get_all_valid_zsb_shifts(self):
-		return [(apply_diff(barrel_cell, cell_dir(target_cell, barrel_cell), self.reverse_barrel_mode), barrel_cell)
-			for barrel_cell, target_cell in self.get_all_valid_zsb_barrel_moves(self.barrel_cells)]
+		return [(
+			self.cell_idxs[apply_diff(barrel_cell, cell_dir(target_cell, barrel_cell), self.reverse_barrel_mode)],
+			self.cell_idxs[barrel_cell]
+		) for barrel_cell, target_cell in self.get_all_valid_zsb_barrel_moves(self.barrel_cells)]
 
 	def check_zsb(self):
 		self.is_zsb = False
@@ -761,10 +763,8 @@ class Grid:
 			for char_idx in (valid_srcs if valid_srcs else self.all_passable_neigh_idxs)[barrel_idx]:
 				if not accessible_bits[char_idx]:
 					continue
-				char_cell = self.idx_cells[char_idx]
-				barrel_cell = self.idx_cells[barrel_idx]
-				if self.can_shift(char_cell, barrel_cell):
-					shift_pairs.append((char_cell, barrel_cell))
+				if self.can_shift(self.idx_cells[char_idx], self.idx_cells[barrel_idx]):
+					shift_pairs.append((char_idx, barrel_idx))
 		return shift_pairs
 
 	def get_corral(self, start_idx):
