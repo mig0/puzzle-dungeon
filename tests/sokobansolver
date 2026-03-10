@@ -771,6 +771,112 @@ sok_complex_05 = (
 	'     #####',
 )
 
+sok_zsb_3x3_01 = (
+	'zsb.3x3.autogen.1',
+	"#########",
+	"#@      #",
+	"# #.#.# #",
+	"# * * * #",
+	"# #$#$# #",
+	"# $ . * #",
+	"# #*# # #",
+	"#       #",
+	"#########",
+)
+
+sok_zsb_4x4_01 = (
+	'zsb.4x4.autogen.1',
+	'###########',
+	'#@        #',
+	'# #*#$#*# #',
+	'# . $ . $ #',
+	'# #.#.#*# #',
+	'# * . $   #',
+	'# #$#*#.# #',
+	'#   $ . * #',
+	'# #*#*#$# #',
+	'#         #',
+	'###########',
+)
+
+sok_tunnels_01 = (
+	'4 horiz tunnels, 6 barrels',
+	'###########',
+	'#.       .#',
+	'#  #$ $#  #',
+	'###.$@$.###',
+	'#  #$ $#  #',
+	'#.       .#',
+	'###########',
+)
+
+sok_tunnels_02 = (
+	'5 vert tunnels, 4 barrels',
+	'###########',
+	'#.       .#',
+	'# # #$# # #',
+	'# #$#@#$# #',
+	'# #  $  # #',
+	'#.       .#',
+	'###########',
+)
+
+sok_tunnels_03 = (
+	'3 horiz tunnels, 2 barrels',
+	'      ##',
+	' #####  #',
+	'# $     #',
+	'# #####  #',
+	'#        #',
+	'# #######',
+	'#+$     .#',
+	' ########',
+)
+
+sok_tunnels_04 = (
+	'4 horiz tunnels, 2 barrels',
+	'###########',
+	'#    @    #',
+	'# ###$### #',
+	'#         #',
+	'# ###$### #',
+	'#.       .#',
+	'###########',
+)
+
+sok_tunnels_05 = (
+	'4 horiz tunnels, 4 barrels, v1',
+	'###########',
+	'#    @    #',
+	'# ###$### #',
+	'#  $   $  #',
+	'# ### ### #',
+	'#    $....#',
+	'###########',
+)
+
+sok_tunnels_06 = (
+	'4 horiz tunnels, 4 barrels, v2',
+	'###########',
+	'#....$    #',
+	'# ### ### #',
+	'#  $ $ $  #',
+	'# ### ### #',
+	'#    @    #',
+	'###########',
+)
+
+sok_tunnels_07 = (
+	'3 horiz tunnels, 1 vert tunnel, 6 barrels',
+	'###########',
+	'# #.@$    #',
+	'#.# ##    #',
+	'#*$  $  #*#',
+	'#   ### #.#',
+	'#  $   .# #',
+	'###########',
+)
+
 optimal_solution_nums_strs = {
 	sok_trivial_h1: '1/1',
 	sok_trivial_h2: '1/1',
@@ -841,6 +947,15 @@ optimal_solution_nums_strs = {
 	sok_complex_03: '211/82',
 	sok_complex_04: ('140/41', '138/45'),
 	sok_complex_05: '161/40',
+	sok_zsb_3x3_01: '22/6',
+	sok_zsb_4x4_01: '58/14',
+	sok_tunnels_01: '35/18',
+	sok_tunnels_02: '47/18',
+	sok_tunnels_03: '49/21',
+	sok_tunnels_04: '51/12',
+	sok_tunnels_05: ('97/17', '88/19'),
+	sok_tunnels_06: ('97/16', '88/18'),
+	sok_tunnels_07: '68/21',
 }
 
 optimal_solution_nums_strs_by_type = {
@@ -886,6 +1001,15 @@ optimal_solution_strs = {
 	sok_complex_03: 'uluurDrrddrUrrRRRuRRRurrdLulDlllddrUllllllluurDllllddrUluRRRdRRRRRRuRRRurDllllddrUluRRRurrdLLLLulDrdLLLdlUllluurDldRRRRRRdrUluRRRurrdLLLLulDrrrrrddlUruLLLLdLLLLLLdlUrrrrrrruulDrrrrddlUruLLLdLLLLLLuLLLrrrdrrruulD',
 	sok_complex_04: ('uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRurDDullddrdrruLuuuuulDulldRRDrdddLLuuRurDDulllldddrUrrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU', 'uuuuLrddddlluuRUrDDullddrdrruLLLLdlUruLuRRRuruulDulldRRDrDDuLLddrdrruLLLullddrUluuRRRurDDullddrdrruLLLuuruuurDDDDulllldRlddrUrrdrruLLLLdlU'),
 	sok_complex_05: 'ldddrrrDullluuulldddRRRdRdRdrruLuLuLuLrdrdrddlUlUlUlUUddlluuuurrrdLdddrdrdrruLuLLdRurDullLuuuullddddRRRdrruLuLrddlUlUUUdddrruLdllluuuurRddDrdLrrrdrddlUruLdlUruLL',
+	sok_zsb_3x3_01: 'ddddRRUUddllddrrrruuUU',
+	sok_zsb_4x4_01: 'rrrrDDLLrruurrrrddLLrrddllLLrrrrddddllUUddlllllluurrUUddRR',
+	sok_tunnels_01: 'LUdDurRUluLLLrrrRRRllddDldLLLrrrRRR',
+	sok_tunnels_02: 'UdDrrdrruuuulllLLLLrdDDrdLLrrRRRRluUUddlluuurRR',
+	sok_tunnels_03: 'RRRRRRlllllluuuuRRRRRurDDrdLLLLLLrrrrruulllllldDD',
+	sok_tunnels_04: 'DurrrrddlllLDuuullllddddrrrRRRRllluuLLLrrruulllldDD',
+	sok_tunnels_05: ('llllddddrrrRRRlllllluuuurrrrDDDurRRllluullllddrRRlllddrrrRRllllluuuurrrrdDDullllddrrrRuuuurrrrdDD', 'DDrRRllluullllddddrrrRRRlllllluurRRRDullllddrrrRRluuuurrrrdDllLrrrDuuulllldDDullllddrrrR'),
+	sok_tunnels_06: ('rrrruuuulllLLLrrrrrrddddlllluUUdlLLrrrddrrrruulLLrrruulllLLrrrrrddddlllluUUdrrrruulllLddddlllluUU', 'uUlLLrrrddrrrruuuulllLLLrrrrrrddlLLLUdrrrruulllLLrddddlllluUrrRlllUdddrrrruUUdrrrruulllL'),
+	sok_tunnels_07: 'RRdrrrDulldddlllLuurRRllldllUdrrdrrrruUluRRurDulLLLLrrddlllLdldRRRRR',
 }
 
 optimal_solution_strs_by_type = {
@@ -900,7 +1024,7 @@ def print_if_verbose(*args):
 		print(*args)
 
 def create_sokoban_map(lines):
-	if lines[0][0].isalpha():
+	if lines[0][0].isalnum():
 		lines = lines[1:]
 	assert is_sokoban_map(lines), "Invalid Sokoban map:\n%s" % '\n'.join(lines)
 	return numpy.array([list(line) for line in convert_and_pad_map_lines(lines)], dtype='<U1').T
@@ -916,7 +1040,7 @@ def test_solution(sok, unique_solution_str=False, solution_alg=None, return_firs
 		solver = create_solver(sok, False, solution_alg, return_first, limit_by_record, solution_type)
 		solution_items = solver.solve(solution_type)
 		test.not_none(solution_items)
-		sok_id = sok[0] + ": " if sok[0][0].isalpha() else ''
+		sok_id = sok[0] + ": " if sok[0][0].isalnum() else ''
 		test.eq(sok_id + str(solver.last_solution.nums_str), sok_id + optimal_solution_nums_strs_by_type[solution_type][sok])
 		if unique_solution_str:
 			test.eq(solver.last_solution.str, optimal_solution_strs_by_type[solution_type][sok])
@@ -951,6 +1075,14 @@ def test_takaken_solutions():
 def test_complex_solutions():
 	for sok in sok_complex_01, sok_complex_02, sok_complex_03, sok_complex_04, sok_complex_05:
 		test_solution(sok, False, SOLUTION_ALG_ASTAR, True)
+
+def test_zsb_nxm_solutions():
+	for sok in sok_zsb_3x3_01, sok_zsb_4x4_01:
+		test_solution(sok, True)
+
+def test_tunnels_solutions():
+	for sok in sok_tunnels_01, sok_tunnels_02, sok_tunnels_03, sok_tunnels_04, sok_tunnels_05, sok_tunnels_06:
+		test_solution(sok, False, SOLUTION_ALG_ASTAR)
 
 def test_limit_cost_solutions():
 	solver = create_solver(sok_awkward_28, limit_by_record=True)
@@ -1051,6 +1183,13 @@ def test_prepare_solution_char_filtering():
 	# reachable plates only should reduce dead set (or stay equal) — expect char_dead_count <= all_dead_count
 	test.le(char_dead_count, all_dead_count)
 
+def test_prepare_solution_without_dead_cells():
+	solver = create_solver(sok_tunnels_02)
+	solver.prepare_solution(solver.char_cell)
+	test.eq(grid.dead_barrel_bits.count(), 0)
+	solver.prepare_solution(None)
+	test.eq(grid.dead_barrel_bits.count(), 0)
+
 def test_superposition_idempotence():
 	solver = create_solver(sok_trivial_h1)
 	solver.prepare_solution(solver.char_cell)
@@ -1095,12 +1234,15 @@ try:
 	test_awkward_solutions()
 	test_takaken_solutions()
 	test_complex_solutions()
+	test_zsb_nxm_solutions()
+	test_tunnels_solutions()
 	test_limit_cost_solutions()
 	test_trivial_without_solutions()
 	test_algorithms_consistency()
 	test_prepare_solution_without_plates()
 	test_prepare_solution_with_plate()
 	test_prepare_solution_char_filtering()
+	test_prepare_solution_without_dead_cells()
 	test_superposition_idempotence()
 	test_position_num_calculation()
 	test_find_solution_status_string()
